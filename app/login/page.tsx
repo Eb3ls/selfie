@@ -11,7 +11,9 @@ export default async function Login() {
 			<h1>Selfie!</h1>
 			<ul>
 				{result.map((user) => (
-					<li key={user._id.toString()}>{user.username}</li>
+					<li key={user._id.toString()}>
+						{user._id.toString()} - {user.username}
+					</li>
 				))}
 			</ul>
 		</main>

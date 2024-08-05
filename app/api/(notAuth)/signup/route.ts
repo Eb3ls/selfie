@@ -12,11 +12,30 @@ export const POST = async (request: Request) => {
 	const client: Collection<User> = await getUsersCollection();
 	const newUser: User = {
 		username: username,
+		firstName: "",
+		lastName: "",
+		email: "",
+		password: "",
+		birthDay: new Date(),
+		userStatus: "",
+		profilePic: "",
+		isResource: false,
+		pomodoro: {
+			cycles: 0,
+			cyclesCompleted: 0,
+			studyDuration: 0,
+			breakDuration: 0,
+			alarms: [],
+		},
 	};
 	client.insertOne(newUser);
 
+	const response: Object = {
+		message: "User " + username + " signed up",
+	};
+
 	// Return Ok with status 200
-	return new NextResponse("User " + username + " signed up", {
+	return new NextResponse(JSON.stringify(response), {
 		status: 200,
 	});
 };

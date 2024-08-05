@@ -15,8 +15,8 @@ const BasicForm = () => {
 		});
 		// Check if the response is 200
 		if (response.status === 200) {
-			const data = await response.text();
-			console.log(data);
+			const data = await response.json();
+			console.log(data.message);
 			window.location.href = "/";
 		} else {
 			console.log("Error: " + response.status);
