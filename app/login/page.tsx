@@ -1,9 +1,9 @@
 import { Collection } from "mongodb";
-import { getUsersCollection } from "@/db_utils/db_functions";
+import { getCollection } from "@/db_utils/db_functions";
 import { User } from "@/db_utils/models/User";
 
 export default async function Login() {
-	const client: Collection<User> = await getUsersCollection();
+	const client: Collection<User> = await getCollection<User>("users");
 	const result = await client.find({}).toArray();
 	console.log(result);
 	return (

@@ -1,4 +1,10 @@
-import { Collection, MongoClient } from "mongodb";
+import {
+	Collection,
+	MongoClient,
+	ObjectId,
+	OptionalUnlessRequiredId,
+	WithId,
+} from "mongodb";
 import clientPromise from "@/db_utils/db";
 import { User } from "@/db_utils/models/User";
 import { Event } from "@/db_utils/models/Event";
@@ -13,68 +19,68 @@ import { ProjectActivity } from "@/db_utils/models/ProjectActivity";
 
 const DB_NAME = "Selfie";
 
-export async function getUsersCollection(): Promise<Collection<User>> {
+export const USER_COLLECTION = "users";
+export const EVENT_COLLECTION = "events";
+export const ACTIVITY_COLLECTION = "activities";
+export const CHAT_COLLECTION = "chats";
+export const EVENT_SESSION_COLLECTION = "eventSessions";
+export const GROUP_CHAT_COLLECTION = "groupChats";
+export const NOTES_COLLECTION = "notes";
+export const PHASE_COLLECTION = "phases";
+export const PROJECT_COLLECTION = "projects";
+export const PROJECT_ACTIVITY_COLLECTION = "projectActivities";
+
+type Schema =
+	| User
+	| Event
+	| Activity
+	| Chat
+	| EventSession
+	| GroupChat
+	| Notes
+	| Phase
+	| Project
+	| ProjectActivity;
+
+export async function getCollection<T extends Schema>(
+	collectionName: string
+): Promise<Collection<T>> {
 	const client: MongoClient = await clientPromise;
 	const db = client.db(DB_NAME);
-	return db.collection("users");
+	return db.collection(collectionName);
 }
 
-export async function getEventsCollection(): Promise<Collection<Event>> {
-	const client: MongoClient = await clientPromise;
-	const db = client.db(DB_NAME);
-	return db.collection("events");
+export async function addToCollection<T extends Schema>(
+	data: T,
+	client: Collection<T>
+): Promise<boolean | undefined> {
+	try {
+		return (await client.insertOne(data as OptionalUnlessRequiredId<T>))
+			.acknowledged;
+	} catch (error: any) {
+		return undefined;
+	}
 }
 
-export async function getActivitiesCollection(): Promise<Collection<Activity>> {
-	const client: MongoClient = await clientPromise;
-	const db = client.db(DB_NAME);
-	return db.collection("activities");
+export async function findInCollection<T extends Schema>(
+	data: Object,
+	client: Collection<T>
+): Promise<WithId<T>[] | undefined> {
+	try {
+		const output: WithId<T>[] = await client.find(data).toArray();
+		return output;
+	} catch (error: any) {
+		return undefined;
+	}
 }
 
-export async function getChatsCollection(): Promise<Collection<Chat>> {
-	const client: MongoClient = await clientPromise;
-	const db = client.db(DB_NAME);
-	return db.collection("chats");
-}
-
-export async function getEventSessionsCollection(): Promise<
-	Collection<EventSession>
-> {
-	const client: MongoClient = await clientPromise;
-	const db = client.db(DB_NAME);
-	return db.collection("eventSessions");
-}
-
-export async function getGroupChatsCollection(): Promise<
-	Collection<GroupChat>
-> {
-	const client: MongoClient = await clientPromise;
-	const db = client.db(DB_NAME);
-	return db.collection("groupChats");
-}
-
-export async function getNotesCollection(): Promise<Collection<Notes>> {
-	const client: MongoClient = await clientPromise;
-	const db = client.db(DB_NAME);
-	return db.collection("notes");
-}
-
-export async function getPhasesCollection(): Promise<Collection<Phase>> {
-	const client: MongoClient = await clientPromise;
-	const db = client.db(DB_NAME);
-	return db.collection("phases");
-}
-
-export async function getProjectsCollection(): Promise<Collection<Project>> {
-	const client: MongoClient = await clientPromise;
-	const db = client.db(DB_NAME);
-	return db.collection("projects");
-}
-
-export async function getProjectActivitiesCollection(): Promise<
-	Collection<ProjectActivity>
-> {
-	const client: MongoClient = await clientPromise;
-	const db = client.db(DB_NAME);
-	return db.collection("projectActivities");
+export async function deleteInCollection<T extends Schema>(
+	data: ObjectId,
+	client: Collection<T>
+): Promise<number | undefined> {
+	try {
+		return (await client.deleteOne({ _id: data } as any)).deletedCount;
+	} catch (error: any) {
+		return undefined;
+	}
 }

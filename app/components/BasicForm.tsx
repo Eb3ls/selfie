@@ -11,7 +11,13 @@ const BasicForm = () => {
 			headers: {
 				"Content-Type": "application/json",
 			},
-			body: JSON.stringify({ username: username }),
+			body: JSON.stringify({
+				username: username,
+				password: "password",
+				firstName: "firstName",
+				lastName: "lastName",
+				email: "email",
+			}),
 		});
 		// Check if the response is 200
 		if (response.status === 200) {
