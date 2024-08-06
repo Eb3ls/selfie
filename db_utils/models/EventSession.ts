@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { Pomodoro } from "@/db_utils/models/Pomodoro";
+import { createPomodoro, Pomodoro } from "@/db_utils/models/Pomodoro";
 
 /*
 COLLECTION
@@ -10,4 +10,16 @@ export interface EventSession {
 	summary: string;
 	pomodoro: Pomodoro;
 	userId: ObjectId;
+}
+
+export function createEventSession({
+	summary = "",
+	pomodoro = createPomodoro({}),
+	userId = new ObjectId(),
+}: Partial<EventSession>): EventSession {
+	return {
+		summary: summary,
+		pomodoro: pomodoro,
+		userId: userId,
+	};
 }

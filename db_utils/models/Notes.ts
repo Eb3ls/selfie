@@ -14,3 +14,23 @@ export interface Notes {
 	userList: ObjectId[];
 	activity: ObjectId;
 }
+
+export function createNotes({
+	text = "",
+	length = 0,
+	access = "public",
+	dtStamp = new Date(),
+	dtModified = new Date(),
+	userList = [],
+	activity = new ObjectId(),
+}: Partial<Notes>): Notes {
+	return {
+		text: text,
+		length: length,
+		access: access,
+		dtStamp: dtStamp,
+		dtModified: dtModified,
+		userList: userList,
+		activity: activity,
+	};
+}

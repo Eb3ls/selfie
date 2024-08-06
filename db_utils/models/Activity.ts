@@ -19,3 +19,31 @@ export interface Activity {
 	activityList: Activity[];
 	alarms: Alarm[];
 }
+
+export function createActivity({
+	summary = "",
+	description = "",
+	status = "",
+	dtStart = new Date(),
+	due = new Date(),
+	dtStamp = new Date(),
+	categories = [],
+	location = "",
+	geo = "",
+	activityList = [],
+	alarms = [],
+}: Partial<Activity>): Activity {
+	return {
+		summary: summary,
+		description: description,
+		status: status,
+		dtStart: dtStart,
+		due: due,
+		dtStamp: dtStamp,
+		categories: categories,
+		location: location,
+		geo: geo,
+		activityList: activityList,
+		alarms: alarms,
+	};
+}

@@ -27,3 +27,47 @@ export interface ProjectActivity {
 	alarms: Alarm[];
 	note: ObjectId;
 }
+
+export function createProjectActivity({
+	summary = "",
+	description = "",
+	status = "Not Started",
+	dtStart = new Date(),
+	due = new Date(),
+	dtStamp = new Date(),
+	categories = [],
+	location = "",
+	geo = "",
+	input = "",
+	output = "",
+	isMilestone = false,
+	percentage = 0,
+	parentId = new ObjectId(),
+	child = new ObjectId(),
+	phaseId = new ObjectId(),
+	userList = [],
+	alarms = [],
+	note = new ObjectId(),
+}: Partial<ProjectActivity>): ProjectActivity {
+	return {
+		summary: summary,
+		description: description,
+		status: status,
+		dtStart: dtStart,
+		due: due,
+		dtStamp: dtStamp,
+		categories: categories,
+		location: location,
+		geo: geo,
+		input: input,
+		output: output,
+		isMilestone: isMilestone,
+		percentage: percentage,
+		parentId: parentId,
+		child: child,
+		phaseId: phaseId,
+		userList: userList,
+		alarms: alarms,
+		note: note,
+	};
+}

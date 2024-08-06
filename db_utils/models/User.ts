@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { Pomodoro } from "@/db_utils/models/Pomodoro";
+import { createPomodoro, Pomodoro } from "@/db_utils/models/Pomodoro";
 
 /*
 COLLECTION
@@ -17,4 +17,30 @@ export interface User {
 	profilePic: string;
 	isResource: boolean;
 	pomodoro: Pomodoro;
+}
+
+export function createUser({
+	username = "",
+	firstName = "",
+	lastName = "",
+	email = "",
+	password = "",
+	birthDay = new Date(),
+	userStatus = "Attivo",
+	profilePic = "/images/?.png",
+	isResource = false,
+	pomodoro = createPomodoro({}),
+}: Partial<User>): User {
+	return {
+		username: username,
+		firstName: firstName,
+		lastName: lastName,
+		email: email,
+		password: password,
+		birthDay: birthDay,
+		userStatus: userStatus,
+		profilePic: profilePic,
+		isResource: isResource,
+		pomodoro: pomodoro,
+	};
 }

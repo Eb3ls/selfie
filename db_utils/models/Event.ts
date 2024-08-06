@@ -21,3 +21,35 @@ export interface Event {
 	userList: ObjectId[];
 	alarms: Alarm[];
 }
+
+export function createEvent({
+	summary = "",
+	description = "",
+	status = 0,
+	rrule = "",
+	dtStart = new Date(),
+	dtEnd = new Date(),
+	dtStamp = new Date(),
+	categories = [],
+	location = "",
+	geo = "",
+	eventSession = new ObjectId(),
+	userList = [],
+	alarms = [],
+}: Partial<Event>): Event {
+	return {
+		summary: summary,
+		description: description,
+		status: status,
+		rrule: rrule,
+		dtStart: dtStart,
+		dtEnd: dtEnd,
+		dtStamp: dtStamp,
+		categories: categories,
+		location: location,
+		geo: geo,
+		eventSession: eventSession,
+		userList: userList,
+		alarms: alarms,
+	};
+}

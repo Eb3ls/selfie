@@ -12,3 +12,17 @@ export interface GroupChat {
 	messages: Message[];
 	ownerId: ObjectId;
 }
+
+export function createGroupChat({
+	summary = "",
+	userList = [],
+	messages = [],
+	ownerId = new ObjectId(),
+}: Partial<GroupChat>): GroupChat {
+	return {
+		summary: summary,
+		userList: userList,
+		messages: messages,
+		ownerId: ownerId,
+	};
+}

@@ -10,3 +10,15 @@ export interface Phase {
 	phaseList: Phase[];
 	projectId: ObjectId;
 }
+
+export function createPhase({
+	summary = "",
+	phaseList = [],
+	projectId = new ObjectId(),
+}: Partial<Phase>): Phase {
+	return {
+		summary: summary,
+		phaseList: phaseList,
+		projectId: projectId,
+	};
+}
