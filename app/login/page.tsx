@@ -2,6 +2,8 @@ import { Collection } from "mongodb";
 import { getCollection } from "@/db_utils/db_functions";
 import { User } from "@/db_utils/models/User";
 
+import BasicLogin from "@/app/components/BasicLogin";
+
 export default async function Login() {
 	const client: Collection<User> = await getCollection<User>("users");
 	const result = await client.find({}).toArray();
@@ -16,6 +18,7 @@ export default async function Login() {
 					</li>
 				))}
 			</ul>
+			<BasicLogin />
 		</main>
 	);
 }

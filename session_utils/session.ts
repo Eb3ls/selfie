@@ -1,5 +1,5 @@
 import { SignJWT, jwtVerify, JWTPayload } from "jose";
-import { cookies } from "next/headers";
+// import { cookies } from "next/headers"; // Passare questa funzione alla chiamata delle funzioni di sessione
 import { NextRequest, NextResponse } from "next/server";
 import { User } from "@/db_utils/models/User";
 
@@ -25,7 +25,11 @@ export async function decrypt(input: string): Promise<JWTPayload> {
 	return payload;
 }
 
-export async function login(username: string, password: string) {
+export async function login(
+	username: string,
+	password: string,
+	res: NextResponse | any
+) {
 	const user: Partial<User> = {
 		username: username,
 		password: password,
@@ -36,16 +40,16 @@ export async function login(username: string, password: string) {
 	const session = await encrypt({ user, expires });
 
 	// Salvataggio del cookie di sessione
-	cookies().set("session", session, { expires: expires, httpOnly: true });
+	res.set("session", session, { expires: expires, httpOnly: true });
 }
 
-export async function logout() {
+export async function logout(res: NextResponse | any) {
 	// Distruzione del cookie di sessione
-	cookies().set("session", "", { expires: new Date(0) });
+	res.set("session", "", { expires: new Date(0) });
 }
 
-export async function getSession() {
-	const session = cookies().get("session")?.value;
+export async function getSession(res: NextResponse | any) {
+	const session = res.get("session")?.value;
 	if (!session) return null;
 	return await decrypt(session);
 }

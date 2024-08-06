@@ -1,3 +1,4 @@
+import { NextRequest } from "next/server";
 import { Collection, WithId } from "mongodb";
 import {
 	getCollection,
@@ -23,7 +24,7 @@ const requestTemplate: Partial<User> = {
 	email: "",
 };
 
-export const POST = async (request: Request) => {
+export const POST = async (request: NextRequest) => {
 	// Convertiamo in JSON il body della richiesta
 	const body: Object | undefined = await parseJSONInput(request);
 	if (body === undefined) {
