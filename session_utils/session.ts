@@ -54,6 +54,16 @@ export async function getSession(res: NextResponse | any) {
 	return await decrypt(session);
 }
 
+export async function isValidSession(
+	res: NextResponse | any
+): Promise<boolean> {
+	const session = await getSession(res);
+	if (session === null) return false;
+	if (session.exp === undefined) return false;
+	if (session.exp < Date.now() / 1000) return false;
+	return true;
+}
+
 export async function updateSession(request: NextRequest) {
 	const session: string | undefined = request.cookies.get("session")?.value;
 	if (!session) return null;
