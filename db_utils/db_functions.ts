@@ -62,6 +62,19 @@ export async function addToCollection<T extends Schema>(
 	}
 }
 
+export async function addAndFetchToCollection<T extends Schema>(
+	data: T,
+	client: Collection<T>
+): Promise<WithId<T> | undefined | null> {
+	try {
+		const id = (await client.insertOne(data as OptionalUnlessRequiredId<T>))
+			.insertedId;
+		return await client.findOne({ _id: id } as any);
+	} catch (error: any) {
+		return undefined;
+	}
+}
+
 export async function findInCollection<T extends Schema>(
 	data: Object,
 	client: Collection<T>

@@ -1,0 +1,65 @@
+import { NextRequest } from "next/server";
+import { Collection, WithId, ObjectId } from "mongodb";
+import {
+	getCollection,
+	EVENT_COLLECTION,
+	addAndFetchToCollection,
+} from "@/db_utils/db_functions";
+
+import { createEvent, Event } from "@/db_utils/models/Event";
+import {
+	parseJSONInput,
+	generateMessageResponse,
+	isTemplateValid,
+	generateObjectResponse,
+} from "@/api_utils/api_functions";
+
+const requestTemplate: Partial<Event> = {
+	summary: "",
+	description: "",
+	status: 0,
+	rrule: "",
+	dtStart: new Date(),
+	dtEnd: new Date(),
+	dtStamp: new Date(),
+	categories: [],
+	location: "",
+	geo: "",
+	userList: [],
+	alarms: [],
+};
+
+export const POST = async (request: NextRequest) => {
+	// Convertiamo in JSON il body della richiesta
+	const body: Object | undefined = await parseJSONInput(request);
+	if (body === undefined) {
+		return generateMessageResponse("Invalid input", 400);
+	}
+
+	// Controlliamo che il body abbia tutti i campi necessari
+	if (!isTemplateValid(body, requestTemplate)) {
+		return generateMessageResponse("Invalid input", 400);
+	}
+
+	// Creaiamo un nuovo evento con quei campi
+	const newEvent: Event = createEvent(body);
+
+	// Ottieniamo la collezione degli eventi
+	const client: Collection<Event> = await getCollection<Event>(
+		EVENT_COLLECTION
+	);
+
+	// Aggiungi il nuovo evento al db
+	const ifOut: WithId<Event> | null | undefined =
+		await addAndFetchToCollection<Event>(newEvent, client);
+	if (ifOut === undefined) {
+		return generateMessageResponse("Error with DB connection", 400);
+	} else if (ifOut === null) {
+		return generateMessageResponse(
+			"Error while trying to add event (Should never happen)",
+			400
+		);
+	}
+
+	return generateObjectResponse(ifOut, 200);
+};
