@@ -6,10 +6,10 @@ import {
 	parseJSONInput,
 	isTemplateValid,
 } from "@/api_utils/api_functions";
-import { Event } from "@/db_utils/models/Event";
+import { Activity } from "@/db_utils/models/Activity";
 import {
 	deleteInCollection,
-	EVENT_COLLECTION,
+	ACTIVITY_COLLECTION,
 	getCollection,
 } from "@/db_utils/db_functions";
 import { JWTPayload } from "jose";
@@ -41,8 +41,8 @@ export const DELETE = async (request: NextRequest) => {
 	const id: ObjectId = ObjectId.createFromHexString(stringId);
 
 	// Ottieniamo la collezione degli eventi
-	const client: Collection<Event> = await getCollection<Event>(
-		EVENT_COLLECTION
+	const client: Collection<Activity> = await getCollection<Activity>(
+		ACTIVITY_COLLECTION
 	);
 
 	// Eliminiamo l'evento
@@ -50,14 +50,14 @@ export const DELETE = async (request: NextRequest) => {
 
 	if (result === undefined) {
 		return generateMessageResponse(
-			"Error while trying to delete event",
+			"Error while trying to delete activity",
 			400
 		);
 	}
 
 	if (result === 0) {
-		return generateMessageResponse("Event not found", 400);
+		return generateMessageResponse("Activity not found", 400);
 	}
 
-	return generateMessageResponse("Event deleted", 200);
+	return generateMessageResponse("Activity deleted", 200);
 };

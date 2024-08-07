@@ -51,7 +51,7 @@ export const POST = async (request: NextRequest) => {
 		return generateMessageResponse("Invalid input", 400);
 	}
 
-	// Creaiamo un nuovo evento con quei campi
+	// Creiamo un nuovo evento con quei campi
 	const newEvent: Event = createEvent(body);
 
 	// Aggiungiamo il campo 'owner' a newEvent
@@ -64,16 +64,16 @@ export const POST = async (request: NextRequest) => {
 	);
 
 	// Aggiungi il nuovo evento al db
-	const ifOut: WithId<Event> | null | undefined =
+	const insertedEvent: WithId<Event> | null | undefined =
 		await addAndFetchToCollection<Event>(newEvent, client);
-	if (ifOut === undefined) {
+	if (insertedEvent === undefined) {
 		return generateMessageResponse("Error with DB connection", 400);
-	} else if (ifOut === null) {
+	} else if (insertedEvent === null) {
 		return generateMessageResponse(
 			"Error while trying to add event (Should never happen)",
 			400
 		);
 	}
 
-	return generateObjectResponse(ifOut, 200);
+	return generateObjectResponse(insertedEvent, 200);
 };
