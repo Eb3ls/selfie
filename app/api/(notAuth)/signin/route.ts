@@ -64,7 +64,12 @@ export const POST = async (request: NextRequest) => {
 	const resp = generateMessageResponse("User found", 200);
 
 	// Impostiamo i cookie
-	login(castedUser.username, passwordEncrypted, resp.cookies);
+	login(
+		queryOut[0]._id,
+		castedUser.username,
+		passwordEncrypted,
+		resp.cookies
+	);
 
 	return resp;
 };

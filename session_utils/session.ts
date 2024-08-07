@@ -2,6 +2,7 @@ import { SignJWT, jwtVerify, JWTPayload } from "jose";
 // import { cookies } from "next/headers"; // Passare questa funzione alla chiamata delle funzioni di sessione
 import { NextRequest, NextResponse } from "next/server";
 import { User } from "@/db_utils/models/User";
+import { ObjectId } from "mongodb";
 
 const secretKey: string = process.env.SECRET_KEY as string;
 
@@ -26,11 +27,13 @@ export async function decrypt(input: string): Promise<JWTPayload> {
 }
 
 export async function login(
+	_id: ObjectId,
 	username: string,
 	password: string,
 	res: NextResponse | any
 ) {
 	const user: Partial<User> = {
+		_id: _id,
 		username: username,
 		password: password,
 	};

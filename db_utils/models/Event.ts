@@ -7,6 +7,7 @@ COLLECTION
 
 export interface Event {
 	_id?: ObjectId;
+	owner: ObjectId;
 	summary: string;
 	description: string;
 	status: number;
@@ -17,12 +18,13 @@ export interface Event {
 	categories: string[];
 	location: string;
 	geo: string;
-	eventSession: ObjectId;
+	eventSession: ObjectId | null;
 	userList: ObjectId[];
 	alarms: Alarm[];
 }
 
 export function createEvent({
+	owner = new ObjectId(),
 	summary = "",
 	description = "",
 	status = 0,
@@ -33,11 +35,12 @@ export function createEvent({
 	categories = [],
 	location = "",
 	geo = "",
-	eventSession = new ObjectId(),
+	eventSession = null,
 	userList = [],
 	alarms = [],
 }: Partial<Event>): Event {
 	return {
+		owner: owner,
 		summary: summary,
 		description: description,
 		status: status,

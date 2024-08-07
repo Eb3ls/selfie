@@ -13,6 +13,9 @@ import {
 	isTemplateValid,
 	generateObjectResponse,
 } from "@/api_utils/api_functions";
+import { getSession } from "@/session_utils/session";
+import { JWTPayload } from "jose";
+import { User } from "@/db_utils/models/User";
 
 const requestTemplate: Partial<Event> = {
 	summary: "",
@@ -30,6 +33,13 @@ const requestTemplate: Partial<Event> = {
 };
 
 export const POST = async (request: NextRequest) => {
+	// Prendiamo i cookie della richiesta
+	const cookies: JWTPayload = (await getSession(
+		request.cookies
+	)) as JWTPayload; // Assumiamo che la sessione sia stata validata dal middleware
+
+	const owner: Partial<User> = cookies.user as Partial<User>;
+
 	// Convertiamo in JSON il body della richiesta
 	const body: Object | undefined = await parseJSONInput(request);
 	if (body === undefined) {
@@ -43,6 +53,10 @@ export const POST = async (request: NextRequest) => {
 
 	// Creaiamo un nuovo evento con quei campi
 	const newEvent: Event = createEvent(body);
+
+	// Aggiungiamo il campo 'owner' a newEvent
+	newEvent.owner = owner._id as ObjectId; // Assumiamo che la sessione sia corretta
+	newEvent.userList.push(owner._id as ObjectId);
 
 	// Ottieniamo la collezione degli eventi
 	const client: Collection<Event> = await getCollection<Event>(
