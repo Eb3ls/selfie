@@ -9,6 +9,7 @@ import {
 	generateMessageResponse,
 	isTemplateValid,
 	generateObjectResponse,
+	stringsToObjects,
 } from "@/api_utils/api_functions";
 import { JWTPayload } from "jose";
 import {
@@ -45,13 +46,16 @@ export const POST = async (request: NextRequest) => {
 		return generateMessageResponse("Invalid input", 400);
 	}
 
+	// Cambio le stringhe date in oggetti Date
+	const newBody: any = stringsToObjects(body);
+
 	// Controlliamo che il body abbia tutti i campi necessari
-	if (!isTemplateValid(body, requestTemplate)) {
+	if (!isTemplateValid(newBody, requestTemplate)) {
 		return generateMessageResponse("Invalid input", 400);
 	}
 
 	// Creiamo una nuova attività con quei campi
-	const newActivity: Activity = createActivity(body);
+	const newActivity: Activity = createActivity(newBody);
 
 	// Aggiungiamo il campo 'owner' a newActivity
 	newActivity.owner = owner._id as ObjectId; // Assumiamo che la sessione sia corretta

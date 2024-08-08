@@ -97,3 +97,33 @@ export async function deleteInCollection<T extends Schema>(
 		return undefined;
 	}
 }
+
+export async function updateOneInCollection<T extends Schema>(
+	_id: ObjectId,
+	data: T,
+	client: Collection<T>
+): Promise<number | undefined> {
+	try {
+		return (
+			await client.updateOne({ _id: _id } as any, { $set: data } as any)
+		).modifiedCount;
+	} catch (error: any) {
+		return undefined;
+	}
+}
+
+export async function updateOneAndFetchInCollection<T extends Schema>(
+	_id: ObjectId,
+	data: T,
+	client: Collection<T>
+): Promise<WithId<T> | undefined | null> {
+	try {
+		return await client.findOneAndUpdate(
+			{ _id: _id } as any,
+			{ $set: data } as any,
+			{ returnDocument: "after" }
+		);
+	} catch (error: any) {
+		return undefined;
+	}
+}

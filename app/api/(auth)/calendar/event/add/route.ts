@@ -12,6 +12,7 @@ import {
 	generateMessageResponse,
 	isTemplateValid,
 	generateObjectResponse,
+	stringsToObjects,
 } from "@/api_utils/api_functions";
 import { getSession } from "@/session_utils/session";
 import { JWTPayload } from "jose";
@@ -20,7 +21,7 @@ import { User } from "@/db_utils/models/User";
 const requestTemplate: Partial<Event> = {
 	summary: "",
 	description: "",
-	status: 0,
+	status: "",
 	rrule: "",
 	dtStart: new Date(),
 	dtEnd: new Date(),
@@ -46,13 +47,16 @@ export const POST = async (request: NextRequest) => {
 		return generateMessageResponse("Invalid input", 400);
 	}
 
+	// Cambio le stringhe date in oggetti Date
+	const newBody: any = stringsToObjects(body);
+
 	// Controlliamo che il body abbia tutti i campi necessari
-	if (!isTemplateValid(body, requestTemplate)) {
+	if (!isTemplateValid(newBody, requestTemplate)) {
 		return generateMessageResponse("Invalid input", 400);
 	}
 
 	// Creiamo un nuovo evento con quei campi
-	const newEvent: Event = createEvent(body);
+	const newEvent: Event = createEvent(newBody);
 
 	// Aggiungiamo il campo 'owner' a newEvent
 	newEvent.owner = owner._id as ObjectId; // Assumiamo che la sessione sia corretta

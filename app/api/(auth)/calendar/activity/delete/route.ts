@@ -5,6 +5,7 @@ import {
 	generateMessageResponse,
 	parseJSONInput,
 	isTemplateValid,
+	stringsToObjects,
 } from "@/api_utils/api_functions";
 import { Activity } from "@/db_utils/models/Activity";
 import {
@@ -14,8 +15,8 @@ import {
 } from "@/db_utils/db_functions";
 import { JWTPayload } from "jose";
 
-const requestTemplate = {
-	_id: "",
+const requestTemplate: Partial<Activity> = {
+	_id: new ObjectId(),
 };
 
 export const DELETE = async (request: NextRequest) => {
@@ -31,14 +32,16 @@ export const DELETE = async (request: NextRequest) => {
 		return generateMessageResponse("Invalid input", 400);
 	}
 
+	// Cambio le stringhe che dovrebbero essere oggetti in oggetti
+	const newBody: any = stringsToObjects(body);
+
 	// Controlliamo che il body abbia tutti i campi necessari
-	if (!isTemplateValid(body, requestTemplate)) {
+	if (!isTemplateValid(newBody, requestTemplate)) {
 		return generateMessageResponse("Invalid input", 400);
 	}
 
 	// Estraggo l'id dal body
-	const stringId: string = JSON.parse(JSON.stringify(body))._id;
-	const id: ObjectId = ObjectId.createFromHexString(stringId);
+	const id: ObjectId = newBody._id;
 
 	// Ottieniamo la collezione degli eventi
 	const client: Collection<Activity> = await getCollection<Activity>(

@@ -12,7 +12,7 @@ export interface User {
 	lastName: string;
 	email: string;
 	password: string;
-	birthDay: Date;
+	birthDay: Date | null;  // Se non messa è null, altrimenti l'utente sarebbe nato il giorno del signup
 	userStatus: string; 	// Attivo, Disattivo
 	profilePic: string; 	// path dell'immagine di profilo
 	isResource: boolean; 	// Se l'utente è una risorsa - es. un luogo specifico
@@ -25,7 +25,7 @@ export function createUser({
 	lastName = "",
 	email = "",
 	password = "",
-	birthDay = new Date(),
+	birthDay = null,
 	userStatus = "Attivo",
 	profilePic = "/images/?.png",
 	isResource = false,

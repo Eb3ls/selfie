@@ -10,7 +10,7 @@ export interface Event {
 	owner: ObjectId; 				      // ID dell'utente che ha creato l'evento
 	summary: string; 				      // Titolo dell'evento
 	description: string; 				  // Descrizione
-	status: number; 				      // TENTATIVE, CONFIRMED, CANCELLED
+	status: string; 				      // TENTATIVE, CONFIRMED, CANCELLED
 	rrule: string; 					      // regola di ripetizione dell'Evento. Es. FREQ=WEEKLY;BYDAY=MO (Ogni lunedì), RRULE:FREQ=DAILY;UNTIL=20240831T235959Z (ogni giorno fino a una data specifica)
 	dtStart: Date; 						  // Data inizio dell'Evento. Es. DTSTART:20240810T150000Z: l'evento si svolge il 10 agosto 2024 alle 15
 	dtEnd: Date; 						  // Data fine dell'evento
@@ -27,7 +27,7 @@ export function createEvent({
 	owner = new ObjectId(),
 	summary = "",
 	description = "",
-	status = 0,
+	status = "",
 	rrule = "",
 	dtStart = new Date(),
 	dtEnd = new Date(),
