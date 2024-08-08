@@ -6,10 +6,10 @@ COLLECTION
 */
 
 export interface Chat {
-	_id?: ObjectId;
-	user1: ObjectId;
-	user2: ObjectId;
-	messages: Message[];
+	_id?: ObjectId;         // ID della notifica
+	user1: ObjectId; 	    // ID del primo utente
+	user2: ObjectId; 		// ID del secondo utente
+	messages: Message[];    // messaggi nella chat
 }
 
 export function createChat({

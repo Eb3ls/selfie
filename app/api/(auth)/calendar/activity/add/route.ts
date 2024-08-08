@@ -1,4 +1,5 @@
 import { Activity, createActivity } from "@/db_utils/models/Activity";
+import { Alarm } from "@/db_utils/models/Alarm";
 import { User } from "@/db_utils/models/User";
 import { NextRequest } from "next/server";
 import { Collection, ObjectId, WithId } from "mongodb";
@@ -26,8 +27,8 @@ const requestTemplate: Partial<Activity> = {
 	categories: [],
 	location: "",
 	geo: "",
-	activityList: [],
-	alarms: [],
+	activityList: [] as Activity[],
+	alarms: [] as Alarm[],
 };
 
 export const POST = async (request: NextRequest) => {

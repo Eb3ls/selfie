@@ -6,17 +6,17 @@ COLLECTION
 */
 
 export interface User {
-	_id?: ObjectId;
+	_id?: ObjectId; 		// ID dell'utente
 	username: string;
 	firstName: string;
 	lastName: string;
 	email: string;
 	password: string;
 	birthDay: Date;
-	userStatus: string;
-	profilePic: string;
-	isResource: boolean;
-	pomodoro: Pomodoro;
+	userStatus: string; 	// Attivo, Disattivo
+	profilePic: string; 	// path dell'immagine di profilo
+	isResource: boolean; 	// Se l'utente è una risorsa - es. un luogo specifico
+	pomodoro: Pomodoro; 	// Setting iniziale per il pomodoro
 }
 
 export function createUser({

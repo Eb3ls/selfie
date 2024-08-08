@@ -6,12 +6,12 @@ NO COLLECTION
 */
 
 export interface Pomodoro {
-	_id?: ObjectId;
-	cycles: number;
-	cyclesCompleted: number;
-	studyDuration: number;
-	breakDuration: number;
-	alarms: Alarm[];
+	_id?: ObjectId; 			// ID del pomodoro
+	cycles: number; 			// numero di cicli
+	cyclesCompleted: number; 	// cicli completati
+	studyDuration: number; 		// durata timer di studio, in minuti
+	breakDuration: number; 		// durata timer di pausa, in minuti
+	alarms: Alarm[]; 			// notifiche associate
 }
 
 export function createPomodoro({

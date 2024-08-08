@@ -5,10 +5,10 @@ NO COLLECTION
 */
 
 export interface Message {
-	_id?: ObjectId;
-	text: string;
-	dateTime: Date;
-	sender: ObjectId;
+	_id?: ObjectId; 	 // ID del messaggio
+	text: string; 	     // Testo del messaggio
+	dateTime: Date;      // Data e ora del messaggio
+	sender: ObjectId;    // ID dell'utente che ha inviato il messaggio
 }
 
 export function createMessage({
