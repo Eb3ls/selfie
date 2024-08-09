@@ -21,7 +21,7 @@ const requestTemplate = {
 	receiver: "", // username dell'utente con cui si vuole creare una chat
 };
 
-export const PUT = async (request: NextRequest) => {
+export const POST = async (request: NextRequest) => {
 	// Prendiamo i cookie della richiesta
 	const cookies: JWTPayload = (await getSession(
 		request.cookies

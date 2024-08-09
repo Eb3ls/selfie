@@ -18,7 +18,7 @@ export function createMessage({
 	isInGroupChat = false,
 	senderId = new ObjectId(),
 	content = "",
-	sentAt = new Date(),
+	sentAt = new Date(new Date().toISOString()),
 	receivers = [],
 	chatId = new ObjectId(),
 }: Partial<Message>): Message {

@@ -29,6 +29,7 @@ export const NOTES_COLLECTION = "notes";
 export const PHASE_COLLECTION = "phases";
 export const PROJECT_COLLECTION = "projects";
 export const PROJECT_ACTIVITY_COLLECTION = "projectActivities";
+export const MESSAGE_COLLECTION = "messages";
 
 type Schema =
 	| User
