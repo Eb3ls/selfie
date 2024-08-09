@@ -6,20 +6,21 @@ COLLECTION
 */
 
 export interface Chat {
-	_id?: ObjectId;         // ID della notifica
-	user1: ObjectId; 	    // ID del primo utente
-	user2: ObjectId; 		// ID del secondo utente
-	messages: Message[];    // messaggi nella chat
+	_id?: ObjectId;             	// ID della chat
+	users: [ObjectId, ObjectId]; 	// utenti della chat privata
+	createdAt: Date; 				// data di creazione
+	lastMessageAt: Date 			// data ultimo messaggio
 }
 
 export function createChat({
-	user1 = new ObjectId(),
-	user2 = new ObjectId(),
-	messages = [],
+	users = [new ObjectId(), new ObjectId()],
+	createdAt = new Date(),
+	lastMessageAt = new Date(),
+	
 }: Partial<Chat>): Chat {
 	return {
-		user1: user1,
-		user2: user2,
-		messages: messages,
+		users: users,
+		createdAt: createdAt,
+		lastMessageAt: lastMessageAt
 	};
 }

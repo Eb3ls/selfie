@@ -8,21 +8,24 @@ COLLECTION
 export interface GroupChat {
 	_id?: ObjectId; 		  // ID della chat di gruppo
 	summary: string; 		  // Titolo della chat
-	userList: ObjectId[];	  // Utenti nel gruppo
-	messages: Message[];      // Messaggi della chat
 	ownerId: ObjectId;        // Creatore della chat
+	userList: ObjectId[];	  // Utenti nel gruppo
+	createdAt: Date;		  // Data di creazione della chat
+	lastMessageAt: Date;	  // Data dell'ultimo di ultima messaggio
 }
 
 export function createGroupChat({
 	summary = "",
-	userList = [],
-	messages = [],
 	ownerId = new ObjectId(),
+	userList = [],
+	createdAt = new Date(),
+	lastMessageAt = new Date(),
 }: Partial<GroupChat>): GroupChat {
 	return {
 		summary: summary,
-		userList: userList,
-		messages: messages,
 		ownerId: ownerId,
+		userList: userList,
+		createdAt: createdAt,
+		lastMessageAt: lastMessageAt
 	};
 }
