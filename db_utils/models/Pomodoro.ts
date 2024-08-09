@@ -6,7 +6,7 @@ NO COLLECTION
 */
 
 export interface Pomodoro {
-	_id?: ObjectId; 			// ID del pomodoro
+	_id: ObjectId; 			// ID del pomodoro
 	cycles: number; 			// numero di cicli
 	cyclesCompleted: number; 	// cicli completati
 	studyDuration: number; 		// durata timer di studio, in minuti
@@ -15,6 +15,7 @@ export interface Pomodoro {
 }
 
 export function createPomodoro({
+	_id = new ObjectId(),
 	cycles = 4,
 	cyclesCompleted = 0,
 	studyDuration = 25,
@@ -22,6 +23,7 @@ export function createPomodoro({
 	alarms = [],
 }: Partial<Pomodoro>): Pomodoro {
 	return {
+		_id: _id,
 		cycles: cycles,
 		cyclesCompleted: cyclesCompleted,
 		studyDuration: studyDuration,

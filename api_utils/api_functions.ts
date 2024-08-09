@@ -42,9 +42,13 @@ export function stringsToObjects(obj: Object): Object {
 	let object: any = { ...obj };
 
 	for (let i = 0; i < keys.length; i++) {
+		// Controllo data
 		if (isISO8601(object[keys[i]])) {
 			object[keys[i]] = object[keys[i]] = new Date(object[keys[i]]);
-		} else if (ObjectId.isValid(object[keys[i]])) {
+		} else if (
+			ObjectId.isValid(object[keys[i]]) &&
+			typeof object[keys[i]] === "string"
+		) {
 			object[keys[i]] = ObjectId.createFromHexString(object[keys[i]]);
 		}
 	}
@@ -113,9 +117,12 @@ export function isTemplateSubset(
 	const keys1 = Object.keys(obj).sort();
 	const keys2 = Object.keys(template).sort();
 
-	// Verifica se il campo obbligatorio è presente sia in obj che in template
-	if (!keys1.includes(requiredField) || !keys2.includes(requiredField)) {
-		return false;
+	// Se c'è il campo obbligatorio fai un controllo a riguardo
+	if (requiredField !== "") {
+		// Verifica se il campo obbligatorio è presente sia in obj che in template
+		if (!keys1.includes(requiredField) || !keys2.includes(requiredField)) {
+			return false;
+		}
 	}
 
 	// Copio perchè è utile any

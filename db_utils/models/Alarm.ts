@@ -5,7 +5,7 @@ NO COLLECTION
 */
 
 export interface Alarm {
-	_id?: ObjectId;              // ID della notifca
+	_id: ObjectId;              // ID della notifca
 	trigger: string; 			 // Quanto prima o dopo dovrà essere attivato. Es: trigger: -PT30M (scatta 30 minuti prima), trigger: PT5M (scatta 5 minuti dopo)
 	repeat: number; 			 // Viene ripetuto repeat + 1 volte. La prima volta scatta quando lo dice trigger, poi scatta dopo duration per repeat volte
 	duration: string; 			 // Durata tra ogni repeat
@@ -16,6 +16,7 @@ export interface Alarm {
 }
 
 export function createAlarm({
+	_id = new ObjectId(),
 	trigger = "",
 	repeat = 0,
 	duration = "",
@@ -25,6 +26,7 @@ export function createAlarm({
 	description = "",
 }: Partial<Alarm>): Alarm {
 	return {
+		_id: _id,
 		trigger: trigger,
 		repeat: repeat,
 		duration: duration,

@@ -21,7 +21,6 @@ const requestTemplate: Partial<Activity> = {
 
 export const DELETE = async (request: NextRequest) => {
 	// Prendiamo i cookie della richiesta
-
 	const cookies: JWTPayload = (await getSession(
 		request.cookies
 	)) as JWTPayload; // Assumiamo che la sessione sia stata validata dal middleware
