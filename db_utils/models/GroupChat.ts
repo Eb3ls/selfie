@@ -6,13 +6,13 @@ COLLECTION
 */
 
 export interface GroupChat {
-	_id?: ObjectId; 		  // ID della chat di gruppo
-	summary: string; 		  // Titolo della chat
-	ownerId: ObjectId;        // Creatore della chat
-	userList: ObjectId[];	  // Utenti nel gruppo (compreso il creatore come primo utente)
-	createdAt: Date;		  // Data di creazione della chat
-	lastMessageAt: Date;	  // Data dell'ultimo di ultima messaggio
-	messages: Message[];	  // Lista dei messaggi della chat
+	_id?: ObjectId;				// ID della chat di gruppo
+	summary: string;			// Titolo della chat
+	ownerId: ObjectId;			// Creatore della chat
+	userList: ObjectId[];		// Utenti nel gruppo (compreso il creatore come primo utente)
+	createdAt: Date;			// Data di creazione della chat
+	lastMessageAt: Date;		// Data dell'ultimo di ultima messaggio
+	messages: Message[];		// Lista dei messaggi della chat
 }
 
 export function createGroupChat({

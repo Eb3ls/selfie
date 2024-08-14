@@ -6,11 +6,11 @@ COLLECTION
 */
 
 export interface Chat {
-	_id?: ObjectId;             	// ID della chat
-	users: [ObjectId, ObjectId]; 	// Utenti della chat privata
-	createdAt: Date; 				// Data di creazione
-	lastMessageAt: Date | null 		// Data ultimo messaggio
-	messages: Message[];			// Lista dei messaggi della chat
+	_id?: ObjectId;						// ID della chat
+	users: [ObjectId, ObjectId];		// Utenti della chat privata
+	createdAt: Date;					// Data di creazione
+	lastMessageAt: Date | null;			// Data ultimo messaggio
+	messages: Message[];				// Lista dei messaggi della chat
 }
 
 export function createChat({

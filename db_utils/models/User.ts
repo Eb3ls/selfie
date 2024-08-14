@@ -6,17 +6,17 @@ COLLECTION
 */
 
 export interface User {
-	_id?: ObjectId; 		// ID dell'utente
+	_id?: ObjectId;				// ID dell'utente
 	username: string;
 	firstName: string;
 	lastName: string;
 	email: string;
 	password: string;
-	birthDay: Date | null;  // Se non messa è null, altrimenti l'utente sarebbe nato il giorno del signup
-	userStatus: string; 	// Attivo, Disattivo
-	profilePic: string; 	// path dell'immagine di profilo
-	isResource: boolean; 	// Se l'utente è una risorsa - es. un luogo specifico
-	pomodoro: Pomodoro; 	// Setting iniziale per il pomodoro
+	birthDay: Date | null;		// Se non messa è null, altrimenti l'utente sarebbe nato il giorno del signup
+	userStatus: string;			// Attivo, Disattivo
+	profilePic: string;			// Path dell'immagine di profilo
+	isResource: boolean;		// Se l'utente è una risorsa - es. un luogo specifico
+	pomodoro: Pomodoro;			// Setting iniziale per il pomodoro
 }
 
 export function createUser({

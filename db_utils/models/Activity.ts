@@ -6,20 +6,20 @@ COLLECTION
 */
 
 export interface Activity {
-	_id?: ObjectId;                   // ID dell'attività
-	owner: ObjectId;                  // ID dell'utente che ha creato l'attività
-	summary: string;                  // Titolo dell'attività
-	description: string;              // Descrizione dell'attività
-	status: string;                   // Stato dell'attività (iCalendar): NEEDS-ACTION, COMPLETED, IN-PROCESS, CANCELLED
-	dtStart: Date;                    // Data di inizio dell'attività - coincide con dtStamp, le attività hanno solo scadenza
-	due: Date;                        // Data di scadenza dell'attività
-	dtStamp: Date; 					  // Data di creazione dell'attività
-	categories: string[];			  // Categorie dell'attività
-	location: string; 				  // Luogo dell'attività
-	geo: string; 					  // Geolocalizzazione dell'attività
-	parentActivity: ObjectId | null;  // Padre dell'attività
-	userList: ObjectId[]; 		      // Lista degli utenti che partecipano all'attività
-	alarms: Alarm[]; 				  // Notifiche associate all'attività
+	_id?: ObjectId;						// ID dell'attività
+	owner: ObjectId;					// ID dell'utente che ha creato l'attività
+	summary: string;					// Titolo dell'attività
+	description: string;				// Descrizione dell'attività
+	status: string;						// Stato dell'attività (iCalendar): NEEDS-ACTION, COMPLETED, IN-PROCESS, CANCELLED
+	dtStart: Date;						// Data di inizio dell'attività - coincide con dtStamp, le attività hanno solo scadenza
+	due: Date;							// Data di scadenza dell'attività
+	dtStamp: Date;						// Data di creazione dell'attività
+	categories: string[];				// Categorie dell'attività
+	location: string;					// Luogo dell'attività
+	geo: string;						// Geolocalizzazione dell'attività
+	parentActivity: ObjectId | null;	// Padre dell'attività
+	userList: ObjectId[];				// Lista degli utenti che partecipano all'attività
+	alarms: Alarm[];					// Notifiche associate all'attività
 }
 
 export function createActivity({
