@@ -17,7 +17,7 @@ export interface Activity {
 	categories: string[];			  // Categorie dell'attività
 	location: string; 				  // Luogo dell'attività
 	geo: string; 					  // Geolocalizzazione dell'attività
-	activityList: Activity[]; 		  // Lista di sotto-attività
+	parentActivity: ObjectId | null;  // Padre dell'attività
 	userList: ObjectId[]; 		      // Lista degli utenti che partecipano all'attività
 	alarms: Alarm[]; 				  // Notifiche associate all'attività
 }
@@ -33,7 +33,7 @@ export function createActivity({
 	categories = [],
 	location = "",
 	geo = "",
-	activityList = [],
+	parentActivity = null,
 	userList = [],
 	alarms = [],
 }: Partial<Activity>): Activity {
@@ -48,7 +48,7 @@ export function createActivity({
 		categories: categories,
 		location: location,
 		geo: geo,
-		activityList: activityList,
+		parentActivity: parentActivity,
 		userList: userList,
 		alarms: alarms,
 	};

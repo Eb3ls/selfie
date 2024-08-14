@@ -9,9 +9,10 @@ export interface GroupChat {
 	_id?: ObjectId; 		  // ID della chat di gruppo
 	summary: string; 		  // Titolo della chat
 	ownerId: ObjectId;        // Creatore della chat
-	userList: ObjectId[];	  // Utenti nel gruppo
+	userList: ObjectId[];	  // Utenti nel gruppo (compreso il creatore come primo utente)
 	createdAt: Date;		  // Data di creazione della chat
 	lastMessageAt: Date;	  // Data dell'ultimo di ultima messaggio
+	messages: Message[];	  // Lista dei messaggi della chat
 }
 
 export function createGroupChat({
@@ -20,12 +21,14 @@ export function createGroupChat({
 	userList = [],
 	createdAt = new Date(),
 	lastMessageAt = new Date(),
+	messages = [],
 }: Partial<GroupChat>): GroupChat {
 	return {
 		summary: summary,
 		ownerId: ownerId,
 		userList: userList,
 		createdAt: createdAt,
-		lastMessageAt: lastMessageAt
+		lastMessageAt: lastMessageAt,
+		messages: messages
 	};
 }
