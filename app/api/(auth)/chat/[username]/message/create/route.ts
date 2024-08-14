@@ -3,6 +3,7 @@ import {
 	generateMessageResponse,
 	parseJSONInput,
 	isTemplateValid,
+	generateObjectResponse,
 } from "@/api_utils/api_functions";
 import { JWTPayload } from "jose";
 import { getSession } from "@/session_utils/session";
@@ -16,6 +17,7 @@ import {
 	findInCollection,
 	CHAT_COLLECTION,
 	MESSAGE_COLLECTION,
+	addAndFetchToCollection,
 } from "@/db_utils/db_functions";
 
 const requestTemplate: Partial<Message> = {
@@ -81,9 +83,9 @@ export const POST = async (
 			chat
 		);
 	if (chatQueryOut === undefined) {
-		return generateMessageResponse("Error in db connection", 404);
+		return generateMessageResponse("Error in db connection", 400);
 	} else if (chatQueryOut.length === 0) {
-		return generateMessageResponse("Chat not found", 404);
+		return generateMessageResponse("Chat not found", 400);
 	}
 
 	// Creo il messaggio
@@ -94,9 +96,19 @@ export const POST = async (
 		content: content,
 	});
 
-	// Inserisco il messaggio nel db
-	// Errore stranissimo - commento
-	/*const messageClient: Collection<Message> = await getCollection<Message>(
+	const messageClient: Collection<Message> = await getCollection<Message>(
 		MESSAGE_COLLECTION
-	);*/
+	);
+
+	// Inserisco il messaggio nel db
+	const messageQueryOut: WithId<Message> | undefined | null =
+		await addAndFetchToCollection<Message>(newMessage, messageClient);
+	if (messageQueryOut === undefined) {
+		return generateMessageResponse("Error in db connection", 400);
+	}
+	if (messageQueryOut === null) {
+		return generateMessageResponse("Error in inserting message", 400);
+	}
+
+	return generateObjectResponse(messageQueryOut, 200);
 };

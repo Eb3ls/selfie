@@ -16,6 +16,7 @@ import { Notes } from "@/db_utils/models/Notes";
 import { Phase } from "@/db_utils/models/Phase";
 import { Project } from "@/db_utils/models/Project";
 import { ProjectActivity } from "@/db_utils/models/ProjectActivity";
+import { Message } from "@/db_utils/models/Message";
 
 const DB_NAME = "Selfie";
 
@@ -41,7 +42,8 @@ type Schema =
 	| Notes
 	| Phase
 	| Project
-	| ProjectActivity;
+	| ProjectActivity
+	| Message;
 
 export async function getCollection<T extends Schema>(
 	collectionName: string
