@@ -35,14 +35,17 @@ export const DELETE = async (request: NextRequest) => {
 	const userId: ObjectId = user._id!;
 
 	// Estraggo l'id dal body
-	const id: ObjectId = newBody._id!;
+	const activityId: ObjectId = newBody._id!;
 
 	// Ottieniamo la collezione deglle attività
 	const client: Collection<Activity> = await getCollection<Activity>(
 		ACTIVITY_COLLECTION
 	);
 
-	const out = await findCollectionWrapper<Activity>({ _id: id }, client);
+	const out = await findCollectionWrapper<Activity>(
+		{ _id: activityId },
+		client
+	);
 
 	if (out.status !== 200) {
 		return out;
@@ -55,5 +58,5 @@ export const DELETE = async (request: NextRequest) => {
 		return generateMessageResponse("Unauthorized", 400);
 	}
 
-	return await deleteCollectionWrapper<Activity>(id, client);
+	return await deleteCollectionWrapper<Activity>(activityId, client);
 };
