@@ -30,7 +30,7 @@ export const PHASE_COLLECTION = "phases";
 export const PROJECT_COLLECTION = "projects";
 export const PROJECT_ACTIVITY_COLLECTION = "projectActivities";
 
-type Schema =
+export type Schema =
 	| User
 	| Event
 	| Activity

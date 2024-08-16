@@ -158,6 +158,23 @@ export function isTemplateSubset(
 	return true;
 }
 
+/*
+Parametri: 
+	request: richiesta ricevuta
+	requestTemplate: template su cui verificare l'oggetto
+	needForConversion: se è necessario avviare la conversione di stringhe in oggetti (es. date in oggetto Date)
+	onlySubset: se è necessario solo un sottoinsieme del template
+Valore di Ritorno:
+	OBJECT:
+		user: utente che ha fatto la richiesta
+		body: corpo della richiesta convertito
+	NULL: richiesta fallita
+Descrizione:
+	La funzione standardValidation è una funzione di validazione standard per le richieste. 
+	Controlla se l'utente che ha fatto la richiesta è loggato ed esegue le conversioni opportune.
+	Successivamente controlla se il corpo della richiesta è conforme al template richiesto.
+	Se la richiesta è conforme, ritorna un oggetto con l'utente e il corpo della richiesta.
+*/
 export async function standardValidation<T>(
 	request: NextRequest,
 	requestTemplate: Object,
