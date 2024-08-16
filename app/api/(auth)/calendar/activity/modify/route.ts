@@ -1,22 +1,15 @@
 import { NextRequest } from "next/server";
-import { Collection, ObjectId, WithId } from "mongodb";
+import { Collection, ObjectId } from "mongodb";
+import { getCollection, ACTIVITY_COLLECTION } from "@/db_utils/db_functions";
 import {
-	parseJSONInput,
-	generateMessageResponse,
-	isTemplateSubset,
-	generateObjectResponse,
-	stringsToObjects,
-} from "@/api_utils/api_functions";
-import {
-	getCollection,
-	ACTIVITY_COLLECTION,
-	updateOneAndFetchInCollection,
-	findInCollection,
-} from "@/db_utils/db_functions";
+	findCollectionWrapper,
+	updateOneCollectionWrapper,
+} from "@/db_utils/db_wrappers";
 import { Activity } from "@/db_utils/models/Activity";
-import { JWTPayload } from "jose";
-import { getSession } from "@/session_utils/session";
-import { User } from "@/db_utils/models/User";
+import {
+	generateMessageResponse,
+	standardValidation,
+} from "@/api_utils/api_functions";
 
 const requestTemplate: Partial<Activity> = {
 	_id: new ObjectId(),
@@ -30,29 +23,26 @@ const requestTemplate: Partial<Activity> = {
 };
 
 export const PATCH = async (request: NextRequest) => {
-	// Prendiamo i cookie della richiesta
-	const cookies: JWTPayload = (await getSession(
-		request.cookies
-	)) as JWTPayload; // Assumiamo che la sessione sia stata validata dal middleware
+	// Validazione standard
+	const validation = await standardValidation<Activity>(
+		request,
+		requestTemplate,
+		true
+	);
 
-	const user: Partial<User> = cookies.user as Partial<User>;
-	const userId: any = user._id;
-	// Convertiamo in JSON il body della richiesta
-	const body: Object | undefined = await parseJSONInput(request);
-	if (body === undefined) {
-		return generateMessageResponse("Invalid input", 400);
+	// Se la validazione fallisce, ritorna il messaggio di errore
+	if (validation === null) {
+		return generateMessageResponse("Invalid request", 400);
 	}
 
-	// Cambio le stringhe date in oggetti Date
-	const newBody: any = stringsToObjects(body);
+	// Estraiamo l'utente e il corpo della richiesta
+	const { user: user, body: newBody } = validation;
 
-	// Controlliamo che il body abbia tutti i campi necessari
-	if (!isTemplateSubset(newBody, requestTemplate, "_id")) {
-		return generateMessageResponse("Invalid input", 400);
-	}
+	// Estraggo l'id dell'utente
+	const userId: ObjectId = user._id!;
 
 	// Estraggo l'id dal body
-	const id: ObjectId = newBody._id;
+	const activityId: ObjectId = newBody._id!;
 
 	// Creo un oggetto senza il campo id
 	const { _id, ...newFields } = newBody;
@@ -62,28 +52,26 @@ export const PATCH = async (request: NextRequest) => {
 		ACTIVITY_COLLECTION
 	);
 
-	// Controlliamo che l'owner sia l'utente corrispondente
-	const activity: WithId<Activity>[] | undefined =
-		await findInCollection<Activity>({ _id: id }, client);
+	const out = await findCollectionWrapper<Activity>(
+		{ _id: activityId },
+		client
+	);
 
-	if (activity === undefined) {
-		return generateMessageResponse("Error in database", 400);
-	} else if (activity.length === 0) {
-		return generateMessageResponse("Event not found", 400);
-	} else if (activity[0].owner.toString() !== userId.toString()) {
-		console.log(activity[0].owner.toString(), userId.toString());
+	if (out.status !== 200) {
+		return out;
+	}
+
+	const activity: Activity[] = await out.json();
+
+	// Controlliamo che l'owner sia l'utente corrispondente
+	if (activity[0].owner.toString() !== userId.toString()) {
 		return generateMessageResponse("Unauthorized", 400);
 	}
 
 	// Modifichiamo l'attività
-	const modifiedActivity: WithId<Activity> | undefined | null =
-		await updateOneAndFetchInCollection<Activity>(id, newFields, client);
-
-	if (modifiedActivity === undefined) {
-		return generateMessageResponse("Error in database", 400);
-	} else if (modifiedActivity === null) {
-		return generateMessageResponse("Activity not found", 400);
-	}
-
-	return generateObjectResponse(modifiedActivity, 200);
+	return await updateOneCollectionWrapper<Activity>(
+		activityId,
+		newFields,
+		client
+	);
 };
