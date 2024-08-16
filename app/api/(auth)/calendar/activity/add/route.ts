@@ -28,7 +28,7 @@ const requestTemplate: Partial<Activity> = {
 	categories: [],
 	location: "",
 	geo: "",
-	activityList: [] as Activity[],
+	parentActivity: new ObjectId(),
 	alarms: [] as Alarm[],
 };
 

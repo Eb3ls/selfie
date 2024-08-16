@@ -10,7 +10,7 @@ import { User } from "@/db_utils/models/User";
 import { Event } from "@/db_utils/models/Event";
 import { Activity } from "@/db_utils/models/Activity";
 import { Chat } from "@/db_utils/models/Chat";
-import { EventSession } from "@/db_utils/models/EventSession";
+import { Session } from "@/db_utils/models/Session";
 import { GroupChat } from "@/db_utils/models/GroupChat";
 import { Notes } from "@/db_utils/models/Notes";
 import { Phase } from "@/db_utils/models/Phase";
@@ -23,7 +23,7 @@ export const USER_COLLECTION = "users";
 export const EVENT_COLLECTION = "events";
 export const ACTIVITY_COLLECTION = "activities";
 export const CHAT_COLLECTION = "chats";
-export const EVENT_SESSION_COLLECTION = "eventSessions";
+export const SESSION_COLLECTION = "sessions";
 export const GROUP_CHAT_COLLECTION = "groupChats";
 export const NOTES_COLLECTION = "notes";
 export const PHASE_COLLECTION = "phases";
@@ -35,7 +35,7 @@ type Schema =
 	| Event
 	| Activity
 	| Chat
-	| EventSession
+	| Session
 	| GroupChat
 	| Notes
 	| Phase

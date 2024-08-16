@@ -18,7 +18,6 @@ export interface Event {
 	categories: string[];					// Categorie dell'evento
 	location: string;						// Luogo dell'evento
 	geo: string;							// Geolocalizzazione dell'evento
-	eventSession: ObjectId | null;			// Sessione a cui appartiene, potrebbe non appartenere a nessuna sessione
 	userList: ObjectId[];					// Lista degli utenti a cui appartiene
 	alarms: Alarm[];						// Notifiche associate all'evento
 }
@@ -35,7 +34,6 @@ export function createEvent({
 	categories = [],
 	location = "",
 	geo = "",
-	eventSession = null,
 	userList = [],
 	alarms = [],
 }: Partial<Event>): Event {
@@ -51,7 +49,6 @@ export function createEvent({
 		categories: categories,
 		location: location,
 		geo: geo,
-		eventSession: eventSession,
 		userList: userList,
 		alarms: alarms,
 	};

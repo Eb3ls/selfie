@@ -7,17 +7,17 @@ import {
 	isTemplateValid,
 	stringsToObjects,
 } from "@/api_utils/api_functions";
-import { Event } from "@/db_utils/models/Event";
+import { Session } from "@/db_utils/models/Session";
 import {
 	deleteInCollection,
-	EVENT_COLLECTION,
+	SESSION_COLLECTION,
 	getCollection,
 	findInCollection,
 } from "@/db_utils/db_functions";
 import { JWTPayload } from "jose";
 import { User } from "@/db_utils/models/User";
 
-const requestTemplate: Partial<Event> = {
+const requestTemplate: Partial<Session> = {
 	_id: new ObjectId(),
 };
 
@@ -48,22 +48,20 @@ export const DELETE = async (request: NextRequest) => {
 	const id: ObjectId = newBody._id;
 
 	// Ottieniamo la collezione degli eventi
-	const client: Collection<Event> = await getCollection<Event>(
-		EVENT_COLLECTION
+	const client: Collection<Session> = await getCollection<Session>(
+		SESSION_COLLECTION
 	);
 
 	// Controlliamo che l'owner sia l'utente corrispondente
-	const event: WithId<Event>[] | undefined = await findInCollection<Event>(
-		{ _id: id },
-		client
-	);
+	const session: WithId<Session>[] | undefined =
+		await findInCollection<Session>({ _id: id }, client);
 
-	if (event === undefined) {
+	if (session === undefined) {
 		return generateMessageResponse("Error in database", 400);
-	} else if (event.length === 0) {
+	} else if (session.length === 0) {
 		return generateMessageResponse("Event not found", 400);
-	} else if (event[0].owner.toString() !== userId.toString()) {
-		console.log(event[0].owner.toString(), userId.toString());
+	} else if (session[0].owner.toString() !== userId.toString()) {
+		console.log(session[0].owner.toString(), userId.toString());
 		return generateMessageResponse("Unauthorized", 400);
 	}
 
@@ -72,14 +70,14 @@ export const DELETE = async (request: NextRequest) => {
 
 	if (result === undefined) {
 		return generateMessageResponse(
-			"Error while trying to delete event",
+			"Error while trying to delete session",
 			400
 		);
 	}
 
 	if (result === 0) {
-		return generateMessageResponse("Event not found", 400);
+		return generateMessageResponse("session not found", 400);
 	}
 
-	return generateMessageResponse("Event deleted", 200);
+	return generateMessageResponse("session deleted", 200);
 };

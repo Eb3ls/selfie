@@ -3,31 +3,24 @@ import { Collection, ObjectId, WithId } from "mongodb";
 import {
 	parseJSONInput,
 	generateMessageResponse,
-	isTemplateSubset,
+	isTemplateValid,
 	generateObjectResponse,
 	stringsToObjects,
 } from "@/api_utils/api_functions";
 import {
 	getCollection,
-	EVENT_COLLECTION,
+	SESSION_COLLECTION,
 	updateOneAndFetchInCollection,
 	findInCollection,
 } from "@/db_utils/db_functions";
-import { Event } from "@/db_utils/models/Event";
+import { Session } from "@/db_utils/models/Session";
 import { JWTPayload } from "jose";
 import { getSession } from "@/session_utils/session";
 import { User } from "@/db_utils/models/User";
 
-const requestTemplate: Partial<Event> = {
-	_id: new ObjectId(),
-	summary: "",
-	description: "",
-	status: "",
-	dtStart: new Date(),
-	dtEnd: new Date(),
-	categories: [],
-	location: "",
-	geo: "",
+const requestTemplate = {
+	sessionId: new ObjectId(),
+	cycles: 0,
 };
 
 export const PATCH = async (request: NextRequest) => {
@@ -48,44 +41,47 @@ export const PATCH = async (request: NextRequest) => {
 	const newBody: any = stringsToObjects(body);
 
 	// Controlliamo che il body abbia tutti i campi necessari
-	if (!isTemplateSubset(newBody, requestTemplate, "_id")) {
+	if (!isTemplateValid(newBody, requestTemplate)) {
 		return generateMessageResponse("Invalid input", 400);
 	}
 
 	// Estraggo l'id dal body
-	const id: ObjectId = newBody._id;
+	const sessionId: ObjectId = newBody.sessionId;
 
-	// Creo un oggetto senza il campo id
-	const { _id, ...newFields } = newBody;
-
-	// Ottieniamo la collezione degli eventi
-	const client: Collection<Event> = await getCollection<Event>(
-		EVENT_COLLECTION
+	// Ottieniamo la collezione degli Sessioni
+	const client: Collection<Session> = await getCollection<Session>(
+		SESSION_COLLECTION
 	);
 
 	// Controlliamo che l'owner sia l'utente corrispondente
-	const event: WithId<Event>[] | undefined = await findInCollection<Event>(
-		{ _id: id },
-		client
-	);
+	const session: WithId<Session>[] | undefined =
+		await findInCollection<Session>({ _id: sessionId }, client);
 
-	if (event === undefined) {
+	if (session === undefined) {
 		return generateMessageResponse("Error in database", 400);
-	} else if (event.length === 0) {
-		return generateMessageResponse("Event not found", 400);
-	} else if (event[0].owner.toString() !== userId.toString()) {
-		console.log(event[0].owner.toString(), userId.toString());
+	} else if (session.length === 0) {
+		return generateMessageResponse("Session not found", 400);
+	} else if (session[0].owner.toString() !== userId.toString()) {
+		console.log(session[0].owner.toString(), userId.toString());
 		return generateMessageResponse("Unauthorized", 400);
 	}
-	// Modifichiamo l'evento
-	const modifiedEvent: WithId<Event> | undefined | null =
-		await updateOneAndFetchInCollection<Event>(id, newFields, client);
 
-	if (modifiedEvent === undefined) {
+	let updatedSession: Session = { ...session[0] };
+	updatedSession.pomodoro.cycles = newBody.cycles;
+
+	// Modifichiamo la session
+	const modifiedSession: WithId<Session> | undefined | null =
+		await updateOneAndFetchInCollection<Session>(
+			sessionId,
+			updatedSession,
+			client
+		);
+
+	if (modifiedSession === undefined) {
 		return generateMessageResponse("Error in database", 400);
-	} else if (modifiedEvent === null) {
-		return generateMessageResponse("Event not found", 400);
+	} else if (modifiedSession === null) {
+		return generateMessageResponse("Session not found", 400);
 	}
 
-	return generateObjectResponse(modifiedEvent, 200);
+	return generateObjectResponse(modifiedSession.pomodoro, 200);
 };
