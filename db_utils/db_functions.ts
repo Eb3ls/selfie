@@ -12,7 +12,7 @@ import { Activity } from "@/db_utils/models/Activity";
 import { Chat } from "@/db_utils/models/Chat";
 import { Session } from "@/db_utils/models/Session";
 import { GroupChat } from "@/db_utils/models/GroupChat";
-import { Notes } from "@/db_utils/models/Notes";
+import { Note } from "@/db_utils/models/Note";
 import { Phase } from "@/db_utils/models/Phase";
 import { Project } from "@/db_utils/models/Project";
 import { ProjectActivity } from "@/db_utils/models/ProjectActivity";
@@ -25,7 +25,7 @@ export const ACTIVITY_COLLECTION = "activities";
 export const CHAT_COLLECTION = "chats";
 export const SESSION_COLLECTION = "sessions";
 export const GROUP_CHAT_COLLECTION = "groupChats";
-export const NOTES_COLLECTION = "notes";
+export const NOTE_COLLECTION = "notes";
 export const PHASE_COLLECTION = "phases";
 export const PROJECT_COLLECTION = "projects";
 export const PROJECT_ACTIVITY_COLLECTION = "projectActivities";
@@ -37,7 +37,7 @@ type Schema =
 	| Chat
 	| Session
 	| GroupChat
-	| Notes
+	| Note
 	| Phase
 	| Project
 	| ProjectActivity;
