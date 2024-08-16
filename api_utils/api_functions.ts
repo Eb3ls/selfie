@@ -1,9 +1,12 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
+import { User } from "@/db_utils/models/User";
+import { getSession } from "@/session_utils/session";
+import { JWTPayload } from "jose";
 
 export async function parseJSONInput(
 	request: Request
-): Promise<Object | undefined> {
+): Promise<any | undefined> {
 	try {
 		return await request.json();
 	} catch (e) {
@@ -147,6 +150,57 @@ export function isTemplateSubset(
 	}
 
 	return true;
+}
+
+export async function standardValidation<T>(
+	request: NextRequest,
+	requestTemplate: Object,
+	needForConversion: boolean = false,
+	onlySubset: boolean = false
+): Promise<{ user: Partial<User>; body: Partial<T> } | null> {
+	// Prendiamo i cookie della richiesta
+	const cookies: JWTPayload | null = await getSession(request.cookies);
+
+	if (cookies === null) {
+		// Se non c'è la sessione (Non dovrebbe mai succedere visto che il middleware dovrebbe bloccare la richiesta)
+		return null;
+	}
+
+	let user: Partial<User> = cookies.user as Partial<User>;
+
+	// Convertiamo l'ID dell'utente in ObjectId
+	try {
+		user._id = ObjectId.createFromHexString(user._id! as any);
+	} catch (e: any) {
+		return null;
+	}
+
+	// Convertiamo in JSON il body della richiesta
+	const body: any | undefined = await parseJSONInput(request);
+	if (body === undefined) {
+		return null;
+	}
+
+	// Conversione del body
+	let newBody = { ...body };
+	if (needForConversion) {
+		newBody = stringsToObjects(body);
+	}
+
+	// Controlliamo che il body abbia tutti i campi necessari
+	if (onlySubset) {
+		// Se è necessario solo un sottoinsieme del template
+		if (!isTemplateSubset(newBody, requestTemplate, "_id")) {
+			return null;
+		}
+	} else {
+		// Se è necessario tutto il template
+		if (!isTemplateValid(newBody, requestTemplate)) {
+			return null;
+		}
+	}
+
+	return { user: user, body: newBody };
 }
 
 export function generateMessageResponse(payload: string, status: number) {
