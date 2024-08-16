@@ -1,23 +1,14 @@
 import { NextRequest } from "next/server";
-import { Collection, WithId, ObjectId } from "mongodb";
+import { Collection } from "mongodb";
+import { getCollection, SESSION_COLLECTION } from "@/db_utils/db_functions";
+import { addCollectionWrapper } from "@/db_utils/db_wrappers";
+import { Session, createSession } from "@/db_utils/models/Session";
+import { createPomodoro } from "@/db_utils/models/Pomodoro";
 import {
-	getCollection,
-	SESSION_COLLECTION,
-	addAndFetchToCollection,
-} from "@/db_utils/db_functions";
-
-import { createSession, Session } from "@/db_utils/models/Session";
-import {
-	parseJSONInput,
-	generateMessageResponse,
 	isTemplateValid,
-	generateObjectResponse,
-	stringsToObjects,
+	generateMessageResponse,
+	standardValidation,
 } from "@/api_utils/api_functions";
-import { getSession } from "@/session_utils/session";
-import { JWTPayload } from "jose";
-import { User } from "@/db_utils/models/User";
-import { createPomodoro, Pomodoro } from "@/db_utils/models/Pomodoro";
 
 const requestTemplate: Partial<Session> = {
 	summary: "",
@@ -31,54 +22,36 @@ const requestTemplate: Partial<Session> = {
 };
 
 export const POST = async (request: NextRequest) => {
-	// Prendiamo i cookie della richiesta
-	const cookies: JWTPayload = (await getSession(
-		request.cookies
-	)) as JWTPayload; // Assumiamo che la sessione sia stata validata dal middleware
+	// Validazione standard
+	const validation = await standardValidation<Session>(
+		request,
+		requestTemplate,
+		true
+	);
 
-	const owner: Partial<User> = cookies.user as Partial<User>;
-
-	// Convertiamo in JSON il body della richiesta
-	const body: Object | undefined = await parseJSONInput(request);
-	if (body === undefined) {
-		return generateMessageResponse("Invalid input", 400);
+	// Se la validazione fallisce, ritorna il messaggio di errore
+	if (validation === null) {
+		return generateMessageResponse("Invalid request", 400);
 	}
 
-	// Cambio le stringhe date in oggetti Date
-	const newBody: any = stringsToObjects(body);
-
-	// Controlliamo che il body abbia tutti i campi necessari
-	if (!isTemplateValid(newBody, requestTemplate)) {
-		return generateMessageResponse("Invalid input", 400);
-	}
+	// Estraiamo l'utente e il corpo della richiesta
+	const { user: owner, body: newBody } = validation;
 
 	// Controlliamo che il pomodoro abbia tutti i campi necessari
-	if (!isTemplateValid(newBody.pomodoro, createPomodoro({}))) {
+	if (!isTemplateValid(newBody.pomodoro!, createPomodoro({}))) {
 		return generateMessageResponse("Invalid input", 400);
 	}
 
-	// Creiamo un nuovo Sessiono con quei campi
+	// Creiamo una nuova sessione con quei campi
 	const newSession: Session = createSession(newBody);
 
 	// Aggiungiamo il campo 'owner' a newSession
-	newSession.owner = owner._id as ObjectId; // Assumiamo che la sessione sia corretta
+	newSession.owner = owner._id!;
 
-	// Ottieniamo la collezione degli Sessioni
+	// Ottieniamo la collezione delle sessioni
 	const client: Collection<Session> = await getCollection<Session>(
 		SESSION_COLLECTION
 	);
 
-	// Aggiungi il nuovo Sessiono al db
-	const insertedSession: WithId<Session> | null | undefined =
-		await addAndFetchToCollection<Session>(newSession, client);
-	if (insertedSession === undefined) {
-		return generateMessageResponse("Error with DB connection", 400);
-	} else if (insertedSession === null) {
-		return generateMessageResponse(
-			"Error while trying to add Session (Should never happen)",
-			400
-		);
-	}
-
-	return generateObjectResponse(insertedSession, 200);
+	return await addCollectionWrapper(newSession, client);
 };

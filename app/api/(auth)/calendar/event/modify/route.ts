@@ -28,6 +28,7 @@ export const PATCH = async (request: NextRequest) => {
 	const validation = await standardValidation<Event>(
 		request,
 		requestTemplate,
+		true,
 		true
 	);
 
@@ -67,5 +68,9 @@ export const PATCH = async (request: NextRequest) => {
 	}
 
 	// Modifichiamo l'evento
-	return await updateOneCollectionWrapper<Event>(eventId, newFields, client);
+	return await updateOneCollectionWrapper<Event>(
+		eventId,
+		newFields as Event,
+		client
+	);
 };

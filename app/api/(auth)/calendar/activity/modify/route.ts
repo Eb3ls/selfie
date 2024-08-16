@@ -27,6 +27,7 @@ export const PATCH = async (request: NextRequest) => {
 	const validation = await standardValidation<Activity>(
 		request,
 		requestTemplate,
+		true,
 		true
 	);
 
@@ -71,7 +72,7 @@ export const PATCH = async (request: NextRequest) => {
 	// Modifichiamo l'attività
 	return await updateOneCollectionWrapper<Activity>(
 		activityId,
-		newFields,
+		newFields as Activity,
 		client
 	);
 };

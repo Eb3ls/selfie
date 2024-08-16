@@ -10,6 +10,7 @@ import {
 	generateMessageResponse,
 	standardValidation,
 } from "@/api_utils/api_functions";
+
 const requestTemplate: Partial<Event> = {
 	_id: new ObjectId(),
 };

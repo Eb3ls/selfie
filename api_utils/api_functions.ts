@@ -180,7 +180,7 @@ export async function standardValidation<T>(
 	requestTemplate: Object,
 	needForConversion: boolean = false,
 	onlySubset: boolean = false
-): Promise<{ user: Partial<User>; body: T } | null> {
+): Promise<{ user: Partial<User>; body: Partial<T> } | null> {
 	// Prendiamo i cookie della richiesta
 	const cookies: JWTPayload | null = await getSession(request.cookies);
 
