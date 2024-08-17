@@ -8,6 +8,7 @@ import {
 	isTemplateValid,
 	generateMessageResponse,
 	standardValidation,
+	stringsToObjects,
 } from "@/api_utils/api_functions";
 
 const requestTemplate: Partial<Session> = {
@@ -36,9 +37,10 @@ export const POST = async (request: NextRequest) => {
 
 	// Estraiamo l'utente e il corpo della richiesta
 	const { user: owner, body: newBody } = validation;
+	const bodyPomodoro = stringsToObjects(newBody.pomodoro!);
 
 	// Controlliamo che il pomodoro abbia tutti i campi necessari
-	if (!isTemplateValid(newBody.pomodoro!, createPomodoro({}))) {
+	if (!isTemplateValid(bodyPomodoro, createPomodoro({}))) {
 		return generateMessageResponse("Invalid input", 400);
 	}
 

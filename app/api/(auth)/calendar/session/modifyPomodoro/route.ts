@@ -60,12 +60,13 @@ export const PATCH = async (request: NextRequest) => {
 		return generateMessageResponse("Unauthorized", 400);
 	}
 
-	let updatedSession: Session = { ...session[0] };
-	updatedSession.pomodoro.cycles = newBody.cycles;
+	const pomodoro = session[0].pomodoro;
+	pomodoro.cycles = newBody.cycles;
 
 	return await updateOneCollectionWrapper<Session>(
 		sessionId,
-		updatedSession as Session,
+		{ pomodoro: pomodoro } as Session,
 		client
 	);
 };
+
