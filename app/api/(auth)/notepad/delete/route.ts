@@ -37,6 +37,9 @@ export const DELETE = async (request: NextRequest) => {
 		return generateMessageResponse("Invalid input", 400);
 	}
 
+	// body._id da stringa a ObjectId
+	body._id = ObjectId.createFromHexString(body._id);
+
 	// Controlliamo che il body abbia tutti i campi necessari
 	if (!isTemplateValid(body, requestTemplate)) {
 		return generateMessageResponse("Invalid input", 400);
@@ -59,7 +62,7 @@ export const DELETE = async (request: NextRequest) => {
 		return generateMessageResponse("Error in database", 400);
 	} else if (queryOut.length === 0) {
 		return generateMessageResponse("Note not found", 400);
-	} else if (queryOut[0].ownerId !== senderId) {
+	} else if (!queryOut[0].ownerId.equals(senderId)) {
 		return generateMessageResponse("Sender isn't the owner", 400);
 	}
 

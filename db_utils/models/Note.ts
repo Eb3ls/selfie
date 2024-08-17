@@ -14,7 +14,7 @@ export interface Note {
 	dtStamp: Date;					// Data di creazione della nota
 	dtModified: Date;				// Data di ultima modifica della nota
 	userList: ObjectId[];			// Lista degli utenti che possono accedere alla nota. Caso PRIVATE e PUBLIC, array di un solo elemento, l'owner. Caso INVITED tutti gli utenti che possono modificare la nota
-	activity: ObjectId[] | null;		// ID dell'attività a cui la nota fa riferimento. Null se la nota non fa riferimento ad alcuna attività
+	activity: ObjectId[] | null;	// ID dell'attività a cui la nota fa riferimento. Null se la nota non fa riferimento ad alcuna attività
 }
 
 export function createNote({

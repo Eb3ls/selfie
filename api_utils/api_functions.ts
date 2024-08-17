@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ObjectId } from "mongodb";
+import { Collection, ObjectId, WithId } from "mongodb";
 import { User } from "@/db_utils/models/User";
 import { getSession } from "@/session_utils/session";
 import { JWTPayload } from "jose";
+import {
+	findInCollection,
+	getCollection,
+	USER_COLLECTION,
+} from "@/db_utils/db_functions";
 
 export async function parseJSONInput(
 	request: Request
@@ -224,6 +229,43 @@ export async function standardValidation<T>(
 	}
 
 	return { user: user, body: newBody };
+}
+
+export async function getIdFromUsername(
+	userList: string[],
+	sender: ObjectId
+): Promise<NextResponse> {
+	// Iteriamo su userList per convertire ogni username in un ObjectId
+	const userIds: ObjectId[] = [];
+	const usersError: string[] = [];
+
+	const userClient: Collection<User> = await getCollection<User>(
+		USER_COLLECTION
+	);
+
+	userIds.push(sender);
+
+	for (const username of userList) {
+		// Controlliamo che l'utente esista
+		const queryOut: WithId<User>[] | undefined =
+			await findInCollection<User>({ username: username }, userClient);
+
+		// Se l'utente non esiste lo salviamo
+		if (queryOut === undefined) {
+			return generateMessageResponse("Error in database", 500);
+		} else if (queryOut.length === 0) {
+			usersError.push(username);
+		} else {
+			userIds.push(queryOut[0]._id);
+		}
+	}
+
+	// Ritorniamo la lista di username errati
+	if (usersError.length !== 0) {
+		return generateObjectResponse({ users: usersError }, 400);
+	}
+
+	return generateObjectResponse({ users: userIds }, 200);
 }
 
 export function generateMessageResponse(payload: string, status: number) {

@@ -39,6 +39,9 @@ export const PATCH = async (request: NextRequest) => {
 		return generateMessageResponse("Invalid input", 400);
 	}
 
+	// body._id da stringa a ObjectId
+	body._id = ObjectId.createFromHexString(body._id);
+
 	// Controlliamo che il body abbia tutti i campi necessari
 	if (!isTemplateValid(body, requestTemplate)) {
 		return generateMessageResponse("Invalid input", 400);
@@ -48,7 +51,7 @@ export const PATCH = async (request: NextRequest) => {
 	const { _id, ...newFields } = body;
 
 	// Aggiorniamo la lunghezza della nota
-	newFields.length = newFields.text.length();
+	newFields.length = newFields.text.length;
 
 	// Ottieniamo la collezione delle note
 	const client: Collection<Note> = await getCollection<Note>(NOTE_COLLECTION);
@@ -68,7 +71,7 @@ export const PATCH = async (request: NextRequest) => {
 	const isInvited: boolean =
 		queryOut[0].access === "INVITED" &&
 		queryOut[0].userList.includes(senderId);
-	const isCreator: boolean = queryOut[0].ownerId === senderId;
+	const isCreator: boolean = queryOut[0].ownerId.equals(senderId);
 	const isPublic: boolean = queryOut[0].access === "PUBLIC";
 
 	// Controlliamo che il sender abbia accesso

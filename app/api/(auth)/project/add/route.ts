@@ -14,9 +14,10 @@ import { Note, createNote } from "@/db_utils/models/Note";
 import { Project, createProject } from "@/db_utils/models/Project";
 import {
 	parseJSONInput,
-	isTemplateValid,
+	isTemplateSubset,
 	generateMessageResponse,
 	generateObjectResponse,
+	getIdFromUsername,
 } from "@/api_utils/api_functions";
 import { getSession } from "@/session_utils/session";
 import { JWTPayload } from "jose";
@@ -43,38 +44,30 @@ export const POST = async (request: NextRequest) => {
 	}
 
 	// Controlliamo che il body abbia tutti i campi necessari
-	if (!isTemplateValid(body, requestTemplate)) {
+	if (!isTemplateSubset(body, requestTemplate, "summary")) {
 		return generateMessageResponse("Invalid input", 400);
 	}
 
-	// Iteriamo su userList per convertire ogni username in un ObjectId
-	const userList: ObjectId[] = [];
+	if (body.userList !== undefined) {
+		// Otteniamo la lista degli id degli utenti
+		const parsedUsers = await getIdFromUsername(body.userList, senderId);
 
-	const client: Collection<User> = await getCollection<User>(USER_COLLECTION);
-
-	for (const username of body.userList) {
-		// Controlliamo che l'utente esista
-		const queryOut: WithId<User>[] | undefined =
-			await findInCollection<User>({ username: username }, client);
-
-		// Se l'utente non esiste, restituiamo un messaggio di errore
-		if (queryOut === undefined) {
-			return generateMessageResponse("Error in database", 404);
-		} else if (queryOut.length === 0) {
-			return generateMessageResponse("User not found", 404);
+		// Ritorniamo la lista di utenti sbagliati o errore nel db
+		if (parsedUsers.status !== 200) {
+			return parsedUsers;
 		}
-		userList.push(queryOut[0]._id);
-	}
 
-	// Inseriamo gli id degli user all'interno di body
-	body.userList = userList;
-	body.userList.unshift(senderId);
+		const usersList: ObjectId[] = await parsedUsers.json();
+		body.userList = usersList;
+	} else {
+		body.userList = [senderId];
+	}
 
 	// Creiamo l'oggetto da cui deriverà la nota
 	const obj: Partial<Note> = {
 		ownerId: senderId,
 		summary: body.summary,
-		access: "PRIVATE",
+		access: "INVITED",
 		userList: body.userList,
 	};
 

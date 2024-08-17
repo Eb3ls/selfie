@@ -2,9 +2,7 @@ import { NextRequest } from "next/server";
 import { Collection, ObjectId, WithId } from "mongodb";
 import {
 	getCollection,
-	USER_COLLECTION,
 	NOTE_COLLECTION,
-	findInCollection,
 	addAndFetchToCollection,
 } from "@/db_utils/db_functions";
 
@@ -12,9 +10,10 @@ import { User } from "@/db_utils/models/User";
 import { Note, createNote } from "@/db_utils/models/Note";
 import {
 	parseJSONInput,
-	isTemplateSubset,
 	generateMessageResponse,
 	generateObjectResponse,
+	getIdFromUsername,
+	isTemplateSubset,
 } from "@/api_utils/api_functions";
 import { getSession } from "@/session_utils/session";
 import { JWTPayload } from "jose";
@@ -22,7 +21,6 @@ import { JWTPayload } from "jose";
 const requestTemplate: Partial<Note> = {
 	access: "",
 	userList: [],
-	activity: [],
 };
 
 export const POST = async (request: NextRequest) => {
@@ -52,30 +50,20 @@ export const POST = async (request: NextRequest) => {
 		return generateMessageResponse("Invalid input", 400);
 	}
 
-	// Iteriamo su userList per convertire ogni username in un ObjectId
-	const userList: ObjectId[] = [];
+	if (body.userList !== undefined) {
+		// Otteniamo la lista degli id degli utenti
+		const parsedUsers = await getIdFromUsername(body.userList, senderId);
 
-	const userClient: Collection<User> = await getCollection<User>(
-		USER_COLLECTION
-	);
-
-	for (const username of body.userList) {
-		// Controlliamo che l'utente esista
-		const queryOut: WithId<User>[] | undefined =
-			await findInCollection<User>({ username: username }, userClient);
-
-		// Se l'utente non esiste, restituiamo un messaggio di errore
-		if (queryOut === undefined) {
-			return generateMessageResponse("Error in database", 404);
-		} else if (queryOut.length === 0) {
-			return generateMessageResponse("User not found", 404);
+		// Ritorniamo la lista di utenti sbagliati o errore nel db
+		if (parsedUsers.status !== 200) {
+			return parsedUsers;
 		}
-		userList.push(queryOut[0]._id);
-	}
 
-	// Inseriamo gli id degli user all'interno di body
-	body.userList = userList;
-	body.userList.unshift(senderId);
+		const usersList: ObjectId[] = await parsedUsers.json();
+		body.userList = usersList;
+	} else {
+		body.userList = [senderId];
+	}
 
 	// Creiamo una nuova nota con quei campi
 	const newNote: Note = createNote(body);
@@ -91,7 +79,7 @@ export const POST = async (request: NextRequest) => {
 
 	// Aggiungiamo il nuovo evento al db
 	const insertedNote: WithId<Note> | null | undefined =
-		await addAndFetchToCollection(body, noteClient);
+		await addAndFetchToCollection(newNote, noteClient);
 	if (insertedNote === undefined) {
 		return generateMessageResponse("Error in database", 400);
 	} else if (insertedNote === null) {

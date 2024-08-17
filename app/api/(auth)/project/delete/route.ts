@@ -37,6 +37,9 @@ export const DELETE = async (request: NextRequest) => {
 		return generateMessageResponse("Invalid input", 400);
 	}
 
+	// body._id da stringa a ObjectId
+	body._id = ObjectId.createFromHexString(body._id);
+
 	// Controlliamo che il body abbia tutti i campi necessari
 	if (!isTemplateValid(body, requestTemplate)) {
 		return generateMessageResponse("Invalid input", 400);
@@ -63,14 +66,15 @@ export const DELETE = async (request: NextRequest) => {
 	}
 
 	// Controlliamo che il sender sia l'owner
-	if (queryOut[0].ownerId !== senderId) {
+	if (!queryOut[0].ownerId.equals(senderId)) {
 		return generateMessageResponse("Sender isn't the owner", 400);
 	}
 
 	// Eliminiamo il progetto
 	const result: number | undefined = await deleteInCollection(id, client);
 	if (result === undefined) {
-		generateMessageResponse("Error while deleting", 400);
+		return generateMessageResponse("Error while deleting", 400);
 	}
-	generateMessageResponse("Project deleted", 200);
+
+	return generateMessageResponse("Project deleted", 200);
 };
