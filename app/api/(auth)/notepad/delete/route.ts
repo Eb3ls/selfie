@@ -2,12 +2,14 @@ import { NextRequest } from "next/server";
 import { Collection, ObjectId, WithId } from "mongodb";
 import {
 	getCollection,
+	PROJECT_COLLECTION,
 	NOTE_COLLECTION,
 	findInCollection,
 	deleteInCollection,
 } from "@/db_utils/db_functions";
 
 import { User } from "@/db_utils/models/User";
+import { Project } from "@/db_utils/models/Project";
 import { Note } from "@/db_utils/models/Note";
 import {
 	parseJSONInput,
@@ -48,26 +50,42 @@ export const DELETE = async (request: NextRequest) => {
 	// Estraggo l'id dal body
 	const id: ObjectId = body._id;
 
+	// Otteniamo la collezione dei progetti
+	const projectClient: Collection<Project> = await getCollection<Project>(
+		PROJECT_COLLECTION
+	);
+
+	// Controlliamo che la nota non sia associata ad un progetto
+	const projectQueryOut: WithId<Project>[] | undefined =
+		await findInCollection({ note: id }, projectClient);
+	if (projectQueryOut === undefined) {
+		return generateMessageResponse("Error in database", 500);
+	} else if (projectQueryOut.length !== 0) {
+		return generateMessageResponse("Note is from a project", 400);
+	}
+
 	// Ottieniamo la collezione delle note
-	const client: Collection<Note> = await getCollection<Note>(NOTE_COLLECTION);
+	const noteClient: Collection<Note> = await getCollection<Note>(
+		NOTE_COLLECTION
+	);
 
 	// Troviamo la nota da eliminare
-	const queryOut: WithId<Note>[] | undefined = await findInCollection(
-		id,
-		client
+	const noteQueryOut: WithId<Note>[] | undefined = await findInCollection(
+		{ _id: id },
+		noteClient
 	);
 
 	// Controlliamo che il sender sia l'owner
-	if (queryOut === undefined) {
+	if (noteQueryOut === undefined) {
 		return generateMessageResponse("Error in database", 400);
-	} else if (queryOut.length === 0) {
+	} else if (noteQueryOut.length === 0) {
 		return generateMessageResponse("Note not found", 400);
-	} else if (!queryOut[0].ownerId.equals(senderId)) {
+	} else if (!noteQueryOut[0].ownerId.equals(senderId)) {
 		return generateMessageResponse("Sender isn't the owner", 400);
 	}
 
 	// Eliminiamo la nota
-	const result: number | undefined = await deleteInCollection(id, client);
+	const result: number | undefined = await deleteInCollection(id, noteClient);
 	if (result === undefined) {
 		return generateMessageResponse("Error while deleting", 400);
 	}

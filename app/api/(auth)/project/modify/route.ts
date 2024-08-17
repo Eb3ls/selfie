@@ -73,7 +73,7 @@ export const PATCH = async (request: NextRequest) => {
 
 	// Controlliamo che il progetto esista
 	const queryOut: WithId<Project>[] | undefined = await findInCollection(
-		_id,
+		{ _id: _id },
 		projectClient
 	);
 

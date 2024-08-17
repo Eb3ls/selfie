@@ -2,12 +2,14 @@ import { NextRequest } from "next/server";
 import { Collection, WithId, ObjectId } from "mongodb";
 import {
 	getCollection,
+	NOTE_COLLECTION,
 	PROJECT_COLLECTION,
 	findInCollection,
 	deleteInCollection,
 } from "@/db_utils/db_functions";
 
 import { User } from "@/db_utils/models/User";
+import { Note } from "@/db_utils/models/Note";
 import { Project } from "@/db_utils/models/Project";
 import {
 	parseJSONInput,
@@ -54,27 +56,45 @@ export const DELETE = async (request: NextRequest) => {
 	);
 
 	// Controlliamo che il progetto esista
-	const queryOut: WithId<Project>[] | undefined = await findInCollection(
-		id,
-		client
-	);
+	const projectQueryOut: WithId<Project>[] | undefined =
+		await findInCollection({ _id: id }, client);
 
-	if (queryOut === undefined) {
+	if (projectQueryOut === undefined) {
 		return generateMessageResponse("Error in database", 400);
-	} else if (queryOut.length === 0) {
+	} else if (projectQueryOut.length === 0) {
 		return generateMessageResponse("Project not found", 400);
 	}
 
 	// Controlliamo che il sender sia l'owner
-	if (!queryOut[0].ownerId.equals(senderId)) {
+	if (!projectQueryOut[0].ownerId.equals(senderId)) {
 		return generateMessageResponse("Sender isn't the owner", 400);
 	}
 
+	// Ottieniamo la collezione delle note
+	const noteClient: Collection<Note> = await getCollection<Note>(
+		NOTE_COLLECTION
+	);
+
+	// Eliminiamo la nota associata al progetto
+	const noteResult: number | undefined = await deleteInCollection(
+		projectQueryOut[0].note,
+		noteClient
+	);
+
+	if (noteResult === undefined) {
+		return generateMessageResponse("Error in database", 500);
+	}
+
 	// Eliminiamo il progetto
-	const result: number | undefined = await deleteInCollection(id, client);
-	if (result === undefined) {
+	const projectResult: number | undefined = await deleteInCollection(
+		id,
+		client
+	);
+	if (projectResult === undefined) {
 		return generateMessageResponse("Error while deleting", 400);
 	}
 
 	return generateMessageResponse("Project deleted", 200);
+
+	// TODO eliminare le note associate alle projectActivity
 };

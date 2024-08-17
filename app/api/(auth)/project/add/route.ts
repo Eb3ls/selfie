@@ -2,10 +2,8 @@ import { NextRequest } from "next/server";
 import { Collection, WithId, ObjectId } from "mongodb";
 import {
 	getCollection,
-	USER_COLLECTION,
 	NOTE_COLLECTION,
 	PROJECT_COLLECTION,
-	findInCollection,
 	addAndFetchToCollection,
 } from "@/db_utils/db_functions";
 

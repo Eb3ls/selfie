@@ -58,7 +58,7 @@ export const PATCH = async (request: NextRequest) => {
 
 	// Controlliamo che la nota esista
 	const queryOut: WithId<Note>[] | undefined = await findInCollection(
-		_id,
+		{ _id: _id },
 		client
 	);
 
