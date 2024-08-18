@@ -24,6 +24,16 @@ export function isValidEmail(email: string): boolean {
 	return emailRegex.test(email);
 }
 
+export function removeArrayDuplicates<T>(array: T[]) {
+	return array.filter((value, index, self) => {
+		return self.indexOf(value) === index;
+	});
+}
+
+export function getArrayIntersection(array1: [], array2: []) {
+	return array1.filter((value) => array2.includes(value));
+}
+
 /*
 Parametri:
 	dateString: stringa da controllare

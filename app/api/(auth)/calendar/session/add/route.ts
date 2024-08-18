@@ -18,7 +18,6 @@ const requestTemplate: Partial<Session> = {
 	rrule: "",
 	dtStart: new Date(),
 	dtEnd: new Date(),
-	dtStamp: new Date(),
 	pomodoro: createPomodoro({}),
 };
 

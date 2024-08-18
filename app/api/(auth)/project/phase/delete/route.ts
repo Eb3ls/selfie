@@ -47,7 +47,7 @@ export const DELETE = async (request: NextRequest) => {
 	);
 
 	const phaseOut = await findCollectionWrapper<Phase>(
-		{ _id: _id },
+		{ _id: _id, ownerId: senderId },
 		phaseClient
 	);
 
@@ -55,56 +55,31 @@ export const DELETE = async (request: NextRequest) => {
 		return phaseOut;
 	}
 
-	// Estraiamo il projectId
-	const phaseData: Phase[] = await phaseOut.json();
-	const projectId: ObjectId = phaseData[0].projectId;
+	const phaseData: Phase = await phaseOut.json();
 
-	// Otteniamo la collezione dei progetti
-	const projectClient: Collection<Project> = await getCollection<Project>(
-		PROJECT_COLLECTION
-	);
-
-	const projectOut = await findCollectionWrapper<Project>(
-		{ _id: projectId },
-		projectClient
-	);
-
-	if (projectOut.status !== 200) {
-		return projectOut;
-	}
-
-	const projectData: Project[] = await projectOut.json();
-
-	// Controlliamo che l'utente sia il proprietario del progetto
-	if (!senderId.equals(projectData[0].ownerId)) {
-		return generateMessageResponse(
-			"User is not the owner of the project",
-			400
-		);
-	}
-
-	// Otteniamo le sottofasi
-	const subPhases = await findCollectionWrapper<Phase>(
-		{ parentId: _id },
-		phaseClient
-	);
-
-	if (subPhases.status !== 200) {
-		return subPhases;
-	}
-
-	const subPhasesData: Phase[] = await subPhases.json();
-
-	// Eliminiamo le sottofasi
-	while (subPhasesData.length > 0) {
-		const subPhase = subPhasesData.shift()!;
-		const subPhaseId = new ObjectId(subPhase._id);
-		const result = await deleteCollectionWrapper<Phase>(
-			subPhaseId,
+	if (phaseData.parentId === phaseData.projectId) {
+		// Otteniamo le sottofasi
+		const subPhases = await findCollectionWrapper<Phase>(
+			{ parentId: _id },
 			phaseClient
 		);
-		if (result.status !== 200) {
-			return result;
+
+		// Se ci sono sottofasi, le cancelliamo
+		if (subPhases.status === 200) {
+			const subPhasesData: Phase[] = await subPhases.json();
+
+			// Eliminiamo le sottofasi
+			while (subPhasesData.length > 0) {
+				const subPhase = subPhasesData.shift()!;
+				const subPhaseId = new ObjectId(subPhase._id);
+				const result = await deleteCollectionWrapper<Phase>(
+					subPhaseId,
+					phaseClient
+				);
+				if (result.status !== 200) {
+					return result;
+				}
+			}
 		}
 	}
 

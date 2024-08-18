@@ -16,6 +16,7 @@ import {
 	generateMessageResponse,
 	generateObjectResponse,
 	getIdFromUsername,
+	removeArrayDuplicates,
 } from "@/api_utils/api_functions";
 import { getSession } from "@/session_utils/session";
 import { JWTPayload } from "jose";
@@ -93,6 +94,7 @@ export const POST = async (request: NextRequest) => {
 	// Aggiungiamo il campo 'ownerId' a newProject
 	newProject.ownerId = senderId; // Assumiamo che la sessione sia corretta
 	newProject.note = insertedNote._id;
+	newProject.userList = removeArrayDuplicates<ObjectId>(newProject.userList);
 
 	//Otteniamo la collezione dei progetti
 	const projectClient: Collection<Project> = await getCollection<Project>(

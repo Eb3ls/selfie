@@ -10,7 +10,10 @@ export interface Note {
 	summary: string,
 	text: string;					// Testo della nota in markdown
 	length: number;					// lunghezza testo
-	access: string;					// Permessi della nota: PUBLIC, PRIVATE, INVITED
+	access: 
+	| "PRIVATE"
+	| "INVITED"
+	| "PUBLIC";					
 	dtStamp: Date;					// Data di creazione della nota
 	dtModified: Date;				// Data di ultima modifica della nota
 	userList: ObjectId[];			// Lista degli utenti che possono accedere alla nota. Caso PRIVATE e PUBLIC, array di un solo elemento, l'owner. Caso INVITED tutti gli utenti che possono modificare la nota
@@ -22,9 +25,9 @@ export function createNote({
 	summary = "",
 	text = "",
 	length = 0,
-	access = "public",
-	dtStamp = new Date(),
-	dtModified = new Date(),
+	access = "PRIVATE",
+	dtStamp = new Date(new Date().toISOString()),
+	dtModified = new Date(new Date().toISOString()),
 	userList = [],
 	activity = [],
 }: Partial<Note>): Note {

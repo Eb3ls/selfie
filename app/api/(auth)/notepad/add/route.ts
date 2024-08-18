@@ -19,7 +19,7 @@ import { getSession } from "@/session_utils/session";
 import { JWTPayload } from "jose";
 
 const requestTemplate: Partial<Note> = {
-	access: "",
+	access: "PRIVATE",
 	userList: [],
 };
 

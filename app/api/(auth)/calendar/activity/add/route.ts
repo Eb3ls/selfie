@@ -15,7 +15,6 @@ const requestTemplate: Partial<Activity> = {
 	status: "",
 	dtStart: new Date(),
 	due: new Date(),
-	dtStamp: new Date(),
 	categories: [],
 	location: "",
 	geo: "",

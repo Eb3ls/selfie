@@ -71,6 +71,7 @@ export const POST = async (request: NextRequest) => {
 	const project: Project[] = await projectOut.json();
 	const projectUsersList = project[0].userList;
 
+	// Controlliamo che il sender sia l'owner
 	if (!senderId.equals(project[0].ownerId)) {
 		return generateMessageResponse(
 			"User is not the owner of the project",

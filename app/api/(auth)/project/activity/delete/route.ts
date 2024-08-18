@@ -46,7 +46,7 @@ export const DELETE = async (req: NextRequest) => {
 		await getCollection<ProjectActivity>(PROJECT_ACTIVITY_COLLECTION);
 
 	const projectActivityOut = await findCollectionWrapper<ProjectActivity>(
-		{ _id: _id },
+		{ _id: _id, ownerId: senderId },
 		projectActivityClient
 	);
 
@@ -57,14 +57,6 @@ export const DELETE = async (req: NextRequest) => {
 	// Estraiamo i dati dell'attività
 	const projectActivityData: ProjectActivity[] =
 		await projectActivityOut.json();
-
-	// Controlliamo che il sender sia l'owner
-	if (!senderId.equals(projectActivityData[0].ownerId)) {
-		return generateMessageResponse(
-			"User is not the owner of the project",
-			400
-		);
-	}
 
 	// Otteniamo la collezione delle note
 	const noteClient: Collection<Note> = await getCollection<Note>(

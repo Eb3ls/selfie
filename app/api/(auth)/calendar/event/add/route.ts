@@ -15,7 +15,6 @@ const requestTemplate: Partial<Event> = {
 	rrule: "",
 	dtStart: new Date(),
 	dtEnd: new Date(),
-	dtStamp: new Date(),
 	categories: [],
 	location: "",
 	geo: "",

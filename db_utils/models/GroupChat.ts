@@ -19,8 +19,8 @@ export function createGroupChat({
 	summary = "",
 	ownerId = new ObjectId(),
 	userList = [],
-	createdAt = new Date(),
-	lastMessageAt = new Date(),
+	createdAt = new Date(new Date().toISOString()),
+	lastMessageAt = new Date(new Date().toISOString()),
 	messages = [],
 }: Partial<GroupChat>): GroupChat {
 	return {

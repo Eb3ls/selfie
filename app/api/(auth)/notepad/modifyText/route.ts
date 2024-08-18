@@ -18,7 +18,7 @@ import {
 import { getSession } from "@/session_utils/session";
 import { JWTPayload } from "jose";
 
-const requestTemplate: Object = {
+const requestTemplate: Partial<Note> = {
 	_id: new ObjectId(),
 	text: "",
 };

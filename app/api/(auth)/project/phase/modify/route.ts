@@ -48,40 +48,12 @@ export const PATCH = async (request: NextRequest) => {
 	);
 
 	const phaseOut = await findCollectionWrapper<Phase>(
-		{ _id: _id },
+		{ _id: _id, ownerId: senderId },
 		phaseClient
 	);
 
 	if (phaseOut.status !== 200) {
 		return phaseOut;
-	}
-
-	// Otteniamo il projectId
-	const phaseData: Phase[] = await phaseOut.json();
-	const projectId: ObjectId = phaseData[0].projectId;
-
-	// Otteniamo la collezione dei progetti
-	const projectClient: Collection<Project> = await getCollection<Project>(
-		PROJECT_COLLECTION
-	);
-
-	const projectOut = await findCollectionWrapper<Project>(
-		{ _id: projectId },
-		projectClient
-	);
-
-	if (projectOut.status !== 200) {
-		return projectOut;
-	}
-
-	const project: Project[] = await projectOut.json();
-
-	// Verifichiamo che l'utente sia il proprietario del progetto
-	if (!senderId.equals(project[0].ownerId)) {
-		return generateMessageResponse(
-			"User is not the owner of the project",
-			400
-		);
 	}
 
 	// Modifichiamo la fase
