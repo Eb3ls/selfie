@@ -59,7 +59,8 @@ export const PATCH = async (request: NextRequest) => {
 			return parsedUsers;
 		}
 
-		const usersList: ObjectId[] = await parsedUsers.json();
+		const usersListObj = await parsedUsers.json();
+		const usersList: ObjectId[] = usersListObj.users;
 		body.userList = usersList;
 	}
 

@@ -55,22 +55,20 @@ export const POST = async (request: NextRequest) => {
 			return parsedUsers;
 		}
 
-		const usersList: ObjectId[] = await parsedUsers.json();
+		const usersListObj = await parsedUsers.json();
+		const usersList: ObjectId[] = usersListObj.users;
 		body.userList = usersList;
 	} else {
 		body.userList = [senderId];
 	}
 
-	// Creiamo l'oggetto da cui deriverà la nota
-	const obj: Partial<Note> = {
+	// Creiamo la nota associata al progetto
+	const newNote: Note = createNote({
 		ownerId: senderId,
 		summary: body.summary,
 		access: "INVITED",
 		userList: body.userList,
-	};
-
-	// Creiamo la nota associata al progetto
-	const newNote: Note = createNote(obj);
+	});
 
 	// Otteniamo la collezione delle note
 	const noteClient: Collection<Note> = await getCollection<Note>(

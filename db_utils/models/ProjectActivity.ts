@@ -9,45 +9,52 @@ export interface ProjectActivity {
 	_id?: ObjectId;					// ID dell'Attività di progetto
 	summary: string;				// Titolo dell'attività
 	description: string;			// Descrizione dell'attività
-	status: string;					// Stato dell'attività (iCalendar): NEEDS-ACTION, COMPLETED, IN-PROCESS, CANCELLED
+	status: 
+		| "WAITING"
+		| "ACTIVABLE"
+		| "ACTIVE"
+		| "SUBMITTED"
+		| "COMPLETED"
+		| "REACTIVATED"
+		| "OVERDUE"
+		| "DROPPED";
 	dtStart: Date;					// Data di inizio dell'attività - coincide con dtStamp, le attività hanno solo scadenza
 	due: Date;						// Data di scadenza dell'attività
 	dtStamp: Date;					// Data di creazione dell'attività
-	categories: string[];			// Categorie dell'attività
-	location: string;				// Luogo dell'attività
-	geo: string;					// Geolocalizzazione dell'attività
-	input: string;					// Input ricevuto dall'attività precedente - può essere la data di fine dell'attività precedente, fa ritardare l'attività corrente
-	output: string;					// Output da dare all'attività successiva - può essere una data
 	isMilestone: boolean;			// Se è una milestone
-	percentage: number;				// Percentuale di completamento dell'attività
-	parentId: ObjectId | null;		// Attività precedente - può non esserci
-	child: ObjectId | null;			// Attività successiva - può non esserci
+	shifting: 
+		| "TOSHIFT"
+		| "FIXED"
+		| "NONE";
+	ownerId: ObjectId;				// Proprietario dell'progetto
+	prevIds: ObjectId[];
+	nextIds: ObjectId[];
 	phaseId: ObjectId;				// Fase a cui appartiene
+	projectId: ObjectId;			// Progetto a cui appartiene
 	userList: ObjectId[];			// Utenti dell'attività, sottoinsieme degli utenti del progetto
 	alarms: Alarm[];				// Notifiche associate all'attività
-	note: ObjectId | null;			// Nota assoiciata all'attività - può non esserci
+	noteId: ObjectId;				// Nota assoiciata all'attività - può non esserci
+	noteLink: string | null;
 }
 
 export function createProjectActivity({
 	summary = "",
 	description = "",
-	status = "Not Started",
+	status = "WAITING",
 	dtStart = new Date(),
 	due = new Date(),
 	dtStamp = new Date(),
-	categories = [],
-	location = "",
-	geo = "",
-	input = "",
-	output = "",
 	isMilestone = false,
-	percentage = 0,
-	parentId = new ObjectId(),
-	child = new ObjectId(),
+	shifting = "NONE",
+	ownerId = new ObjectId(),
+	prevIds = [],
+	nextIds = [],
 	phaseId = new ObjectId(),
+	projectId = new ObjectId(),
 	userList = [],
 	alarms = [],
-	note = new ObjectId(),
+	noteId = new ObjectId(),
+	noteLink = null,
 }: Partial<ProjectActivity>): ProjectActivity {
 	return {
 		summary: summary,
@@ -56,18 +63,16 @@ export function createProjectActivity({
 		dtStart: dtStart,
 		due: due,
 		dtStamp: dtStamp,
-		categories: categories,
-		location: location,
-		geo: geo,
-		input: input,
-		output: output,
 		isMilestone: isMilestone,
-		percentage: percentage,
-		parentId: parentId,
-		child: child,
+		shifting: shifting,
+		ownerId: ownerId,
+		prevIds: prevIds,
+		nextIds: nextIds,
 		phaseId: phaseId,
+		projectId: projectId,
 		userList: userList,
 		alarms: alarms,
-		note: note,
+		noteId: noteId,
+		noteLink: noteLink,
 	};
 }

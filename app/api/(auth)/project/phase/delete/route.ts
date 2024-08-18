@@ -18,7 +18,6 @@ import {
 
 const requestTemplate: Partial<Phase> = {
 	_id: new ObjectId(),
-	projectId: new ObjectId(), // Utile per semplificare la validazione
 };
 
 export const DELETE = async (request: NextRequest) => {
@@ -40,7 +39,25 @@ export const DELETE = async (request: NextRequest) => {
 	// Estraiamo l'id dell'utente
 	const senderId: ObjectId = user._id!;
 	// Estraiamo l'id della fase
-	const { _id: _id, projectId: projectId } = body;
+	const _id: ObjectId = body._id!;
+
+	// Otteniamo la collezione delle fasi
+	const phaseClient: Collection<Phase> = await getCollection<Phase>(
+		PHASE_COLLECTION
+	);
+
+	const phaseOut = await findCollectionWrapper<Phase>(
+		{ _id: _id },
+		phaseClient
+	);
+
+	if (phaseOut.status !== 200) {
+		return phaseOut;
+	}
+
+	// Estraiamo il projectId
+	const phaseData: Phase[] = await phaseOut.json();
+	const projectId: ObjectId = phaseData[0].projectId;
 
 	// Otteniamo la collezione dei progetti
 	const projectClient: Collection<Project> = await getCollection<Project>(
@@ -65,11 +82,6 @@ export const DELETE = async (request: NextRequest) => {
 			400
 		);
 	}
-
-	// Otteniamo la collezione delle fasi
-	const phaseClient: Collection<Phase> = await getCollection<Phase>(
-		PHASE_COLLECTION
-	);
 
 	// Otteniamo le sottofasi
 	const subPhases = await findCollectionWrapper<Phase>(

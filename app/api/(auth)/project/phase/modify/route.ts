@@ -19,7 +19,6 @@ import {
 const requestTemplate: Partial<Phase> = {
 	_id: new ObjectId(),
 	summary: "",
-	projectId: new ObjectId(),
 };
 
 export const PATCH = async (request: NextRequest) => {
@@ -41,7 +40,25 @@ export const PATCH = async (request: NextRequest) => {
 	// Estraiamo l'id dell'utente
 	const senderId: ObjectId = user._id!;
 	// Estraiamo l'i campi
-	const { _id, summary, projectId } = body;
+	const { _id, summary } = body;
+
+	// Otteniamo la collezione delle fasi
+	const phaseClient: Collection<Phase> = await getCollection<Phase>(
+		PHASE_COLLECTION
+	);
+
+	const phaseOut = await findCollectionWrapper<Phase>(
+		{ _id: _id },
+		phaseClient
+	);
+
+	if (phaseOut.status !== 200) {
+		return phaseOut;
+	}
+
+	// Otteniamo il projectId
+	const phaseData: Phase[] = await phaseOut.json();
+	const projectId: ObjectId = phaseData[0].projectId;
 
 	// Otteniamo la collezione dei progetti
 	const projectClient: Collection<Project> = await getCollection<Project>(
@@ -66,10 +83,6 @@ export const PATCH = async (request: NextRequest) => {
 			400
 		);
 	}
-
-	const phaseClient: Collection<Phase> = await getCollection<Phase>(
-		PHASE_COLLECTION
-	);
 
 	// Modifichiamo la fase
 	return await updateOneCollectionWrapper<Phase>(
