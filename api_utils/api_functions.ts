@@ -243,7 +243,8 @@ export async function standardValidation<T>(
 
 export async function getIdFromUsername(
 	userList: string[],
-	sender: ObjectId
+	sender: ObjectId,
+	toAddSender: boolean = true
 ): Promise<NextResponse> {
 	// Iteriamo su userList per convertire ogni username in un ObjectId
 	const userIds: ObjectId[] = [];
@@ -253,7 +254,7 @@ export async function getIdFromUsername(
 		USER_COLLECTION
 	);
 
-	userIds.push(sender);
+	userList = removeArrayDuplicates(userList);
 
 	for (const username of userList) {
 		// Controlliamo che l'utente esista
@@ -273,6 +274,16 @@ export async function getIdFromUsername(
 	// Ritorniamo la lista di username errati
 	if (usersError.length !== 0) {
 		return generateObjectResponse({ users: usersError }, 400);
+	}
+
+	if (toAddSender) {
+		// Inseriamo il senderId se non presente
+		if (userIds.some((id) => id.equals(sender))) {
+			// Il sender deve essere il primo elemento
+			const index = userIds.indexOf(sender);
+			userIds.splice(index, 1);
+		}
+		userIds.unshift(sender);
 	}
 
 	return generateObjectResponse({ users: userIds }, 200);

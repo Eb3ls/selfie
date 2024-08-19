@@ -40,7 +40,7 @@ export interface ProjectActivity {
 export function createProjectActivity({
 	summary = "",
 	description = "",
-	status = "WAITING",
+	status = "ACTIVABLE",
 	dtStart = new Date(new Date().toISOString()),
 	due = new Date(new Date().toISOString()),
 	dtStamp = new Date(new Date().toISOString()),

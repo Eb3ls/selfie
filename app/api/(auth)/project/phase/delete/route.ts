@@ -1,16 +1,11 @@
 import { NextRequest } from "next/server";
 import { Collection, ObjectId } from "mongodb";
-import {
-	getCollection,
-	PHASE_COLLECTION,
-	PROJECT_COLLECTION,
-} from "@/db_utils/db_functions";
+import { getCollection, PHASE_COLLECTION } from "@/db_utils/db_functions";
 import {
 	findCollectionWrapper,
 	deleteCollectionWrapper,
 } from "@/db_utils/db_wrappers";
 import { Phase } from "@/db_utils/models/Phase";
-import { Project } from "@/db_utils/models/Project";
 import {
 	generateMessageResponse,
 	standardValidation,

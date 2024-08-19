@@ -1,74 +1,63 @@
 import { NextRequest } from "next/server";
-import { Collection, WithId, ObjectId } from "mongodb";
+import { Collection, ObjectId } from "mongodb";
 import {
 	getCollection,
-	NOTE_COLLECTION,
 	PROJECT_COLLECTION,
-	findInCollection,
-	deleteInCollection,
+	NOTE_COLLECTION,
 } from "@/db_utils/db_functions";
-
-import { User } from "@/db_utils/models/User";
+import {
+	findCollectionWrapper,
+	deleteCollectionWrapper,
+} from "@/db_utils/db_wrappers";
 import { Note } from "@/db_utils/models/Note";
 import { Project } from "@/db_utils/models/Project";
 import {
-	parseJSONInput,
-	isTemplateValid,
 	generateMessageResponse,
+	standardValidation,
 } from "@/api_utils/api_functions";
-import { getSession } from "@/session_utils/session";
-import { JWTPayload } from "jose";
 
 const requestTemplate: Partial<Project> = {
 	_id: new ObjectId(),
 };
 
 export const DELETE = async (request: NextRequest) => {
-	// Prendiamo i cookie della richiesta
-	const cookies: JWTPayload = (await getSession(
-		request.cookies
-	)) as JWTPayload; // Assumiamo che la sessione sia stata validata dal middleware
+	// Validazione standard
+	const validation = await standardValidation<Project>(
+		request,
+		requestTemplate,
+		true
+	);
 
-	const sender: Partial<User> = cookies.user as Partial<User>;
-	// Prendiamo l'id dell'utente che vuole eliminare il progetto seguendo l'assunzione
-	const senderId: ObjectId = ObjectId.createFromHexString(sender._id! as any);
-
-	// Convertiamo in JSON il body della richiesta
-	const body: any | undefined = await parseJSONInput(request);
-	if (body === undefined) {
-		return generateMessageResponse("Invalid input", 400);
+	// Se la validazione fallisce, ritorna il messaggio di errore
+	if (validation === null) {
+		return generateMessageResponse("Invalid request", 400);
 	}
 
-	// body._id da stringa a ObjectId
-	body._id = ObjectId.createFromHexString(body._id);
-
-	// Controlliamo che il body abbia tutti i campi necessari
-	if (!isTemplateValid(body, requestTemplate)) {
-		return generateMessageResponse("Invalid input", 400);
-	}
+	// Estraiamo l'utente e il corpo della richiesta
+	const { user: user, body: body } = validation;
+	// Prendiamo il senderId
+	const senderId: ObjectId = user._id!;
 
 	// Estraggo l'id dal body
-	const id: ObjectId = body._id;
+	const id: ObjectId = body._id!;
 
 	// Otteniamo la collezione dei progetti
-	const client: Collection<Project> = await getCollection<Project>(
+	const projectClient: Collection<Project> = await getCollection<Project>(
 		PROJECT_COLLECTION
 	);
 
-	// Controlliamo che il progetto esista
-	const projectQueryOut: WithId<Project>[] | undefined =
-		await findInCollection({ _id: id }, client);
+	// Cerchiamo il progetto
+	const projectQueryOut = await findCollectionWrapper<Project>(
+		{ _id: id, ownerId: senderId },
+		projectClient
+	);
 
-	if (projectQueryOut === undefined) {
-		return generateMessageResponse("Error in database", 400);
-	} else if (projectQueryOut.length === 0) {
-		return generateMessageResponse("Project not found", 400);
+	// Se non esiste il progetto
+	if (projectQueryOut.status !== 200) {
+		return projectQueryOut;
 	}
 
-	// Controlliamo che il sender sia l'owner
-	if (!projectQueryOut[0].ownerId.equals(senderId)) {
-		return generateMessageResponse("Sender isn't the owner", 400);
-	}
+	const noteData: Note = (await projectQueryOut.json())[0];
 
 	// Ottieniamo la collezione delle note
 	const noteClient: Collection<Note> = await getCollection<Note>(
@@ -76,25 +65,18 @@ export const DELETE = async (request: NextRequest) => {
 	);
 
 	// Eliminiamo la nota associata al progetto
-	const noteResult: number | undefined = await deleteInCollection(
-		projectQueryOut[0].note,
+	const noteQueryOut = await deleteCollectionWrapper<Note>(
+		new ObjectId(noteData._id),
 		noteClient
 	);
 
-	if (noteResult === undefined) {
-		return generateMessageResponse("Error in database", 500);
+	// Se non esiste la nota
+	if (noteQueryOut.status !== 200) {
+		return noteQueryOut;
 	}
 
 	// Eliminiamo il progetto
-	const projectResult: number | undefined = await deleteInCollection(
-		id,
-		client
-	);
-	if (projectResult === undefined) {
-		return generateMessageResponse("Error while deleting", 400);
-	}
-
-	return generateMessageResponse("Project deleted", 200);
+	return deleteCollectionWrapper<Project>(id, projectClient);
 
 	// TODO eliminare le note associate alle projectActivity
 };

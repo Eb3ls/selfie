@@ -1,24 +1,16 @@
 import { NextRequest } from "next/server";
-import { Collection, WithId, ObjectId } from "mongodb";
+import { Collection, ObjectId } from "mongodb";
+import { getCollection, PROJECT_COLLECTION } from "@/db_utils/db_functions";
 import {
-	getCollection,
-	USER_COLLECTION,
-	PROJECT_COLLECTION,
-	findInCollection,
-	updateOneAndFetchInCollection,
-} from "@/db_utils/db_functions";
-
-import { User } from "@/db_utils/models/User";
+	findCollectionWrapper,
+	updateOneCollectionWrapper,
+} from "@/db_utils/db_wrappers";
 import { Project } from "@/db_utils/models/Project";
 import {
-	parseJSONInput,
-	isTemplateSubset,
 	generateMessageResponse,
-	generateObjectResponse,
 	getIdFromUsername,
+	standardValidation,
 } from "@/api_utils/api_functions";
-import { getSession } from "@/session_utils/session";
-import { JWTPayload } from "jose";
 
 const requestTemplate: Partial<Project> = {
 	_id: new ObjectId(),
@@ -27,41 +19,40 @@ const requestTemplate: Partial<Project> = {
 };
 
 export const PATCH = async (request: NextRequest) => {
-	// Prendiamo i cookie della richiesta
-	const cookies: JWTPayload = (await getSession(
-		request.cookies
-	)) as JWTPayload; // Assumiamo che la sessione sia stata validata dal middleware
+	// Validazione standard
+	const validation = await standardValidation<Project>(
+		request,
+		requestTemplate,
+		true,
+		true
+	);
 
-	const sender: Partial<User> = cookies.user as Partial<User>;
-	// Prendiamo l'id dell'utente che vuole modificare il progetto seguendo l'assunzione
-	const senderId: ObjectId = ObjectId.createFromHexString(sender._id! as any);
-
-	// Convertiamo in JSON il body della richiesta
-	const body: any | undefined = await parseJSONInput(request);
-	if (body === undefined) {
-		return generateMessageResponse("Invalid input", 400);
+	// Se la validazione fallisce, ritorna il messaggio di errore
+	if (validation === null) {
+		return generateMessageResponse("Invalid request", 400);
 	}
 
-	// body._id da stringa a ObjectId
-	body._id = ObjectId.createFromHexString(body._id);
-
-	// Controlliamo che il body abbia tutti i campi necessari
-	if (!isTemplateSubset(body, requestTemplate, "_id")) {
-		return generateMessageResponse("Invalid input", 400);
-	}
+	// Estraiamo l'utente e il corpo della richiesta
+	const { user: user, body: body } = validation;
+	// Prendiamo il senderId
+	const senderId: ObjectId = user._id!;
 
 	if (body.userList !== undefined) {
 		// Otteniamo la lista degli id degli utenti
-		const parsedUsers = await getIdFromUsername(body.userList, senderId);
+		const parsedUsers = await getIdFromUsername(
+			body.userList as unknown as string[], // Al posto di unknown si può mappare per convertire in stringa ma è inutile
+			senderId
+		);
 
 		// Ritorniamo la lista di utenti sbagliati o errore nel db
 		if (parsedUsers.status !== 200) {
 			return parsedUsers;
 		}
 
-		const usersListObj = await parsedUsers.json();
-		const usersList: ObjectId[] = usersListObj.users;
-		body.userList = usersList;
+		const usersData = await parsedUsers.json();
+		body.userList = usersData.users.map(
+			(user: string) => new ObjectId(user)
+		);
 	}
 
 	// Creo un oggetto senza il campo id
@@ -73,34 +64,20 @@ export const PATCH = async (request: NextRequest) => {
 	);
 
 	// Controlliamo che il progetto esista
-	const queryOut: WithId<Project>[] | undefined = await findInCollection(
-		{ _id: _id },
+	const projectQueryOut = await findCollectionWrapper<Project>(
+		{ _id: _id, ownerId: senderId },
 		projectClient
 	);
 
-	if (queryOut === undefined) {
-		return generateMessageResponse("Error in database", 400);
-	} else if (queryOut.length === 0) {
-		return generateMessageResponse("Project not found", 400);
+	// Se non esiste il progetto
+	if (projectQueryOut.status !== 200) {
+		return projectQueryOut;
 	}
 
-	// Controlliamo che il sender sia l'owner
-	if (!queryOut[0].ownerId.equals(senderId)) {
-		return generateMessageResponse("Sender isn't the owner", 400);
-	}
-
-	// Modifichiamo il progetto
-	const modifiedProject: WithId<Project> | undefined | null =
-		await updateOneAndFetchInCollection<Project>(
-			_id,
-			newFields,
-			projectClient
-		);
-	if (modifiedProject === undefined) {
-		return generateMessageResponse("Error in database", 400);
-	} else if (modifiedProject === null) {
-		return generateMessageResponse("Project not found", 400);
-	}
-
-	return generateObjectResponse(modifiedProject, 200);
+	// Aggiorniamo il progetto
+	return updateOneCollectionWrapper<Project>(
+		_id!,
+		newFields as Project,
+		projectClient
+	);
 };

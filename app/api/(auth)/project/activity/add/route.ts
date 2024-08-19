@@ -55,6 +55,10 @@ export const POST = async (request: NextRequest) => {
 	const phaseId: ObjectId = body.phaseId!;
 	const projectId: ObjectId = body.projectId!;
 
+	if (body.dtStart! > body.due!) {
+		return generateMessageResponse("Invalid date", 400);
+	}
+
 	const projectClient: Collection<Project> = await getCollection<Project>(
 		PROJECT_COLLECTION
 	);
@@ -83,7 +87,7 @@ export const POST = async (request: NextRequest) => {
 	body.ownerId = senderId;
 
 	const userList = await getIdFromUsername(
-		Array.of(String(body.userList)),
+		body.userList as unknown as string[],
 		senderId
 	);
 
@@ -101,6 +105,8 @@ export const POST = async (request: NextRequest) => {
 			400
 		);
 	}
+
+	body.userList = body.userList!.map((user) => new ObjectId(user));
 
 	// Otteniamo la collezione delle fasi
 	const phaseClient: Collection<Phase> = await getCollection<Phase>(

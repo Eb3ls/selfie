@@ -93,7 +93,9 @@ export const POST = async (request: NextRequest) => {
 		}
 	}
 
-	body.ownerId = senderId;
+	body.ownerId = new ObjectId(senderId);
+	body.projectId = new ObjectId(projectId);
+	body.parentId = new ObjectId(parentId);
 
 	// Creiamo una nuova fase con quei campi
 	const newPhase: Phase = createPhase(body);
