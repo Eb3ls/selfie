@@ -63,7 +63,7 @@ export const PATCH = async (request: NextRequest) => {
 	const prevActivity: ProjectActivity = (await prevOut.json())[0];
 
 	// Controllo se l'attività è già collegata
-	if (prevActivity.nextIds.includes(nextId)) {
+	if (prevActivity.nextIdList.includes(nextId)) {
 		return generateMessageResponse("Already linked", 400);
 	}
 
@@ -96,16 +96,16 @@ export const PATCH = async (request: NextRequest) => {
 	}
 
 	// Inseriamo l'id dell'attività precedente nell'array delle attività precedenti del next
-	const nextModifiedIds = nextActivity.prevIds
+	const nextModifiedIds = nextActivity.prevIdList
 		.map((user) => new ObjectId(user))
 		.concat(prevId);
 	// Inseriamo l'id dell'attività successiva nell'array delle attività successive del prev
-	const prevModifiedIds = prevActivity.nextIds
+	const prevModifiedIds = prevActivity.nextIdList
 		.map((user) => new ObjectId(user))
 		.concat(nextId);
 	const prevModified = await updateOneCollectionWrapper<ProjectActivity>(
 		prevId,
-		{ nextIds: prevModifiedIds } as ProjectActivity,
+		{ nextIdList: prevModifiedIds } as ProjectActivity,
 		projectActivityClient
 	);
 
@@ -115,7 +115,7 @@ export const PATCH = async (request: NextRequest) => {
 
 	const nextModified = await updateOneCollectionWrapper<ProjectActivity>(
 		nextId,
-		{ prevIds: nextModifiedIds, status: "WAITING" } as ProjectActivity,
+		{ prevIdList: nextModifiedIds, status: "WAITING" } as ProjectActivity,
 		projectActivityClient
 	);
 

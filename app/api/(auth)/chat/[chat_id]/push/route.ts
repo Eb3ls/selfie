@@ -99,7 +99,7 @@ export const POST = async (
 	if (isGroupChat) {
 		// Se la chat è una chat di gruppo
 		const groupChat: WithId<GroupChat> = chat as WithId<GroupChat>;
-		for (const user of groupChat.userList) {
+		for (const user of groupChat.userIdList) {
 			if (user.equals(senderId)) {
 				found = true;
 				break;
@@ -108,7 +108,7 @@ export const POST = async (
 	} else {
 		// Se la chat è una chat privata
 		const privateChat: WithId<Chat> = chat as WithId<Chat>;
-		for (const user of privateChat.users) {
+		for (const user of privateChat.userIdList) {
 			if (user.equals(senderId)) {
 				found = true;
 				break;
@@ -124,7 +124,7 @@ export const POST = async (
 	// Aggiungiamo il messaggio alla chat e aggiorniamo la data dell'ultimo messaggio
 
 	const message: Message = createMessage({
-		senderId: senderId,
+		ownerId: senderId,
 		content: newBody.content,
 	});
 

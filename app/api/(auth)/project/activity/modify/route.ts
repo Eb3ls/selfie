@@ -22,7 +22,7 @@ const requestTemplate: Partial<ProjectActivity> = {
 	dtStart: new Date(),
 	due: new Date(),
 	isMilestone: false,
-	userList: [],
+	userIdList: [],
 };
 
 export const PATCH = async (request: NextRequest) => {
@@ -47,7 +47,7 @@ export const PATCH = async (request: NextRequest) => {
 	const { _id, ...newBody } = body;
 
 	const usersOut = await getIdFromUsername(
-		newBody.userList as unknown as string[],
+		newBody.userIdList as unknown as string[],
 		senderId,
 		false
 	);
@@ -58,7 +58,7 @@ export const PATCH = async (request: NextRequest) => {
 
 	const userListData = await usersOut.json();
 	const correctUserList = userListData.users;
-	newBody.userList = correctUserList.map(
+	newBody.userIdList = correctUserList.map(
 		(user: string) => new ObjectId(user)
 	);
 
@@ -98,4 +98,7 @@ export const PATCH = async (request: NextRequest) => {
 		newBody as ProjectActivity,
 		projectActivityClient
 	);
+
+	// TODO: Check modifiche date valide per le project activity
+	// linkate. Perchè le date non possono essere sovrapponibili
 };

@@ -23,7 +23,7 @@ const requestTemplate: Partial<Note> = {
 	_id: new ObjectId(),
 	summary: "",
 	access: "PRIVATE",
-	userList: [],
+	userIdList: [],
 };
 
 export const PATCH = async (request: NextRequest) => {
@@ -50,9 +50,9 @@ export const PATCH = async (request: NextRequest) => {
 		return generateMessageResponse("Invalid input", 400);
 	}
 
-	if (body.userList !== undefined) {
+	if (body.userIdList !== undefined) {
 		// Otteniamo la lista degli id degli utenti
-		const parsedUsers = await getIdFromUsername(body.userList, senderId);
+		const parsedUsers = await getIdFromUsername(body.userIdList, senderId);
 
 		// Ritorniamo la lista di utenti sbagliati o errore nel db
 		if (parsedUsers.status !== 200) {
@@ -60,7 +60,7 @@ export const PATCH = async (request: NextRequest) => {
 		}
 
 		const usersList: ObjectId[] = await parsedUsers.json();
-		body.userList = usersList;
+		body.userIdList = usersList;
 	}
 
 	// Creo un oggetto senza il campo id

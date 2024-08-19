@@ -32,7 +32,7 @@ const requestTemplate: Partial<ProjectActivity> = {
 	isMilestone: false,
 	phaseId: new ObjectId(),
 	projectId: new ObjectId(),
-	userList: [],
+	userIdList: [],
 };
 
 export const POST = async (request: NextRequest) => {
@@ -73,7 +73,7 @@ export const POST = async (request: NextRequest) => {
 	}
 
 	const project: Project[] = await projectOut.json();
-	const projectUsersList = project[0].userList;
+	const projectUsersList = project[0].userIdList;
 
 	// Controlliamo che il sender sia l'owner
 	if (!senderId.equals(project[0].ownerId)) {
@@ -87,7 +87,7 @@ export const POST = async (request: NextRequest) => {
 	body.ownerId = senderId;
 
 	const userList = await getIdFromUsername(
-		body.userList as unknown as string[],
+		body.userIdList as unknown as string[],
 		senderId
 	);
 
@@ -96,17 +96,19 @@ export const POST = async (request: NextRequest) => {
 	}
 
 	const userListObj = await userList.json();
-	body.userList = userListObj.users;
+	body.userIdList = userListObj.users;
 
 	// Controlliamo che la userList sia un sottoinsieme degli utenti del progetto
-	if (!body.userList!.every((userId) => projectUsersList.includes(userId))) {
+	if (
+		!body.userIdList!.every((userId) => projectUsersList.includes(userId))
+	) {
 		return generateMessageResponse(
 			"UserList is not a subset of the project users",
 			400
 		);
 	}
 
-	body.userList = body.userList!.map((user) => new ObjectId(user));
+	body.userIdList = body.userIdList!.map((user) => new ObjectId(user));
 
 	// Otteniamo la collezione delle fasi
 	const phaseClient: Collection<Phase> = await getCollection<Phase>(
@@ -138,7 +140,7 @@ export const POST = async (request: NextRequest) => {
 		ownerId: senderId,
 		summary: body.summary,
 		access: "INVITED",
-		userList: body.userList,
+		userIdList: body.userIdList,
 	});
 
 	// Otteniamo la collezione delle note

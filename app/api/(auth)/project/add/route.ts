@@ -16,7 +16,7 @@ import {
 
 const requestTemplate: Partial<Project> = {
 	summary: "",
-	userList: [],
+	userIdList: [],
 };
 
 export const POST = async (request: NextRequest) => {
@@ -38,7 +38,7 @@ export const POST = async (request: NextRequest) => {
 	const senderId: ObjectId = user._id!;
 
 	const usersList = await getIdFromUsername(
-		body.userList as unknown as string[],
+		body.userIdList as unknown as string[],
 		senderId
 	);
 
@@ -47,7 +47,7 @@ export const POST = async (request: NextRequest) => {
 	}
 
 	const userListData = await usersList.json();
-	body.userList = userListData.users.map(
+	body.userIdList = userListData.users.map(
 		(user: string) => new ObjectId(user)
 	);
 
@@ -56,7 +56,7 @@ export const POST = async (request: NextRequest) => {
 		ownerId: senderId,
 		summary: body.summary,
 		access: "INVITED",
-		userList: body.userList,
+		userIdList: body.userIdList,
 	});
 
 	// Otteniamo la collezione delle note

@@ -27,11 +27,11 @@ export interface ProjectActivity {
 		| "FIXED"
 		| "NONE";
 	ownerId: ObjectId;				// Proprietario dell'progetto
-	prevIds: ObjectId[];
-	nextIds: ObjectId[];
+	prevIdList: ObjectId[];
+	nextIdList: ObjectId[];
 	phaseId: ObjectId;				// Fase a cui appartiene
 	projectId: ObjectId;			// Progetto a cui appartiene
-	userList: ObjectId[];			// Utenti dell'attività, sottoinsieme degli utenti del progetto
+	userIdList: ObjectId[];			// Utenti dell'attività, sottoinsieme degli utenti del progetto
 	alarms: Alarm[];				// Notifiche associate all'attività
 	noteId: ObjectId;				// Nota assoiciata all'attività - può non esserci
 	noteLink: string | null;
@@ -47,11 +47,11 @@ export function createProjectActivity({
 	isMilestone = false,
 	shifting = "NONE",
 	ownerId = new ObjectId(),
-	prevIds = [],
-	nextIds = [],
+	prevIdList = [],
+	nextIdList = [],
 	phaseId = new ObjectId(),
 	projectId = new ObjectId(),
-	userList = [],
+	userIdList = [],
 	alarms = [],
 	noteId = new ObjectId(),
 	noteLink = null,
@@ -66,11 +66,11 @@ export function createProjectActivity({
 		isMilestone: isMilestone,
 		shifting: shifting,
 		ownerId: ownerId,
-		prevIds: prevIds,
-		nextIds: nextIds,
+		prevIdList: prevIdList,
+		nextIdList: nextIdList,
 		phaseId: phaseId,
 		projectId: projectId,
-		userList: userList,
+		userIdList: userIdList,
 		alarms: alarms,
 		noteId: noteId,
 		noteLink: noteLink,

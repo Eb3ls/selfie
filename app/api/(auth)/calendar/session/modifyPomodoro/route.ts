@@ -56,7 +56,7 @@ export const PATCH = async (request: NextRequest) => {
 	const session: Session[] = await out.json();
 
 	// Controlliamo che l'owner sia l'utente corrispondente
-	if (session[0].owner.toString() !== userId.toString()) {
+	if (session[0].ownerId.toString() !== userId.toString()) {
 		return generateMessageResponse("Unauthorized", 400);
 	}
 
@@ -69,4 +69,3 @@ export const PATCH = async (request: NextRequest) => {
 		client
 	);
 };
-

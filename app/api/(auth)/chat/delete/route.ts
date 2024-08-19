@@ -90,8 +90,8 @@ export const DELETE = async (request: NextRequest) => {
 		}
 	} else {
 		if (
-			chat.users[0].toHexString() !== senderId.toHexString() &&
-			chat.users[1].toHexString() !== senderId.toHexString()
+			chat.userIdList[0].toHexString() !== senderId.toHexString() &&
+			chat.userIdList[1].toHexString() !== senderId.toHexString()
 		) {
 			return generateMessageResponse(
 				"Only participants are authorized",

@@ -67,7 +67,7 @@ export const PATCH = async (request: NextRequest) => {
 	}
 
 	const isOwner = senderId.equals(projectActivityData.ownerId);
-	const isUser = projectActivityData.userList.find((user) =>
+	const isUser = projectActivityData.userIdList.find((user) =>
 		senderId.equals(user)
 	);
 
@@ -159,7 +159,7 @@ export const PATCH = async (request: NextRequest) => {
 	if (newStatus === "COMPLETED") {
 		// Prendiamo la lista delle attività successive linkate
 		const nextActivitiesOut = await findCollectionWrapper<ProjectActivity>(
-			{ prevIds: _id },
+			{ prevIdList: _id },
 			projectActivityClient
 		);
 
@@ -173,7 +173,7 @@ export const PATCH = async (request: NextRequest) => {
 
 			// Per ogni attività successiva, controlliamo se tutte le attività precedenti sono completate
 			for (const nextActivity of nextActivitiesData) {
-				const prevNextIds: ObjectId[] = nextActivity.prevIds;
+				const prevNextIds: ObjectId[] = nextActivity.prevIdList;
 				let allCompleted = true;
 
 				// Per ogni attività precedente linkata alla successiva

@@ -7,7 +7,7 @@ COLLECTION
 
 export interface Event {
 	_id?: ObjectId;							// ID dell'evento
-	owner: ObjectId;						// ID dell'utente che ha creato l'evento
+	ownerId: ObjectId;						// ID dell'utente che ha creato l'evento
 	summary: string;						// Titolo dell'evento
 	description: string;					// Descrizione
 	status: string;							// TENTATIVE, CONFIRMED, CANCELLED
@@ -18,12 +18,12 @@ export interface Event {
 	categories: string[];					// Categorie dell'evento
 	location: string;						// Luogo dell'evento
 	geo: string;							// Geolocalizzazione dell'evento
-	userList: ObjectId[];					// Lista degli utenti a cui appartiene
+	userIdList: ObjectId[];					// Lista degli utenti a cui appartiene
 	alarms: Alarm[];						// Notifiche associate all'evento
 }
 
 export function createEvent({
-	owner = new ObjectId(),
+	ownerId = new ObjectId(),
 	summary = "",
 	description = "",
 	status = "",
@@ -34,11 +34,11 @@ export function createEvent({
 	categories = [],
 	location = "",
 	geo = "",
-	userList = [],
+	userIdList = [],
 	alarms = [],
 }: Partial<Event>): Event {
 	return {
-		owner: owner,
+		ownerId: ownerId,
 		summary: summary,
 		description: description,
 		status: status,
@@ -49,7 +49,7 @@ export function createEvent({
 		categories: categories,
 		location: location,
 		geo: geo,
-		userList: userList,
+		userIdList: userIdList,
 		alarms: alarms,
 	};
 }

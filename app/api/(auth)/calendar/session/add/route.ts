@@ -47,7 +47,7 @@ export const POST = async (request: NextRequest) => {
 	const newSession: Session = createSession(newBody);
 
 	// Aggiungiamo il campo 'owner' a newSession
-	newSession.owner = owner._id!;
+	newSession.ownerId = owner._id!;
 
 	// Ottieniamo la collezione delle sessioni
 	const client: Collection<Session> = await getCollection<Session>(

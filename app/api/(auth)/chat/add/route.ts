@@ -87,7 +87,7 @@ export const POST = async (request: NextRequest) => {
 
 	// Creiamo la chat
 	const newChat: Chat = createChat({
-		users: [senderId, receiverId],
+		userIdList: [senderId, receiverId],
 	});
 
 	// Inseriamo la chat nel database

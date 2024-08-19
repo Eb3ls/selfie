@@ -7,7 +7,7 @@ COLLECTION
 
 export interface Session {
 	_id?: ObjectId;					// ID della sessione
-	owner: ObjectId;				// ID dell'utente che crea la sessione, e l'unico proprietario
+	ownerId: ObjectId;				// ID dell'utente che crea la sessione, e l'unico proprietario
 	summary: string;				// Titolo della sessione
 	description: string;			// Descrizione della sessione
 	status: string;					// Stato della sessione
@@ -19,7 +19,7 @@ export interface Session {
 }
 
 export function createSession({
-	owner = new ObjectId(),
+	ownerId = new ObjectId(),
 	summary = "",
 	description = "",
 	status = "",
@@ -30,7 +30,7 @@ export function createSession({
 	pomodoro = createPomodoro({}),
 }: Partial<Session>): Session {
 	return {
-		owner: owner,
+		ownerId: ownerId,
 		summary: summary,
 		description: description,
 		status: status,

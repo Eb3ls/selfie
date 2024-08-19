@@ -18,7 +18,7 @@ const requestTemplate: Partial<Event> = {
 	categories: [],
 	location: "",
 	geo: "",
-	userList: [],
+	userIdList: [],
 	alarms: [],
 };
 
@@ -42,8 +42,8 @@ export const POST = async (request: NextRequest) => {
 	const newEvent: Event = createEvent(newBody);
 
 	// Aggiungiamo il campo 'owner' a newEvent
-	newEvent.owner = owner._id!;
-	newEvent.userList.push(owner._id!);
+	newEvent.ownerId = owner._id!;
+	newEvent.userIdList.push(owner._id!);
 
 	// Ottieniamo la collezione degli eventi
 	const client: Collection<Event> = await getCollection<Event>(

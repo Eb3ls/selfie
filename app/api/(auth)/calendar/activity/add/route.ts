@@ -18,8 +18,8 @@ const requestTemplate: Partial<Activity> = {
 	categories: [],
 	location: "",
 	geo: "",
-	parentActivity: new ObjectId(),
-	alarms: [] as Alarm[],
+	parentActivityId: new ObjectId(),
+	alarms: [],
 };
 
 export const POST = async (request: NextRequest) => {
@@ -42,8 +42,8 @@ export const POST = async (request: NextRequest) => {
 	const newActivity: Activity = createActivity(newBody);
 
 	// Aggiungiamo il campo 'owner' a newActivity
-	newActivity.owner = owner._id!;
-	newActivity.userList.unshift(owner._id!);
+	newActivity.ownerId = owner._id!;
+	newActivity.userIdList.unshift(owner._id!);
 
 	// Ottieniamo la collezione delle attività
 	const client: Collection<Activity> = await getCollection<Activity>(

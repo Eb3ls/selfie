@@ -7,7 +7,7 @@ COLLECTION
 
 export interface Activity {
 	_id?: ObjectId;						// ID dell'attività
-	owner: ObjectId;					// ID dell'utente che ha creato l'attività
+	ownerId: ObjectId;					// ID dell'utente che ha creato l'attività
 	summary: string;					// Titolo dell'attività
 	description: string;				// Descrizione dell'attività
 	status: string;						// Stato dell'attività (iCalendar): NEEDS-ACTION, COMPLETED, IN-PROCESS, CANCELLED
@@ -17,13 +17,13 @@ export interface Activity {
 	categories: string[];				// Categorie dell'attività
 	location: string;					// Luogo dell'attività
 	geo: string;						// Geolocalizzazione dell'attività
-	parentActivity: ObjectId | null;	// Padre dell'attività
-	userList: ObjectId[];				// Lista degli utenti che partecipano all'attività
+	parentActivityId: ObjectId | null;	// Padre dell'attività
+	userIdList: ObjectId[];				// Lista degli utenti che partecipano all'attività
 	alarms: Alarm[];					// Notifiche associate all'attività
 }
 
 export function createActivity({
-	owner = new ObjectId(),
+	ownerId = new ObjectId(),
 	summary = "",
 	description = "",
 	status = "",
@@ -33,12 +33,12 @@ export function createActivity({
 	categories = [],
 	location = "",
 	geo = "",
-	parentActivity = null,
-	userList = [],
+	parentActivityId = null,
+	userIdList = [],
 	alarms = [],
 }: Partial<Activity>): Activity {
 	return {
-		owner: owner,
+		ownerId: ownerId,
 		summary: summary,
 		description: description,
 		status: status,
@@ -48,8 +48,8 @@ export function createActivity({
 		categories: categories,
 		location: location,
 		geo: geo,
-		parentActivity: parentActivity,
-		userList: userList,
+		parentActivityId: parentActivityId,
+		userIdList: userIdList,
 		alarms: alarms,
 	};
 }

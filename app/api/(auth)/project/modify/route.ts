@@ -15,7 +15,7 @@ import {
 const requestTemplate: Partial<Project> = {
 	_id: new ObjectId(),
 	summary: "",
-	userList: [],
+	userIdList: [],
 };
 
 export const PATCH = async (request: NextRequest) => {
@@ -37,10 +37,10 @@ export const PATCH = async (request: NextRequest) => {
 	// Prendiamo il senderId
 	const senderId: ObjectId = user._id!;
 
-	if (body.userList !== undefined) {
+	if (body.userIdList !== undefined) {
 		// Otteniamo la lista degli id degli utenti
 		const parsedUsers = await getIdFromUsername(
-			body.userList as unknown as string[], // Al posto di unknown si può mappare per convertire in stringa ma è inutile
+			body.userIdList as unknown as string[], // Al posto di unknown si può mappare per convertire in stringa ma è inutile
 			senderId
 		);
 
@@ -50,7 +50,7 @@ export const PATCH = async (request: NextRequest) => {
 		}
 
 		const usersData = await parsedUsers.json();
-		body.userList = usersData.users.map(
+		body.userIdList = usersData.users.map(
 			(user: string) => new ObjectId(user)
 		);
 	}

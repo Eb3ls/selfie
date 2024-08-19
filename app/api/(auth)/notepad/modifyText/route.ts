@@ -70,7 +70,7 @@ export const PATCH = async (request: NextRequest) => {
 
 	const isInvited: boolean =
 		queryOut[0].access === "INVITED" &&
-		queryOut[0].userList.includes(senderId);
+		queryOut[0].userIdList.includes(senderId);
 	const isCreator: boolean = queryOut[0].ownerId.equals(senderId);
 	const isPublic: boolean = queryOut[0].access === "PUBLIC";
 

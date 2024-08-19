@@ -21,7 +21,7 @@ import { JWTPayload } from "jose";
 
 const requestTemplate = {
 	summary: "",
-	userList: [], // Lista degli utenti della chat escluso il creatore
+	userIdList: [], // Lista degli utenti della chat escluso il creatore
 };
 
 export const POST = async (request: NextRequest) => {
@@ -53,7 +53,7 @@ export const POST = async (request: NextRequest) => {
 
 	const client: Collection<User> = await getCollection<User>(USER_COLLECTION);
 
-	for (const username of newBody.userList) {
+	for (const username of newBody.userIdList) {
 		// Controlliamo che l'utente esista
 		const queryOut: WithId<User>[] | undefined =
 			await findInCollection<User>({ username: username }, client);
@@ -71,7 +71,7 @@ export const POST = async (request: NextRequest) => {
 	const newGroupChat: GroupChat = createGroupChat({
 		summary: newBody.summary,
 		ownerId: senderId,
-		userList: [senderId, ...userList],
+		userIdList: [senderId, ...userList],
 	});
 
 	// Inseriamo la chat di gruppo nel database

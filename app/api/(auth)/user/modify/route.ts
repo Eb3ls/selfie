@@ -34,13 +34,6 @@ const requestPasswordTemplate: Partial<User> = {
 	password: "",
 };
 
-function isISO8601(dateString: string) {
-	const iso8601Regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z$/;
-	return (
-		iso8601Regex.test(dateString) && !isNaN(new Date(dateString).getTime())
-	);
-}
-
 export const PATCH = async (request: NextRequest) => {
 	// Prendiamo i cookie della richiesta
 	const cookies: JWTPayload = (await getSession(

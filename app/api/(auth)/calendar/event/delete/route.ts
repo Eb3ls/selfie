@@ -51,7 +51,7 @@ export const DELETE = async (request: NextRequest) => {
 	const event: Event[] = await out.json();
 
 	// Controlliamo che l'owner sia l'utente corrispondente
-	if (event[0].owner.toString() !== userId.toString()) {
+	if (event[0].ownerId.toString() !== userId.toString()) {
 		return generateMessageResponse("Unauthorized", 400);
 	}
 
