@@ -1,18 +1,18 @@
-import { NextResponse } from "next/server";
-import { Collection, ObjectId } from "mongodb";
-import {
-	Schema,
-	StringSchema,
-	addAndFetchToCollection,
-	findInCollection,
-	deleteManyInCollection,
-	updateManyAndFetchInCollection,
-} from "@/db_utils/db_functions";
 import {
 	generateMessageResponse,
 	generateObjectResponse,
 } from "@/api_utils/api_functions";
+import {
+	Schema,
+	addAndFetchToCollection,
+	deleteManyInCollection,
+	findInCollection,
+	updateManyAndFetchInCollection,
+} from "@/db_utils/db_functions";
 import { stringsToObjectId } from "@/refactor_utils/refactor_functions";
+import { Collection } from "mongodb";
+import { NextResponse } from "next/server";
+import { ConvertToString } from "./models/ModelConverter";
 
 /*
 Canonical usage:
@@ -23,29 +23,29 @@ Canonical usage:
     const output = result.json();
 */
 
-export async function addCollectionWrapper<
-	T extends StringSchema,
-	P extends Schema
->(data: T, client: Collection<P>): Promise<NextResponse> {
+export async function addCollectionWrapper<T extends Schema>(
+	data: ConvertToString<T>,
+	client: Collection<T>,
+): Promise<NextResponse> {
 	const output = await addAndFetchToCollection(
 		stringsToObjectId(data),
-		client
+		client,
 	);
 	if (output === undefined) {
 		return generateMessageResponse("Error from the DB", 500);
 	} else if (output === null) {
 		return generateMessageResponse(
 			"Error from the DB (Should never happen)",
-			500
+			500,
 		);
 	}
 	return generateObjectResponse(output, 200);
 }
 
-export async function findCollectionWrapper<
-	T extends Partial<StringSchema>,
-	P extends Schema
->(data: T, client: Collection<P>): Promise<NextResponse> {
+export async function findCollectionWrapper<T extends Schema>(
+	data: Partial<ConvertToString<T>>,
+	client: Collection<T>,
+): Promise<NextResponse> {
 	const output = await findInCollection(stringsToObjectId(data), client);
 	if (output === undefined) {
 		return generateMessageResponse("Error from the DB", 500);
@@ -55,13 +55,13 @@ export async function findCollectionWrapper<
 	return generateObjectResponse(output, 200);
 }
 
-export async function deleteCollectionWrapper<
-	T extends Partial<StringSchema>,
-	P extends Schema
->(data: T, client: Collection<P>): Promise<NextResponse> {
+export async function deleteCollectionWrapper<T extends Schema>(
+	data: Partial<ConvertToString<T>>,
+	client: Collection<T>,
+): Promise<NextResponse> {
 	const output = await deleteManyInCollection(
 		stringsToObjectId(data),
-		client
+		client,
 	);
 	if (output === undefined) {
 		return generateMessageResponse("Error from the DB", 500);
@@ -71,14 +71,15 @@ export async function deleteCollectionWrapper<
 	return generateMessageResponse("Data deleted", 200);
 }
 
-export async function updateCollectionWrapper<
-	T extends Partial<StringSchema>,
-	P extends Schema
->(filter: T, data: T, client: Collection<P>): Promise<NextResponse> {
+export async function updateCollectionWrapper<T extends Schema>(
+	filter: Partial<ConvertToString<T>>,
+	data: Partial<ConvertToString<T>>,
+	client: Collection<T>,
+): Promise<NextResponse> {
 	const output = await updateManyAndFetchInCollection(
 		stringsToObjectId(filter),
 		stringsToObjectId(data),
-		client
+		client,
 	);
 	if (output === undefined) {
 		return generateMessageResponse("Error from the DB", 500);

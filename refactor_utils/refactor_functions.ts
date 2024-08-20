@@ -1,8 +1,14 @@
-import { NextRequest } from "next/server";
-import { ObjectId } from "mongodb";
+import {
+	generateObjectResponse,
+	parseJSONInput,
+} from "@/api_utils/api_functions";
+import { USER_COLLECTION, getCollection } from "@/db_utils/db_functions";
+import { findCollectionWrapper } from "@/db_utils/db_wrappers";
+import { User } from "@/db_utils/models/User";
 import { getSession } from "@/session_utils/session";
 import { JWTPayload } from "jose";
-import { parseJSONInput } from "@/api_utils/api_functions";
+import { Collection, ObjectId } from "mongodb";
+import { NextRequest, NextResponse } from "next/server";
 
 const IdFields = [
 	"_id",
@@ -24,6 +30,11 @@ const IdArrayFields = [
 
 export function fromModelToStringModel<T, P>(model: T): P {
 	return JSON.parse(JSON.stringify(model)) as P;
+}
+
+export function removeArrayDuplicates<T>(array: T[]) {
+	const set = new Set(array);
+	return Array.from(set);
 }
 
 export function areIdFieldsValid(object: Record<string, any>): boolean {
@@ -100,7 +111,7 @@ export function isTemplateValid(toValidate: any, template: any): boolean {
 export function isTemplateSubset(
 	toValidate: any,
 	template: any,
-	requiredField: string[]
+	requiredField: string[],
 ): boolean {
 	// Prendiamo le chiavi di toValidate e template
 	const keys1 = Object.keys(toValidate).sort();
@@ -132,7 +143,7 @@ export async function validate<T>(
 	request: NextRequest,
 	requestTemplate: Object,
 	onlySubset: boolean,
-	subsetFields: string[] = []
+	subsetFields: string[] = [],
 ): Promise<{
 	user: { _id: string; username: string; password: string };
 	body: T;
@@ -173,4 +184,46 @@ export async function validate<T>(
 	}
 
 	return { user: user, body: body };
+}
+
+export async function usernameListToIds(
+	usernameList: string[],
+	sender: string,
+	toAddSender: boolean = true,
+): Promise<NextResponse> {
+	// Iteriamo su usernameList per convertire ogni username in un ObjectId in formato stringa
+	const userIds: string[] = [];
+	const usersError: string[] = [];
+
+	const client: Collection<User> = await getCollection<User>(USER_COLLECTION);
+
+	usernameList = removeArrayDuplicates(usernameList);
+
+	for (const username of usernameList) {
+		// Controlliamo che l'utente esista
+		const out = await findCollectionWrapper({ username: username }, client);
+
+		if (out.status === 500) {
+			return out;
+		} else if (out.status === 404) {
+			usersError.push(username);
+		} else {
+			userIds.push((await out.json())[0]._id);
+		}
+	}
+
+	// Ritorniamo la lista di username errati
+	if (usersError.length !== 0) {
+		return generateObjectResponse({ users: usersError }, 400);
+	}
+
+	if (toAddSender) {
+		const index = userIds.indexOf(sender);
+		if (index !== -1) {
+			userIds.splice(index, 1);
+		}
+		userIds.unshift(sender);
+	}
+
+	return generateObjectResponse({ users: userIds }, 200);
 }

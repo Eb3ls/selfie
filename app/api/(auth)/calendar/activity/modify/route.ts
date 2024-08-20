@@ -1,34 +1,33 @@
-import { NextRequest } from "next/server";
-import { Collection, ObjectId } from "mongodb";
-import { getCollection, ACTIVITY_COLLECTION } from "@/db_utils/db_functions";
+import { generateMessageResponse } from "@/api_utils/api_functions";
+import { ACTIVITY_COLLECTION, getCollection } from "@/db_utils/db_functions";
 import {
 	findCollectionWrapper,
-	updateOneCollectionWrapper,
+	updateCollectionWrapper,
 } from "@/db_utils/db_wrappers";
-import { Activity } from "@/db_utils/models/Activity";
-import {
-	generateMessageResponse,
-	standardValidation,
-} from "@/api_utils/api_functions";
+import { Activity, StringActivity } from "@/db_utils/models/Activity";
+import { validate } from "@/refactor_utils/refactor_functions";
+import { Collection } from "mongodb";
+import { NextRequest } from "next/server";
 
-const requestTemplate: Partial<Activity> = {
-	_id: new ObjectId(),
+const requestTemplate = {
+	_id: "",
 	summary: "",
 	description: "",
 	status: "",
-	due: new Date(),
+	due: "",
 	categories: [],
 	location: "",
 	geo: "",
 };
 
+type RequestType = typeof requestTemplate;
+
 export const PATCH = async (request: NextRequest) => {
-	// Validazione standard
-	const validation = await standardValidation<Activity>(
+	// Validazione della richiesta
+	const validation = await validate<RequestType>(
 		request,
 		requestTemplate,
-		true,
-		true
+		false,
 	);
 
 	// Se la validazione fallisce, ritorna il messaggio di errore
@@ -40,39 +39,38 @@ export const PATCH = async (request: NextRequest) => {
 	const { user: user, body: newBody } = validation;
 
 	// Estraggo l'id dell'utente
-	const userId: ObjectId = user._id!;
+	const userId: string = user._id!;
 
 	// Estraggo l'id dal body
-	const activityId: ObjectId = newBody._id!;
+	const activityId: string = newBody._id!;
 
 	// Creo un oggetto senza il campo id
 	const { _id, ...newFields } = newBody;
 
 	// Ottieniamo la collezione delle attività
-	const client: Collection<Activity> = await getCollection<Activity>(
-		ACTIVITY_COLLECTION
-	);
+	const client: Collection<Activity> =
+		await getCollection<Activity>(ACTIVITY_COLLECTION);
 
 	const out = await findCollectionWrapper<Activity>(
 		{ _id: activityId },
-		client
+		client,
 	);
 
 	if (out.status !== 200) {
 		return out;
 	}
 
-	const activity: Activity[] = await out.json();
+	const activity: StringActivity[] = await out.json();
 
 	// Controlliamo che l'owner sia l'utente corrispondente
-	if (activity[0].ownerId.toString() !== userId.toString()) {
+	if (activity[0].ownerId !== userId) {
 		return generateMessageResponse("Unauthorized", 400);
 	}
 
 	// Modifichiamo l'attività
-	return await updateOneCollectionWrapper<Activity>(
-		activityId,
-		newFields as Activity,
-		client
+	return await updateCollectionWrapper<Activity>(
+		{ _id: activityId },
+		newFields,
+		client,
 	);
 };

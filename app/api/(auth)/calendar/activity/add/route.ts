@@ -1,33 +1,40 @@
-import { NextRequest } from "next/server";
-import { Collection, ObjectId } from "mongodb";
-import { getCollection, ACTIVITY_COLLECTION } from "@/db_utils/db_functions";
+import { generateMessageResponse } from "@/api_utils/api_functions";
+import { ACTIVITY_COLLECTION, getCollection } from "@/db_utils/db_functions";
 import { addCollectionWrapper } from "@/db_utils/db_wrappers";
-import { Activity, createActivity } from "@/db_utils/models/Activity";
-import { Alarm } from "@/db_utils/models/Alarm";
 import {
-	generateMessageResponse,
-	standardValidation,
-} from "@/api_utils/api_functions";
+	Activity,
+	StringActivity,
+	createActivity,
+} from "@/db_utils/models/Activity";
+import {
+	fromModelToStringModel,
+	stringsToObjectId,
+	validate,
+} from "@/refactor_utils/refactor_functions";
+import { Collection } from "mongodb";
+import { NextRequest } from "next/server";
 
-const requestTemplate: Partial<Activity> = {
+const requestTemplate = {
 	summary: "",
 	description: "",
 	status: "",
-	dtStart: new Date(),
-	due: new Date(),
+	dtStart: "",
+	due: "",
 	categories: [],
 	location: "",
 	geo: "",
-	parentActivityId: new ObjectId(),
+	parentActivityId: "",
 	alarms: [],
 };
 
+type RequestType = typeof requestTemplate;
+
 export const POST = async (request: NextRequest) => {
-	// Validazione standard
-	const validation = await standardValidation<Activity>(
+	// Validazione della richiesta
+	const validation = await validate<RequestType>(
 		request,
 		requestTemplate,
-		true
+		false,
 	);
 
 	// Se la validazione fallisce, ritorna il messaggio di errore
@@ -39,16 +46,17 @@ export const POST = async (request: NextRequest) => {
 	const { user: owner, body: newBody } = validation;
 
 	// Creiamo una nuova attività con quei campi
-	const newActivity: Activity = createActivity(newBody);
+	const newActivity: StringActivity = fromModelToStringModel(
+		createActivity(stringsToObjectId(newBody)),
+	);
 
 	// Aggiungiamo il campo 'owner' a newActivity
 	newActivity.ownerId = owner._id!;
 	newActivity.userIdList.unshift(owner._id!);
 
 	// Ottieniamo la collezione delle attività
-	const client: Collection<Activity> = await getCollection<Activity>(
-		ACTIVITY_COLLECTION
-	);
+	const client: Collection<Activity> =
+		await getCollection<Activity>(ACTIVITY_COLLECTION);
 
 	return await addCollectionWrapper(newActivity, client);
 };
