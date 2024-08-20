@@ -6,16 +6,19 @@ import {
 	WithId,
 } from "mongodb";
 import clientPromise from "@/db_utils/db";
-import { User } from "@/db_utils/models/User";
-import { Event } from "@/db_utils/models/Event";
-import { Activity } from "@/db_utils/models/Activity";
-import { Chat } from "@/db_utils/models/Chat";
-import { Session } from "@/db_utils/models/Session";
-import { GroupChat } from "@/db_utils/models/GroupChat";
-import { Note } from "@/db_utils/models/Note";
-import { Phase } from "@/db_utils/models/Phase";
-import { Project } from "@/db_utils/models/Project";
-import { ProjectActivity } from "@/db_utils/models/ProjectActivity";
+import { User, StringUser } from "@/db_utils/models/User";
+import { Event, StringEvent } from "@/db_utils/models/Event";
+import { Activity, StringActivity } from "@/db_utils/models/Activity";
+import { Chat, StringChat } from "@/db_utils/models/Chat";
+import { Session, StringSession } from "@/db_utils/models/Session";
+import { GroupChat, StringGroupChat } from "@/db_utils/models/GroupChat";
+import { Note, StringNote } from "@/db_utils/models/Note";
+import { Phase, StringPhase } from "@/db_utils/models/Phase";
+import { Project, StringProject } from "@/db_utils/models/Project";
+import {
+	ProjectActivity,
+	StringProjectActivity,
+} from "@/db_utils/models/ProjectActivity";
 
 const DB_NAME = "Selfie";
 
@@ -41,6 +44,18 @@ export type Schema =
 	| Phase
 	| Project
 	| ProjectActivity;
+
+export type StringSchema =
+	| StringUser
+	| StringEvent
+	| StringActivity
+	| StringChat
+	| StringSession
+	| StringGroupChat
+	| StringNote
+	| StringPhase
+	| StringProject
+	| StringProjectActivity;
 
 export async function getCollection<T extends Schema>(
 	collectionName: string
@@ -98,6 +113,17 @@ export async function deleteInCollection<T extends Schema>(
 	}
 }
 
+export async function deleteManyInCollection<T extends Schema>(
+	data: Object,
+	client: Collection<T>
+): Promise<number | undefined> {
+	try {
+		return (await client.deleteMany(data)).deletedCount;
+	} catch (error: any) {
+		return undefined;
+	}
+}
+
 export async function updateOneInCollection<T extends Schema>(
 	_id: ObjectId,
 	data: T,
@@ -123,6 +149,32 @@ export async function updateOneAndFetchInCollection<T extends Schema>(
 			{ $set: data } as any,
 			{ returnDocument: "after" }
 		);
+	} catch (error: any) {
+		return undefined;
+	}
+}
+
+export async function updateManyInCollection<T extends Schema>(
+	filter: Object,
+	data: Object,
+	client: Collection<T>
+): Promise<number | undefined> {
+	try {
+		return (await client.updateMany(filter, { $set: data } as any))
+			.modifiedCount;
+	} catch (error: any) {
+		return undefined;
+	}
+}
+
+export async function updateManyAndFetchInCollection<T extends Schema>(
+	filter: Object,
+	data: Object,
+	client: Collection<T>
+): Promise<WithId<T>[] | undefined> {
+	try {
+		await client.updateMany(filter, { $set: data } as any);
+		return await client.find(filter).toArray();
 	} catch (error: any) {
 		return undefined;
 	}
