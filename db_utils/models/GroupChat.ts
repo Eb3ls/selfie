@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
 import { Message } from "@/db_utils/models/Message";
+import { ConvertToString } from "@/db_utils/models/ModelConverter";
 
 /*
 COLLECTION
@@ -14,6 +15,8 @@ export interface GroupChat {
 	lastMessageAt: Date;		// Data dell'ultimo di ultima messaggio
 	messages: Message[];		// Lista dei messaggi della chat
 }
+
+export type StringGroupChat = ConvertToString<GroupChat>;
 
 export function createGroupChat({
 	summary = "",

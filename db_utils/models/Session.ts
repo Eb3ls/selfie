@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
 import { createPomodoro, Pomodoro } from "@/db_utils/models/Pomodoro";
+import { ConvertToString } from "@/db_utils/models/ModelConverter";
 
 /*
 COLLECTION
@@ -17,6 +18,8 @@ export interface Session {
 	dtStamp: Date;					// Data di creazione della sessione
 	pomodoro: Pomodoro;				// Pomodoro associato alla sessione e quindi a tutti gli eventi di sessione
 }
+
+export type StringSession = ConvertToString<Session>;
 
 export function createSession({
 	ownerId = new ObjectId(),

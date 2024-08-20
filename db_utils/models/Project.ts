@@ -1,4 +1,5 @@
 import { ObjectId } from "mongodb";
+import { ConvertToString } from "@/db_utils/models/ModelConverter";
 
 /*
 COLLECTION
@@ -11,6 +12,8 @@ export interface Project {
 	userIdList: ObjectId[];		// Lista di ID degli utenti del progetto
 	noteId: ObjectId;			// 1:1 nota associata al progetto
 }
+
+export type StringProject = ConvertToString<Project>;
 
 export function createProject({
 	summary = "",

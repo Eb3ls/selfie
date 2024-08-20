@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
 import { Alarm } from "@/db_utils/models/Alarm";
+import { ConvertToString } from "@/db_utils/models/ModelConverter";
 
 /*
 COLLECTION
@@ -36,6 +37,8 @@ export interface ProjectActivity {
 	noteId: ObjectId;				// Nota assoiciata all'attività - può non esserci
 	noteLink: string | null;
 }
+
+export type StringProjectActivity = ConvertToString<ProjectActivity>;
 
 export function createProjectActivity({
 	summary = "",

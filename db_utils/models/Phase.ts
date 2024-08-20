@@ -1,4 +1,5 @@
 import { ObjectId } from "mongodb";
+import { ConvertToString } from "@/db_utils/models/ModelConverter";
 
 /*
 COLLECTION
@@ -11,6 +12,8 @@ export interface Phase {
 	projectId: ObjectId;	// Progetto a cui appartiene la fase
 	parentId: ObjectId;		// Padre della fase, se non coincide con projectId allora è sottofase
 }
+
+export type StringPhase = ConvertToString<Phase>;
 
 export function createPhase({
 	summary = "",

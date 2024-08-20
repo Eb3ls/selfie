@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
 import { createPomodoro, Pomodoro } from "@/db_utils/models/Pomodoro";
+import { ConvertToString } from "@/db_utils/models/ModelConverter";
 
 /*
 COLLECTION
@@ -18,6 +19,8 @@ export interface User {
 	isResource: boolean;		// Se l'utente è una risorsa - es. un luogo specifico
 	pomodoro: Pomodoro;			// Setting iniziale per il pomodoro
 }
+
+export type StringUser = ConvertToString<User>;
 
 export function createUser({
 	username = "",

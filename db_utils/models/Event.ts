@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
 import { Alarm } from "@/db_utils/models/Alarm";
+import { ConvertToString } from "@/db_utils/models/ModelConverter";
 
 /*
 COLLECTION
@@ -21,6 +22,8 @@ export interface Event {
 	userIdList: ObjectId[];					// Lista degli utenti a cui appartiene
 	alarms: Alarm[];						// Notifiche associate all'evento
 }
+
+export type StringEvent = ConvertToString<Event>;
 
 export function createEvent({
 	ownerId = new ObjectId(),

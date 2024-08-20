@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
 import { Message } from "@/db_utils/models/Message";
+import { ConvertToString } from "@/db_utils/models/ModelConverter";
 
 /*
 COLLECTION
@@ -12,6 +13,8 @@ export interface Chat {
 	lastMessageAt: Date | null;			// Data ultimo messaggio
 	messages: Message[];				// Lista dei messaggi della chat
 }
+
+export type StringChat = ConvertToString<Chat>;
 
 export function createChat({
 	userIdList = [new ObjectId(), new ObjectId()],

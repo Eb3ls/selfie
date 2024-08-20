@@ -1,4 +1,5 @@
 import { ObjectId } from "mongodb";
+import { ConvertToString } from "@/db_utils/models/ModelConverter";
 
 /*
 COLLECTION
@@ -10,6 +11,8 @@ export interface Message {
 	content: string;			// Contenuto del messaggio
 	sentAt: Date;				// Data di invio del messaggio
 }
+
+export type StringMessage = ConvertToString<Message>;
 
 export function createMessage({
 	ownerId = new ObjectId(),

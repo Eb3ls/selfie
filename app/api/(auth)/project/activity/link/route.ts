@@ -130,4 +130,6 @@ export const PATCH = async (request: NextRequest) => {
 		{ prevData: prevModifiedData, nextData: nextModifiedData },
 		200
 	);
+
+	// TODO: Le attività non possono essere linkate se completate
 };

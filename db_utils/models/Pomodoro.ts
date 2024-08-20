@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
 import { Alarm } from "@/db_utils/models/Alarm";
+import { ConvertToString } from "@/db_utils/models/ModelConverter";
 
 /*
 NO COLLECTION
@@ -13,6 +14,8 @@ export interface Pomodoro {
 	breakDuration: number;			// Durata timer di pausa, in minuti
 	alarms: Alarm[];				// Notifiche associate
 }
+
+export type StringPomodoro = ConvertToString<Pomodoro>;
 
 export function createPomodoro({
 	_id = new ObjectId(),

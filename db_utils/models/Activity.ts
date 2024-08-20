@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
 import { Alarm } from "@/db_utils/models/Alarm";
+import { ConvertToString } from "@/db_utils/models/ModelConverter";
 
 /*
 COLLECTION
@@ -21,6 +22,8 @@ export interface Activity {
 	userIdList: ObjectId[];				// Lista degli utenti che partecipano all'attività
 	alarms: Alarm[];					// Notifiche associate all'attività
 }
+
+export type StringActivity = ConvertToString<Activity>;
 
 export function createActivity({
 	ownerId = new ObjectId(),

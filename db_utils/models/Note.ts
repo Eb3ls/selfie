@@ -1,4 +1,5 @@
 import { ObjectId} from "mongodb";
+import { ConvertToString } from "@/db_utils/models/ModelConverter";
 
 /*
 COLLECTION
@@ -19,6 +20,8 @@ export interface Note {
 	userIdList: ObjectId[];				// Lista degli utenti che possono accedere alla nota. Caso PRIVATE e PUBLIC, array di un solo elemento, l'owner. Caso INVITED tutti gli utenti che possono modificare la nota
 	activityIdList: ObjectId[] | null;	// ID dell'attività a cui la nota fa riferimento. Null se la nota non fa riferimento ad alcuna attività
 }
+
+export type StringNote = ConvertToString<Note>;
 
 export function createNote({
 	ownerId = new ObjectId(),

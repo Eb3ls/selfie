@@ -1,4 +1,5 @@
 import { ObjectId } from "mongodb";
+import { ConvertToString } from "@/db_utils/models/ModelConverter";
 
 /*
 NO COLLECTION
@@ -14,6 +15,8 @@ export interface Alarm {
 	summary: string;				// Titolo della notifica
 	description: string;			// Descrizione della notifica
 }
+
+export type StringAlarm = ConvertToString<Alarm>;
 
 export function createAlarm({
 	_id = new ObjectId(),
