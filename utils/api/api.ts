@@ -92,12 +92,23 @@ export function isTemplateValid(toValidate: any, template: any): boolean {
 
 	// Verifichiamo per ogni chiave se corrispondono
 	for (let i = 0; i < keys1.length; i++) {
-		// Se ci sono nomi di chiavi diversi o tipi dei valori diversi, non sono uguali
-		if (
-			keys1[i] !== keys2[i] || // Nomi delle chiavi
-			typeof toValidate[keys1[i]] !== typeof template[keys2[i]] // Tipi dei valori
-		) {
+		if (keys1[i] !== keys2[i]) {
+			// Se i nomi delle chiavi sono diversi, non sono uguali
 			return false;
+		}
+		if (typeof toValidate[keys1[i]] !== typeof template[keys2[i]]) {
+			// Se il tipo dei valori è diverso
+			if (IdOrNullFields.includes(keys1[i])) {
+				// Se è un campo che può essere ObjectId o null
+				// ed è effettivamente null, allora sono uguali
+				if (toValidate[keys1[i]] !== null) {
+					return false;
+				}
+			} else {
+				// Se non è un campo che può essere ObjectId o null
+				// allora non sono uguali
+				return false;
+			}
 		}
 	}
 
@@ -113,22 +124,30 @@ export function isTemplateSubset(
 	const keys1 = Object.keys(toValidate).sort();
 	const keys2 = Object.keys(template).sort();
 
-	// Controlliamo che ci sia il campo obbligatorio
+	// Controlliamo che ci siano i campi obbligatori
 	if (!requiredField.every((field) => keys1.includes(field))) {
 		return false;
 	}
 
 	// Verifichiamo per ogni chiave se corrispondono
 	for (let i = 0; i < keys1.length; i++) {
-		if (keys2.includes(keys1[i])) {
-			// Se il tipo dei valori è diverso, non sono uguali
-			if (
-				typeof toValidate[keys1[i]] !== typeof template[keys1[i]] // Tipi dei valori
-			) {
+		if (!keys2.includes(keys1[i])) {
+			// Se la chiave non è presente nel template
+			return false;
+		}
+		if (typeof toValidate[keys1[i]] !== typeof template[keys2[i]]) {
+			// Se il tipo dei valori è diverso
+			if (IdOrNullFields.includes(keys1[i])) {
+				// Se è un campo che può essere ObjectId o null
+				// ed è effettivamente null, allora sono uguali
+				if (toValidate[keys1[i]] !== null) {
+					return false;
+				}
+			} else {
+				// Se non è un campo che può essere ObjectId o null
+				// allora non sono uguali
 				return false;
 			}
-		} else {
-			return false;
 		}
 	}
 
