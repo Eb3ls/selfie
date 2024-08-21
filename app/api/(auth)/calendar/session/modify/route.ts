@@ -1,31 +1,31 @@
-import { NextRequest } from "next/server";
-import { Collection, ObjectId } from "mongodb";
-import { getCollection, SESSION_COLLECTION } from "@/db_utils/db_functions";
+import { generateMessageResponse, validate } from "@/utils/api/api";
 import {
+	SESSION_COLLECTION,
+	Session,
+	StringSession,
 	findCollectionWrapper,
-	updateOneCollectionWrapper,
-} from "@/db_utils/db_wrappers";
-import { Session } from "@/db_utils/models/Session";
-import {
-	generateMessageResponse,
-	standardValidation,
-} from "@/api_utils/api_functions";
+	getCollection,
+	updateCollectionWrapper
+} from "@/utils/db/db";
+import { Collection } from "mongodb";
+import { NextRequest } from "next/server";
 
-const requestTemplate: Partial<Session> = {
-	_id: new ObjectId(),
+const requestTemplate = {
+	_id: "",
 	summary: "",
 	description: "",
-	dtStart: new Date(),
-	dtEnd: new Date(),
+	dtStart: "",
+	dtEnd: ""
 };
 
+type RequestType = typeof requestTemplate;
+
 export const PATCH = async (request: NextRequest) => {
-	// Validazione standard
-	const validation = await standardValidation<Session>(
+	// Validazione della richiesta
+	const validation = await validate<RequestType>(
 		request,
 		requestTemplate,
-		true,
-		true
+		false
 	);
 
 	// Se la validazione fallisce, ritorna il messaggio di errore
@@ -37,18 +37,17 @@ export const PATCH = async (request: NextRequest) => {
 	const { user: user, body: newBody } = validation;
 
 	// Estraggo l'id dell'utente
-	const userId: ObjectId = user._id!;
+	const userId: string = user._id!;
 
 	// Estraggo l'id dal body
-	const sessionId: ObjectId = newBody._id!;
+	const sessionId: string = newBody._id!;
 
 	// Creo un oggetto senza il campo id
 	const { _id, ...newFields } = newBody;
 
 	// Ottieniamo la collezione delle sessioni
-	const client: Collection<Session> = await getCollection<Session>(
-		SESSION_COLLECTION
-	);
+	const client: Collection<Session> =
+		await getCollection<Session>(SESSION_COLLECTION);
 
 	const out = await findCollectionWrapper<Session>(
 		{ _id: sessionId },
@@ -59,17 +58,17 @@ export const PATCH = async (request: NextRequest) => {
 		return out;
 	}
 
-	const session: Session[] = await out.json();
+	const session: StringSession[] = await out.json();
 
 	// Controlliamo che l'owner sia l'utente corrispondente
-	if (session[0].ownerId.toString() !== userId.toString()) {
+	if (session[0].ownerId !== userId) {
 		return generateMessageResponse("Unauthorized", 400);
 	}
 
 	// Modifichiamo la sessione
-	return await updateOneCollectionWrapper<Session>(
-		sessionId,
-		newFields as Session,
+	return await updateCollectionWrapper<Session>(
+		{ _id: sessionId },
+		newFields,
 		client
 	);
 };

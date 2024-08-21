@@ -8,7 +8,6 @@ import {
 	Activity,
 	StringActivity,
 	addCollectionWrapper,
-	createActivity,
 	getCollection
 } from "@/utils/db/db";
 import { Collection } from "mongodb";

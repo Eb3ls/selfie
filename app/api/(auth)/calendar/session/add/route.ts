@@ -1,32 +1,42 @@
-import { NextRequest } from "next/server";
-import { Collection } from "mongodb";
-import { getCollection, SESSION_COLLECTION } from "@/db_utils/db_functions";
-import { addCollectionWrapper } from "@/db_utils/db_wrappers";
-import { Session, createSession } from "@/db_utils/models/Session";
-import { createPomodoro } from "@/db_utils/models/Pomodoro";
 import {
-	isTemplateValid,
 	generateMessageResponse,
-	standardValidation,
-	stringsToObjects,
-} from "@/api_utils/api_functions";
+	generateStringModel,
+	validate
+} from "@/utils/api/api";
+import {
+	SESSION_COLLECTION,
+	Session,
+	StringSession,
+	addCollectionWrapper,
+	getCollection
+} from "@/utils/db/db";
+import { Collection } from "mongodb";
+import { NextRequest } from "next/server";
 
-const requestTemplate: Partial<Session> = {
+const requestTemplate = {
 	summary: "",
 	description: "",
 	status: "",
 	rrule: "",
-	dtStart: new Date(),
-	dtEnd: new Date(),
-	pomodoro: createPomodoro({}),
+	dtStart: "",
+	dtEnd: "",
+	pomodoro: {
+		cycles: 0,
+		cyclesCompleted: 0,
+		studyDuration: 0,
+		breakDuration: 0,
+		alarms: []
+	}
 };
 
+type RequestType = typeof requestTemplate;
+
 export const POST = async (request: NextRequest) => {
-	// Validazione standard
-	const validation = await standardValidation<Session>(
+	// Validazione della richiesta
+	const validation = await validate<RequestType>(
 		request,
 		requestTemplate,
-		true
+		false
 	);
 
 	// Se la validazione fallisce, ritorna il messaggio di errore
@@ -36,23 +46,21 @@ export const POST = async (request: NextRequest) => {
 
 	// Estraiamo l'utente e il corpo della richiesta
 	const { user: owner, body: newBody } = validation;
-	const bodyPomodoro = stringsToObjects(newBody.pomodoro!);
 
-	// Controlliamo che il pomodoro abbia tutti i campi necessari
-	if (!isTemplateValid(bodyPomodoro, createPomodoro({}))) {
-		return generateMessageResponse("Invalid input", 400);
-	}
+	// Assumiamo che la validazione abbia validato anche il pomodoro
 
 	// Creiamo una nuova sessione con quei campi
-	const newSession: Session = createSession(newBody);
+	const newSession: StringSession = generateStringModel<StringSession>(
+		newBody,
+		"Session"
+	);
 
 	// Aggiungiamo il campo 'owner' a newSession
 	newSession.ownerId = owner._id!;
 
 	// Ottieniamo la collezione delle sessioni
-	const client: Collection<Session> = await getCollection<Session>(
-		SESSION_COLLECTION
-	);
+	const client: Collection<Session> =
+		await getCollection<Session>(SESSION_COLLECTION);
 
 	return await addCollectionWrapper(newSession, client);
 };
