@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isValidSession, updateSession } from "@/session_utils/session";
+import { isValidSession, updateSession } from "@/utils/session/session";
 
 async function api_route_handler(request: NextRequest): Promise<boolean> {
 	let path: string = request.nextUrl.pathname;

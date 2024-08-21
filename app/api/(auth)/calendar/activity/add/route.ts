@@ -1,7 +1,6 @@
 import {
-	fromModelToStringModel,
 	generateMessageResponse,
-	stringsToObjectId,
+	generateStringModel,
 	validate
 } from "@/utils/api/api";
 import {
@@ -47,8 +46,9 @@ export const POST = async (request: NextRequest) => {
 	const { user: owner, body: newBody } = validation;
 
 	// Creiamo una nuova attività con quei campi
-	const newActivity: StringActivity = fromModelToStringModel(
-		createActivity(stringsToObjectId(newBody))
+	const newActivity: StringActivity = generateStringModel<StringActivity>(
+		newBody,
+		"Activity"
 	);
 
 	// Aggiungiamo il campo 'owner' a newActivity

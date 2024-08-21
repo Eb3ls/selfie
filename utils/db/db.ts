@@ -38,6 +38,7 @@ import {
 	StringActivity,
 	createActivity
 } from "@/utils/db/models/Activity";
+import { Alarm, StringAlarm, createAlarm } from "@/utils/db/models/Alarm";
 import { Chat, StringChat, createChat } from "@/utils/db/models/Chat";
 import { Event, StringEvent, createEvent } from "@/utils/db/models/Event";
 import {
@@ -45,8 +46,18 @@ import {
 	StringGroupChat,
 	createGroupChat
 } from "@/utils/db/models/GroupChat";
+import {
+	Message,
+	StringMessage,
+	createMessage
+} from "@/utils/db/models/Message";
 import { Note, StringNote, createNote } from "@/utils/db/models/Note";
 import { Phase, StringPhase, createPhase } from "@/utils/db/models/Phase";
+import {
+	Pomodoro,
+	StringPomodoro,
+	createPomodoro
+} from "@/utils/db/models/Pomodoro";
 import {
 	Project,
 	StringProject,
@@ -100,7 +111,10 @@ export {
 	createProject,
 	createProjectActivity,
 	createSession,
-	createUser
+	createUser,
+	createAlarm,
+	createMessage,
+	createPomodoro
 };
 
 export type {
@@ -116,6 +130,9 @@ export type {
 	StringProjectActivity,
 	StringSession,
 	StringUser,
+	StringAlarm,
+	StringMessage,
+	StringPomodoro,
 	Activity,
 	Chat,
 	Event,
@@ -125,5 +142,8 @@ export type {
 	Project,
 	ProjectActivity,
 	Session,
-	User
+	User,
+	Alarm,
+	Message,
+	Pomodoro
 };

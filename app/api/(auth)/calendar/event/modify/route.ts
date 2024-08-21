@@ -1,35 +1,35 @@
-import { NextRequest } from "next/server";
-import { Collection, ObjectId } from "mongodb";
-import { getCollection, EVENT_COLLECTION } from "@/db_utils/db_functions";
+import { generateMessageResponse, validate } from "@/utils/api/api";
 import {
+	EVENT_COLLECTION,
+	Event,
+	StringEvent,
 	findCollectionWrapper,
-	updateOneCollectionWrapper,
-} from "@/db_utils/db_wrappers";
-import { Event } from "@/db_utils/models/Event";
-import {
-	generateMessageResponse,
-	standardValidation,
-} from "@/api_utils/api_functions";
+	getCollection,
+	updateCollectionWrapper
+} from "@/utils/db/db";
+import { Collection } from "mongodb";
+import { NextRequest } from "next/server";
 
-const requestTemplate: Partial<Event> = {
-	_id: new ObjectId(),
+const requestTemplate = {
+	_id: "",
 	summary: "",
 	description: "",
 	status: "",
-	dtStart: new Date(),
-	dtEnd: new Date(),
+	dtStart: "",
+	dtEnd: "",
 	categories: [],
 	location: "",
-	geo: "",
+	geo: ""
 };
 
+type RequestType = typeof requestTemplate;
+
 export const PATCH = async (request: NextRequest) => {
-	// Validazione standard
-	const validation = await standardValidation<Event>(
+	// Validazione della richiesta
+	const validation = await validate<RequestType>(
 		request,
 		requestTemplate,
-		true,
-		true
+		false
 	);
 
 	// Se la validazione fallisce, ritorna il messaggio di errore
@@ -41,18 +41,17 @@ export const PATCH = async (request: NextRequest) => {
 	const { user: user, body: newBody } = validation;
 
 	// Estraggo l'id dell'utente
-	const userId: ObjectId = user._id!;
+	const userId: string = user._id!;
 
 	// Estraggo l'id dal body
-	const eventId: ObjectId = newBody._id!;
+	const eventId: string = newBody._id!;
 
 	// Creo un oggetto senza il campo id
 	const { _id, ...newFields } = newBody;
 
 	// Ottieniamo la collezione degli eventi
-	const client: Collection<Event> = await getCollection<Event>(
-		EVENT_COLLECTION
-	);
+	const client: Collection<Event> =
+		await getCollection<Event>(EVENT_COLLECTION);
 
 	const out = await findCollectionWrapper<Event>({ _id: eventId }, client);
 
@@ -60,17 +59,17 @@ export const PATCH = async (request: NextRequest) => {
 		return out;
 	}
 
-	const event: Event[] = await out.json();
+	const event: StringEvent[] = await out.json();
 
 	// Controlliamo che l'owner sia l'utente corrispondente
-	if (event[0].ownerId.toString() !== userId.toString()) {
+	if (event[0].ownerId !== userId) {
 		return generateMessageResponse("Unauthorized", 400);
 	}
 
 	// Modifichiamo l'evento
-	return await updateOneCollectionWrapper<Event>(
-		eventId,
-		newFields as Event,
+	return await updateCollectionWrapper<Event>(
+		{ _id: eventId },
+		newFields,
 		client
 	);
 };

@@ -9,6 +9,18 @@ import {
 import {
 	USER_COLLECTION,
 	User,
+	createActivity,
+	createAlarm,
+	createChat,
+	createEvent,
+	createGroupChat,
+	createMessage,
+	createNote,
+	createPhase,
+	createPomodoro,
+	createProject,
+	createSession,
+	createUser,
 	findCollectionWrapper,
 	getCollection
 } from "@/utils/db/db";
@@ -238,4 +250,46 @@ export async function usernameListToIds(
 	}
 
 	return generateObjectResponse({ users: userIds }, 200);
+}
+
+// =============================================================
+// ===================== Generatori ============================
+// =============================================================
+// Descrizione: Questa sezione contiene i generatori che vengono utilizzati per generare oggetti.
+
+type names =
+	| "Activity"
+	| "Alarm"
+	| "Chat"
+	| "Event"
+	| "GroupChat"
+	| "Message"
+	| "Note"
+	| "Phase"
+	| "Pomodoro"
+	| "Project"
+	| "Session"
+	| "User";
+
+// prettier-ignore
+const functionsMap = {
+	"Activity": createActivity,
+	"Alarm": createAlarm,
+	"Chat": createChat,
+	"Event": createEvent,
+	"GroupChat": createGroupChat,
+	"Message": createMessage,
+	"Note": createNote,
+	"Phase": createPhase,
+	"Pomodoro": createPomodoro,
+	"Project": createProject,
+	"Session": createSession,
+	"User": createUser
+};
+
+export function generateStringModel<T>(obj: Object, type: names): T {
+	const objWithId = stringsToObjectId(obj);
+	const createFunction = functionsMap[type];
+	const generatedModel = createFunction(objWithId);
+	return fromModelToStringModel(generatedModel);
 }
