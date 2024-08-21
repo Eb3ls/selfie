@@ -1,24 +1,24 @@
+import { clientPromise } from "@/utils/db/db_client";
+import { Activity, StringActivity } from "@/utils/db/models/Activity";
+import { Chat, StringChat } from "@/utils/db/models/Chat";
+import { Event, StringEvent } from "@/utils/db/models/Event";
+import { GroupChat, StringGroupChat } from "@/utils/db/models/GroupChat";
+import { Note, StringNote } from "@/utils/db/models/Note";
+import { Phase, StringPhase } from "@/utils/db/models/Phase";
+import { Project, StringProject } from "@/utils/db/models/Project";
+import {
+	ProjectActivity,
+	StringProjectActivity
+} from "@/utils/db/models/ProjectActivity";
+import { Session, StringSession } from "@/utils/db/models/Session";
+import { StringUser, User } from "@/utils/db/models/User";
 import {
 	Collection,
 	MongoClient,
 	ObjectId,
 	OptionalUnlessRequiredId,
-	WithId,
+	WithId
 } from "mongodb";
-import clientPromise from "@/db_utils/db";
-import { User, StringUser } from "@/db_utils/models/User";
-import { Event, StringEvent } from "@/db_utils/models/Event";
-import { Activity, StringActivity } from "@/db_utils/models/Activity";
-import { Chat, StringChat } from "@/db_utils/models/Chat";
-import { Session, StringSession } from "@/db_utils/models/Session";
-import { GroupChat, StringGroupChat } from "@/db_utils/models/GroupChat";
-import { Note, StringNote } from "@/db_utils/models/Note";
-import { Phase, StringPhase } from "@/db_utils/models/Phase";
-import { Project, StringProject } from "@/db_utils/models/Project";
-import {
-	ProjectActivity,
-	StringProjectActivity,
-} from "@/db_utils/models/ProjectActivity";
 
 const DB_NAME = "Selfie";
 

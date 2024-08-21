@@ -1,13 +1,37 @@
-import { NextRequest, NextResponse } from "next/server";
-import { Collection, ObjectId, WithId } from "mongodb";
-import { User } from "@/db_utils/models/User";
-import { getSession } from "@/session_utils/session";
-import { JWTPayload } from "jose";
 import {
-	findInCollection,
-	getCollection,
 	USER_COLLECTION,
-} from "@/db_utils/db_functions";
+	User,
+	findCollectionWrapper,
+	getCollection
+} from "@/utils/db/db";
+import { getSession } from "@/utils/session/session";
+import { JWTPayload } from "jose";
+import { ObjectId } from "mongodb";
+import { Collection } from "mongodb";
+import { NextRequest, NextResponse } from "next/server";
+
+// Definizione dei campi che dobbiamo verificare essere ObjectId in formato stringa
+
+// Campi che devono essere ObjectId
+const IdFields = [
+	"_id",
+	"ownerId",
+	"projectId",
+	"parentId",
+	"noteId",
+	"phaseId"
+];
+
+// Campi che possono essere ObjectId o null
+const IdOrNullFields = ["parentActivityId"];
+
+// Campi che devono essere array di ObjectId
+const IdArrayFields = [
+	"userIdList",
+	"activityIdList",
+	"prevIdList",
+	"nextIdList"
+];
 
 export async function parseJSONInput(
 	request: Request
@@ -19,31 +43,16 @@ export async function parseJSONInput(
 	}
 }
 
-export function isValidEmail(email: string): boolean {
+// =============================================================
+// ===================== Validatori ============================
+// =============================================================
+// Descrizione: Questa sezione contiene i validatori che vengono utilizzati per verificare la correttezza dei dati.
+
+export function isEmailValid(email: string): boolean {
 	const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 	return emailRegex.test(email);
 }
 
-export function removeArrayDuplicates<T>(array: T[]) {
-	return array.filter((value, index, self) => {
-		return self.indexOf(value) === index;
-	});
-}
-
-export function getArrayIntersection(array1: [], array2: []) {
-	return array1.filter((value) => array2.includes(value));
-}
-
-/*
-Parametri:
-	dateString: stringa da controllare
-Valore di Ritorno:
-	BOOLEAN:
-		true: dateString è una stringa ISO 8601 valida
-		false: dateString non è una stringa ISO 8601 valida
-Descrizione:
-	Funzione ausiliaria che controlla se una stringa è ISO 8601. Il controllo serve a creare un oggetto Date
-*/
 function isISO8601(dateString: string) {
 	const iso8601Regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z$/;
 	return (
@@ -51,119 +60,28 @@ function isISO8601(dateString: string) {
 	);
 }
 
-/*
-Parametri:
-	obj: oggetto con dei campi stringhe da convertire in oggetti
-Valore di Ritorno:
-	OBJECT:
-		Nuovo oggetto con campi convertiti
-Descrizione:
-	Funzione che converte determinate stringhe in determinati oggetti. Es data in oggetto Date
-	o stringa di ObjectId in ObjectId. La conversione serve a inserire correttamente gli oggetti nel db.
-*/
-export function stringsToObjects(obj: Object): Object {
-	const keys = Object.keys(obj);
-	let object: any = { ...obj };
+export function areIdFieldsValid(object: Record<string, any>): boolean {
+	// Prendiamo le chiavi dell'oggetto da validare
+	const keys = Object.keys(object);
 
-	for (let i = 0; i < keys.length; i++) {
-		// Controllo data
-		if (isISO8601(object[keys[i]])) {
-			object[keys[i]] = object[keys[i]] = new Date(object[keys[i]]);
-		} else if (
-			ObjectId.isValid(object[keys[i]]) &&
-			typeof object[keys[i]] === "string"
-		) {
-			object[keys[i]] = ObjectId.createFromHexString(object[keys[i]]);
-		}
-	}
-
-	return object;
-}
-
-/*
-Parametri:
-	obj: oggetto da verificare
-	template: template su cui verificare l'oggetto
-Valore di Ritorno:
-	BOOLEAN:
-		true: obj è della stessa struttura di template
-		false: obj non è della stessa struttura di template
-Descrizione: 
-	Funzione che verifica se l'oggetto obj è della stessa struttura di template, per campi e tipo dei campi
-*/
-export function isTemplateValid(obj: Object, template: Object): boolean {
-	// Prendo le chiavi di obj e template
-	const keys1 = Object.keys(obj).sort();
-	const keys2 = Object.keys(template).sort();
-
-	// Se hanno un numero di chiavi diverso non sono uguali
-	if (keys1.length !== keys2.length) {
-		return false;
-	}
-
-	// Comodo per usare any o si hanno problemi nell'accesso alle chiavi
-	const ob: any = { ...obj };
-	const temp: any = { ...template };
-
-	// Verifico per ogni chiave, sono ordinate quindi so che allo stesso indice c'è la stessa chiave
-	for (let i = 0; i < keys1.length; i++) {
-		// Se ho nomi delle chiavi diverso o tipi dei valori diversi, non sono uguali
-		if (
-			keys1[i] !== keys2[i] || // Nomi delle chiavi
-			typeof ob[keys1[i]] !== typeof temp[keys2[i]] // Tipi dei valori
-		) {
+	// Iteriamo su tutti campi dell'oggetto e controlliamo se sono presenti dei campi
+	// che dovrebbero essere ObjectId in formato stringa.
+	// In base al tipo di campo, controlliamo che sia valido.
+	for (const key of keys) {
+		if (IdFields.includes(key) && !ObjectId.isValid(object[key])) {
 			return false;
 		}
-	}
-
-	return true;
-}
-
-/*
-Parametri: 
-	obj: oggetto da verificare
-	template: template su cui verificare l'oggetto
-	requiredField: campo obbligatorio (di solito _id)
-Valore di Ritorno:
-	BOOLEAN:
-		true: obj è un sottoinsieme di template e il campo obbligatorio è presente
-		false: obj non è un sottoinsieme di template o il campo obbligatorio è assente
-Descrizione:
-	La funzione verifica se obj è un sottoinsieme di template. È utile per le modify (es. activity e event).
-	Per essere validato, obj deve avere almeno il campo obligatorio denotato da requiredField.
-*/
-export function isTemplateSubset(
-	obj: Object,
-	template: Object,
-	requiredField: string
-): boolean {
-	// Prendi le chiavi di obj e template
-	const keys1 = Object.keys(obj).sort();
-	const keys2 = Object.keys(template).sort();
-
-	// Se c'è il campo obbligatorio fai un controllo a riguardo
-	if (requiredField !== "") {
-		// Verifica se il campo obbligatorio è presente sia in obj che in template
-		if (!keys1.includes(requiredField) || !keys2.includes(requiredField)) {
-			return false;
+		if (IdOrNullFields.includes(key)) {
+			if (object[key] !== null && !ObjectId.isValid(object[key])) {
+				return false;
+			}
 		}
-	}
-
-	// Copio perchè è utile any
-	const ob: any = { ...obj };
-	const temp: any = { ...template };
-
-	// Verifica che tutti i campi di obj appartengono a template e che siano dello stesso tipo
-	for (let i = 0; i < keys1.length; i++) {
-		// Controllo che il campo i di obj sia presente in template
-		if (!keys2.includes(keys1[i])) {
-			return false;
-		}
-
-		// Controllo che i tipi siano uguali
-		for (let j = 0; j < keys2.length; j++) {
-			if (keys1[i] === keys2[j]) {
-				if (typeof ob[keys1[i]] !== typeof temp[keys2[j]]) {
+		if (IdArrayFields.includes(key)) {
+			if (!Array.isArray(object[key])) {
+				return false;
+			}
+			for (const id of object[key]) {
+				if (!ObjectId.isValid(id)) {
 					return false;
 				}
 			}
@@ -173,29 +91,70 @@ export function isTemplateSubset(
 	return true;
 }
 
-/*
-Parametri: 
-	request: richiesta ricevuta
-	requestTemplate: template su cui verificare l'oggetto
-	needForConversion: se è necessario avviare la conversione di stringhe in oggetti (es. date in oggetto Date)
-	onlySubset: se è necessario solo un sottoinsieme del template
-Valore di Ritorno:
-	OBJECT:
-		user: utente che ha fatto la richiesta
-		body: corpo della richiesta convertito
-	NULL: richiesta fallita
-Descrizione:
-	La funzione standardValidation è una funzione di validazione standard per le richieste. 
-	Controlla se l'utente che ha fatto la richiesta è loggato ed esegue le conversioni opportune.
-	Successivamente controlla se il corpo della richiesta è conforme al template richiesto.
-	Se la richiesta è conforme, ritorna un oggetto con l'utente e il corpo della richiesta.
-*/
-export async function standardValidation<T>(
+export function isTemplateValid(toValidate: any, template: any): boolean {
+	// Prendiamo le chiavi di toValidate e template
+	const keys1 = Object.keys(toValidate).sort();
+	const keys2 = Object.keys(template).sort();
+
+	// Se hanno un numero di chiavi diverso non sono uguali
+	if (keys1.length !== keys2.length) {
+		return false;
+	}
+
+	// Verifichiamo per ogni chiave se corrispondono
+	for (let i = 0; i < keys1.length; i++) {
+		// Se ci sono nomi di chiavi diversi o tipi dei valori diversi, non sono uguali
+		if (
+			keys1[i] !== keys2[i] || // Nomi delle chiavi
+			typeof toValidate[keys1[i]] !== typeof template[keys2[i]] // Tipi dei valori
+		) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+export function isTemplateSubset(
+	toValidate: any,
+	template: any,
+	requiredField: string[]
+): boolean {
+	// Prendiamo le chiavi di toValidate e template
+	const keys1 = Object.keys(toValidate).sort();
+	const keys2 = Object.keys(template).sort();
+
+	// Controlliamo che ci sia il campo obbligatorio
+	if (!requiredField.every((field) => keys1.includes(field))) {
+		return false;
+	}
+
+	// Verifichiamo per ogni chiave se corrispondono
+	for (let i = 0; i < keys1.length; i++) {
+		if (keys2.includes(keys1[i])) {
+			// Se il tipo dei valori è diverso, non sono uguali
+			if (
+				typeof toValidate[keys1[i]] !== typeof template[keys1[i]] // Tipi dei valori
+			) {
+				return false;
+			}
+		} else {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+export async function validate<T>(
 	request: NextRequest,
 	requestTemplate: Object,
-	needForConversion: boolean = false,
-	onlySubset: boolean = false
-): Promise<{ user: Partial<User>; body: Partial<T> } | null> {
+	onlySubset: boolean,
+	subsetFields: string[] = []
+): Promise<{
+	user: { _id: string; username: string; password: string };
+	body: T;
+} | null> {
 	// Prendiamo i cookie della richiesta
 	const cookies: JWTPayload | null = await getSession(request.cookies);
 
@@ -204,14 +163,8 @@ export async function standardValidation<T>(
 		return null;
 	}
 
-	let user: Partial<User> = cookies.user as Partial<User>;
-
-	// Convertiamo l'ID dell'utente in ObjectId
-	try {
-		user._id = ObjectId.createFromHexString(user._id! as any);
-	} catch (e: any) {
-		return null;
-	}
+	let user: { _id: string; username: string; password: string } =
+		cookies.user as any;
 
 	// Convertiamo in JSON il body della richiesta
 	const body: any | undefined = await parseJSONInput(request);
@@ -219,55 +172,88 @@ export async function standardValidation<T>(
 		return null;
 	}
 
-	// Conversione del body
-	let newBody = { ...body };
-	if (needForConversion) {
-		newBody = stringsToObjects(body);
-	}
-
 	// Controlliamo che il body abbia tutti i campi necessari
 	if (onlySubset) {
 		// Se è necessario solo un sottoinsieme del template
-		if (!isTemplateSubset(newBody, requestTemplate, "_id")) {
+		if (!isTemplateSubset(body, requestTemplate, subsetFields)) {
 			return null;
 		}
 	} else {
 		// Se è necessario tutto il template
-		if (!isTemplateValid(newBody, requestTemplate)) {
+		if (!isTemplateValid(body, requestTemplate)) {
 			return null;
 		}
 	}
 
-	return { user: user, body: newBody };
+	// Controlliamo che i campi ObjectId siano validi
+	if (!areIdFieldsValid(body)) {
+		return null;
+	}
+
+	return { user: user, body: body };
 }
 
-export async function getIdFromUsername(
-	userList: string[],
-	sender: ObjectId,
+// =============================================================
+// ===================== Convertitori ==========================
+// =============================================================
+// Descrizione: Questa sezione contiene i convertitori che vengono utilizzati per convertire i dati da un formato all'altro.
+
+export function fromModelToStringModel<T, P>(model: T): P {
+	return JSON.parse(JSON.stringify(model)) as P;
+}
+
+export function removeArrayDuplicates<T>(array: T[]) {
+	const set = new Set(array);
+	return Array.from(set);
+}
+
+export function getArrayIntersection(array1: [], array2: []) {
+	return array1.filter((value) => array2.includes(value));
+}
+
+export function stringsToObjectId(object: any): any {
+	const keys = Object.keys(object);
+
+	for (const key of keys) {
+		if (IdFields.includes(key)) {
+			object[key] = new ObjectId(object[key] as string);
+		}
+		if (IdOrNullFields.includes(key)) {
+			if (object[key] !== null) {
+				object[key] = new ObjectId(object[key] as string);
+			}
+		}
+		if (IdArrayFields.includes(key)) {
+			object[key] = object[key].map((id: string) => new ObjectId(id));
+		}
+	}
+
+	return object;
+}
+
+export async function usernameListToIds(
+	usernameList: string[],
+	sender: string,
 	toAddSender: boolean = true
 ): Promise<NextResponse> {
-	// Iteriamo su userList per convertire ogni username in un ObjectId
-	const userIds: ObjectId[] = [];
+	// Iteriamo su usernameList per convertire ogni username in un ObjectId in formato stringa
+	const userIds: string[] = [];
 	const usersError: string[] = [];
 
-	const userClient: Collection<User> = await getCollection<User>(
-		USER_COLLECTION
-	);
+	const client: Collection<User> = await getCollection<User>(USER_COLLECTION);
 
-	userList = removeArrayDuplicates(userList);
+	usernameList = removeArrayDuplicates(usernameList);
 
-	for (const username of userList) {
+	for (const username of usernameList) {
 		// Controlliamo che l'utente esista
-		const queryOut: WithId<User>[] | undefined =
-			await findInCollection<User>({ username: username }, userClient);
+		const out = await findCollectionWrapper({ username: username }, client);
 
-		// Se l'utente non esiste lo salviamo
-		if (queryOut === undefined) {
-			return generateMessageResponse("Error in database", 500);
-		} else if (queryOut.length === 0) {
+		if (out.status === 500) {
+			return out;
+		} else if (out.status === 404) {
 			usersError.push(username);
 		} else {
-			userIds.push(queryOut[0]._id);
+			userIds.push((await out.json())[0]._id);
 		}
 	}
 
@@ -277,10 +263,8 @@ export async function getIdFromUsername(
 	}
 
 	if (toAddSender) {
-		// Inseriamo il senderId se non presente
-		if (userIds.some((id) => id.equals(sender))) {
-			// Il sender deve essere il primo elemento
-			const index = userIds.indexOf(sender);
+		const index = userIds.indexOf(sender);
+		if (index !== -1) {
 			userIds.splice(index, 1);
 		}
 		userIds.unshift(sender);
@@ -289,14 +273,19 @@ export async function getIdFromUsername(
 	return generateObjectResponse({ users: userIds }, 200);
 }
 
+// =============================================================
+// ===================== Generatori ============================
+// =============================================================
+// Descrizione: Questa sezione contiene i generatori che vengono utilizzati per generare le risposte.
+
 export function generateMessageResponse(payload: string, status: number) {
 	return new NextResponse(JSON.stringify({ message: payload }), {
-		status: status,
+		status: status
 	});
 }
 
 export function generateObjectResponse(payload: Object, status: number) {
 	return new NextResponse(JSON.stringify(payload), {
-		status: status,
+		status: status
 	});
 }

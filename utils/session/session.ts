@@ -1,8 +1,8 @@
-import { SignJWT, jwtVerify, JWTPayload } from "jose";
+import { User } from "@/utils/db/db";
+import { JWTPayload, SignJWT, jwtVerify } from "jose";
+import { ObjectId } from "mongodb";
 // import { cookies } from "next/headers"; // Passare questa funzione alla chiamata delle funzioni di sessione
 import { NextRequest, NextResponse } from "next/server";
-import { User } from "@/db_utils/models/User";
-import { ObjectId } from "mongodb";
 
 const secretKey: string = process.env.SECRET_KEY as string;
 
@@ -21,7 +21,7 @@ export async function encrypt(payload: any): Promise<string> {
 
 export async function decrypt(input: string): Promise<JWTPayload> {
 	const { payload } = await jwtVerify(input, key, {
-		algorithms: [algorithm],
+		algorithms: [algorithm]
 	});
 	return payload;
 }
@@ -35,7 +35,7 @@ export async function login(
 	const user: Partial<User> = {
 		_id: _id,
 		username: username,
-		password: password,
+		password: password
 	};
 
 	// Creazione della sessione
@@ -84,7 +84,7 @@ export async function updateSession(request: NextRequest) {
 	const res = NextResponse.next();
 	res.cookies.set("session", newSession, {
 		expires: newDate,
-		httpOnly: true,
+		httpOnly: true
 	});
 	return res;
 }
