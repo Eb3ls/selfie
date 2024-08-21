@@ -42,44 +42,86 @@ const QueryFields = [
 
 export { IdFields, IdOrNullFields, IdArrayFields };
 
-export function stringsToObjectId(object: any): any {
+function diveArray(array: any[], fromIdField: boolean): any[] {
+	const outArray = [];
+
+	for (let i = 0; i < array.length; i++) {
+		if (typeof array[i] === "string") {
+			if (fromIdField) {
+				outArray.push(new ObjectId(array[i] as string));
+			} else {
+				outArray.push(array[i]);
+			}
+		} else if (Array.isArray(array[i])) {
+			outArray.push(diveArray(array[i], fromIdField));
+		} else if (typeof array[i] === "object") {
+			outArray.push(stringsToObjectId(array[i], fromIdField));
+		} else {
+			outArray.push(array[i]);
+		}
+	}
+
+	return outArray;
+}
+
+export function stringsToObjectId(
+	object: any,
+	fromIdField: boolean = false
+): any {
+	const outObject = {} as any;
 	const keys = Object.keys(object);
 
 	for (const key of keys) {
 		if (IdFields.includes(key)) {
-			object[key] = new ObjectId(object[key] as string);
-		}
-		if (IdOrNullFields.includes(key)) {
-			if (object[key] !== null) {
-				object[key] = new ObjectId(object[key] as string);
+			// Se è un campo che deve essere ObjectId, lo convertiamo
+			outObject[key] = new ObjectId(object[key] as string);
+		} else if (IdOrNullFields.includes(key)) {
+			// Se è un campo che deve essere ObjectId o null
+			if (outObject[key] !== null) {
+				// Se non è null, lo convertiamo
+				outObject[key] = new ObjectId(object[key] as string);
 			}
-		}
-		if (IdArrayFields.includes(key)) {
-			if (!Array.isArray(object[key])) {
-				// Se non è un array, probabilmente è un oggetto di query
-				// Quindi iteriamo su tutti i campi interni e convertiamoli
-				const insideKeys = Object.keys(object[key]);
-				for (const insideKey of insideKeys) {
-					if (!QueryFields.includes(insideKey)) {
-						// Se non è un operatore di query, allora è un campo normale,
-						// ma questo può accadere solo se c'è un errore nella query!
-						console.warn("Cannot convert field to ObjectId!");
-						console.warn("Key:", insideKey);
-						console.warn("Field: ", object[key][insideKey]);
-						throw new Error("Cannot convert field to ObjectId!");
-					}
-					const one = stringsToObjectId({
-						userIdList: object[key][insideKey]
-					});
-					object[key][insideKey] = one.userIdList;
-				}
+		} else if (IdArrayFields.includes(key)) {
+			// Se è un campo che deve essere un array di ObjectId
+			if (Array.isArray(object[key])) {
+				// Se è un array chiamiamo diveArray, sapendo che proveniamo da un campo che deve essere ObjectId
+				outObject[key] = diveArray(object[key], true);
 			} else {
-				object[key] = object[key].map((id: string) => new ObjectId(id));
+				// Se è un oggetto chiamiamo stringsToObjectId, sapendo che proveniamo da un campo che deve essere ObjectId
+				outObject[key] = stringsToObjectId(object[key], true);
+			}
+		} else if (QueryFields.includes(key)) {
+			// Se è un campo di query
+			if (Array.isArray(object[key])) {
+				// Se è un array chiamiamo diveArray, passando il campo da cui proveniamo
+				outObject[key] = diveArray(object[key], fromIdField);
+			} else if (typeof object[key] === "object") {
+				// Se è un oggetto chiamiamo stringsToObjectId, passando il campo da cui proveniamo
+				outObject[key] = stringsToObjectId(object[key], fromIdField);
+			} else {
+				// Se è una stringa, la convertiamo in ObjectId se proveniamo da un campo che deve essere ObjectId
+				if (fromIdField) {
+					outObject[key] = new ObjectId(object[key]);
+				} else {
+					outObject[key] = object[key];
+				}
+			}
+		} else {
+			// Se è un campo di nessuna rilevanza
+			if (Array.isArray(object[key])) {
+				// Se è un array chiamiamo diveArray, passando che non proveniamo da un campo che deve essere ObjectId
+				outObject[key] = diveArray(object[key], false);
+			} else if (typeof object[key] === "object") {
+				// Se è un oggetto chiamiamo stringsToObjectId, passando che non proveniamo da un campo che deve essere ObjectId
+				outObject[key] = stringsToObjectId(object[key], false);
+			} else {
+				// Se è una stringa, la manteniamo così com'è
+				outObject[key] = object[key];
 			}
 		}
 	}
 
-	return object;
+	return outObject;
 }
 
 export function generateMessageResponse(payload: string, status: number) {
