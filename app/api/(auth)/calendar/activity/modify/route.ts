@@ -39,13 +39,13 @@ export const PATCH = async (request: NextRequest) => {
 	// Estraiamo l'utente e il corpo della richiesta
 	const { user: user, body: newBody } = validation;
 
-	// Estraggo l'id dell'utente
+	// Estraiamo l'id dell'utente
 	const userId: string = user._id!;
 
-	// Estraggo l'id dal body
+	// Estraiamo l'id dal body
 	const activityId: string = newBody._id!;
 
-	// Creo un oggetto senza il campo id
+	// Creiamo un oggetto senza il campo id
 	const { _id, ...newFields } = newBody;
 
 	// Ottieniamo la collezione delle attività
@@ -71,7 +71,7 @@ export const PATCH = async (request: NextRequest) => {
 	// Modifichiamo l'attività
 	return await updateCollectionWrapper<Activity>(
 		{ _id: activityId },
-		newFields,
+		{ $set: newFields } as any,
 		client
 	);
 };

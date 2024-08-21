@@ -32,10 +32,10 @@ export const DELETE = async (request: NextRequest) => {
 	// Estraiamo l'utente e il corpo della richiesta
 	const { user: user, body: newBody } = validation;
 
-	// Estraggo l'id dell'utente
+	// Estraiamo l'id dell'utente
 	const userId: string = user._id!;
 
-	// Estraggo l'id dal body
+	// Estraiamo l'id dal body
 	const sessionId: string = newBody._id!;
 
 	// Ottieniamo la collezione delle sessioni

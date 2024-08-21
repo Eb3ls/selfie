@@ -24,6 +24,22 @@ const IdArrayFields = [
 	"nextIdList"
 ];
 
+const QueryFields = [
+	"$eq",
+	"$ne",
+	"$gt",
+	"$gte",
+	"$lt",
+	"$lte",
+	"$in",
+	"$nin",
+	"$and",
+	"$or",
+	"$not",
+	"$nor",
+	"$all"
+];
+
 export { IdFields, IdOrNullFields, IdArrayFields };
 
 export function stringsToObjectId(object: any): any {
@@ -39,7 +55,27 @@ export function stringsToObjectId(object: any): any {
 			}
 		}
 		if (IdArrayFields.includes(key)) {
-			object[key] = object[key].map((id: string) => new ObjectId(id));
+			if (!Array.isArray(object[key])) {
+				// Se non è un array, probabilmente è un oggetto di query
+				// Quindi iteriamo su tutti i campi interni e convertiamoli
+				const insideKeys = Object.keys(object[key]);
+				for (const insideKey of insideKeys) {
+					if (!QueryFields.includes(insideKey)) {
+						// Se non è un operatore di query, allora è un campo normale,
+						// ma questo può accadere solo se c'è un errore nella query!
+						console.warn("Cannot convert field to ObjectId!");
+						console.warn("Key:", insideKey);
+						console.warn("Field: ", object[key][insideKey]);
+						throw new Error("Cannot convert field to ObjectId!");
+					}
+					const one = stringsToObjectId({
+						userIdList: object[key][insideKey]
+					});
+					object[key][insideKey] = one.userIdList;
+				}
+			} else {
+				object[key] = object[key].map((id: string) => new ObjectId(id));
+			}
 		}
 	}
 

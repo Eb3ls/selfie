@@ -133,9 +133,8 @@ export async function updateOneInCollection<T extends Schema>(
 	client: Collection<T>
 ): Promise<number | undefined> {
 	try {
-		return (
-			await client.updateOne({ _id: _id } as any, { $set: data } as any)
-		).modifiedCount;
+		return (await client.updateOne({ _id: _id } as any, data as any))
+			.modifiedCount;
 	} catch (error: any) {
 		return undefined;
 	}
@@ -147,11 +146,9 @@ export async function updateOneAndFetchInCollection<T extends Schema>(
 	client: Collection<T>
 ): Promise<WithId<T> | undefined | null> {
 	try {
-		return await client.findOneAndUpdate(
-			{ _id: _id } as any,
-			{ $set: data } as any,
-			{ returnDocument: "after" }
-		);
+		return await client.findOneAndUpdate({ _id: _id } as any, data as any, {
+			returnDocument: "after"
+		});
 	} catch (error: any) {
 		return undefined;
 	}
@@ -163,8 +160,7 @@ export async function updateManyInCollection<T extends Schema>(
 	client: Collection<T>
 ): Promise<number | undefined> {
 	try {
-		return (await client.updateMany(filter, { $set: data } as any))
-			.modifiedCount;
+		return (await client.updateMany(filter, data as any)).modifiedCount;
 	} catch (error: any) {
 		return undefined;
 	}
@@ -176,7 +172,7 @@ export async function updateManyAndFetchInCollection<T extends Schema>(
 	client: Collection<T>
 ): Promise<WithId<T>[] | undefined> {
 	try {
-		await client.updateMany(filter, { $set: data } as any);
+		await client.updateMany(filter, data as any);
 		return await client.find(filter).toArray();
 	} catch (error: any) {
 		return undefined;

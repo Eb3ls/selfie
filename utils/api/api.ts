@@ -190,6 +190,10 @@ export async function validate<T>(
 export async function parseJSONInput(
 	request: Request
 ): Promise<any | undefined> {
+	// if is a GET request
+	if (request.method === "GET") {
+		return {};
+	}
 	try {
 		return await request.json();
 	} catch (e) {

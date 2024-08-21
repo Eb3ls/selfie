@@ -1,95 +1,98 @@
-import { NextRequest } from "next/server";
-import { Collection, WithId, ObjectId } from "mongodb";
-import {
-	getCollection,
-	CHAT_COLLECTION,
-	GROUP_CHAT_COLLECTION,
-	findInCollection,
-} from "@/db_utils/db_functions";
-
-import { User } from "@/db_utils/models/User";
-import { Chat } from "@/db_utils/models/Chat";
-import { GroupChat } from "@/db_utils/models/GroupChat";
 import {
 	generateMessageResponse,
 	generateObjectResponse,
-} from "@/api_utils/api_functions";
-import { getSession } from "@/session_utils/session";
-import { JWTPayload } from "jose";
+	validate
+} from "@/utils/api/api";
+import {
+	CHAT_COLLECTION,
+	Chat,
+	GROUP_CHAT_COLLECTION,
+	GroupChat,
+	StringChat,
+	StringGroupChat,
+	findCollectionWrapper,
+	getCollection
+} from "@/utils/db/db";
+import { Collection, ObjectId } from "mongodb";
+import { NextRequest } from "next/server";
 
 export const GET = async (
 	request: NextRequest,
 	{ params }: { params: { chat_id: string } }
 ) => {
-	// Prendiamo i cookie della richiesta
-	const cookies: JWTPayload = (await getSession(
-		request.cookies
-	)) as JWTPayload; // Assumiamo che la sessione sia stata validata dal middleware
+	// Validazione della richiesta
+	const validation = await validate<{}>(request, {}, false);
 
-	const sender: Partial<User> = cookies.user as Partial<User>;
-
-	// Prendiamo l'id dell'utente che vuole ottenere la chat seguendo l'assunzione
-	const senderId: ObjectId = ObjectId.createFromHexString(sender._id! as any);
-
-	// Otteniamo l'ID della chat dall'URL
-	let chatId: ObjectId;
-	try {
-		chatId = ObjectId.createFromHexString(params.chat_id);
-	} catch (e: any) {
-		return generateMessageResponse("Invalid chat ID", 400);
+	// Se la validazione fallisce, ritorna il messaggio di errore
+	if (validation === null) {
+		return generateMessageResponse("Invalid request", 400);
 	}
 
-	// Controlliamo che la chat esista
-	let chat: any;
-	let isGroupChat: boolean = false;
+	// Estraiamo l'utente e il corpo della richiesta
+	const { user: user, body: newBody } = validation;
 
-	const chatClient: Collection<Chat> = await getCollection<Chat>(
-		CHAT_COLLECTION
-	);
+	// Estraggo l'id dell'utente
+	const userId: string = user._id!;
+
+	// Otteniamo l'ID della chat dall'URL
+	if (!ObjectId.isValid(params.chat_id)) {
+		return generateMessageResponse("Invalid chat ID", 400);
+	}
+	const chatId: string = params.chat_id;
+
+	// Otteniamo le collezioni delle chat
+	const chatClient: Collection<Chat> =
+		await getCollection<Chat>(CHAT_COLLECTION);
 
 	const groupChatClient: Collection<GroupChat> =
 		await getCollection<GroupChat>(GROUP_CHAT_COLLECTION);
 
-	const queryOut: WithId<Chat>[] | undefined = await findInCollection<Chat>(
+	// Otteniamo la chat richiesta
+	let chat: any;
+	let isGroupChat: boolean = false;
+
+	const outChat = await findCollectionWrapper<Chat>(
 		{ _id: chatId },
 		chatClient
 	);
 
-	if (queryOut === undefined || queryOut.length === 0) {
-		// Se la chat non esiste, riproviamo con le chat di gruppo
-		const groupQueryOut: WithId<GroupChat>[] | undefined =
-			await findInCollection<GroupChat>({ _id: chatId }, groupChatClient);
+	if (outChat.status !== 200) {
+		// Se la chat non è stata trovata, proviamo a cercarla tra le chat di gruppo
+		const outGroup = await findCollectionWrapper<GroupChat>(
+			{ _id: chatId },
+			groupChatClient
+		);
 
-		if (groupQueryOut === undefined || groupQueryOut.length === 0) {
+		if (outGroup.status !== 200) {
+			// Se la chat non è stata trovata, ritorna un errore
 			return generateMessageResponse("Chat not found", 404);
 		}
 
-		chat = groupQueryOut[0];
+		chat = (await outGroup.json())[0];
 		isGroupChat = true;
 	} else {
-		chat = queryOut[0];
-		isGroupChat = false;
+		chat = (await outChat.json())[0];
 	}
 
 	// Se arriviamo qui, la chat esiste
 
 	// Controlliamo che l'utente sia uno dei partecipanti alla chat
-	let found = false;
+	let found: boolean = false;
 
 	if (isGroupChat) {
 		// Se la chat è una chat di gruppo
-		const groupChat: WithId<GroupChat> = chat as WithId<GroupChat>;
-		for (const user of groupChat.userIdList) {
-			if (user.equals(senderId)) {
+		const getChat: StringGroupChat = chat;
+		for (const user of getChat.userIdList) {
+			if (user === userId) {
 				found = true;
 				break;
 			}
 		}
 	} else {
 		// Se la chat è una chat privata
-		const privateChat: WithId<Chat> = chat as WithId<Chat>;
-		for (const user of privateChat.userIdList) {
-			if (user.equals(senderId)) {
+		const getChat: StringChat = chat;
+		for (const user of getChat.userIdList) {
+			if (user === userId) {
 				found = true;
 				break;
 			}
