@@ -1,4 +1,8 @@
-import { generateMessageResponse, validate } from "@/utils/api/api";
+import {
+	generateMessageResponse,
+	generateObjectResponse,
+	validate
+} from "@/utils/api/api";
 import {
 	EVENT_COLLECTION,
 	Event,
@@ -67,9 +71,17 @@ export const PATCH = async (request: NextRequest) => {
 	}
 
 	// Modifichiamo l'evento
-	return await updateCollectionWrapper<Event>(
+	const updateOut = await updateCollectionWrapper<Event>(
 		{ _id: eventId },
 		{ $set: newFields } as any,
 		client
 	);
+
+	if (updateOut.status !== 200) {
+		return updateOut;
+	}
+
+	const updatedActivity: StringEvent = (await updateOut.json())[0];
+
+	return generateObjectResponse(updatedActivity, 200);
 };

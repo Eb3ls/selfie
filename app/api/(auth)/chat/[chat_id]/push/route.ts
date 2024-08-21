@@ -160,7 +160,7 @@ export const POST = async (
 		return out;
 	}
 
-	const updatedChat: StringChat | StringGroupChat = await out.json();
+	const updatedChat: StringChat | StringGroupChat = (await out.json())[0];
 
 	return generateObjectResponse(updatedChat, 200);
 };

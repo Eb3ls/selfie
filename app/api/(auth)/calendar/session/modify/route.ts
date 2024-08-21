@@ -1,4 +1,8 @@
-import { generateMessageResponse, validate } from "@/utils/api/api";
+import {
+	generateMessageResponse,
+	generateObjectResponse,
+	validate
+} from "@/utils/api/api";
 import {
 	SESSION_COLLECTION,
 	Session,
@@ -66,9 +70,17 @@ export const PATCH = async (request: NextRequest) => {
 	}
 
 	// Modifichiamo la sessione
-	return await updateCollectionWrapper<Session>(
+	const updateOut = await updateCollectionWrapper<Session>(
 		{ _id: sessionId },
 		{ $set: newFields } as any,
 		client
 	);
+
+	if (updateOut.status !== 200) {
+		return updateOut;
+	}
+
+	const updatedActivity: StringSession = (await updateOut.json())[0];
+
+	return generateObjectResponse(updatedActivity, 200);
 };

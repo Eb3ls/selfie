@@ -1,4 +1,8 @@
-import { generateMessageResponse, validate } from "@/utils/api/api";
+import {
+	generateMessageResponse,
+	generateObjectResponse,
+	validate
+} from "@/utils/api/api";
 import {
 	ACTIVITY_COLLECTION,
 	Activity,
@@ -69,9 +73,17 @@ export const PATCH = async (request: NextRequest) => {
 	}
 
 	// Modifichiamo l'attività
-	return await updateCollectionWrapper<Activity>(
+	const updateOut = await updateCollectionWrapper<Activity>(
 		{ _id: activityId },
 		{ $set: newFields } as any,
 		client
 	);
+
+	if (updateOut.status !== 200) {
+		return updateOut;
+	}
+
+	const updatedActivity: StringActivity = (await updateOut.json())[0];
+
+	return generateObjectResponse(updatedActivity, 200);
 };
