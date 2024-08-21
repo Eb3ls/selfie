@@ -1,4 +1,6 @@
+// Importazione del client per la connessione al database
 import { clientPromise } from "@/utils/db/db_client";
+// Importazione dei modelli
 import { Activity, StringActivity } from "@/utils/db/models/Activity";
 import { Chat, StringChat } from "@/utils/db/models/Chat";
 import { Event, StringEvent } from "@/utils/db/models/Event";
@@ -12,6 +14,7 @@ import {
 } from "@/utils/db/models/ProjectActivity";
 import { Session, StringSession } from "@/utils/db/models/Session";
 import { StringUser, User } from "@/utils/db/models/User";
+// Importazione da mongodb
 import {
 	Collection,
 	MongoClient,

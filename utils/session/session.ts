@@ -1,4 +1,3 @@
-import { User } from "@/utils/db/db";
 import { JWTPayload, SignJWT, jwtVerify } from "jose";
 import { ObjectId } from "mongodb";
 // import { cookies } from "next/headers"; // Passare questa funzione alla chiamata delle funzioni di sessione
@@ -32,7 +31,7 @@ export async function login(
 	password: string,
 	res: NextResponse | any
 ) {
-	const user: Partial<User> = {
+	const user = {
 		_id: _id,
 		username: username,
 		password: password
