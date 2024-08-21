@@ -1,8 +1,10 @@
 import {
+	IdArrayFields,
+	IdFields,
+	IdOrNullFields,
 	generateMessageResponse,
-	generateObjectResponse,
-	stringsToObjectId
-} from "@/utils/api/api";
+	generateObjectResponse
+} from "@/utils/api/common";
 import {
 	Schema,
 	addAndFetchToCollection,
@@ -10,9 +12,9 @@ import {
 	findInCollection,
 	updateManyAndFetchInCollection
 } from "@/utils/db/db_functions";
-import { Collection } from "mongodb";
+import { ConvertToString } from "@/utils/db/models/ModelConverter";
+import { Collection, ObjectId } from "mongodb";
 import { NextResponse } from "next/server";
-import { ConvertToString } from "./models/ModelConverter";
 
 /*
 Canonical usage:
@@ -22,6 +24,26 @@ Canonical usage:
     }
     const output = result.json();
 */
+
+export function stringsToObjectId(object: any): any {
+	const keys = Object.keys(object);
+
+	for (const key of keys) {
+		if (IdFields.includes(key)) {
+			object[key] = new ObjectId(object[key] as string);
+		}
+		if (IdOrNullFields.includes(key)) {
+			if (object[key] !== null) {
+				object[key] = new ObjectId(object[key] as string);
+			}
+		}
+		if (IdArrayFields.includes(key)) {
+			object[key] = object[key].map((id: string) => new ObjectId(id));
+		}
+	}
+
+	return object;
+}
 
 export async function addCollectionWrapper<T extends Schema>(
 	data: ConvertToString<T>,
