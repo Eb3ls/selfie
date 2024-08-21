@@ -1,6 +1,6 @@
+import { Alarm } from "@/utils/db/models/Alarm";
+import { ConvertToString } from "@/utils/db/models/ModelConverter";
 import { ObjectId } from "mongodb";
-import { Alarm } from "@/db_utils/models/Alarm";
-import { ConvertToString } from "@/db_utils/models/ModelConverter";
 
 /*
 COLLECTION
@@ -38,7 +38,7 @@ export function createActivity({
 	geo = "",
 	parentActivityId = null,
 	userIdList = [],
-	alarms = [],
+	alarms = []
 }: Partial<Activity>): Activity {
 	return {
 		ownerId: ownerId,
@@ -53,6 +53,6 @@ export function createActivity({
 		geo: geo,
 		parentActivityId: parentActivityId,
 		userIdList: userIdList,
-		alarms: alarms,
+		alarms: alarms
 	};
 }

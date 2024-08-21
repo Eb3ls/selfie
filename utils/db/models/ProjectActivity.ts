@@ -1,6 +1,6 @@
+import { Alarm } from "@/utils/db/models/Alarm";
+import { ConvertToString } from "@/utils/db/models/ModelConverter";
 import { ObjectId } from "mongodb";
-import { Alarm } from "@/db_utils/models/Alarm";
-import { ConvertToString } from "@/db_utils/models/ModelConverter";
 
 /*
 COLLECTION
@@ -57,7 +57,7 @@ export function createProjectActivity({
 	userIdList = [],
 	alarms = [],
 	noteId = new ObjectId(),
-	noteLink = null,
+	noteLink = null
 }: Partial<ProjectActivity>): ProjectActivity {
 	return {
 		summary: summary,
@@ -76,6 +76,6 @@ export function createProjectActivity({
 		userIdList: userIdList,
 		alarms: alarms,
 		noteId: noteId,
-		noteLink: noteLink,
+		noteLink: noteLink
 	};
 }

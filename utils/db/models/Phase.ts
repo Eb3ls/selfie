@@ -1,5 +1,5 @@
+import { ConvertToString } from "@/utils/db/models/ModelConverter";
 import { ObjectId } from "mongodb";
-import { ConvertToString } from "@/db_utils/models/ModelConverter";
 
 /*
 COLLECTION
@@ -19,12 +19,12 @@ export function createPhase({
 	summary = "",
 	ownerId = new ObjectId(),
 	projectId = new ObjectId(),
-	parentId = new ObjectId(),
+	parentId = new ObjectId()
 }: Partial<Phase>): Phase {
 	return {
 		summary: summary,
 		ownerId: ownerId,
 		projectId: projectId,
-		parentId: parentId,
+		parentId: parentId
 	};
 }

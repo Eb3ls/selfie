@@ -1,7 +1,6 @@
-import { getSession } from "@/session_utils/session";
-import { cookies } from "next/headers";
-
 import { CalendarForm } from "@/app/components/CalendarForm";
+import { getSession } from "@/utils/session/session";
+import { cookies } from "next/headers";
 
 export default async function Calendar() {
 	const session = await getSession(cookies());

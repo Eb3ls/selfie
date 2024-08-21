@@ -1,6 +1,6 @@
+import { Message } from "@/utils/db/models/Message";
+import { ConvertToString } from "@/utils/db/models/ModelConverter";
 import { ObjectId } from "mongodb";
-import { Message } from "@/db_utils/models/Message";
-import { ConvertToString } from "@/db_utils/models/ModelConverter";
 
 /*
 COLLECTION
@@ -20,7 +20,7 @@ export function createChat({
 	userIdList = [new ObjectId(), new ObjectId()],
 	createdAt = new Date(new Date().toISOString()),
 	lastMessageAt = null,
-	messages = [],
+	messages = []
 }: Partial<Chat>): Chat {
 	return {
 		userIdList: userIdList,

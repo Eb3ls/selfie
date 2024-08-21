@@ -1,5 +1,5 @@
-import { ObjectId} from "mongodb";
-import { ConvertToString } from "@/db_utils/models/ModelConverter";
+import { ConvertToString } from "@/utils/db/models/ModelConverter";
+import { ObjectId } from "mongodb";
 
 /*
 COLLECTION
@@ -32,7 +32,7 @@ export function createNote({
 	dtStamp = new Date(new Date().toISOString()),
 	dtModified = new Date(new Date().toISOString()),
 	userIdList = [],
-	activityIdList = [],
+	activityIdList = []
 }: Partial<Note>): Note {
 	return {
 		ownerId: ownerId,
@@ -43,6 +43,6 @@ export function createNote({
 		dtStamp: dtStamp,
 		dtModified: dtModified,
 		userIdList: userIdList,
-		activityIdList: activityIdList,
+		activityIdList: activityIdList
 	};
 }

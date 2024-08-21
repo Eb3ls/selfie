@@ -1,9 +1,7 @@
 import {
-	IdArrayFields,
-	IdFields,
-	IdOrNullFields,
 	generateMessageResponse,
-	generateObjectResponse
+	generateObjectResponse,
+	stringsToObjectId
 } from "@/utils/api/common";
 import {
 	Schema,
@@ -24,26 +22,6 @@ Canonical usage:
     }
     const output = result.json();
 */
-
-export function stringsToObjectId(object: any): any {
-	const keys = Object.keys(object);
-
-	for (const key of keys) {
-		if (IdFields.includes(key)) {
-			object[key] = new ObjectId(object[key] as string);
-		}
-		if (IdOrNullFields.includes(key)) {
-			if (object[key] !== null) {
-				object[key] = new ObjectId(object[key] as string);
-			}
-		}
-		if (IdArrayFields.includes(key)) {
-			object[key] = object[key].map((id: string) => new ObjectId(id));
-		}
-	}
-
-	return object;
-}
 
 export async function addCollectionWrapper<T extends Schema>(
 	data: ConvertToString<T>,

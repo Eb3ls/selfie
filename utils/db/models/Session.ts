@@ -1,6 +1,6 @@
+import { ConvertToString } from "@/utils/db/models/ModelConverter";
+import { Pomodoro, createPomodoro } from "@/utils/db/models/Pomodoro";
 import { ObjectId } from "mongodb";
-import { createPomodoro, Pomodoro } from "@/db_utils/models/Pomodoro";
-import { ConvertToString } from "@/db_utils/models/ModelConverter";
 
 /*
 COLLECTION
@@ -30,7 +30,7 @@ export function createSession({
 	dtStart = new Date(new Date().toISOString()),
 	dtEnd = new Date(new Date().toISOString()),
 	dtStamp = new Date(new Date().toISOString()),
-	pomodoro = createPomodoro({}),
+	pomodoro = createPomodoro({})
 }: Partial<Session>): Session {
 	return {
 		ownerId: ownerId,

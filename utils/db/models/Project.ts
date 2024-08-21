@@ -1,5 +1,5 @@
+import { ConvertToString } from "@/utils/db/models/ModelConverter";
 import { ObjectId } from "mongodb";
-import { ConvertToString } from "@/db_utils/models/ModelConverter";
 
 /*
 COLLECTION
@@ -19,12 +19,12 @@ export function createProject({
 	summary = "",
 	ownerId = new ObjectId(),	// Abuso di default value
 	userIdList = [],
-	noteId = new ObjectId(),	// Abuso di default value
+	noteId = new ObjectId()		// Abuso di default value
 }: Partial<Project>): Project {
 	return {
 		summary: summary,
 		ownerId: ownerId,
 		userIdList: userIdList,
-		noteId: noteId,
+		noteId: noteId
 	};
 }

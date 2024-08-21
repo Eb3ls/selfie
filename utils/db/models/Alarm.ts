@@ -1,5 +1,5 @@
+import { ConvertToString } from "@/utils/db/models/ModelConverter";
 import { ObjectId } from "mongodb";
-import { ConvertToString } from "@/db_utils/models/ModelConverter";
 
 /*
 NO COLLECTION
@@ -26,7 +26,7 @@ export function createAlarm({
 	action = "",
 	attendee = "",
 	summary = "",
-	description = "",
+	description = ""
 }: Partial<Alarm>): Alarm {
 	return {
 		_id: _id,
@@ -36,6 +36,6 @@ export function createAlarm({
 		action: action,
 		attendee: attendee,
 		summary: summary,
-		description: description,
+		description: description
 	};
 }

@@ -3,7 +3,8 @@ import {
 	IdFields,
 	IdOrNullFields,
 	generateMessageResponse,
-	generateObjectResponse
+	generateObjectResponse,
+	stringsToObjectId
 } from "@/utils/api/common";
 import {
 	USER_COLLECTION,
@@ -17,7 +18,7 @@ import { ObjectId } from "mongodb";
 import { Collection } from "mongodb";
 import { NextRequest, NextResponse } from "next/server";
 
-export { generateObjectResponse, generateMessageResponse };
+export { generateObjectResponse, generateMessageResponse, stringsToObjectId };
 
 // =============================================================
 // ===================== Validatori ============================

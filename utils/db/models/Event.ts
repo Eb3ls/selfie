@@ -1,6 +1,6 @@
+import { Alarm } from "@/utils/db/models/Alarm";
+import { ConvertToString } from "@/utils/db/models/ModelConverter";
 import { ObjectId } from "mongodb";
-import { Alarm } from "@/db_utils/models/Alarm";
-import { ConvertToString } from "@/db_utils/models/ModelConverter";
 
 /*
 COLLECTION
@@ -38,7 +38,7 @@ export function createEvent({
 	location = "",
 	geo = "",
 	userIdList = [],
-	alarms = [],
+	alarms = []
 }: Partial<Event>): Event {
 	return {
 		ownerId: ownerId,
@@ -53,6 +53,6 @@ export function createEvent({
 		location: location,
 		geo: geo,
 		userIdList: userIdList,
-		alarms: alarms,
+		alarms: alarms
 	};
 }

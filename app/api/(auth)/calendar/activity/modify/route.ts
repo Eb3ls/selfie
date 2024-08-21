@@ -1,11 +1,12 @@
-import { generateMessageResponse } from "@/api_utils/api_functions";
-import { ACTIVITY_COLLECTION, getCollection } from "@/db_utils/db_functions";
+import { generateMessageResponse, validate } from "@/utils/api/api";
 import {
+	ACTIVITY_COLLECTION,
+	Activity,
+	StringActivity,
 	findCollectionWrapper,
-	updateCollectionWrapper,
-} from "@/db_utils/db_wrappers";
-import { Activity, StringActivity } from "@/db_utils/models/Activity";
-import { validate } from "@/refactor_utils/refactor_functions";
+	getCollection,
+	updateCollectionWrapper
+} from "@/utils/db/db";
 import { Collection } from "mongodb";
 import { NextRequest } from "next/server";
 
@@ -17,7 +18,7 @@ const requestTemplate = {
 	due: "",
 	categories: [],
 	location: "",
-	geo: "",
+	geo: ""
 };
 
 type RequestType = typeof requestTemplate;
@@ -27,7 +28,7 @@ export const PATCH = async (request: NextRequest) => {
 	const validation = await validate<RequestType>(
 		request,
 		requestTemplate,
-		false,
+		false
 	);
 
 	// Se la validazione fallisce, ritorna il messaggio di errore
@@ -53,7 +54,7 @@ export const PATCH = async (request: NextRequest) => {
 
 	const out = await findCollectionWrapper<Activity>(
 		{ _id: activityId },
-		client,
+		client
 	);
 
 	if (out.status !== 200) {
@@ -71,6 +72,6 @@ export const PATCH = async (request: NextRequest) => {
 	return await updateCollectionWrapper<Activity>(
 		{ _id: activityId },
 		newFields,
-		client,
+		client
 	);
 };

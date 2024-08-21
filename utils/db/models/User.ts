@@ -1,6 +1,6 @@
+import { ConvertToString } from "@/utils/db/models/ModelConverter";
+import { Pomodoro, createPomodoro } from "@/utils/db/models/Pomodoro";
 import { ObjectId } from "mongodb";
-import { createPomodoro, Pomodoro } from "@/db_utils/models/Pomodoro";
-import { ConvertToString } from "@/db_utils/models/ModelConverter";
 
 /*
 COLLECTION
@@ -32,7 +32,7 @@ export function createUser({
 	userStatus = "Attivo",
 	profilePic = "/images/?.png",
 	isResource = false,
-	pomodoro = createPomodoro({}),
+	pomodoro = createPomodoro({})
 }: Partial<User>): User {
 	return {
 		username: username,
@@ -44,6 +44,6 @@ export function createUser({
 		userStatus: userStatus,
 		profilePic: profilePic,
 		isResource: isResource,
-		pomodoro: pomodoro,
+		pomodoro: pomodoro
 	};
 }

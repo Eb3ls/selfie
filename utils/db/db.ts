@@ -33,19 +33,36 @@ import {
 	updateCollectionWrapper
 } from "@/utils/db/db_wrappers";
 // Db models
-import { Activity, StringActivity } from "@/utils/db/models/Activity";
-import { Chat, StringChat } from "@/utils/db/models/Chat";
-import { Event, StringEvent } from "@/utils/db/models/Event";
-import { GroupChat, StringGroupChat } from "@/utils/db/models/GroupChat";
-import { Note, StringNote } from "@/utils/db/models/Note";
-import { Phase, StringPhase } from "@/utils/db/models/Phase";
-import { Project, StringProject } from "@/utils/db/models/Project";
+import {
+	Activity,
+	StringActivity,
+	createActivity
+} from "@/utils/db/models/Activity";
+import { Chat, StringChat, createChat } from "@/utils/db/models/Chat";
+import { Event, StringEvent, createEvent } from "@/utils/db/models/Event";
+import {
+	GroupChat,
+	StringGroupChat,
+	createGroupChat
+} from "@/utils/db/models/GroupChat";
+import { Note, StringNote, createNote } from "@/utils/db/models/Note";
+import { Phase, StringPhase, createPhase } from "@/utils/db/models/Phase";
+import {
+	Project,
+	StringProject,
+	createProject
+} from "@/utils/db/models/Project";
 import {
 	ProjectActivity,
-	StringProjectActivity
+	StringProjectActivity,
+	createProjectActivity
 } from "@/utils/db/models/ProjectActivity";
-import { Session, StringSession } from "@/utils/db/models/Session";
-import { StringUser, User } from "@/utils/db/models/User";
+import {
+	Session,
+	StringSession,
+	createSession
+} from "@/utils/db/models/Session";
+import { StringUser, User, createUser } from "@/utils/db/models/User";
 
 // Export everything
 export {
@@ -73,7 +90,17 @@ export {
 	addCollectionWrapper,
 	deleteCollectionWrapper,
 	findCollectionWrapper,
-	updateCollectionWrapper
+	updateCollectionWrapper,
+	createActivity,
+	createChat,
+	createEvent,
+	createGroupChat,
+	createNote,
+	createPhase,
+	createProject,
+	createProjectActivity,
+	createSession,
+	createUser
 };
 
 export type {

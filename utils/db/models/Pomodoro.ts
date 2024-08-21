@@ -1,6 +1,6 @@
+import { Alarm } from "@/utils/db/models/Alarm";
+import { ConvertToString } from "@/utils/db/models/ModelConverter";
 import { ObjectId } from "mongodb";
-import { Alarm } from "@/db_utils/models/Alarm";
-import { ConvertToString } from "@/db_utils/models/ModelConverter";
 
 /*
 NO COLLECTION
@@ -23,7 +23,7 @@ export function createPomodoro({
 	cyclesCompleted = 0,
 	studyDuration = 25,
 	breakDuration = 5,
-	alarms = [],
+	alarms = []
 }: Partial<Pomodoro>): Pomodoro {
 	return {
 		_id: _id,
@@ -31,6 +31,6 @@ export function createPomodoro({
 		cyclesCompleted: cyclesCompleted,
 		studyDuration: studyDuration,
 		breakDuration: breakDuration,
-		alarms: alarms,
+		alarms: alarms
 	};
 }

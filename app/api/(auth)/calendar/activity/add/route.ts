@@ -1,16 +1,17 @@
-import { generateMessageResponse } from "@/api_utils/api_functions";
-import { ACTIVITY_COLLECTION, getCollection } from "@/db_utils/db_functions";
-import { addCollectionWrapper } from "@/db_utils/db_wrappers";
-import {
-	Activity,
-	StringActivity,
-	createActivity,
-} from "@/db_utils/models/Activity";
 import {
 	fromModelToStringModel,
+	generateMessageResponse,
 	stringsToObjectId,
-	validate,
-} from "@/refactor_utils/refactor_functions";
+	validate
+} from "@/utils/api/api";
+import {
+	ACTIVITY_COLLECTION,
+	Activity,
+	StringActivity,
+	addCollectionWrapper,
+	createActivity,
+	getCollection
+} from "@/utils/db/db";
 import { Collection } from "mongodb";
 import { NextRequest } from "next/server";
 
@@ -24,7 +25,7 @@ const requestTemplate = {
 	location: "",
 	geo: "",
 	parentActivityId: "",
-	alarms: [],
+	alarms: []
 };
 
 type RequestType = typeof requestTemplate;
@@ -34,7 +35,7 @@ export const POST = async (request: NextRequest) => {
 	const validation = await validate<RequestType>(
 		request,
 		requestTemplate,
-		false,
+		false
 	);
 
 	// Se la validazione fallisce, ritorna il messaggio di errore
@@ -47,7 +48,7 @@ export const POST = async (request: NextRequest) => {
 
 	// Creiamo una nuova attività con quei campi
 	const newActivity: StringActivity = fromModelToStringModel(
-		createActivity(stringsToObjectId(newBody)),
+		createActivity(stringsToObjectId(newBody))
 	);
 
 	// Aggiungiamo il campo 'owner' a newActivity

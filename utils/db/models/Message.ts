@@ -1,5 +1,5 @@
+import { ConvertToString } from "@/utils/db/models/ModelConverter";
 import { ObjectId } from "mongodb";
-import { ConvertToString } from "@/db_utils/models/ModelConverter";
 
 /*
 COLLECTION
@@ -17,11 +17,11 @@ export type StringMessage = ConvertToString<Message>;
 export function createMessage({
 	ownerId = new ObjectId(),
 	content = "",
-	sentAt = new Date(),
+	sentAt = new Date()
 }: Partial<Message>): Message {
 	return {
 		ownerId: ownerId,
 		content: content,
-		sentAt: sentAt,
+		sentAt: sentAt
 	};
 }

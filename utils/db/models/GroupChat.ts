@@ -1,6 +1,6 @@
+import { Message } from "@/utils/db/models/Message";
+import { ConvertToString } from "@/utils/db/models/ModelConverter";
 import { ObjectId } from "mongodb";
-import { Message } from "@/db_utils/models/Message";
-import { ConvertToString } from "@/db_utils/models/ModelConverter";
 
 /*
 COLLECTION
@@ -24,7 +24,7 @@ export function createGroupChat({
 	userIdList = [],
 	createdAt = new Date(new Date().toISOString()),
 	lastMessageAt = new Date(new Date().toISOString()),
-	messages = [],
+	messages = []
 }: Partial<GroupChat>): GroupChat {
 	return {
 		summary: summary,
