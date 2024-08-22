@@ -1,31 +1,29 @@
-import { NextRequest } from "next/server";
-import { Collection, ObjectId } from "mongodb";
+import { generateMessageResponse, validate } from "@/utils/api/api";
 import {
-	getCollection,
-	PROJECT_ACTIVITY_COLLECTION,
 	NOTE_COLLECTION,
-} from "@/db_utils/db_functions";
-import {
-	findCollectionWrapper,
+	Note,
+	PROJECT_ACTIVITY_COLLECTION,
+	ProjectActivity,
+	StringProjectActivity,
 	deleteCollectionWrapper,
-} from "@/db_utils/db_wrappers";
-import { ProjectActivity } from "@/db_utils/models/ProjectActivity";
-import { Note } from "@/db_utils/models/Note";
-import {
-	generateMessageResponse,
-	standardValidation,
-} from "@/api_utils/api_functions";
+	findCollectionWrapper,
+	getCollection
+} from "@/utils/db/db";
+import { Collection } from "mongodb";
+import { NextRequest } from "next/server";
 
-const requestTemplate: Partial<ProjectActivity> = {
-	_id: new ObjectId(),
+const requestTemplate = {
+	_id: ""
 };
 
+type RequestType = typeof requestTemplate;
+
 export const DELETE = async (request: NextRequest) => {
-	// Validazione standard
-	const validation = await standardValidation<ProjectActivity>(
+	// Validazione della richiesta
+	const validation = await validate<RequestType>(
 		request,
 		requestTemplate,
-		true
+		false
 	);
 
 	// Se la validazione fallisce, ritorna il messaggio di errore
@@ -34,19 +32,20 @@ export const DELETE = async (request: NextRequest) => {
 	}
 
 	// Estraiamo l'utente e il corpo della richiesta
-	const { user: user, body: body } = validation;
+	const { user: user, body: newBody } = validation;
 
-	// Estraiamo l'utente
-	const senderId: ObjectId = user._id!;
-	// Estraiamo l'id dell'attività
-	const _id: ObjectId = body._id!;
+	// Estraiamo l'id dell'utente
+	const userId: string = user._id!;
+
+	// Estraiamo l'id dal body
+	const activityId: string = newBody._id!;
 
 	// Otteniamo la collezione delle attività
 	const projectActivityClient: Collection<ProjectActivity> =
 		await getCollection<ProjectActivity>(PROJECT_ACTIVITY_COLLECTION);
 
 	const projectActivityOut = await findCollectionWrapper<ProjectActivity>(
-		{ _id: _id, ownerId: senderId },
+		{ _id: activityId },
 		projectActivityClient
 	);
 
@@ -54,24 +53,32 @@ export const DELETE = async (request: NextRequest) => {
 		return projectActivityOut;
 	}
 
-	// Estraiamo i dati dell'attività
-	const projectActivityData: ProjectActivity[] =
+	const projectActivity: StringProjectActivity[] =
 		await projectActivityOut.json();
 
+	// Controlliamo che l'owner sia l'utente corrispondente
+	if (projectActivity[0].ownerId !== userId) {
+		return generateMessageResponse("Unauthorized", 400);
+	}
+
 	// Otteniamo la collezione delle note
-	const noteClient: Collection<Note> = await getCollection<Note>(
-		NOTE_COLLECTION
+	const noteClient: Collection<Note> =
+		await getCollection<Note>(NOTE_COLLECTION);
+
+	const noteOut = await deleteCollectionWrapper<Note>(
+		{ _id: projectActivity[0].noteId },
+		noteClient
 	);
-
-	const noteId = new ObjectId(projectActivityData[0].noteId);
-
-	// Se esiste una nota associata, la eliminiamo
-	const noteOut = await deleteCollectionWrapper<Note>(noteId, noteClient);
 
 	if (noteOut.status !== 200) {
 		return noteOut;
 	}
 
 	// Eliminiamo l'attività
-	return deleteCollectionWrapper<ProjectActivity>(_id, projectActivityClient);
+	return await deleteCollectionWrapper<ProjectActivity>(
+		{ _id: activityId },
+		projectActivityClient
+	);
+
+	// TODO: eliminare i link con le altre activity
 };

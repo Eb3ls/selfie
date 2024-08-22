@@ -1,29 +1,33 @@
-import { NextRequest } from "next/server";
-import { Collection, ObjectId } from "mongodb";
-import {
-	getCollection,
-	PROJECT_ACTIVITY_COLLECTION,
-} from "@/db_utils/db_functions";
-import {
-	findCollectionWrapper,
-	deleteCollectionWrapper,
-	updateOneCollectionWrapper,
-} from "@/db_utils/db_wrappers";
-import { ProjectActivity } from "@/db_utils/models/ProjectActivity";
 import {
 	generateMessageResponse,
 	generateObjectResponse,
-	standardValidation,
-} from "@/api_utils/api_functions";
+	validate
+} from "@/utils/api/api";
+import {
+	PROJECT_ACTIVITY_COLLECTION,
+	ProjectActivity,
+	StringProjectActivity,
+	findCollectionWrapper,
+	getCollection,
+	updateCollectionWrapper
+} from "@/utils/db/db";
+import { Collection } from "mongodb";
+import { NextRequest } from "next/server";
 
-const requestTemplate: Object = {
-	prevId: new ObjectId(),
-	nextId: new ObjectId(),
+const requestTemplate = {
+	prevId: "",
+	nextId: ""
 };
 
+type RequestType = typeof requestTemplate;
+
 export const PATCH = async (request: NextRequest) => {
-	// Validazione standard
-	const validation = await standardValidation(request, requestTemplate, true);
+	// Validazione della richiesta
+	const validation = await validate<RequestType>(
+		request,
+		requestTemplate,
+		false
+	);
 
 	// Se la validazione fallisce, ritorna il messaggio di errore
 	if (validation === null) {
@@ -31,15 +35,16 @@ export const PATCH = async (request: NextRequest) => {
 	}
 
 	// Estraiamo l'utente e il corpo della richiesta
-	const { user: user, body: body } = validation;
+	const { user: user, body: newBody } = validation;
 
-	// Estraiamo l'utente
-	const senderId: ObjectId = user._id!;
+	// Estraiamo l'id dell'utente
+	const userId: string = user._id!;
 
-	// Estraiamo l'id delle attività
-	const { prevId, nextId } = body as { prevId: ObjectId; nextId: ObjectId };
+	// Estraiamo il prevId e il nextId dal body
+	const prevId: string = newBody.prevId;
+	const nextId: string = newBody.nextId;
 
-	if (prevId.equals(nextId)) {
+	if (prevId === nextId) {
 		return generateMessageResponse(
 			"The projectActivities can't be the same",
 			400
@@ -50,39 +55,49 @@ export const PATCH = async (request: NextRequest) => {
 	const projectActivityClient: Collection<ProjectActivity> =
 		await getCollection<ProjectActivity>(PROJECT_ACTIVITY_COLLECTION);
 
-	const prevOut = await findCollectionWrapper<ProjectActivity>(
-		{ _id: prevId, ownerId: senderId },
+	const prevActivityOut = await findCollectionWrapper<ProjectActivity>(
+		{ _id: prevId },
 		projectActivityClient
 	);
 
-	// Se l'attività non esiste, ritorna un errore
-	if (prevOut.status !== 200) {
-		return prevOut;
+	if (prevActivityOut.status !== 200) {
+		return prevActivityOut;
 	}
 
-	const prevActivity: ProjectActivity = (await prevOut.json())[0];
+	const prevActivity: StringProjectActivity = (
+		await prevActivityOut.json()
+	)[0];
+
+	const nextActivityOut = await findCollectionWrapper<ProjectActivity>(
+		{ _id: nextId },
+		projectActivityClient
+	);
+
+	if (nextActivityOut.status !== 200) {
+		return nextActivityOut;
+	}
+
+	const nextActivity: StringProjectActivity = (
+		await nextActivityOut.json()
+	)[0];
+
+	// Controlliamo che l'owner sia l'utente corrispondente
+	if (prevActivity.ownerId !== userId) {
+		return generateMessageResponse("Unauthorized", 400);
+	}
+
+	// Controlliamo che appartengano allo stesso progetto
+	if (prevActivity.projectId !== nextActivity.projectId) {
+		return generateMessageResponse(
+			"The projectActivities must belong to the same project",
+			400
+		);
+	}
 
 	// Controllo se l'attività è già collegata
 	if (prevActivity.nextIdList.includes(nextId)) {
 		return generateMessageResponse("Already linked", 400);
 	}
-
-	const nextOut = await findCollectionWrapper<ProjectActivity>(
-		{
-			_id: nextId,
-			ownerId: senderId, // Non serve ma lo lascio per chiarezza
-			// Controlliamo che appartengano allo stesso progetto
-			projectId: new ObjectId(prevActivity.projectId),
-		},
-		projectActivityClient
-	);
-
-	// Se l'attività non esiste, ritorna un errore
-	if (nextOut.status !== 200) {
-		return nextOut;
-	}
-
-	const nextActivity: ProjectActivity = (await nextOut.json())[0];
 
 	// Se l'attività successiva è prima di quella precedente, ritorna un errore
 	if (
@@ -96,38 +111,43 @@ export const PATCH = async (request: NextRequest) => {
 	}
 
 	// Inseriamo l'id dell'attività precedente nell'array delle attività precedenti del next
-	const nextModifiedIds = nextActivity.prevIdList
-		.map((user) => new ObjectId(user))
-		.concat(prevId);
+	let nextModifiedIds = nextActivity.prevIdList;
+	nextModifiedIds.push(prevId);
+
 	// Inseriamo l'id dell'attività successiva nell'array delle attività successive del prev
-	const prevModifiedIds = prevActivity.nextIdList
-		.map((user) => new ObjectId(user))
-		.concat(nextId);
-	const prevModified = await updateOneCollectionWrapper<ProjectActivity>(
-		prevId,
-		{ nextIdList: prevModifiedIds } as ProjectActivity,
+	let prevModifiedIds = prevActivity.nextIdList;
+	prevModifiedIds.push(nextId);
+
+	const prevModifiedOut = await updateCollectionWrapper<ProjectActivity>(
+		{ _id: prevId },
+		{
+			nextIdList: prevModifiedIds
+		} as StringProjectActivity,
 		projectActivityClient
 	);
 
-	if (prevModified.status !== 200) {
-		return prevModified;
+	if (prevModifiedOut.status !== 200) {
+		return prevModifiedOut;
 	}
 
-	const nextModified = await updateOneCollectionWrapper<ProjectActivity>(
-		nextId,
-		{ prevIdList: nextModifiedIds, status: "WAITING" } as ProjectActivity,
+	const nextModifiedOut = await updateCollectionWrapper<ProjectActivity>(
+		{ _id: nextId },
+		{
+			prevIdList: nextModifiedIds,
+			status: "WAITING"
+		} as StringProjectActivity,
 		projectActivityClient
 	);
 
-	if (nextModified.status !== 200) {
-		return nextModified;
+	if (nextModifiedOut.status !== 200) {
+		return nextModifiedOut;
 	}
 
-	const prevModifiedData = await prevModified.json();
-	const nextModifiedData = await nextModified.json();
+	const prevModified: StringProjectActivity = await prevModifiedOut.json();
+	const nextModified: StringProjectActivity = await nextModifiedOut.json();
 
 	return generateObjectResponse(
-		{ prevData: prevModifiedData, nextData: nextModifiedData },
+		{ prevData: prevModified, nextData: nextModified },
 		200
 	);
 

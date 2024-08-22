@@ -1,26 +1,27 @@
-import { NextRequest } from "next/server";
-import { Collection, ObjectId } from "mongodb";
-import { getCollection, PHASE_COLLECTION } from "@/db_utils/db_functions";
+import { generateMessageResponse, validate } from "@/utils/api/api";
 import {
-	findCollectionWrapper,
+	PHASE_COLLECTION,
+	Phase,
+	StringPhase,
 	deleteCollectionWrapper,
-} from "@/db_utils/db_wrappers";
-import { Phase } from "@/db_utils/models/Phase";
-import {
-	generateMessageResponse,
-	standardValidation,
-} from "@/api_utils/api_functions";
+	findCollectionWrapper,
+	getCollection
+} from "@/utils/db/db";
+import { Collection } from "mongodb";
+import { NextRequest } from "next/server";
 
-const requestTemplate: Partial<Phase> = {
-	_id: new ObjectId(),
+const requestTemplate = {
+	_id: ""
 };
 
+type RequestType = typeof requestTemplate;
+
 export const DELETE = async (request: NextRequest) => {
-	// Validazione standard
-	const validation = await standardValidation<Phase>(
+	// Validazione della richiesta
+	const validation = await validate<RequestType>(
 		request,
 		requestTemplate,
-		true
+		false
 	);
 
 	// Se la validazione fallisce, ritorna il messaggio di errore
@@ -29,20 +30,20 @@ export const DELETE = async (request: NextRequest) => {
 	}
 
 	// Estraiamo l'utente e il corpo della richiesta
-	const { user: user, body: body } = validation;
+	const { user: user, body: newBody } = validation;
 
 	// Estraiamo l'id dell'utente
-	const senderId: ObjectId = user._id!;
-	// Estraiamo l'id della fase
-	const _id: ObjectId = body._id!;
+	const userId: string = user._id!;
+
+	// Estraiamo l'id dal body
+	const phaseId: string = newBody._id!;
 
 	// Otteniamo la collezione delle fasi
-	const phaseClient: Collection<Phase> = await getCollection<Phase>(
-		PHASE_COLLECTION
-	);
+	const phaseClient: Collection<Phase> =
+		await getCollection<Phase>(PHASE_COLLECTION);
 
 	const phaseOut = await findCollectionWrapper<Phase>(
-		{ _id: _id, ownerId: senderId },
+		{ _id: phaseId },
 		phaseClient
 	);
 
@@ -50,36 +51,42 @@ export const DELETE = async (request: NextRequest) => {
 		return phaseOut;
 	}
 
-	const phaseData: Phase = await phaseOut.json();
+	const phase: StringPhase[] = await phaseOut.json();
 
-	if (phaseData.parentId === phaseData.projectId) {
+	// Controlliamo che l'owner sia l'utente corrispondente
+	if (phase[0].ownerId !== userId) {
+		return generateMessageResponse("Unauthorized", 400);
+	}
+
+	if (phase[0].parentId === phase[0].projectId) {
 		// Otteniamo le sottofasi
-		const subPhases = await findCollectionWrapper<Phase>(
-			{ parentId: _id },
+		const subPhasesOut = await findCollectionWrapper<Phase>(
+			{ parentId: phaseId },
 			phaseClient
 		);
 
 		// Se ci sono sottofasi, le cancelliamo
-		if (subPhases.status === 200) {
-			const subPhasesData: Phase[] = await subPhases.json();
+		if (subPhasesOut.status === 200) {
+			const subPhases: StringPhase[] = await subPhasesOut.json();
 
 			// Eliminiamo le sottofasi
-			while (subPhasesData.length > 0) {
-				const subPhase = subPhasesData.shift()!;
-				const subPhaseId = new ObjectId(subPhase._id);
-				const result = await deleteCollectionWrapper<Phase>(
-					subPhaseId,
+			while (subPhases.length > 0) {
+				const subPhase = subPhases.shift()!;
+				const subPhaseOut = await deleteCollectionWrapper<Phase>(
+					{ _id: subPhase._id },
 					phaseClient
 				);
-				if (result.status !== 200) {
-					return result;
+
+				if (subPhaseOut.status !== 200) {
+					return subPhaseOut;
 				}
 			}
 		}
 	}
 
 	// Eliminiamo la fase
-	return await deleteCollectionWrapper<Phase>(_id!, phaseClient);
+	return await deleteCollectionWrapper<Phase>({ _id: phaseId }, phaseClient);
 
-	// TODO aggiungere la cancellazione delle activity
+	// TODO: eliminare tutte le attività associate alla fase
+	// per ogni attività, eliminare nei link le attività associate
 };

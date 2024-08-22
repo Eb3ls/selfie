@@ -1,33 +1,36 @@
-import { NextRequest } from "next/server";
-import { Collection, ObjectId } from "mongodb";
-import {
-	getCollection,
-	PROJECT_COLLECTION,
-	PHASE_COLLECTION,
-} from "@/db_utils/db_functions";
-import {
-	findCollectionWrapper,
-	addCollectionWrapper,
-} from "@/db_utils/db_wrappers";
-import { Project } from "@/db_utils/models/Project";
-import { Phase, createPhase } from "@/db_utils/models/Phase";
 import {
 	generateMessageResponse,
-	standardValidation,
-} from "@/api_utils/api_functions";
+	generateStringModel,
+	validate
+} from "@/utils/api/api";
+import {
+	PHASE_COLLECTION,
+	PROJECT_COLLECTION,
+	Phase,
+	Project,
+	StringPhase,
+	StringProject,
+	addCollectionWrapper,
+	findCollectionWrapper,
+	getCollection
+} from "@/utils/db/db";
+import { Collection } from "mongodb";
+import { NextRequest } from "next/server";
 
-const requestTemplate: Partial<Phase> = {
+const requestTemplate = {
 	summary: "",
-	projectId: new ObjectId(),
-	parentId: new ObjectId(),
+	projectId: "",
+	parentId: ""
 };
 
+type RequestType = typeof requestTemplate;
+
 export const POST = async (request: NextRequest) => {
-	// Validazione standard
-	const validation = await standardValidation<Phase>(
+	// Validazione della richiesta
+	const validation = await validate<RequestType>(
 		request,
 		requestTemplate,
-		true
+		false
 	);
 
 	// Se la validazione fallisce, ritorna il messaggio di errore
@@ -36,19 +39,20 @@ export const POST = async (request: NextRequest) => {
 	}
 
 	// Estraiamo l'utente e il corpo della richiesta
-	const { user: user, body: body } = validation;
+	const { user: user, body: newBody } = validation;
 
 	// Estraiamo l'id dell'utente
-	const senderId: ObjectId = user._id!;
-	//Estraiamo il projectId
-	const projectId: ObjectId = body.projectId!;
-	//Estraiamo il parentId
-	const parentId: ObjectId = body.parentId!;
+	const userId: string = user._id!;
+
+	//Estraiamo l'id dal body
+	const projectId: string = newBody.projectId;
+
+	//Estraiamo il parentId dal body
+	const parentId: string = newBody.parentId;
 
 	// Otteniamo la collezione dei progetti
-	const projectClient: Collection<Project> = await getCollection<Project>(
-		PROJECT_COLLECTION
-	);
+	const projectClient: Collection<Project> =
+		await getCollection<Project>(PROJECT_COLLECTION);
 
 	const projectOut = await findCollectionWrapper<Project>(
 		{ _id: projectId },
@@ -59,23 +63,19 @@ export const POST = async (request: NextRequest) => {
 		return projectOut;
 	}
 
-	const project: Project[] = await projectOut.json();
+	const project: StringProject[] = await projectOut.json();
 
-	// Controlliamo che l'utente sia il proprietario del progetto
-	if (!senderId.equals(project[0].ownerId)) {
-		return generateMessageResponse(
-			"User is not the owner of the project",
-			400
-		);
+	// Controlliamo che l'owner sia l'utente corrispondente
+	if (project[0].ownerId !== userId) {
+		return generateMessageResponse("Unauthorized", 400);
 	}
 
 	//Otteniamo la collezione delle fasi
-	const phaseClient: Collection<Phase> = await getCollection<Phase>(
-		PHASE_COLLECTION
-	);
+	const phaseClient: Collection<Phase> =
+		await getCollection<Phase>(PHASE_COLLECTION);
 
 	// Controlliamo se il progetto è sottofase
-	if (!projectId.equals(parentId)) {
+	if (parentId !== projectId) {
 		const phaseOut = await findCollectionWrapper<Phase>(
 			{ _id: parentId },
 			phaseClient
@@ -85,20 +85,19 @@ export const POST = async (request: NextRequest) => {
 			return phaseOut;
 		}
 
-		const phase: Phase[] = await phaseOut.json();
+		const phase: StringPhase[] = await phaseOut.json();
 
 		// Controlliamo che la fase padre non sia già sottofase del progetto passato
-		if (!projectId.equals(phase[0].parentId)) {
+		if (phase[0].parentId !== projectId) {
 			return generateMessageResponse("Parent is already a subphase", 400);
 		}
 	}
 
-	body.ownerId = new ObjectId(senderId);
-	body.projectId = new ObjectId(projectId);
-	body.parentId = new ObjectId(parentId);
-
 	// Creiamo una nuova fase con quei campi
-	const newPhase: Phase = createPhase(body);
+	const newPhase: StringPhase = generateStringModel<StringPhase>(
+		newBody,
+		"Phase"
+	);
 
 	return await addCollectionWrapper(newPhase, phaseClient);
 };

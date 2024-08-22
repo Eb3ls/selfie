@@ -1,30 +1,34 @@
-import { NextRequest } from "next/server";
-import { Collection, ObjectId } from "mongodb";
-import { getCollection, PROJECT_COLLECTION } from "@/db_utils/db_functions";
-import {
-	findCollectionWrapper,
-	updateOneCollectionWrapper,
-} from "@/db_utils/db_wrappers";
-import { Project } from "@/db_utils/models/Project";
 import {
 	generateMessageResponse,
-	getIdFromUsername,
-	standardValidation,
-} from "@/api_utils/api_functions";
+	generateObjectResponse,
+	usernameListToIds,
+	validate
+} from "@/utils/api/api";
+import {
+	PROJECT_COLLECTION,
+	Project,
+	StringProject,
+	findCollectionWrapper,
+	getCollection,
+	updateCollectionWrapper
+} from "@/utils/db/db";
+import { Collection } from "mongodb";
+import { NextRequest } from "next/server";
 
-const requestTemplate: Partial<Project> = {
-	_id: new ObjectId(),
+const requestTemplate = {
+	_id: "",
 	summary: "",
-	userIdList: [],
+	usernameList: []
 };
 
+type RequestType = typeof requestTemplate;
+
 export const PATCH = async (request: NextRequest) => {
-	// Validazione standard
-	const validation = await standardValidation<Project>(
+	// Validazione della richiesta
+	const validation = await validate<RequestType>(
 		request,
 		requestTemplate,
-		true,
-		true
+		false
 	);
 
 	// Se la validazione fallisce, ritorna il messaggio di errore
@@ -33,51 +37,68 @@ export const PATCH = async (request: NextRequest) => {
 	}
 
 	// Estraiamo l'utente e il corpo della richiesta
-	const { user: user, body: body } = validation;
-	// Prendiamo il senderId
-	const senderId: ObjectId = user._id!;
+	const { user: user, body: newBody } = validation;
 
-	if (body.userIdList !== undefined) {
-		// Otteniamo la lista degli id degli utenti
-		const parsedUsers = await getIdFromUsername(
-			body.userIdList as unknown as string[], // Al posto di unknown si può mappare per convertire in stringa ma è inutile
-			senderId
-		);
+	// Estraiamo l'id dell'utente
+	const userId: string = user._id!;
 
-		// Ritorniamo la lista di utenti sbagliati o errore nel db
-		if (parsedUsers.status !== 200) {
-			return parsedUsers;
-		}
+	// Estraiamo l'id dal body
+	const projectId: string = newBody._id!;
 
-		const usersData = await parsedUsers.json();
-		body.userIdList = usersData.users.map(
-			(user: string) => new ObjectId(user)
-		);
+	// Estraiamo la lista degli username dal body
+	const usernameList: string[] = newBody.usernameList;
+
+	// Convertiamo lo username in id e aggiungiamo lo userId come primo elemento
+	const convertionOut = await usernameListToIds(usernameList, userId);
+
+	if (convertionOut.status !== 200) {
+		return convertionOut;
 	}
 
-	// Creo un oggetto senza il campo id
-	const { _id, ...newFields } = body;
+	const userIdList: string[] = (await convertionOut.json()).users;
 
 	// Ottieniamo la collezione dei progetti
-	const projectClient: Collection<Project> = await getCollection<Project>(
-		PROJECT_COLLECTION
-	);
+	const projectClient: Collection<Project> =
+		await getCollection<Project>(PROJECT_COLLECTION);
 
 	// Controlliamo che il progetto esista
-	const projectQueryOut = await findCollectionWrapper<Project>(
-		{ _id: _id, ownerId: senderId },
+	const projectOut = await findCollectionWrapper<Project>(
+		{ _id: projectId },
 		projectClient
 	);
 
-	// Se non esiste il progetto
-	if (projectQueryOut.status !== 200) {
-		return projectQueryOut;
+	if (projectOut.status !== 200) {
+		return projectOut;
 	}
 
-	// Aggiorniamo il progetto
-	return updateOneCollectionWrapper<Project>(
-		_id!,
-		newFields as Project,
+	const project: StringProject[] = await projectOut.json();
+
+	// Controlliamo che l'owner sia l'utente corrispondente
+	if (project[0].ownerId !== userId) {
+		return generateMessageResponse("Unauthorized", 400);
+	}
+
+	// Creiamo un oggetto con i campi da modificare
+	const newFields: Partial<StringProject> = {
+		summary: newBody.summary,
+		userIdList: userIdList
+	};
+
+	// Modifichiamo il progetto
+	const updateOut = await updateCollectionWrapper<Project>(
+		{ _id: projectId },
+		{ $set: newFields } as any,
 		projectClient
 	);
+
+	if (updateOut.status !== 200) {
+		return updateOut;
+	}
+
+	const updatedProject: StringProject = (await updateOut.json())[0];
+
+	return generateObjectResponse(updatedProject, 200);
+
+	// TODO: Eliminare dalle attività del progetto le persone che
+	// non fanno più parte del progetto
 };

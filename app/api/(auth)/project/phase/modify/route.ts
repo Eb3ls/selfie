@@ -1,27 +1,32 @@
-import { NextRequest } from "next/server";
-import { Collection, ObjectId } from "mongodb";
-import { getCollection, PHASE_COLLECTION } from "@/db_utils/db_functions";
-import {
-	findCollectionWrapper,
-	updateOneCollectionWrapper,
-} from "@/db_utils/db_wrappers";
-import { Phase } from "@/db_utils/models/Phase";
 import {
 	generateMessageResponse,
-	standardValidation,
-} from "@/api_utils/api_functions";
+	generateObjectResponse,
+	validate
+} from "@/utils/api/api";
+import {
+	PHASE_COLLECTION,
+	Phase,
+	StringPhase,
+	findCollectionWrapper,
+	getCollection,
+	updateCollectionWrapper
+} from "@/utils/db/db";
+import { Collection } from "mongodb";
+import { NextRequest } from "next/server";
 
-const requestTemplate: Partial<Phase> = {
-	_id: new ObjectId(),
-	summary: "",
+const requestTemplate = {
+	_id: "",
+	summary: ""
 };
 
+type RequestType = typeof requestTemplate;
+
 export const PATCH = async (request: NextRequest) => {
-	// Validazione standard
-	const validation = await standardValidation<Phase>(
+	// Validazione della richiesta
+	const validation = await validate<RequestType>(
 		request,
 		requestTemplate,
-		true
+		false
 	);
 
 	// Se la validazione fallisce, ritorna il messaggio di errore
@@ -30,20 +35,20 @@ export const PATCH = async (request: NextRequest) => {
 	}
 
 	// Estraiamo l'utente e il corpo della richiesta
-	const { user: user, body: body } = validation;
+	const { user: user, body: newBody } = validation;
 
 	// Estraiamo l'id dell'utente
-	const senderId: ObjectId = user._id!;
-	// Estraiamo l'i campi
-	const { _id, summary } = body;
+	const userId: string = user._id!;
+
+	// Estraiamo l'id dal body
+	const phaseId: string = newBody._id!;
 
 	// Otteniamo la collezione delle fasi
-	const phaseClient: Collection<Phase> = await getCollection<Phase>(
-		PHASE_COLLECTION
-	);
+	const phaseClient: Collection<Phase> =
+		await getCollection<Phase>(PHASE_COLLECTION);
 
 	const phaseOut = await findCollectionWrapper<Phase>(
-		{ _id: _id, ownerId: senderId },
+		{ _id: phaseId },
 		phaseClient
 	);
 
@@ -51,10 +56,25 @@ export const PATCH = async (request: NextRequest) => {
 		return phaseOut;
 	}
 
+	const phase: StringPhase[] = await phaseOut.json();
+
+	// Controlliamo che l'owner sia l'utente corrispondente
+	if (phase[0].ownerId !== userId) {
+		return generateMessageResponse("Unauthorized", 400);
+	}
+
 	// Modifichiamo la fase
-	return await updateOneCollectionWrapper<Phase>(
-		_id!,
-		{ summary: summary } as Phase,
+	const updateOut = await updateCollectionWrapper<Phase>(
+		{ _id: phaseId },
+		newBody,
 		phaseClient
 	);
+
+	if (updateOut.status !== 200) {
+		return updateOut;
+	}
+
+	const updatedPhase: StringPhase = (await updateOut.json())[0];
+
+	return generateObjectResponse(updatedPhase, 200);
 };

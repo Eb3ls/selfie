@@ -1,31 +1,29 @@
-import { NextRequest } from "next/server";
-import { Collection, ObjectId } from "mongodb";
+import { generateMessageResponse, validate } from "@/utils/api/api";
 import {
-	getCollection,
-	PROJECT_COLLECTION,
 	NOTE_COLLECTION,
-} from "@/db_utils/db_functions";
-import {
-	findCollectionWrapper,
+	Note,
+	PROJECT_COLLECTION,
+	Project,
+	StringProject,
 	deleteCollectionWrapper,
-} from "@/db_utils/db_wrappers";
-import { Note } from "@/db_utils/models/Note";
-import { Project } from "@/db_utils/models/Project";
-import {
-	generateMessageResponse,
-	standardValidation,
-} from "@/api_utils/api_functions";
+	findCollectionWrapper,
+	getCollection
+} from "@/utils/db/db";
+import { Collection } from "mongodb";
+import { NextRequest } from "next/server";
 
-const requestTemplate: Partial<Project> = {
-	_id: new ObjectId(),
+const requestTemplate = {
+	_id: ""
 };
 
+type RequestType = typeof requestTemplate;
+
 export const DELETE = async (request: NextRequest) => {
-	// Validazione standard
-	const validation = await standardValidation<Project>(
+	// Validazione della richiesta
+	const validation = await validate<RequestType>(
 		request,
 		requestTemplate,
-		true
+		false
 	);
 
 	// Se la validazione fallisce, ritorna il messaggio di errore
@@ -34,49 +32,50 @@ export const DELETE = async (request: NextRequest) => {
 	}
 
 	// Estraiamo l'utente e il corpo della richiesta
-	const { user: user, body: body } = validation;
-	// Prendiamo il senderId
-	const senderId: ObjectId = user._id!;
+	const { user: user, body: newBody } = validation;
 
-	// Estraggo l'id dal body
-	const id: ObjectId = body._id!;
+	// Estraimo l'id dell'utente
+	const userId: string = user._id!;
+
+	// Estriamo l'id dal body
+	const projectId: string = newBody._id!;
 
 	// Otteniamo la collezione dei progetti
-	const projectClient: Collection<Project> = await getCollection<Project>(
-		PROJECT_COLLECTION
-	);
+	const projectClient: Collection<Project> =
+		await getCollection<Project>(PROJECT_COLLECTION);
 
-	// Cerchiamo il progetto
-	const projectQueryOut = await findCollectionWrapper<Project>(
-		{ _id: id, ownerId: senderId },
+	const projectOut = await findCollectionWrapper<Project>(
+		{ _id: projectId },
 		projectClient
 	);
 
-	// Se non esiste il progetto
-	if (projectQueryOut.status !== 200) {
-		return projectQueryOut;
+	if (projectOut.status !== 200) {
+		return projectOut;
 	}
 
-	const noteData: Note = (await projectQueryOut.json())[0];
+	const project: StringProject[] = await projectOut.json();
+
+	// Controlliamo che l'owner sia l'utente corrispondente
+	if (project[0].ownerId !== userId) {
+		return generateMessageResponse("Unauthorized", 400);
+	}
 
 	// Ottieniamo la collezione delle note
-	const noteClient: Collection<Note> = await getCollection<Note>(
-		NOTE_COLLECTION
-	);
+	const noteClient: Collection<Note> =
+		await getCollection<Note>(NOTE_COLLECTION);
 
 	// Eliminiamo la nota associata al progetto
-	const noteQueryOut = await deleteCollectionWrapper<Note>(
-		new ObjectId(noteData._id),
+	const noteOut = await deleteCollectionWrapper<Note>(
+		{ _id: project[0].noteId },
 		noteClient
 	);
 
-	// Se non esiste la nota
-	if (noteQueryOut.status !== 200) {
-		return noteQueryOut;
+	if (noteOut.status !== 200) {
+		return noteOut;
 	}
 
 	// Eliminiamo il progetto
-	return deleteCollectionWrapper<Project>(id, projectClient);
+	return deleteCollectionWrapper<Project>({ _id: projectId }, projectClient);
 
-	// TODO eliminare le note associate alle projectActivity
+	// TODO: Eliminare tutte le note, attività e fasi associate al progetto
 };

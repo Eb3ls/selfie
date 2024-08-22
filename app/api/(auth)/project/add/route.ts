@@ -1,30 +1,33 @@
-import { NextRequest } from "next/server";
-import { Collection, ObjectId } from "mongodb";
-import {
-	getCollection,
-	PROJECT_COLLECTION,
-	NOTE_COLLECTION,
-} from "@/db_utils/db_functions";
-import { addCollectionWrapper } from "@/db_utils/db_wrappers";
-import { Note, createNote } from "@/db_utils/models/Note";
-import { Project, createProject } from "@/db_utils/models/Project";
 import {
 	generateMessageResponse,
-	standardValidation,
-	getIdFromUsername,
-} from "@/api_utils/api_functions";
+	generateStringModel,
+	validate
+} from "@/utils/api/api";
+import {
+	NOTE_COLLECTION,
+	Note,
+	PROJECT_COLLECTION,
+	Project,
+	StringNote,
+	StringProject,
+	addCollectionWrapper,
+	getCollection
+} from "@/utils/db/db";
+import { Collection } from "mongodb";
+import { NextRequest } from "next/server";
 
-const requestTemplate: Partial<Project> = {
-	summary: "",
-	userIdList: [],
+const requestTemplate = {
+	summary: ""
 };
 
+type RequestType = typeof requestTemplate;
+
 export const POST = async (request: NextRequest) => {
-	// Validazione standard
-	const validation = await standardValidation<Project>(
+	// Validazione della richiesta
+	const validation = await validate<RequestType>(
 		request,
 		requestTemplate,
-		true
+		false
 	);
 
 	// Se la validazione fallisce, ritorna il messaggio di errore
@@ -33,56 +36,46 @@ export const POST = async (request: NextRequest) => {
 	}
 
 	// Estraiamo l'utente e il corpo della richiesta
-	const { user: user, body: body } = validation;
-	// Prendiamo il senderId
-	const senderId: ObjectId = user._id!;
+	const { user: user, body: newBody } = validation;
 
-	const usersList = await getIdFromUsername(
-		body.userIdList as unknown as string[],
-		senderId
-	);
-
-	if (usersList.status !== 200) {
-		return usersList;
-	}
-
-	const userListData = await usersList.json();
-	body.userIdList = userListData.users.map(
-		(user: string) => new ObjectId(user)
-	);
+	// Estraiamo l'id dell'utente
+	const userId = user._id!;
 
 	// Creiamo la nota associata al progetto
-	const newNote: Note = createNote({
-		ownerId: senderId,
-		summary: body.summary,
-		access: "INVITED",
-		userIdList: body.userIdList,
-	});
-
-	// Otteniamo la collezione delle note
-	const noteClient: Collection<Note> = await getCollection<Note>(
-		NOTE_COLLECTION
+	const newNote: StringNote = generateStringModel<StringNote>(
+		newBody,
+		"Note"
 	);
 
+	// Otteniamo la collezione delle note
+	const noteClient: Collection<Note> =
+		await getCollection<Note>(NOTE_COLLECTION);
+
+	// Aggiungo la nota al database
 	const noteOut = await addCollectionWrapper<Note>(newNote, noteClient);
 
 	if (noteOut.status !== 200) {
 		return noteOut;
 	}
 
-	const noteData: Note = await noteOut.json();
+	const note: StringNote = await noteOut.json();
 
 	// Creiamo un nuovo progetto con quei campi
-	const newProject: Project = createProject(body);
+	const newProject: StringProject = generateStringModel<StringProject>(
+		newBody,
+		"Project"
+	);
 
 	// Aggiungiamo il campo 'ownerId' a newProject
-	newProject.ownerId = senderId; // Assumiamo che la sessione sia corretta
-	newProject.noteId = new ObjectId(noteData._id);
+	newProject.ownerId = userId;
+	// Aggiungiamo il campo 'noteId' a newProject
+	newProject.noteId = note._id!;
+	// Inseriamo a 'userIdList' lo user a newProject
+	newProject.userIdList = [userId];
 
 	//Otteniamo la collezione dei progetti
-	const projectClient: Collection<Project> = await getCollection<Project>(
-		PROJECT_COLLECTION
-	);
+	const projectClient: Collection<Project> =
+		await getCollection<Project>(PROJECT_COLLECTION);
 
 	return addCollectionWrapper<Project>(newProject, projectClient);
 };

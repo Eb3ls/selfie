@@ -11,6 +11,7 @@ export interface Phase {
 	ownerId: ObjectId;		// Utente che ha creato la fase
 	projectId: ObjectId;	// Progetto a cui appartiene la fase
 	parentId: ObjectId;		// Padre della fase, se non coincide con projectId allora è sottofase
+	//TODO: Aggiungere data di inizio e fine
 }
 
 export type StringPhase = ConvertToString<Phase>;
