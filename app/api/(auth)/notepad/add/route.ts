@@ -1,93 +1,52 @@
-import { NextRequest } from "next/server";
-import { Collection, ObjectId, WithId } from "mongodb";
 import {
-	getCollection,
-	NOTE_COLLECTION,
-	addAndFetchToCollection,
-} from "@/db_utils/db_functions";
-
-import { User } from "@/db_utils/models/User";
-import { Note, createNote } from "@/db_utils/models/Note";
-import {
-	parseJSONInput,
 	generateMessageResponse,
-	generateObjectResponse,
-	getIdFromUsername,
-	isTemplateSubset,
-} from "@/api_utils/api_functions";
-import { getSession } from "@/session_utils/session";
-import { JWTPayload } from "jose";
+	generateStringModel,
+	validate
+} from "@/utils/api/api";
+import {
+	NOTE_COLLECTION,
+	Note,
+	StringNote,
+	addCollectionWrapper,
+	getCollection
+} from "@/utils/db/db";
+import { Collection } from "mongodb";
+import { NextRequest } from "next/server";
 
-const requestTemplate: Partial<Note> = {
-	access: "PRIVATE",
-	userIdList: [],
+const requestTemplate = {
+	summary: ""
 };
 
+type RequestType = typeof requestTemplate;
+
 export const POST = async (request: NextRequest) => {
-	// Prendiamo i cookie della richiesta
-	const cookies: JWTPayload = (await getSession(
-		request.cookies
-	)) as JWTPayload; // Assumiamo che la sessione sia stata validata dal middleware
-
-	const sender: Partial<User> = cookies.user as Partial<User>;
-	// Prendiamo l'id dell'utente che vuole creare la nota seguendo l'assunzione
-	const senderId: ObjectId = ObjectId.createFromHexString(sender._id! as any);
-
-	// Convertiamo in JSON il body della richiesta
-	const body: any | undefined = await parseJSONInput(request);
-	if (body === undefined) {
-		return generateMessageResponse("Invalid input", 400);
-	}
-
-	// Controlliamo che il body abbia tutti i campi necessari
-	if (!isTemplateSubset(body, requestTemplate, "access")) {
-		return generateMessageResponse("Invalid input", 400);
-	} else if (
-		body.access !== "PRIVATE" &&
-		body.access !== "INVITED" &&
-		body.access !== "PUBLIC"
-	) {
-		return generateMessageResponse("Invalid input", 400);
-	}
-
-	if (body.userIdList !== undefined) {
-		// Otteniamo la lista degli id degli utenti
-		const parsedUsers = await getIdFromUsername(body.userIdList, senderId);
-
-		// Ritorniamo la lista di utenti sbagliati o errore nel db
-		if (parsedUsers.status !== 200) {
-			return parsedUsers;
-		}
-
-		const usersList: ObjectId[] = await parsedUsers.json();
-		body.userIdList = usersList;
-	} else {
-		body.userIdList = [senderId];
-	}
-
-	// Creiamo una nuova nota con quei campi
-	const newNote: Note = createNote(body);
-
-	// Aggiungiamo il campo 'ownerId' a newNote
-	newNote.ownerId = senderId; // Assumiamo che la sessione sia corretta
-	newNote.summary = "Nota";
-
-	// Ottieniamo la collezione delle note
-	const noteClient: Collection<Note> = await getCollection<Note>(
-		NOTE_COLLECTION
+	// Validazione della richiesta
+	const validation = await validate<RequestType>(
+		request,
+		requestTemplate,
+		false
 	);
 
-	// Aggiungiamo il nuovo evento al db
-	const insertedNote: WithId<Note> | null | undefined =
-		await addAndFetchToCollection(newNote, noteClient);
-	if (insertedNote === undefined) {
-		return generateMessageResponse("Error in database", 400);
-	} else if (insertedNote === null) {
-		return generateMessageResponse(
-			"Error while trying to add note (Should never happen)",
-			400
-		);
+	// Se la validazione fallisce, ritorna il messaggio di errore
+	if (validation === null) {
+		return generateMessageResponse("Invalid request", 400);
 	}
 
-	return generateObjectResponse(insertedNote, 200);
+	// Estraiamo l'utente e il corpo della richiesta
+	const { user: user, body: newBody } = validation;
+
+	// Estraiamo l'id dell'utente
+	const userId: string = user._id!;
+
+	// Creiamo una nuova nota con quei campi
+	const newNote: StringNote = generateStringModel(newBody, "Note");
+
+	// Aggiungiamo il campo 'ownerId' a newNote
+	newNote.ownerId = userId;
+
+	// Ottieniamo la collezione delle note
+	const noteClient: Collection<Note> =
+		await getCollection<Note>(NOTE_COLLECTION);
+
+	return await addCollectionWrapper<Note>(newNote, noteClient);
 };

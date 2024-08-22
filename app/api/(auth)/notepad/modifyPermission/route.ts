@@ -1,98 +1,98 @@
-import { NextRequest } from "next/server";
-import { Collection, ObjectId, WithId } from "mongodb";
 import {
-	getCollection,
-	NOTE_COLLECTION,
-	findInCollection,
-	updateOneAndFetchInCollection,
-} from "@/db_utils/db_functions";
-
-import { User } from "@/db_utils/models/User";
-import { Note } from "@/db_utils/models/Note";
-import {
-	parseJSONInput,
-	isTemplateSubset,
 	generateMessageResponse,
 	generateObjectResponse,
-	getIdFromUsername,
-} from "@/api_utils/api_functions";
-import { getSession } from "@/session_utils/session";
-import { JWTPayload } from "jose";
+	usernameListToIds,
+	validate
+} from "@/utils/api/api";
+import {
+	NOTE_COLLECTION,
+	Note,
+	StringNote,
+	findCollectionWrapper,
+	getCollection,
+	updateCollectionWrapper
+} from "@/utils/db/db";
+import { Collection } from "mongodb";
+import { NextRequest } from "next/server";
 
-const requestTemplate: Partial<Note> = {
-	_id: new ObjectId(),
+const requestTemplate = {
+	_id: "",
 	summary: "",
-	access: "PRIVATE",
-	userIdList: [],
+	access: "",
+	usernameList: []
 };
 
+type RequestType = typeof requestTemplate;
+
 export const PATCH = async (request: NextRequest) => {
-	// Prendiamo i cookie della richiesta
-	const cookies: JWTPayload = (await getSession(
-		request.cookies
-	)) as JWTPayload; // Assumiamo che la sessione sia stata validata dal middleware
+	// Validazione della richiesta
+	const validation = await validate<RequestType>(
+		request,
+		requestTemplate,
+		false
+	);
 
-	const sender: Partial<User> = cookies.user as Partial<User>;
-	// Prendiamo l'id dell'utente che vuole modificare la nota seguendo l'assunzione
-	const senderId: ObjectId = ObjectId.createFromHexString(sender._id! as any);
-
-	// Convertiamo in JSON il body della richiesta
-	const body: any | undefined = await parseJSONInput(request);
-	if (body === undefined) {
-		return generateMessageResponse("Invalid input", 400);
+	// Se la validazione fallisce, ritorna il messaggio di errore
+	if (validation === null) {
+		return generateMessageResponse("Invalid request", 400);
 	}
 
-	// body._id da stringa a ObjectId
-	body._id = ObjectId.createFromHexString(body._id);
+	// Estraiamo l'utente e il corpo della richiesta
+	const { user: user, body: newBody } = validation;
 
-	// Controlliamo che il body abbia tutti i campi necessari
-	if (!isTemplateSubset(body, requestTemplate, "_id")) {
-		return generateMessageResponse("Invalid input", 400);
+	// Estraiamo l'id dell'utente
+	const userId: string = user._id!;
+
+	// Estraiamo l'id dal body
+	const noteId: string = newBody._id!;
+
+	// Estraiamo la lista degli username dal body
+	const usernameList: string[] = newBody.usernameList;
+
+	// Convertiamo la lista degli username in lista di id e aggiungiamo lo userId come primo elemento
+	const convertionOut = await usernameListToIds(usernameList, userId);
+
+	if (convertionOut.status !== 200) {
+		return convertionOut;
 	}
 
-	if (body.userIdList !== undefined) {
-		// Otteniamo la lista degli id degli utenti
-		const parsedUsers = await getIdFromUsername(body.userIdList, senderId);
-
-		// Ritorniamo la lista di utenti sbagliati o errore nel db
-		if (parsedUsers.status !== 200) {
-			return parsedUsers;
-		}
-
-		const usersList: ObjectId[] = await parsedUsers.json();
-		body.userIdList = usersList;
-	}
-
-	// Creo un oggetto senza il campo id
-	const { _id, ...newFields } = body;
+	const userIdList: string[] = (await convertionOut.json()).users;
 
 	// Ottieniamo la collezione delle note
 	const client: Collection<Note> = await getCollection<Note>(NOTE_COLLECTION);
 
-	// Controlliamo che la nota esista
-	const queryOut: WithId<Note>[] | undefined = await findInCollection(
-		{ _id: _id },
+	const noteOut = await findCollectionWrapper<Note>({ _id: noteId }, client);
+
+	if (noteOut.status !== 200) {
+		return noteOut;
+	}
+
+	const note: StringNote[] = await noteOut.json();
+
+	// Controlliamo che l'owner sia l'utente corrispondente
+	if (note[0].ownerId !== userId) {
+		return generateMessageResponse("Unauthorized", 400);
+	}
+
+	// Creiamo un oggetto con i campi da modificare
+	const newFields: Partial<StringNote> = {
+		summary: newBody.summary,
+		access: newBody.access as "PRIVATE" | "INVITED" | "PUBLIC",
+		userIdList: userIdList
+	};
+
+	// Modifichiamo la nota
+	const updateOut = await updateCollectionWrapper<Note>(
+		{ _id: noteId },
+		{ $set: newFields } as any,
 		client
 	);
 
-	if (queryOut === undefined) {
-		return generateMessageResponse("Error in database", 400);
-	} else if (queryOut.length === 0) {
-		return generateMessageResponse("Note not found", 400);
+	if (updateOut.status !== 200) {
+		return updateOut;
 	}
 
-	// Controlliamo che il sender sia l'owner
-	if (!queryOut[0].ownerId.equals(senderId)) {
-		return generateMessageResponse("Sender isn't the owner", 400);
-	}
+	const updatedNote: StringNote = (await updateOut.json())[0];
 
-	// Modifichiamo la nota
-	const modifiedNote: WithId<Note> | undefined | null =
-		await updateOneAndFetchInCollection(_id, newFields, client);
-	if (modifiedNote === undefined) {
-		return generateMessageResponse("Error in database", 400);
-	} else if (modifiedNote === null) {
-		return generateMessageResponse("Note not found", 400);
-	}
-	return generateObjectResponse(modifiedNote, 200);
+	return generateObjectResponse(updatedNote, 200);
 };

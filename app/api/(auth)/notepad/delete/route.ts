@@ -1,94 +1,85 @@
-import { NextRequest } from "next/server";
-import { Collection, ObjectId, WithId } from "mongodb";
+import { generateMessageResponse, validate } from "@/utils/api/api";
 import {
-	getCollection,
-	PROJECT_COLLECTION,
 	NOTE_COLLECTION,
-	findInCollection,
-	deleteInCollection,
-} from "@/db_utils/db_functions";
+	Note,
+	PROJECT_COLLECTION,
+	Project,
+	StringNote,
+	deleteCollectionWrapper,
+	findCollectionWrapper,
+	getCollection
+} from "@/utils/db/db";
+import { Collection } from "mongodb";
+import { NextRequest } from "next/server";
 
-import { User } from "@/db_utils/models/User";
-import { Project } from "@/db_utils/models/Project";
-import { Note } from "@/db_utils/models/Note";
-import {
-	parseJSONInput,
-	isTemplateValid,
-	generateMessageResponse,
-} from "@/api_utils/api_functions";
-import { getSession } from "@/session_utils/session";
-import { JWTPayload } from "jose";
-
-const requestTemplate: Object = {
-	_id: new ObjectId(),
+const requestTemplate = {
+	_id: ""
 };
 
+type RequestType = typeof requestTemplate;
+
 export const DELETE = async (request: NextRequest) => {
-	// Prendiamo i cookie della richiesta
-	const cookies: JWTPayload = (await getSession(
-		request.cookies
-	)) as JWTPayload; // Assumiamo che la sessione sia stata validata dal middleware
+	// Validazione della richiesta
+	const validation = await validate<RequestType>(
+		request,
+		requestTemplate,
+		false
+	);
 
-	const sender: Partial<User> = cookies.user as Partial<User>;
-	// Prendiamo l'id dell'utente che vuole creare la chat seguendo l'assunzione
-	const senderId: ObjectId = ObjectId.createFromHexString(sender._id! as any);
-
-	// Convertiamo in JSON il body della richiesta
-	const body: any | undefined = await parseJSONInput(request);
-	if (body === undefined) {
-		return generateMessageResponse("Invalid input", 400);
+	// Se la validazione fallisce, ritorna il messaggio di errore
+	if (validation === null) {
+		return generateMessageResponse("Invalid request", 400);
 	}
 
-	// body._id da stringa a ObjectId
-	body._id = ObjectId.createFromHexString(body._id);
+	// Estraiamo l'utente e il corpo della richiesta
+	const { user: user, body: newBody } = validation;
 
-	// Controlliamo che il body abbia tutti i campi necessari
-	if (!isTemplateValid(body, requestTemplate)) {
-		return generateMessageResponse("Invalid input", 400);
-	}
+	// Estraiamo l'id dell'utente
+	const userId: string = user._id!;
 
-	// Estraggo l'id dal body
-	const id: ObjectId = body._id;
+	// Estraiamo l'id dal body
+	const noteId: string = newBody._id!;
 
 	// Otteniamo la collezione dei progetti
-	const projectClient: Collection<Project> = await getCollection<Project>(
-		PROJECT_COLLECTION
-	);
+	const projectClient: Collection<Project> =
+		await getCollection<Project>(PROJECT_COLLECTION);
 
 	// Controlliamo che la nota non sia associata ad un progetto
-	const projectQueryOut: WithId<Project>[] | undefined =
-		await findInCollection({ note: id }, projectClient);
-	if (projectQueryOut === undefined) {
-		return generateMessageResponse("Error in database", 500);
-	} else if (projectQueryOut.length !== 0) {
-		return generateMessageResponse("Note is from a project", 400);
-	}
-
-	// Ottieniamo la collezione delle note
-	const noteClient: Collection<Note> = await getCollection<Note>(
-		NOTE_COLLECTION
+	const outProject = await findCollectionWrapper<Project>(
+		{ noteId: noteId },
+		projectClient
 	);
 
-	// Troviamo la nota da eliminare
-	const noteQueryOut: WithId<Note>[] | undefined = await findInCollection(
-		{ _id: id },
+	if (outProject.status === 500) {
+		return outProject;
+	} else if (outProject.status === 200) {
+		return generateMessageResponse(
+			"Note is associated with a project",
+			400
+		);
+	}
+
+	// Se arriviamo qui, la nota non è associata ad un progetto
+
+	// Ottieniamo la collezione delle note
+	const noteClient: Collection<Note> =
+		await getCollection<Note>(NOTE_COLLECTION);
+
+	const outNote = await findCollectionWrapper<Note>(
+		{ _id: noteId },
 		noteClient
 	);
 
-	// Controlliamo che il sender sia l'owner
-	if (noteQueryOut === undefined) {
-		return generateMessageResponse("Error in database", 400);
-	} else if (noteQueryOut.length === 0) {
-		return generateMessageResponse("Note not found", 400);
-	} else if (!noteQueryOut[0].ownerId.equals(senderId)) {
-		return generateMessageResponse("Sender isn't the owner", 400);
+	if (outNote.status !== 200) {
+		return outNote;
 	}
 
-	// Eliminiamo la nota
-	const result: number | undefined = await deleteInCollection(id, noteClient);
-	if (result === undefined) {
-		return generateMessageResponse("Error while deleting", 400);
+	const note: StringNote[] = await outNote.json();
+
+	// Controlliamo che l'owner sia l'utente corrispondente
+	if (note[0].ownerId !== userId) {
+		return generateMessageResponse("Unauthorized", 400);
 	}
 
-	return generateMessageResponse("Note deleted", 200);
+	return await deleteCollectionWrapper<Note>({ _id: noteId }, noteClient);
 };
