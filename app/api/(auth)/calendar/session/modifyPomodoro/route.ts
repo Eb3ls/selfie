@@ -15,7 +15,7 @@ import { Collection } from "mongodb";
 import { NextRequest } from "next/server";
 
 const requestTemplate = {
-	sessionId: "",
+	_id: "", // Id della sessione
 	cycles: 0
 };
 
@@ -41,7 +41,7 @@ export const PATCH = async (request: NextRequest) => {
 	const userId: string = user._id!;
 
 	// Estraiamo l'id dal body
-	const sessionId: string = newBody.sessionId!;
+	const sessionId: string = newBody._id!;
 
 	// Estraiamo il numero di cicli
 	const cycles: number = newBody.cycles!;

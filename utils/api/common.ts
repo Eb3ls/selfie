@@ -111,7 +111,10 @@ export function stringsToObjectId(
 			if (Array.isArray(object[key])) {
 				// Se è un array chiamiamo diveArray, passando che non proveniamo da un campo che deve essere ObjectId
 				outObject[key] = diveArray(object[key], false);
-			} else if (typeof object[key] === "object") {
+			} else if (
+				typeof object[key] === "object" &&
+				object[key] !== null
+			) {
 				// Se è un oggetto chiamiamo stringsToObjectId, passando che non proveniamo da un campo che deve essere ObjectId
 				outObject[key] = stringsToObjectId(object[key], false);
 			} else {

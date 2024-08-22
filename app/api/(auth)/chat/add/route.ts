@@ -75,8 +75,7 @@ export const POST = async (request: NextRequest) => {
 	// Creiamo la chat
 	const newChat: StringChat = generateStringModel<StringChat>(
 		{
-			userIdList: userIdList,
-			groupChat: false
+			userIdList: userIdList
 		},
 		"Chat"
 	);
