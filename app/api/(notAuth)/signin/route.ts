@@ -1,25 +1,25 @@
-import { NextRequest } from "next/server";
-import { Collection, WithId } from "mongodb";
 import {
-	getCollection,
-	USER_COLLECTION,
-	findInCollection,
-} from "@/db_utils/db_functions";
-
-import { User } from "@/db_utils/models/User";
-import {
-	parseJSONInput,
 	generateMessageResponse,
 	isTemplateValid,
-} from "@/api_utils/api_functions";
-
+	parseJSONInput
+} from "@/utils/api/api";
+import {
+	USER_COLLECTION,
+	User,
+	findCollectionWrapper,
+	getCollection
+} from "@/utils/db/db";
+import { login } from "@/utils/session/session";
 import crypto from "crypto";
-import { login } from "@/session_utils/session";
+import { Collection } from "mongodb";
+import { NextRequest } from "next/server";
 
-const requestTemplate: Partial<User> = {
+const requestTemplate = {
 	username: "",
-	password: "",
+	password: ""
 };
+
+type RequestType = typeof requestTemplate;
 
 export const POST = async (request: NextRequest) => {
 	// Convertiamo in JSON il body della richiesta
@@ -33,10 +33,7 @@ export const POST = async (request: NextRequest) => {
 		return generateMessageResponse("Invalid input", 400);
 	}
 
-	// Ottieniamo la collezione degli utenti
-	const client: Collection<User> = await getCollection<User>(USER_COLLECTION);
-
-	const castedUser: User = body as User;
+	const castedUser: RequestType = body as RequestType;
 
 	const passwordEncrypted: string = crypto
 		.createHash("sha256")
@@ -45,31 +42,29 @@ export const POST = async (request: NextRequest) => {
 
 	castedUser.password = passwordEncrypted;
 
-	// Controlliamo se l'utente esiste
-	const queryOut: WithId<User>[] | undefined = await findInCollection<User>(
+	// Ottieniamo la collezione degli utenti
+	const client: Collection<User> = await getCollection<User>(USER_COLLECTION);
+
+	const userOut = await findCollectionWrapper<User>(
 		{ username: castedUser.username },
 		client
 	);
-	if (queryOut === undefined) {
-		return generateMessageResponse("Error while trying to check user", 400);
-	} else if (queryOut.length === 0) {
+
+	if (userOut.status !== 200) {
 		return generateMessageResponse("User not found", 400);
 	}
 
+	const user: User = (await userOut.json())[0];
+
 	// Se arriviamo qua significa che lo abbiamo trovato
-	if (queryOut[0].password !== castedUser.password) {
+	if (user.password !== castedUser.password) {
 		return generateMessageResponse("Wrong password", 400);
 	}
 
-	const resp = generateMessageResponse("User found", 200);
+	const response = generateMessageResponse("User found", 200);
 
 	// Impostiamo i cookie
-	login(
-		queryOut[0]._id,
-		castedUser.username,
-		passwordEncrypted,
-		resp.cookies
-	);
+	login(user._id!, user.username, passwordEncrypted, response.cookies);
 
-	return resp;
+	return response;
 };

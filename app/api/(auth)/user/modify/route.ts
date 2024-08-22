@@ -1,98 +1,96 @@
-import { NextRequest } from "next/server";
-import { Collection, ObjectId, WithId } from "mongodb";
-import { User } from "@/db_utils/models/User";
 import {
-	parseJSONInput,
 	generateMessageResponse,
-	isTemplateSubset,
-	isTemplateValid,
 	generateObjectResponse,
-	stringsToObjects,
-	isValidEmail,
-} from "@/api_utils/api_functions";
-import { JWTPayload } from "jose";
-import { getSession } from "@/session_utils/session";
+	validate
+} from "@/utils/api/api";
 import {
-	getCollection,
+	StringUser,
 	USER_COLLECTION,
-	updateOneAndFetchInCollection,
-} from "@/db_utils/db_functions";
+	User,
+	findCollectionWrapper,
+	getCollection,
+	updateCollectionWrapper
+} from "@/utils/db/db";
 import crypto from "crypto";
+import { Collection } from "mongodb";
+import { NextRequest } from "next/server";
 
-const requestTemplate: Partial<User> = {
+const requestTemplate = {
 	username: "",
 	firstName: "",
 	lastName: "",
-	birthDay: new Date(),
-};
-
-const requestEmailTemplate: Partial<User> = {
 	email: "",
+	password: "",
+	oldPassword: "",
+	birthDay: ""
 };
 
-const requestPasswordTemplate: Partial<User> = {
-	password: "",
-};
+type RequestType = typeof requestTemplate;
 
 export const PATCH = async (request: NextRequest) => {
-	// Prendiamo i cookie della richiesta
-	const cookies: JWTPayload = (await getSession(
-		request.cookies
-	)) as JWTPayload; // Assumiamo che la sessione sia stata validata dal middleware
+	// Validazione della richiesta
+	const validation = await validate<RequestType>(
+		request,
+		requestTemplate,
+		false
+	);
 
-	const user: any = cookies.user as Partial<User>;
-	const userId: ObjectId = ObjectId.createFromHexString(user._id);
-
-	// Convertiamo in JSON il body della richiesta
-	const body: Object | undefined = await parseJSONInput(request);
-	if (body === undefined) {
-		return generateMessageResponse("Invalid input", 400);
+	// Se la validazione fallisce, ritorna il messaggio di errore
+	if (validation === null) {
+		return generateMessageResponse("Invalid request", 400);
 	}
 
-	// Cambio le stringhe date in oggetti Date
-	const newBody: any = stringsToObjects(body);
+	// Estraiamo l'utente e il corpo della richiesta
+	const { user: user, body: newBody } = validation;
 
-	// Controlliamo che il body abbia tutti i campi necessari
-	let choice: string = "";
+	// TODO: Controllare che l'email sia valida
 
-	if (isTemplateValid(newBody, requestEmailTemplate)) {
-		choice = "email";
-	} else if (isTemplateValid(newBody, requestPasswordTemplate)) {
-		choice = "password";
-	} else if (isTemplateSubset(newBody, requestTemplate, "")) {
-		choice = "basic";
+	// Estraiamo l'id dell'utente
+	const userId: string = user._id!;
+
+	// Ottieniamo la collezione degli utenti
+	const client: Collection<User> = await getCollection<User>(USER_COLLECTION);
+
+	const userOut = await findCollectionWrapper<User>({ _id: userId }, client);
+
+	if (userOut.status !== 200) {
+		return generateMessageResponse("User not found", 400);
 	}
 
-	if (choice === "") {
-		return generateMessageResponse("Invalid input", 400);
-	}
-	if (choice === "email") {
-		// Controlliamo che la mail sia valida
-		if (!isValidEmail(newBody.email)) {
-			return generateMessageResponse("Invalid email", 400);
-		}
-	}
-	if (choice === "password") {
-		// Criptiamo la password
+	const userString: StringUser = (await userOut.json())[0];
 
-		newBody.password = crypto
+	// Creiamo un oggetto con i campi da modificare
+	const newFields: Partial<StringUser> = {
+		username: newBody.username,
+		firstName: newBody.firstName,
+		lastName: newBody.lastName,
+		email: newBody.email,
+		birthDay: newBody.birthDay
+	};
+
+	if (
+		newBody.password !== "" &&
+		newBody.oldPassword !== "" &&
+		newBody.oldPassword === userString.password
+	) {
+		newFields.password = crypto
 			.createHash("sha256")
 			.update(newBody.password)
 			.digest("hex");
 	}
 
-	// Ottieniamo la collezione degli utenti
-	const client: Collection<User> = await getCollection<User>(USER_COLLECTION);
+	// Modifichiamo l'utente
+	const updateOut = await updateCollectionWrapper<User>(
+		{ _id: userId },
+		{ $set: newFields } as any,
+		client
+	);
 
-	// Aggiorno l'utente col pomodoro
-	const modifiedUser: WithId<User> | undefined | null =
-		await updateOneAndFetchInCollection<User>(userId, newBody, client);
-
-	if (modifiedUser === undefined) {
-		return generateMessageResponse("Error in database", 400);
-	} else if (modifiedUser === null) {
-		return generateMessageResponse("User not found", 400);
+	if (updateOut.status !== 200) {
+		return updateOut;
 	}
 
-	return generateObjectResponse(modifiedUser, 200);
+	const updatedUser: StringUser = (await updateOut.json())[0];
+
+	return generateObjectResponse(updatedUser, 200);
 };

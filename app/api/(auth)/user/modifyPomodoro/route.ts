@@ -1,73 +1,70 @@
-import { NextRequest } from "next/server";
-import { Collection, ObjectId, WithId } from "mongodb";
-import { Pomodoro } from "@/db_utils/models/Pomodoro";
-import { User } from "@/db_utils/models/User";
 import {
-	parseJSONInput,
 	generateMessageResponse,
-	isTemplateValid,
 	generateObjectResponse,
-	stringsToObjects,
-} from "@/api_utils/api_functions";
-import { JWTPayload } from "jose";
-import { getSession } from "@/session_utils/session";
+	validate
+} from "@/utils/api/api";
 import {
-	getCollection,
+	Pomodoro,
+	StringUser,
 	USER_COLLECTION,
-	updateOneAndFetchInCollection,
-} from "@/db_utils/db_functions";
+	User,
+	getCollection,
+	updateCollectionWrapper
+} from "@/utils/db/db";
+import { Collection } from "mongodb";
+import { NextRequest } from "next/server";
 
-const requestTemplate: Partial<Pomodoro> = {
-	_id: new ObjectId(),
-	cycles: 4,
+const requestTemplate = {
+	cycles: 0,
 	cyclesCompleted: 0,
-	studyDuration: 25,
-	breakDuration: 5,
+	studyDuration: 0,
+	breakDuration: 0
 };
 
+type RequestType = typeof requestTemplate;
+
 export const PATCH = async (request: NextRequest) => {
-	// Prendiamo i cookie della richiesta
-	const cookies: JWTPayload = (await getSession(
-		request.cookies
-	)) as JWTPayload; // Assumiamo che la sessione sia stata validata dal middleware
+	// Validazione della richiesta
+	const validation = await validate<RequestType>(
+		request,
+		requestTemplate,
+		false
+	);
 
-	const owner: any = cookies.user as Partial<User>;
-	const userId: ObjectId = ObjectId.createFromHexString(owner._id);
-
-	// Convertiamo in JSON il body della richiesta
-	const body: Object | undefined = await parseJSONInput(request);
-	if (body === undefined) {
-		return generateMessageResponse("Invalid input", 400);
+	// Se la validazione fallisce, ritorna il messaggio di errore
+	if (validation === null) {
+		return generateMessageResponse("Invalid request", 400);
 	}
 
-	// Cambio le stringhe date in oggetti Date
-	const newBody: any = stringsToObjects(body);
+	// Estraiamo l'utente e il corpo della richiesta
+	const { user: user, body: newBody } = validation;
 
-	// Controlliamo che il body abbia tutti i campi necessari
-	if (!isTemplateValid(newBody, requestTemplate)) {
-		return generateMessageResponse("Invalid input", 400);
-	}
+	// Estraiamo l'id dell'utente
+	const userId: string = user._id!;
 
-	const { ...pomodoro } = newBody as Pomodoro;
-	// Creo il pomodoro da inserire
-	const pomodoroObject: any = { pomodoro: pomodoro };
+	// Creiamo un oggetto con i campi da modificare
+	const newFields: Partial<Pomodoro> = {
+		cycles: newBody.cycles,
+		cyclesCompleted: newBody.cyclesCompleted,
+		studyDuration: newBody.studyDuration,
+		breakDuration: newBody.breakDuration
+	};
 
 	// Ottieniamo la collezione degli utenti
 	const client: Collection<User> = await getCollection<User>(USER_COLLECTION);
 
-	// Aggiorno l'utente col pomodoro
-	const modifiedUser: WithId<User> | undefined | null =
-		await updateOneAndFetchInCollection<User>(
-			userId,
-			pomodoroObject,
-			client
-		);
+	// Modifichiamo l'utente
+	const outUser = await updateCollectionWrapper<User>(
+		{ _id: userId },
+		{ $set: { pomodoro: newFields } } as any,
+		client
+	);
 
-	if (modifiedUser === undefined) {
-		return generateMessageResponse("Error in database", 400);
-	} else if (modifiedUser === null) {
-		return generateMessageResponse("User not found", 400);
+	if (outUser.status !== 200) {
+		return outUser;
 	}
 
-	return generateObjectResponse(modifiedUser.pomodoro, 200);
+	const updatedUser: StringUser = (await outUser.json())[0];
+
+	return generateObjectResponse(updatedUser, 200);
 };

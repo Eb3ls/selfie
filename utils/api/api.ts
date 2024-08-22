@@ -180,25 +180,27 @@ export async function validate<T>(
 		return null;
 	}
 
+	const newBody = nullSanitizer(body, requestTemplate);
+
 	// Controlliamo che il body abbia tutti i campi necessari
 	if (onlySubset) {
 		// Se è necessario solo un sottoinsieme del template
-		if (!isTemplateSubset(body, requestTemplate, subsetFields)) {
+		if (!isTemplateSubset(newBody, requestTemplate, subsetFields)) {
 			return null;
 		}
 	} else {
 		// Se è necessario tutto il template
-		if (!isTemplateValid(body, requestTemplate)) {
+		if (!isTemplateValid(newBody, requestTemplate)) {
 			return null;
 		}
 	}
 
 	// Controlliamo che i campi ObjectId siano validi
-	if (!areIdFieldsValid(body)) {
+	if (!areIdFieldsValid(newBody)) {
 		return null;
 	}
 
-	return { user: user, body: body };
+	return { user: user, body: newBody };
 }
 
 // =============================================================
@@ -273,6 +275,24 @@ export async function usernameListToIds(
 	}
 
 	return generateObjectResponse({ users: userIds }, 200);
+}
+
+export function nullSanitizer(toValidate: any, template: any) {
+	let convertedToValidate = { ...toValidate };
+	const keys = Object.keys(toValidate);
+
+	for (const key of keys) {
+		if (
+			Array.isArray(template[key]) &&
+			template[key].length === 0 &&
+			convertedToValidate[key] === null
+		) {
+			// Se nel template è un array vuoto e il valore è null, allora è valido
+			convertedToValidate[key] = template[key];
+		}
+	}
+
+	return convertedToValidate;
 }
 
 // =============================================================
