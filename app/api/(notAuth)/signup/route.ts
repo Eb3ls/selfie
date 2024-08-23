@@ -2,7 +2,8 @@ import {
 	generateMessageResponse,
 	generateStringModel,
 	isTemplateValid,
-	parseJSONInput
+	parseJSONInput,
+	isEmailValid
 } from "@/utils/api/api";
 import {
 	StringUser,
@@ -28,7 +29,7 @@ type RequestType = typeof requestTemplate;
 
 export const POST = async (request: NextRequest) => {
 	// Convertiamo in JSON il body della richiesta
-	const body: Object | undefined = await parseJSONInput(request);
+	const body: RequestType | undefined = await parseJSONInput(request);
 	if (body === undefined) {
 		return generateMessageResponse("Invalid input", 400);
 	}
@@ -38,7 +39,9 @@ export const POST = async (request: NextRequest) => {
 		return generateMessageResponse("Invalid input", 400);
 	}
 
-	// TODO: Controllare che l'email sia valida
+	if(!isEmailValid(body.email)) {
+		return generateMessageResponse("Invalid email", 400);
+	}
 
 	// Creaiamo un nuovo utente con quei campi
 	const newUser: StringUser = generateStringModel(body, "User");

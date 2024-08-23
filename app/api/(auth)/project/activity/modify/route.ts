@@ -196,7 +196,4 @@ export const PATCH = async (request: NextRequest) => {
 	)[0];
 
 	return generateObjectResponse(updatedProjectActivity, 200);
-
-	// TODO: Check modifiche date valide per le project activity
-	// linkate. Perchè le date non possono essere sovrapponibili.
 };

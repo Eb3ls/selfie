@@ -23,7 +23,7 @@ type RequestType = typeof requestTemplate;
 
 export const POST = async (request: NextRequest) => {
 	// Convertiamo in JSON il body della richiesta
-	const body: Object | undefined = await parseJSONInput(request);
+	const body: RequestType | undefined = await parseJSONInput(request);
 	if (body === undefined) {
 		return generateMessageResponse("Invalid input", 400);
 	}

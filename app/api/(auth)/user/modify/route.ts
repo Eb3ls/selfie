@@ -1,7 +1,8 @@
 import {
 	generateMessageResponse,
 	generateObjectResponse,
-	validate
+	validate,
+	isEmailValid
 } from "@/utils/api/api";
 import {
 	StringUser,
@@ -43,7 +44,9 @@ export const PATCH = async (request: NextRequest) => {
 	// Estraiamo l'utente e il corpo della richiesta
 	const { user: user, body: newBody } = validation;
 
-	// TODO: Controllare che l'email sia valida
+	if(!isEmailValid(newBody.email)) {
+		return generateMessageResponse("Invalid email", 400);
+	}
 
 	// Estraiamo l'id dell'utente
 	const userId: string = user._id!;
