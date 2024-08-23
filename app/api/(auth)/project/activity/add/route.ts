@@ -144,7 +144,8 @@ export const POST = async (request: NextRequest) => {
 		return noteOut;
 	}
 
-	const note: StringNote[] = await noteOut.json();
+	const note: StringNote = await noteOut.json();
+	console.log(note);
 
 	// Creiamo l'attività
 	const newActivity: StringProjectActivity =
@@ -155,10 +156,13 @@ export const POST = async (request: NextRequest) => {
 				dtStart: newBody.dtStart,
 				due: newBody.due,
 				ownerId: userId,
+				phaseId: newBody.phaseId,
+				isMilestone: newBody.isMilestone,
+				projectId: project[0]._id,
 				userIdList: userIdList,
-				noteId: note[0]._id!
+				noteId: note._id
 			},
-			"Activity"
+			"ProjectActivity"
 		);
 
 	// Otteniamo la collezione delle attività

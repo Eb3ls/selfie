@@ -12,6 +12,7 @@ import {
 	updateCollectionWrapper
 } from "@/utils/db/db";
 import { Collection } from "mongodb";
+import { Project } from "next/dist/build/swc";
 import { NextRequest } from "next/server";
 
 const requestTemplate = {
@@ -82,9 +83,10 @@ export const PATCH = async (request: NextRequest) => {
 	)[0];
 
 	// Controlliamo che l'owner sia l'utente corrispondente
-	if (prevActivity.ownerId !== userId) {
+	if (prevActivity.ownerId !== userId ) {
 		return generateMessageResponse("Unauthorized", 400);
 	}
+
 
 	// Controlliamo che appartengano allo stesso progetto
 	if (prevActivity.projectId !== nextActivity.projectId) {
@@ -94,39 +96,19 @@ export const PATCH = async (request: NextRequest) => {
 		);
 	}
 
-	// Controlliamo se le attività sono già collegate
-	if (prevActivity.nextIdList.includes(nextId)) {
-		return generateMessageResponse("Already linked", 400);
+	// Controlliamo che le attività siano collegate
+	if (!prevActivity.nextIdList.includes(nextId)) {
+		return generateMessageResponse("Activities are not linked", 400);
 	}
 
-	// Controlliamo se le attività sono in ordine temporale
-	if (
-		prevActivity.dtStart > nextActivity.dtStart ||
-		prevActivity.due > nextActivity.due
-	) {
-		return generateMessageResponse(
-			"Activities can't be in the same period of time",
-			400
-		);
-	}
-
-	// Controlliamo se l'attività successiva è già attiva
-	if (
-		nextActivity.status !== "ACTIVABLE" &&
-		nextActivity.status !== "WAITING"
-	) {
-		return generateMessageResponse("Can't link an active activity", 400);
-	}
-
-	// Inseriamo l'id dell'attività precedente nell'array delle attività precedenti del next
+	// Rimuoviamo l'id dell'attività precedente nell'array delle attività precedenti del next
 	let nextModifiedIds = nextActivity.prevIdList;
-	nextModifiedIds.push(prevId);
+	nextModifiedIds = nextModifiedIds.filter(elem => elem !== prevId);
 
-	// Inseriamo l'id dell'attività successiva nell'array delle attività successive del prev
+	// Rimuoviamo l'id dell'attività successiva nell'array delle attività successive del prev
 	let prevModifiedIds = prevActivity.nextIdList;
-	prevModifiedIds.push(nextId);
-
-	console.log("1");
+    prevModifiedIds = prevModifiedIds.filter(elem => elem !== nextId);
+    console.log(prevModifiedIds);
 
 	const prevModifiedOut = await updateCollectionWrapper<ProjectActivity>(
 		{ _id: prevId },
@@ -140,22 +122,21 @@ export const PATCH = async (request: NextRequest) => {
 		return prevModifiedOut;
 	}
 
-	console.log("2");
+    let newStatus = nextActivity.status;
+	// Se l'attività successiva non ha più attività precedenti ed è in stato di waiting, diventa activable
+    if(nextModifiedIds.length === 0 && nextActivity.status === "WAITING") {
+        newStatus = "ACTIVABLE";
+    }
 
-	// Controlliamo se l'attività successiva può essere attivabile
-	let newStatus = "ACTIVABLE";
-	if (
-		prevActivity.status !== "COMPLETED" ||
-		nextActivity.status === "WAITING"
-	) {
-		newStatus = "WAITING";
-	}
+    // TODO: Se le attività precedenti che rimangono sono tutte completed, diventa activable
 
 	const nextModifiedOut = await updateCollectionWrapper<ProjectActivity>(
 		{ _id: nextId },
 		{
-			$set:{prevIdList: nextModifiedIds,status: newStatus}
-			
+            $set: {
+                prevIdList: nextModifiedIds,
+                status: newStatus
+            }
 		} as any,
 		projectActivityClient
 	);
@@ -163,8 +144,6 @@ export const PATCH = async (request: NextRequest) => {
 	if (nextModifiedOut.status !== 200) {
 		return nextModifiedOut;
 	}
-
-	console.log("3");
 
 	const prevModified: StringProjectActivity = await prevModifiedOut.json();
 	const nextModified: StringProjectActivity = await nextModifiedOut.json();

@@ -19,6 +19,7 @@ import {
 	createPhase,
 	createPomodoro,
 	createProject,
+	createProjectActivity,
 	createSession,
 	createUser,
 	findCollectionWrapper,
@@ -311,6 +312,7 @@ type names =
 	| "Phase"
 	| "Pomodoro"
 	| "Project"
+	| "ProjectActivity"
 	| "Session"
 	| "User";
 
@@ -326,6 +328,7 @@ const functionsMap = {
 	"Phase": createPhase,
 	"Pomodoro": createPomodoro,
 	"Project": createProject,
+	"ProjectActivity": createProjectActivity,
 	"Session": createSession,
 	"User": createUser
 };
