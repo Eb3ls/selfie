@@ -1,9 +1,9 @@
 import {
 	generateMessageResponse,
 	generateStringModel,
+	isEmailValid,
 	isTemplateValid,
-	parseJSONInput,
-	isEmailValid
+	parseJSONInput
 } from "@/utils/api/api";
 import {
 	StringUser,
@@ -39,7 +39,7 @@ export const POST = async (request: NextRequest) => {
 		return generateMessageResponse("Invalid input", 400);
 	}
 
-	if(!isEmailValid(body.email)) {
+	if (!isEmailValid(body.email)) {
 		return generateMessageResponse("Invalid email", 400);
 	}
 

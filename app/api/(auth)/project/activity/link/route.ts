@@ -126,12 +126,10 @@ export const PATCH = async (request: NextRequest) => {
 	let prevModifiedIds = prevActivity.nextIdList;
 	prevModifiedIds.push(nextId);
 
-	console.log("1");
-
 	const prevModifiedOut = await updateCollectionWrapper<ProjectActivity>(
 		{ _id: prevId },
 		{
-			$set: {nextIdList: prevModifiedIds}
+			$set: { nextIdList: prevModifiedIds }
 		} as any,
 		projectActivityClient
 	);
@@ -139,8 +137,6 @@ export const PATCH = async (request: NextRequest) => {
 	if (prevModifiedOut.status !== 200) {
 		return prevModifiedOut;
 	}
-
-	console.log("2");
 
 	// Controlliamo se l'attività successiva può essere attivabile
 	let newStatus = "ACTIVABLE";
@@ -154,8 +150,7 @@ export const PATCH = async (request: NextRequest) => {
 	const nextModifiedOut = await updateCollectionWrapper<ProjectActivity>(
 		{ _id: nextId },
 		{
-			$set:{prevIdList: nextModifiedIds,status: newStatus}
-			
+			$set: { prevIdList: nextModifiedIds, status: newStatus }
 		} as any,
 		projectActivityClient
 	);
@@ -164,10 +159,13 @@ export const PATCH = async (request: NextRequest) => {
 		return nextModifiedOut;
 	}
 
-	console.log("3");
-
-	const prevModified: StringProjectActivity = await prevModifiedOut.json();
-	const nextModified: StringProjectActivity = await nextModifiedOut.json();
+	// TODO: controllare se prevModifiedOut e nextModifiedOut sono array
+	const prevModified: StringProjectActivity = (
+		await prevModifiedOut.json()
+	)[0];
+	const nextModified: StringProjectActivity = (
+		await nextModifiedOut.json()
+	)[0];
 
 	return generateObjectResponse(
 		{ prevData: prevModified, nextData: nextModified },

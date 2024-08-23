@@ -30,8 +30,7 @@ export const PATCH = async (request: NextRequest) => {
 	const validation = await validate<RequestType>(
 		request,
 		requestTemplate,
-		true,
-		["summary", "dtStart", "due"]
+		false
 	);
 
 	// Se la validazione fallisce, ritorna il messaggio di errore

@@ -129,8 +129,7 @@ export const PATCH = async (request: NextRequest) => {
 	}
 
 	// Controlliamo che la dtStart sia maggiore delle due di tutte le prev
-	for(const elemId of projectActivity[0].prevIdList) {
-
+	for (const elemId of projectActivity[0].prevIdList) {
 		const prevOut = await findCollectionWrapper<ProjectActivity>(
 			{ _id: elemId },
 			projectActivityClient
@@ -142,31 +141,30 @@ export const PATCH = async (request: NextRequest) => {
 
 		const prev: StringProjectActivity = (await prevOut.json())[0];
 
-		if(newBody.dtStart < prev.due) {
+		if (newBody.dtStart < prev.due) {
 			return generateMessageResponse(
-				"the new dtStart is not greater than a previus activity due",
+				"The new dtStart is not greater than a previus activity due",
 				400
 			);
 		}
 	}
 
 	// Controlliamo che la due sia minore di tutte le dtStart di tutte le next
-	for(const elemId of projectActivity[0].nextIdList) {
-
+	for (const elemId of projectActivity[0].nextIdList) {
 		const nextOut = await findCollectionWrapper<ProjectActivity>(
 			{ _id: elemId },
 			projectActivityClient
-		);	
+		);
 
 		if (nextOut.status !== 200) {
 			return nextOut;
-		}	
+		}
 
-		const next: StringProjectActivity = (await nextOut.json())[0];	
+		const next: StringProjectActivity = (await nextOut.json())[0];
 
-		if(newBody.due > next.dtStart) {
+		if (newBody.due > next.dtStart) {
 			return generateMessageResponse(
-				"the new due is not less than a next activity dtStart",
+				"The new due is not less than a next activity dtStart",
 				400
 			);
 		}

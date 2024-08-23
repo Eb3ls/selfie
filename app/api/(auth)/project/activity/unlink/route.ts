@@ -12,7 +12,6 @@ import {
 	updateCollectionWrapper
 } from "@/utils/db/db";
 import { Collection } from "mongodb";
-import { Project } from "next/dist/build/swc";
 import { NextRequest } from "next/server";
 
 const requestTemplate = {
@@ -83,10 +82,9 @@ export const PATCH = async (request: NextRequest) => {
 	)[0];
 
 	// Controlliamo che l'owner sia l'utente corrispondente
-	if (prevActivity.ownerId !== userId ) {
+	if (prevActivity.ownerId !== userId) {
 		return generateMessageResponse("Unauthorized", 400);
 	}
-
 
 	// Controlliamo che appartengano allo stesso progetto
 	if (prevActivity.projectId !== nextActivity.projectId) {
@@ -103,17 +101,16 @@ export const PATCH = async (request: NextRequest) => {
 
 	// Rimuoviamo l'id dell'attività precedente nell'array delle attività precedenti del next
 	let nextModifiedIds = nextActivity.prevIdList;
-	nextModifiedIds = nextModifiedIds.filter(elem => elem !== prevId);
+	nextModifiedIds = nextModifiedIds.filter((elem) => elem !== prevId);
 
 	// Rimuoviamo l'id dell'attività successiva nell'array delle attività successive del prev
 	let prevModifiedIds = prevActivity.nextIdList;
-    prevModifiedIds = prevModifiedIds.filter(elem => elem !== nextId);
-    console.log(prevModifiedIds);
+	prevModifiedIds = prevModifiedIds.filter((elem) => elem !== nextId);
 
 	const prevModifiedOut = await updateCollectionWrapper<ProjectActivity>(
 		{ _id: prevId },
 		{
-			$set: {nextIdList: prevModifiedIds}
+			$set: { nextIdList: prevModifiedIds }
 		} as any,
 		projectActivityClient
 	);
@@ -122,14 +119,15 @@ export const PATCH = async (request: NextRequest) => {
 		return prevModifiedOut;
 	}
 
-    let newStatus = nextActivity.status;
-	let completed: boolean =  true;
+	let newStatus = nextActivity.status;
+	let completed: boolean = true;
 
-	for(const elemId of nextModifiedIds){
-		const prevNextActivityOut = await findCollectionWrapper<ProjectActivity>(
-		{ _id: elemId },
-		projectActivityClient
-		);
+	for (const elemId of nextModifiedIds) {
+		const prevNextActivityOut =
+			await findCollectionWrapper<ProjectActivity>(
+				{ _id: elemId },
+				projectActivityClient
+			);
 
 		if (prevNextActivityOut.status !== 200) {
 			return prevNextActivityOut;
@@ -139,24 +137,24 @@ export const PATCH = async (request: NextRequest) => {
 			await prevNextActivityOut.json()
 		)[0];
 
-		if(prevNextActivity.status !== "COMPLETED") {
+		if (prevNextActivity.status !== "COMPLETED") {
 			completed = false;
 			break;
 		}
 	}
 
 	// Se l'attività successiva non ha più attività precedenti ed è in stato di waiting, diventa activable
-    if(nextActivity.status === "WAITING" && completed) {
-        newStatus = "ACTIVABLE";
-    }
+	if (nextActivity.status === "WAITING" && completed) {
+		newStatus = "ACTIVABLE";
+	}
 
 	const nextModifiedOut = await updateCollectionWrapper<ProjectActivity>(
 		{ _id: nextId },
 		{
-            $set: {
-                prevIdList: nextModifiedIds,
-                status: newStatus
-            }
+			$set: {
+				prevIdList: nextModifiedIds,
+				status: newStatus
+			}
 		} as any,
 		projectActivityClient
 	);
@@ -165,8 +163,12 @@ export const PATCH = async (request: NextRequest) => {
 		return nextModifiedOut;
 	}
 
-	const prevModified: StringProjectActivity = await prevModifiedOut.json();
-	const nextModified: StringProjectActivity = await nextModifiedOut.json();
+	const prevModified: StringProjectActivity = (
+		await prevModifiedOut.json()
+	)[0];
+	const nextModified: StringProjectActivity = (
+		await nextModifiedOut.json()
+	)[0];
 
 	return generateObjectResponse(
 		{ prevData: prevModified, nextData: nextModified },

@@ -11,7 +11,6 @@ import {
 	updateCollectionWrapper
 } from "@/utils/db/db";
 import { Collection } from "mongodb";
-import next from "next";
 import { NextRequest } from "next/server";
 
 const requestTemplate = {

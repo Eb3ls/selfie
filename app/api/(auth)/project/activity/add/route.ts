@@ -145,7 +145,6 @@ export const POST = async (request: NextRequest) => {
 	}
 
 	const note: StringNote = await noteOut.json();
-	console.log(note);
 
 	// Creiamo l'attività
 	const newActivity: StringProjectActivity =
