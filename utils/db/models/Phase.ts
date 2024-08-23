@@ -11,7 +11,8 @@ export interface Phase {
 	ownerId: ObjectId;		// Utente che ha creato la fase
 	projectId: ObjectId;	// Progetto a cui appartiene la fase
 	parentId: ObjectId;		// Padre della fase, se non coincide con projectId allora è sottofase
-	//TODO: Aggiungere data di inizio e fine
+	dtStart: Date;			// Data di inizio della fase
+	due: Date;				// Data di fine della fase
 }
 
 export type StringPhase = ConvertToString<Phase>;
@@ -20,12 +21,16 @@ export function createPhase({
 	summary = "",
 	ownerId = new ObjectId(),
 	projectId = new ObjectId(),
-	parentId = new ObjectId()
+	parentId = new ObjectId(),
+	dtStart = new Date(new Date().toISOString()),
+	due = new Date(new Date().toISOString())
 }: Partial<Phase>): Phase {
 	return {
 		summary: summary,
 		ownerId: ownerId,
 		projectId: projectId,
-		parentId: parentId
+		parentId: parentId,
+		dtStart: dtStart,
+		due: due
 	};
 }

@@ -2,9 +2,14 @@ import { generateMessageResponse, validate } from "@/utils/api/api";
 import {
 	NOTE_COLLECTION,
 	Note,
+	PHASE_COLLECTION,
+	PROJECT_ACTIVITY_COLLECTION,
 	PROJECT_COLLECTION,
+	Phase,
 	Project,
+	ProjectActivity,
 	StringProject,
+	StringProjectActivity,
 	deleteCollectionWrapper,
 	findCollectionWrapper,
 	getCollection
@@ -60,9 +65,64 @@ export const DELETE = async (request: NextRequest) => {
 		return generateMessageResponse("Unauthorized", 400);
 	}
 
+	// Ottieniamo la collezione delle fasi
+	const phaseClient: Collection<Phase> =
+		await getCollection<Phase>(PHASE_COLLECTION);
+
+	const phaseOut = await deleteCollectionWrapper<Phase>(
+		{ projectId: projectId },
+		phaseClient
+	);
+
+	if (phaseOut.status === 500) {
+		return;
+	}
+
+	// Otteniamo la collezione delle attività
+	const projectActivityClient: Collection<ProjectActivity> =
+		await getCollection<ProjectActivity>(PROJECT_ACTIVITY_COLLECTION);
+
+	const projectActivityOut = await findCollectionWrapper<ProjectActivity>(
+		{ projectId: projectId },
+		projectActivityClient
+	);
+
+	if (projectActivityOut.status === 500) {
+		return projectActivityOut;
+	}
+
 	// Ottieniamo la collezione delle note
 	const noteClient: Collection<Note> =
 		await getCollection<Note>(NOTE_COLLECTION);
+
+	// Controlliamo se esistono attività associate al progetto
+	if (projectActivityOut.status === 200) {
+		const projectActivities: StringProjectActivity[] =
+			await projectActivityOut.json();
+
+		// Eliminiamo le note associate alle attività
+		for (const activity of projectActivities) {
+			const noteOut = await deleteCollectionWrapper<Note>(
+				{ _id: activity.noteId },
+				noteClient
+			);
+
+			if (noteOut.status !== 200) {
+				return noteOut;
+			}
+		}
+
+		// Eliminiamo le attività associate al progetto
+		const deletedProjectActivityOut =
+			await deleteCollectionWrapper<ProjectActivity>(
+				{ projectId: projectId },
+				projectActivityClient
+			);
+
+		if (deletedProjectActivityOut.status !== 200) {
+			return deletedProjectActivityOut;
+		}
+	}
 
 	// Eliminiamo la nota associata al progetto
 	const noteOut = await deleteCollectionWrapper<Note>(
@@ -76,6 +136,4 @@ export const DELETE = async (request: NextRequest) => {
 
 	// Eliminiamo il progetto
 	return deleteCollectionWrapper<Project>({ _id: projectId }, projectClient);
-
-	// TODO: Eliminare tutte le note, attività e fasi associate al progetto
 };

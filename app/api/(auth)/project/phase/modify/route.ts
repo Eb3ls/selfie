@@ -5,7 +5,9 @@ import {
 } from "@/utils/api/api";
 import {
 	PHASE_COLLECTION,
+	PROJECT_ACTIVITY_COLLECTION,
 	Phase,
+	ProjectActivity,
 	StringPhase,
 	findCollectionWrapper,
 	getCollection,
@@ -16,7 +18,9 @@ import { NextRequest } from "next/server";
 
 const requestTemplate = {
 	_id: "",
-	summary: ""
+	summary: "",
+	dtStart: "",
+	due: ""
 };
 
 type RequestType = typeof requestTemplate;
@@ -26,7 +30,8 @@ export const PATCH = async (request: NextRequest) => {
 	const validation = await validate<RequestType>(
 		request,
 		requestTemplate,
-		false
+		true,
+		["summary", "dtStart", "due"]
 	);
 
 	// Se la validazione fallisce, ritorna il messaggio di errore
@@ -61,6 +66,39 @@ export const PATCH = async (request: NextRequest) => {
 	// Controlliamo che l'owner sia l'utente corrispondente
 	if (phase[0].ownerId !== userId) {
 		return generateMessageResponse("Unauthorized", 400);
+	}
+
+	// Controlliamo se la fase è una sottofase
+	if (phase[0].parentId !== phase[0].projectId) {
+		const parentPhaseOut = await findCollectionWrapper<Phase>(
+			{ _id: phase[0].parentId },
+			phaseClient
+		);
+
+		if (parentPhaseOut.status !== 200) {
+			return parentPhaseOut;
+		}
+
+		const parentPhase: StringPhase = (await parentPhaseOut.json())[0];
+
+		// TODO: controlliamo che il nuovo range di date sia compreso in quello del parent
+	}
+
+	// Otteniamo la collezione delle projectActivity
+	const projectActivityClient: Collection<ProjectActivity> =
+		await getCollection<ProjectActivity>(PROJECT_ACTIVITY_COLLECTION);
+
+	const projectActivityOut = await findCollectionWrapper<ProjectActivity>(
+		{ phaseId: phaseId },
+		projectActivityClient
+	);
+
+	if (projectActivityOut.status === 500) {
+		return projectActivityOut;
+	}
+
+	if (projectActivityOut.status === 200) {
+		// TODO: controlliamo che il nuovo range di date sia compreso in quello delle attività
 	}
 
 	// Modifichiamo la fase

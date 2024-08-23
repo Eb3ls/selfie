@@ -20,7 +20,9 @@ import { NextRequest } from "next/server";
 const requestTemplate = {
 	summary: "",
 	projectId: "",
-	parentId: ""
+	parentId: "",
+	dtStart: "",
+	due: ""
 };
 
 type RequestType = typeof requestTemplate;
@@ -74,7 +76,7 @@ export const POST = async (request: NextRequest) => {
 	const phaseClient: Collection<Phase> =
 		await getCollection<Phase>(PHASE_COLLECTION);
 
-	// Controlliamo se il progetto è sottofase
+	// Controlliamo se dobbiamo creare una sottofase
 	if (parentId !== projectId) {
 		const phaseOut = await findCollectionWrapper<Phase>(
 			{ _id: parentId },
@@ -91,6 +93,14 @@ export const POST = async (request: NextRequest) => {
 		if (phase[0].parentId !== projectId) {
 			return generateMessageResponse("Parent is already a subphase", 400);
 		}
+
+		// Controlliamo che il range di date sia incluso nel range della fase padre
+		if (phase[0].dtStart > newBody.dtStart || phase[0].due < newBody.due) {
+			return generateMessageResponse(
+				"Date range is not included in parent range",
+				400
+			);
+		}
 	}
 
 	// Creiamo una nuova fase con quei campi
@@ -98,6 +108,9 @@ export const POST = async (request: NextRequest) => {
 		newBody,
 		"Phase"
 	);
+
+	// Aggiungiamo il campo 'ownerId' alla fase
+	newPhase.ownerId = userId;
 
 	return await addCollectionWrapper(newPhase, phaseClient);
 };

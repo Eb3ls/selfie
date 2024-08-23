@@ -81,14 +81,30 @@ export const POST = async (request: NextRequest) => {
 		return phaseOut;
 	}
 
-	const phase: StringPhase[] = await phaseOut.json();
+	const phase: StringPhase = (await phaseOut.json())[0];
+
+	// Controlliamo che l'owner sia l'utente corrispondente
+	if (phase.ownerId !== userId) {
+		return generateMessageResponse(
+			"User is not the owner of the project",
+			400
+		);
+	}
+
+	// Controlliamo che il range di date sia un sottoinsieme del range di date della fase
+	if (phase.dtStart > newBody.dtStart || phase.due < newBody.due) {
+		return generateMessageResponse(
+			"Activity date range is not a subset of the phase date range",
+			400
+		);
+	}
 
 	// Otteniamo la collezione dei progetti
 	const projectClient: Collection<Project> =
 		await getCollection<Project>(PROJECT_COLLECTION);
 
 	const projectOut = await findCollectionWrapper<Project>(
-		{ _id: phase[0].projectId },
+		{ _id: phase.projectId },
 		projectClient
 	);
 
@@ -97,14 +113,6 @@ export const POST = async (request: NextRequest) => {
 	}
 
 	const project: StringProject[] = await projectOut.json();
-
-	// Controlliamo che l'owner sia l'utente corrispondente
-	if (project[0].ownerId !== userId) {
-		return generateMessageResponse(
-			"User is not the owner of the project",
-			400
-		);
-	}
 
 	// Controlliamo che la userList sia un sottoinsieme degli utenti del progetto
 	if (

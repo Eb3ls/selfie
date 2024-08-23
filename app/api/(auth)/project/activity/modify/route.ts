@@ -5,8 +5,11 @@ import {
 	validate
 } from "@/utils/api/api";
 import {
+	PHASE_COLLECTION,
 	PROJECT_ACTIVITY_COLLECTION,
+	Phase,
 	ProjectActivity,
+	StringPhase,
 	StringProjectActivity,
 	findCollectionWrapper,
 	getCollection,
@@ -90,6 +93,41 @@ export const PATCH = async (request: NextRequest) => {
 		);
 	}
 
+	// Controlliamo che gli username passati siano un sottoinsieme di quelli del progetto
+	if (
+		!userIdList.every((userId) =>
+			projectActivity[0].userIdList.includes(userId)
+		)
+	) {
+		return generateMessageResponse(
+			"UsernameList is not a subset of the project users",
+			400
+		);
+	}
+
+	// Otteniamo la collezione delle fasi
+	const phaseClient: Collection<Phase> =
+		await getCollection<Phase>(PHASE_COLLECTION);
+
+	const phaseOut = await findCollectionWrapper<Phase>(
+		{ _id: projectActivity[0].phaseId },
+		phaseClient
+	);
+
+	if (phaseOut.status !== 200) {
+		return phaseOut;
+	}
+
+	const phase: StringPhase = (await phaseOut.json())[0];
+
+	// Controlliamo che il range delle date sia un sottoinsieme di quello della fase
+	if (phase.dtStart > newBody.dtStart || phase.due < newBody.due) {
+		return generateMessageResponse(
+			"Activity date range is not a subset of the phase date range",
+			400
+		);
+	}
+
 	const updateOut = await updateCollectionWrapper<ProjectActivity>(
 		{ _id: activityId },
 		{
@@ -117,5 +155,4 @@ export const PATCH = async (request: NextRequest) => {
 
 	// TODO: Check modifiche date valide per le project activity
 	// linkate. Perchè le date non possono essere sovrapponibili.
-	// Check che gli username passati siano un sottoinsieme di quelli del progetto
 };

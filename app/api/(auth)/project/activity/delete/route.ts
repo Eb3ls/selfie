@@ -7,9 +7,11 @@ import {
 	StringProjectActivity,
 	deleteCollectionWrapper,
 	findCollectionWrapper,
-	getCollection
+	getCollection,
+	updateCollectionWrapper
 } from "@/utils/db/db";
 import { Collection } from "mongodb";
+import next from "next";
 import { NextRequest } from "next/server";
 
 const requestTemplate = {
@@ -61,6 +63,87 @@ export const DELETE = async (request: NextRequest) => {
 		return generateMessageResponse("Unauthorized", 400);
 	}
 
+	// Rimuoviamo l'attività dai nextIdList delle attività precedenti
+	const prevIdList = projectActivity[0].prevIdList;
+	for (const prevId of prevIdList) {
+		const prevActivityOut = await updateCollectionWrapper<ProjectActivity>(
+			{ _id: prevId },
+			{ $pull: { nextIdList: activityId } } as any,
+			projectActivityClient
+		);
+
+		if (prevActivityOut.status !== 200) {
+			return prevActivityOut;
+		}
+	}
+
+	const nextIdList = projectActivity[0].nextIdList;
+
+	// Rimuoviamo l'attività dai prevIdList delle attività successive
+	for (const nextId of nextIdList) {
+		const nextActivityOut = await findCollectionWrapper<ProjectActivity>(
+			{ _id: nextId },
+			projectActivityClient
+		);
+
+		if (nextActivityOut.status !== 200) {
+			return nextActivityOut;
+		}
+
+		const nextActivity: StringProjectActivity[] =
+			await nextActivityOut.json();
+
+		const nextPrevIdList = nextActivity[0].prevIdList.filter(
+			(nextPrevId) => nextPrevId !== activityId
+		);
+
+		if (nextActivity[0].status === "WAITING") {
+			// Controlliamo se le attività successive hanno tutti i prevIdList a COMPLETED
+			let allCompleted = true;
+
+			for (const nextPrevId of nextPrevIdList) {
+				const nextPrevActivityOut =
+					await findCollectionWrapper<ProjectActivity>(
+						{ _id: nextPrevId },
+						projectActivityClient
+					);
+
+				if (nextPrevActivityOut.status !== 200) {
+					return nextPrevActivityOut;
+				}
+
+				const nextPrevActivity: StringProjectActivity[] =
+					await nextPrevActivityOut.json();
+
+				if (nextPrevActivity[0].status !== "COMPLETED") {
+					allCompleted = false;
+					break;
+				}
+			}
+
+			if (allCompleted) {
+				// Se tutte le attività precedenti sono completate, settiamo lo stato a ACTIVABLE
+				const nextActivityOut =
+					await updateCollectionWrapper<ProjectActivity>(
+						{ _id: nextId },
+						{ $set: { status: "ACTIVABLE" } } as any,
+						projectActivityClient
+					);
+
+				if (nextActivityOut.status !== 200) {
+					return nextActivityOut;
+				}
+			}
+		}
+
+		// Rimuoviamo l'attività dai prevIdList delle attività successive
+		const updateOut = await updateCollectionWrapper<ProjectActivity>(
+			{ _id: nextId },
+			{ $pull: { prevIdList: activityId } } as any,
+			projectActivityClient
+		);
+	}
+
 	// Otteniamo la collezione delle note
 	const noteClient: Collection<Note> =
 		await getCollection<Note>(NOTE_COLLECTION);
@@ -79,6 +162,4 @@ export const DELETE = async (request: NextRequest) => {
 		{ _id: activityId },
 		projectActivityClient
 	);
-
-	// TODO: eliminare i link con le altre activity
 };

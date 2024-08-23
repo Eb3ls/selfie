@@ -37,7 +37,8 @@ const QueryFields = [
 	"$or",
 	"$not",
 	"$nor",
-	"$all"
+	"$all",
+	"$pull"
 ];
 
 export { IdFields, IdOrNullFields, IdArrayFields };

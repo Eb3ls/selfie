@@ -5,9 +5,12 @@ import {
 	validate
 } from "@/utils/api/api";
 import {
+	PROJECT_ACTIVITY_COLLECTION,
 	PROJECT_COLLECTION,
 	Project,
+	ProjectActivity,
 	StringProject,
+	StringProjectActivity,
 	findCollectionWrapper,
 	getCollection,
 	updateCollectionWrapper
@@ -78,6 +81,41 @@ export const PATCH = async (request: NextRequest) => {
 		return generateMessageResponse("Unauthorized", 400);
 	}
 
+	// Otteniamo la collezione delle attività
+	const projectActivityClient: Collection<ProjectActivity> =
+		await getCollection<ProjectActivity>(PROJECT_ACTIVITY_COLLECTION);
+
+	const projectActivityOut = await findCollectionWrapper<ProjectActivity>(
+		{ projectId: projectId },
+		projectActivityClient
+	);
+
+	if (projectActivityOut.status === 500) {
+		return;
+	}
+
+	if (projectActivityOut.status === 200) {
+		const projectActivities: StringProjectActivity[] =
+			await projectActivityOut.json();
+
+		// Eliminiamo le persone che non fanno più parte del progetto dalle attività
+		for (const activity of projectActivities) {
+			const newUserIdList = activity.userIdList.filter((id) =>
+				userIdList.includes(id)
+			);
+
+			const updateOut = await updateCollectionWrapper<ProjectActivity>(
+				{ _id: activity._id },
+				{ $set: { userIdList: newUserIdList } } as any,
+				projectActivityClient
+			);
+
+			if (updateOut.status !== 200) {
+				return updateOut;
+			}
+		}
+	}
+
 	// Creiamo un oggetto con i campi da modificare
 	const newFields: Partial<StringProject> = {
 		summary: newBody.summary,
@@ -98,7 +136,4 @@ export const PATCH = async (request: NextRequest) => {
 	const updatedProject: StringProject = (await updateOut.json())[0];
 
 	return generateObjectResponse(updatedProject, 200);
-
-	// TODO: Eliminare dalle attività del progetto le persone che
-	// non fanno più parte del progetto
 };

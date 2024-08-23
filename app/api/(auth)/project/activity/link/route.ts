@@ -94,12 +94,12 @@ export const PATCH = async (request: NextRequest) => {
 		);
 	}
 
-	// Controllo se l'attività è già collegata
+	// Controlliamo se le attività sono già collegate
 	if (prevActivity.nextIdList.includes(nextId)) {
 		return generateMessageResponse("Already linked", 400);
 	}
 
-	// Se l'attività successiva è prima di quella precedente, ritorna un errore
+	// Controlliamo se le attività sono in ordine temporale
 	if (
 		prevActivity.dtStart > nextActivity.dtStart ||
 		prevActivity.due > nextActivity.due
@@ -108,6 +108,14 @@ export const PATCH = async (request: NextRequest) => {
 			"Activities can't be in the same period of time",
 			400
 		);
+	}
+
+	// Controlliamo se l'attività successiva è già attiva
+	if (
+		nextActivity.status !== "ACTIVABLE" &&
+		nextActivity.status !== "WAITING"
+	) {
+		return generateMessageResponse("Can't link an active activity", 400);
 	}
 
 	// Inseriamo l'id dell'attività precedente nell'array delle attività precedenti del next
@@ -130,11 +138,20 @@ export const PATCH = async (request: NextRequest) => {
 		return prevModifiedOut;
 	}
 
+	// Controlliamo se l'attività successiva può essere attivabile
+	let newStatus = "ACTIVABLE";
+	if (
+		prevActivity.status !== "COMPLETED" ||
+		nextActivity.status === "WAITING"
+	) {
+		newStatus = "WAITING";
+	}
+
 	const nextModifiedOut = await updateCollectionWrapper<ProjectActivity>(
 		{ _id: nextId },
 		{
 			prevIdList: nextModifiedIds,
-			status: "WAITING"
+			status: newStatus
 		} as StringProjectActivity,
 		projectActivityClient
 	);
@@ -150,6 +167,4 @@ export const PATCH = async (request: NextRequest) => {
 		{ prevData: prevModified, nextData: nextModified },
 		200
 	);
-
-	// TODO: Le attività non possono essere linkate se completate
 };
