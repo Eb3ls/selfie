@@ -159,7 +159,6 @@ export const PATCH = async (request: NextRequest) => {
 		return nextModifiedOut;
 	}
 
-	// TODO: controllare se prevModifiedOut e nextModifiedOut sono array
 	const prevModified: StringProjectActivity = (
 		await prevModifiedOut.json()
 	)[0];

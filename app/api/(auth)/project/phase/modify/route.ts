@@ -9,6 +9,7 @@ import {
 	Phase,
 	ProjectActivity,
 	StringPhase,
+	StringProjectActivity,
 	findCollectionWrapper,
 	getCollection,
 	updateCollectionWrapper
@@ -80,7 +81,12 @@ export const PATCH = async (request: NextRequest) => {
 
 		const parentPhase: StringPhase = (await parentPhaseOut.json())[0];
 
-		// TODO: controlliamo che il nuovo range di date sia compreso in quello del parent
+		if (
+			parentPhase.dtStart > newBody.dtStart ||
+			parentPhase.due < newBody.due
+		) {
+			return generateMessageResponse("Invalid date range", 400);
+		}
 	}
 
 	// Otteniamo la collezione delle projectActivity
@@ -97,7 +103,17 @@ export const PATCH = async (request: NextRequest) => {
 	}
 
 	if (projectActivityOut.status === 200) {
-		// TODO: controlliamo che il nuovo range di date sia compreso in quello delle attività
+		const projectActivity: StringProjectActivity[] =
+			await projectActivityOut.json();
+
+		for (const activity of projectActivity) {
+			if (
+				activity.dtStart < newBody.dtStart ||
+				activity.due > newBody.due
+			) {
+				return generateMessageResponse("Invalid date range", 400);
+			}
+		}
 	}
 
 	// Modifichiamo la fase

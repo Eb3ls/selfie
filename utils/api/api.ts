@@ -201,6 +201,9 @@ export async function validate<T>(
 		return null;
 	}
 
+	// TODO: Controllare che le date siano ISO8601 e che se sono presenti
+	// dtStart e dtEnd/due, dtStart sia minore di dtEnd/due
+
 	return { user: user, body: newBody };
 }
 
