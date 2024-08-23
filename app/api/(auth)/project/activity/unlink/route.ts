@@ -123,12 +123,32 @@ export const PATCH = async (request: NextRequest) => {
 	}
 
     let newStatus = nextActivity.status;
+	let completed: boolean =  true;
+
+	for(const elemId of nextModifiedIds){
+		const prevNextActivityOut = await findCollectionWrapper<ProjectActivity>(
+		{ _id: elemId },
+		projectActivityClient
+		);
+
+		if (prevNextActivityOut.status !== 200) {
+			return prevNextActivityOut;
+		}
+
+		const prevNextActivity: StringProjectActivity = (
+			await prevNextActivityOut.json()
+		)[0];
+
+		if(prevNextActivity.status !== "COMPLETED") {
+			completed = false;
+			break;
+		}
+	}
+
 	// Se l'attività successiva non ha più attività precedenti ed è in stato di waiting, diventa activable
-    if(nextModifiedIds.length === 0 && nextActivity.status === "WAITING") {
+    if(nextActivity.status === "WAITING" && completed) {
         newStatus = "ACTIVABLE";
     }
-
-    // TODO: Se le attività precedenti che rimangono sono tutte completed, diventa activable
 
 	const nextModifiedOut = await updateCollectionWrapper<ProjectActivity>(
 		{ _id: nextId },
