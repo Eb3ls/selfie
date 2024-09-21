@@ -7,6 +7,9 @@ import {
 	stringsToObjectId
 } from "@/utils/api/common";
 import {
+	Phase,
+	ProjectActivity,
+	StringPhase,
 	USER_COLLECTION,
 	User,
 	createActivity,
@@ -25,6 +28,10 @@ import {
 	findCollectionWrapper,
 	getCollection
 } from "@/utils/db/db";
+import { Note } from "@/utils/db/db";
+import { StringProjectActivity } from "@/utils/db/db";
+import { deleteCollectionWrapper } from "@/utils/db/db";
+import { updateCollectionWrapper } from "@/utils/db/db";
 import { getSession } from "@/utils/session/session";
 import { JWTPayload } from "jose";
 import { ObjectId } from "mongodb";
@@ -341,4 +348,171 @@ export function generateStringModel<T>(obj: Object, type: names): T {
 	const createFunction = functionsMap[type];
 	const generatedModel = createFunction(objWithId);
 	return fromModelToStringModel(generatedModel);
+}
+
+export async function deleteProjectActivity(
+	projectActivity: StringProjectActivity,
+	projectActivityClient: Collection<ProjectActivity>,
+	noteClient: Collection<Note>
+): Promise<Response> {
+	// Otteniamo l'id dell'attività
+	const activityId = projectActivity._id;
+	// Rimuoviamo l'attività dai nextIdList delle attività precedenti
+	const prevIdList = projectActivity.prevIdList;
+	for (const prevId of prevIdList) {
+		const prevActivityOut = await updateCollectionWrapper<ProjectActivity>(
+			{ _id: prevId },
+			{ $pull: { nextIdList: activityId } } as any,
+			projectActivityClient
+		);
+
+		if (prevActivityOut.status !== 200) {
+			return prevActivityOut;
+		}
+	}
+
+	const nextIdList = projectActivity.nextIdList;
+
+	// Rimuoviamo l'attività dai prevIdList delle attività successive
+	for (const nextId of nextIdList) {
+		const nextActivityOut = await findCollectionWrapper<ProjectActivity>(
+			{ _id: nextId },
+			projectActivityClient
+		);
+
+		if (nextActivityOut.status !== 200) {
+			return nextActivityOut;
+		}
+
+		const nextActivity: StringProjectActivity[] =
+			await nextActivityOut.json();
+
+		const nextPrevIdList = nextActivity[0].prevIdList.filter(
+			(nextPrevId) => nextPrevId !== activityId
+		);
+
+		if (nextActivity[0].status === "WAITING") {
+			// Controlliamo se le attività successive hanno tutti i prevIdList a COMPLETED
+			let allCompleted = true;
+
+			for (const nextPrevId of nextPrevIdList) {
+				const nextPrevActivityOut =
+					await findCollectionWrapper<ProjectActivity>(
+						{ _id: nextPrevId },
+						projectActivityClient
+					);
+
+				if (nextPrevActivityOut.status !== 200) {
+					return nextPrevActivityOut;
+				}
+
+				const nextPrevActivity: StringProjectActivity[] =
+					await nextPrevActivityOut.json();
+
+				if (nextPrevActivity[0].status !== "COMPLETED") {
+					allCompleted = false;
+					break;
+				}
+			}
+
+			if (allCompleted) {
+				// Se tutte le attività precedenti sono completate, settiamo lo stato a ACTIVABLE
+				const nextActivityOut =
+					await updateCollectionWrapper<ProjectActivity>(
+						{ _id: nextId },
+						{ $set: { status: "ACTIVABLE" } } as any,
+						projectActivityClient
+					);
+
+				if (nextActivityOut.status !== 200) {
+					return nextActivityOut;
+				}
+			}
+		}
+
+		// Rimuoviamo l'attività dai prevIdList delle attività successive
+		const updateOut = await updateCollectionWrapper<ProjectActivity>(
+			{ _id: nextId },
+			{ $pull: { prevIdList: activityId } } as any,
+			projectActivityClient
+		);
+	}
+
+	const noteOut = await deleteCollectionWrapper<Note>(
+		{ _id: projectActivity.noteId },
+		noteClient
+	);
+
+	if (noteOut.status !== 200) {
+		return noteOut;
+	}
+
+	// Eliminiamo l'attività
+	return await deleteCollectionWrapper<ProjectActivity>(
+		{ _id: activityId },
+		projectActivityClient
+	);
+}
+
+export async function deletePhase(
+	phase: StringPhase,
+	phaseClient: Collection<Phase>,
+	activityClient: Collection<ProjectActivity>,
+	noteClient: Collection<Note>
+): Promise<Response> {
+	const phaseId = phase._id;
+	// Otteniamo le sottofasi
+	const subPhasesOut = await findCollectionWrapper<Phase>(
+		{ parentId: phaseId },
+		phaseClient
+	);
+
+	// Se ci sono sottofasi, le cancelliamo
+	if (subPhasesOut.status === 200) {
+		const subPhases: StringPhase[] = await subPhasesOut.json();
+		// Eliminiamo le sottofasi
+		while (subPhases.length > 0) {
+			const subPhase = subPhases.shift()!;
+			const subPhaseOut = await deletePhase(
+				subPhase,
+				phaseClient,
+				activityClient,
+				noteClient
+			);
+			if (subPhaseOut.status !== 200) {
+				return subPhaseOut;
+			}
+		}
+	} else if (subPhasesOut.status === 404) {
+		// Otteniamo le attività associate alla fase
+		const activitiesOut = await findCollectionWrapper<ProjectActivity>(
+			{ phaseId: phaseId },
+			activityClient
+		);
+
+		if (activitiesOut.status === 200) {
+			const activities: StringProjectActivity[] =
+				await activitiesOut.json();
+
+			// Eliminiamo le attività associate alla fase
+			for (const activity of activities) {
+				const activityOut = await deleteProjectActivity(
+					activity,
+					activityClient,
+					noteClient
+				);
+
+				if (activityOut.status !== 200) {
+					return activityOut;
+				}
+			}
+		} else if (activitiesOut.status !== 404) {
+			return activitiesOut;
+		}
+	} else if (subPhasesOut.status === 500) {
+		return subPhasesOut;
+	}
+
+	// Eliminiamo la fase
+	return await deleteCollectionWrapper<Phase>({ _id: phaseId }, phaseClient);
 }

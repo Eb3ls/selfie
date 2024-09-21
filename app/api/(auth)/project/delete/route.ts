@@ -1,4 +1,8 @@
-import { generateMessageResponse, validate } from "@/utils/api/api";
+import {
+	deletePhase,
+	generateMessageResponse,
+	validate
+} from "@/utils/api/api";
 import {
 	NOTE_COLLECTION,
 	Note,
@@ -8,8 +12,8 @@ import {
 	Phase,
 	Project,
 	ProjectActivity,
+	StringPhase,
 	StringProject,
-	StringProjectActivity,
 	deleteCollectionWrapper,
 	findCollectionWrapper,
 	getCollection
@@ -69,59 +73,35 @@ export const DELETE = async (request: NextRequest) => {
 	const phaseClient: Collection<Phase> =
 		await getCollection<Phase>(PHASE_COLLECTION);
 
-	const phaseOut = await deleteCollectionWrapper<Phase>(
-		{ projectId: projectId },
-		phaseClient
-	);
-
-	if (phaseOut.status === 500) {
-		return;
-	}
-
 	// Otteniamo la collezione delle attività
 	const projectActivityClient: Collection<ProjectActivity> =
 		await getCollection<ProjectActivity>(PROJECT_ACTIVITY_COLLECTION);
-
-	const projectActivityOut = await findCollectionWrapper<ProjectActivity>(
-		{ projectId: projectId },
-		projectActivityClient
-	);
-
-	if (projectActivityOut.status === 500) {
-		return projectActivityOut;
-	}
 
 	// Ottieniamo la collezione delle note
 	const noteClient: Collection<Note> =
 		await getCollection<Note>(NOTE_COLLECTION);
 
-	// Controlliamo se esistono attività associate al progetto
-	if (projectActivityOut.status === 200) {
-		const projectActivities: StringProjectActivity[] =
-			await projectActivityOut.json();
+	const phaseOut = await findCollectionWrapper<Phase>(
+		{ projectId: projectId, parentId: projectId },
+		phaseClient
+	);
 
-		// Eliminiamo le note associate alle attività
-		for (const activity of projectActivities) {
-			const noteOut = await deleteCollectionWrapper<Note>(
-				{ _id: activity.noteId },
+	if (phaseOut.status === 200) {
+		const phases: StringPhase[] = await phaseOut.json();
+		for (const phase of phases) {
+			const deletedPhase = await deletePhase(
+				phase,
+				phaseClient,
+				projectActivityClient,
 				noteClient
 			);
-
-			if (noteOut.status !== 200) {
-				return noteOut;
+			if (deletedPhase.status !== 200) {
+				return deletedPhase;
 			}
 		}
-
-		// Eliminiamo le attività associate al progetto
-		const deletedProjectActivityOut =
-			await deleteCollectionWrapper<ProjectActivity>(
-				{ projectId: projectId },
-				projectActivityClient
-			);
-
-		if (deletedProjectActivityOut.status !== 200) {
-			return deletedProjectActivityOut;
-		}
+	}
+	if (phaseOut.status === 500) {
+		return;
 	}
 
 	// Eliminiamo la nota associata al progetto

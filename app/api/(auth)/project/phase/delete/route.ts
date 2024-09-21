@@ -1,9 +1,16 @@
-import { generateMessageResponse, validate } from "@/utils/api/api";
 import {
+	deletePhase,
+	generateMessageResponse,
+	validate
+} from "@/utils/api/api";
+import {
+	NOTE_COLLECTION,
+	Note,
 	PHASE_COLLECTION,
+	PROJECT_ACTIVITY_COLLECTION,
 	Phase,
+	ProjectActivity,
 	StringPhase,
-	deleteCollectionWrapper,
 	findCollectionWrapper,
 	getCollection
 } from "@/utils/db/db";
@@ -58,35 +65,13 @@ export const DELETE = async (request: NextRequest) => {
 		return generateMessageResponse("Unauthorized", 400);
 	}
 
-	if (phase[0].parentId === phase[0].projectId) {
-		// Otteniamo le sottofasi
-		const subPhasesOut = await findCollectionWrapper<Phase>(
-			{ parentId: phaseId },
-			phaseClient
-		);
+	// Ottiniamo la collezione delle attività
+	const activityClient: Collection<ProjectActivity> =
+		await getCollection<ProjectActivity>(PROJECT_ACTIVITY_COLLECTION);
 
-		// Se ci sono sottofasi, le cancelliamo
-		if (subPhasesOut.status === 200) {
-			const subPhases: StringPhase[] = await subPhasesOut.json();
+	// Otteniamo la collezione delle note
+	const noteClient: Collection<Note> =
+		await getCollection<Note>(NOTE_COLLECTION);
 
-			// Eliminiamo le sottofasi
-			while (subPhases.length > 0) {
-				const subPhase = subPhases.shift()!;
-				const subPhaseOut = await deleteCollectionWrapper<Phase>(
-					{ _id: subPhase._id },
-					phaseClient
-				);
-
-				if (subPhaseOut.status !== 200) {
-					return subPhaseOut;
-				}
-			}
-		}
-	}
-
-	// Eliminiamo la fase
-	return await deleteCollectionWrapper<Phase>({ _id: phaseId }, phaseClient);
-
-	// TODO: eliminare tutte le attività associate alla fase
-	// per ogni attività, eliminare nei link le attività associate
+	return await deletePhase(phase[0], phaseClient, activityClient, noteClient);
 };

@@ -91,6 +91,20 @@ export const POST = async (request: NextRequest) => {
 		);
 	}
 
+	const subPhasesOut = await findCollectionWrapper<Phase>(
+		{ parentId: phase._id },
+		phaseClient
+	);
+
+	if (subPhasesOut.status === 200) {
+		return generateMessageResponse(
+			"Cannot add activity to a phase with subphases",
+			400
+		);
+	} else if (subPhasesOut.status !== 404) {
+		return subPhasesOut;
+	}
+
 	// Controlliamo che il range di date sia un sottoinsieme del range di date della fase
 	if (phase.dtStart > newBody.dtStart || phase.due < newBody.due) {
 		return generateMessageResponse(
