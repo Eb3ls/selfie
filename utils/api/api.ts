@@ -7,9 +7,11 @@ import {
 	stringsToObjectId
 } from "@/utils/api/common";
 import {
+	Note,
 	Phase,
 	ProjectActivity,
 	StringPhase,
+	StringProjectActivity,
 	USER_COLLECTION,
 	User,
 	createActivity,
@@ -25,13 +27,11 @@ import {
 	createProjectActivity,
 	createSession,
 	createUser,
+	deleteCollectionWrapper,
 	findCollectionWrapper,
-	getCollection
+	getCollection,
+	updateCollectionWrapper
 } from "@/utils/db/db";
-import { Note } from "@/utils/db/db";
-import { StringProjectActivity } from "@/utils/db/db";
-import { deleteCollectionWrapper } from "@/utils/db/db";
-import { updateCollectionWrapper } from "@/utils/db/db";
 import { getSession } from "@/utils/session/session";
 import { JWTPayload } from "jose";
 import { ObjectId } from "mongodb";
