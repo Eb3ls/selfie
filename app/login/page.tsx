@@ -1,127 +1,143 @@
 "use client";
 
+import { greenColor } from "@/app/color_palette";
 import Image from "next/image";
-import { useState } from "react";
+import Link from "next/link";
+import { ChangeEvent, FormEvent, useState } from "react";
+import { Button, Col, Container, Form, InputGroup, Row } from "react-bootstrap";
 
-// Colore rgb verde
-const color = "rgb(64, 175, 12)";
+function CompleteFormComponent() {
+	const [passwordShown, setPasswordShown] = useState(false); // Stato per la visibilità della password
+	const [formData, setFormData] = useState({
+		email: "",
+		password: ""
+	}); // Stato per i dati del form
 
-export default function Login() {
-	const [passwordVisible, setPasswordVisible] = useState(false);
-
-	const togglePasswordVisibility = () => {
-		setPasswordVisible(!passwordVisible);
-		const passwordForm = document.getElementById(
-			"passwordForm"
-		) as HTMLInputElement;
-		if (passwordForm) {
-			passwordForm.type = passwordVisible ? "password" : "text";
-		}
+	// Gestore per il campo email
+	const handleEmailChange = (event: ChangeEvent<HTMLInputElement>) => {
+		const { value } = event.target;
+		setFormData((prevData) => ({
+			...prevData,
+			email: value
+		}));
 	};
 
-	const emailForm = () => {
-		return (
-			<div className="mb-3 fs-5">
-				<i className="bi bi-envelope me-2"></i>
-				<label htmlFor="email" className="form-label">
-					Email address
-				</label>
-				<input
+	// Gestore per il campo password
+	const handlePasswordChange = (event: ChangeEvent<HTMLInputElement>) => {
+		const { value } = event.target;
+		setFormData((prevData) => ({
+			...prevData,
+			password: value
+		}));
+	};
+
+	// Inverte la visibilità della password
+	const togglePasswordVisibility = () => {
+		setPasswordShown(!passwordShown);
+	};
+
+	// Gestisce il submit del form
+	const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
+		console.log("Form inviato:", formData);
+		// Puoi gestire ulteriori azioni qui, come inviare i dati ad un server
+	};
+
+	return (
+		<Form onSubmit={handleSubmit}>
+			{/* Campo Email */}
+			<Form.Group className="mb-3 fs-5" controlId="formBasicEmail">
+				<Form.Label>
+					<i className="bi bi-envelope me-2"></i>Email
+				</Form.Label>
+				<Form.Control
 					type="email"
-					id="emailForm"
-					className="form-control"
-					placeholder="name@example.com"
+					placeholder="Inserisci la tua email"
+					name="email"
+					value={formData.email}
+					onChange={handleEmailChange}
+					autoComplete="email"
 					required
 				/>
-			</div>
-		);
-	};
+			</Form.Group>
 
-	const passwordForm = () => {
-		return (
-			<div className="mb-4 fs-5 form-group">
-				<i className="bi bi-lock me-2	"></i>
-				<label htmlFor="passwordForm" className="form-label">
-					Password
-				</label>
-				<div className="input-group">
-					<input
-						type={passwordVisible ? "text" : "password"}
-						id="passwordForm"
-						className="form-control"
+			{/* Campo Password */}
+			<Form.Group className="mb-3 fs-5" controlId="formBasicPassword">
+				<Form.Label>
+					<i className="bi bi-lock me-2"></i>Password
+				</Form.Label>
+				<InputGroup>
+					<Form.Control
+						type={passwordShown ? "text" : "password"}
+						placeholder="Inserisci la tua password"
+						name="password"
+						value={formData.password}
+						onChange={handlePasswordChange}
+						autoComplete="current-password"
 						required
 					/>
-					<span
-						className="input-group-text"
+					<InputGroup.Text
 						onClick={togglePasswordVisibility}
 						style={{ cursor: "pointer" }}
 					>
-						{passwordVisible ? (
+						{passwordShown ? (
 							<i className="bi bi-eye-slash"></i>
 						) : (
 							<i className="bi bi-eye"></i>
 						)}
-					</span>
-				</div>
-			</div>
-		);
-	};
+					</InputGroup.Text>
+				</InputGroup>
+			</Form.Group>
 
+			{/* Bottone di invio */}
+			<Button
+				variant="primary"
+				type="submit"
+				className="btn rounded-5 mb-4 text-white"
+				style={{ backgroundColor: greenColor }}
+			>
+				Sign in
+			</Button>
+		</Form>
+	);
+}
+
+export default function Login() {
 	return (
-		<>
-			<main>
-				<div className="container-md container-fluid vh-100 vw-100 d-flex justify-content-center align-items-center">
-					<div className="container">
-						<div className="row">
-							<div className="col-12 col-md-6 order-2 order-md-1 d-flex flex-column">
-								<h1 className="mb-4">Sign in</h1>
-								{emailForm()}
-								{passwordForm()}
-								<button
-									type="submit"
-									className="btn rounded-5 mb-4 text-white"
-									style={{ backgroundColor: color }}
+		<main>
+			<Container className="vh-100 vw-100 d-flex justify-content-center align-items-center">
+				<Container>
+					<Row>
+						<Col
+							xs={12}
+							md={6}
+							className="order-2 order-md-1 d-flex flex-column"
+						>
+							<h1 className="mb-4">Sign in</h1>
+							<CompleteFormComponent />
+							<p className="text-center">
+								Needs to create an account?
+								<Link
+									href="/register"
+									className="ms-2 text-decoration-underline"
 								>
-									Sign in
-								</button>
-								<div className="mb-4">
-									<input
-										type="checkbox"
-										id="rememberMe"
-										className="form-check-input me-2"
-									/>
-									<label
-										htmlFor="rememberMe"
-										className="form-check-label"
-									>
-										Remember me
-									</label>
-									<a href="#" className="float-end">
-										Forgot password?
-									</a>
-								</div>
-								<p className="text-center">
-									Needs to create an account?
-									<a
-										href="/register"
-										className="ms-2 text-decoration-underline"
-									>
-										Sign up
-									</a>
-								</p>
-							</div>
-							<div className="col-12 col-md-6 order-1 order-md-2">
-								<Image
-									src="/Sloth.png"
-									alt="Logo"
-									width={500}
-									height={500}
-								/>
-							</div>
-						</div>
-					</div>
-				</div>
-			</main>
-		</>
+									Sign up
+								</Link>
+							</p>
+						</Col>
+						<Col xs={12} md={6} className="order-1 order-md-2">
+							<Image
+								src="/Sloth.png"
+								alt="Logo"
+								width={500}
+								height={500}
+								priority={true}
+								draggable={false}
+							/>
+						</Col>
+					</Row>
+				</Container>
+			</Container>
+		</main>
 	);
 }
