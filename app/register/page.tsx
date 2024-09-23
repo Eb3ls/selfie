@@ -19,9 +19,27 @@ export default function Login() {
 		}
 	};
 
+	const userNameForm = () => {
+		return (
+			<div className="mb-3 fs-5">
+				<i className="bi bi-person me-2"></i>
+				<label htmlFor="userName" className="form-label">
+					Username
+				</label>
+				<input
+					type="text"
+					id="userNameForm"
+					className="form-control"
+					required
+				/>
+			</div>
+		);
+	};
+
 	const emailForm = () => {
 		return (
 			<div className="mb-3 fs-5">
+				<i className="bi bi-envelope me-2"></i>
 				<label htmlFor="email" className="form-label">
 					Email address
 				</label>
@@ -39,6 +57,7 @@ export default function Login() {
 	const passwordForm = () => {
 		return (
 			<div className="mb-4 fs-5 form-group">
+				<i className="bi bi-lock me-2	"></i>
 				<label htmlFor="passwordForm" className="form-label">
 					Password
 				</label>
@@ -72,7 +91,8 @@ export default function Login() {
 					<div className="container">
 						<div className="row">
 							<div className="col-12 col-md-6 order-2 order-md-1 d-flex flex-column">
-								<h1>Sign up</h1>
+								<h1 className="mb-4">Sign up</h1>
+								{userNameForm()}
 								{emailForm()}
 								{passwordForm()}
 								<button
