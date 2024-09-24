@@ -1,0 +1,7 @@
+/* Assicura che il pulsante di toggle sia sempre visibile */
+.toggle_btn {
+	position: fixed;
+	top: 20px;
+	left: 20px;
+	z-index: 1050; /* Abbastanza alto per stare sopra il contenuto */
+}
