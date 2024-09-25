@@ -13,9 +13,9 @@ import {
 	FaStickyNote,
 	FaStopwatch
 } from "react-icons/fa";
-import styles from "./Sidebar.module.css";
+import "./Sidebar.module.css";
 
-const Sidebar = () => {
+export function Sidebar() {
 	const [showSidebar, setShowSidebar] = useState(false);
 	const [showModal, setShowModal] = useState(false);
 
@@ -29,7 +29,7 @@ const Sidebar = () => {
 				<Button
 					variant="primary"
 					onClick={toggleSidebar}
-					className={styles.toggle_btn}
+					className="toggle_btn"
 				>
 					<FaBars />
 				</Button>
@@ -125,6 +125,4 @@ const Sidebar = () => {
 			</Modal>
 		</>
 	);
-};
-
-export default Sidebar;
+}
