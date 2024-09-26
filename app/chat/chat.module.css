@@ -1,0 +1,19 @@
+.chatInput:focus,
+.chatInput:hover,
+.chatInput:active {
+	border: none !important;
+	outline: none !important;
+	box-shadow: none !important;
+}
+
+.chatInput::placeholder {
+	color: rgb(255, 255, 255) !important; /* Placeholder semi-trasparente */
+}
+
+.iconHover:hover {
+	fill: rgb(
+		9,
+		185,
+		255
+	) !important; /* Icone bianche al passaggio del mouse */
+}

@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Button, Col, Form, InputGroup, Row } from "react-bootstrap";
 import { IoIosSend } from "react-icons/io";
 import { chatBody, chatFooter } from "../color_palette";
+import styles from "./chat.module.css";
 
 const ChatMain = () => {
 	const [messages, setMessages] = useState([
@@ -107,10 +108,10 @@ const ChatMain = () => {
 		scrollToBottom();
 	}, [messages]);
 
-	function upperChat() {
+	function HeaderComponent() {
 		return (
 			<div className="bg-dark text-white p-3 border-bottom border-black">
-				<Row className="align-items-center">
+				<Row>
 					<Col>
 						<h5>Chat con Alice</h5>
 					</Col>
@@ -125,10 +126,10 @@ const ChatMain = () => {
 		);
 	}
 
-	function footerChat() {
+	function FooterComponent() {
 		return (
 			<div
-				className="p-3 rounded-pill px-5 w-50 mx-auto"
+				className="p-3 mb-3 rounded-pill w-50 mx-auto"
 				style={{ backgroundColor: chatFooter }}
 			>
 				<InputGroup>
@@ -136,13 +137,34 @@ const ChatMain = () => {
 						type="text"
 						placeholder="Scrivi un messaggio..."
 						value={newMessage}
-						className={"bg-transparent border-0 text-white"}
+						className={`bg-transparent border-0 text-white ${styles.chatInput}`}
 						onChange={(e) => setNewMessage(e.target.value)}
 					/>
-					<Button>
-						<IoIosSend fontVariant="primary" />
+					<Button className="bg-transparent border-0">
+						<IoIosSend
+							fill="white"
+							size={30}
+							className={`${styles.iconHover}`}
+						/>
 					</Button>
 				</InputGroup>
+			</div>
+		);
+	}
+
+	function MessageComponent({ msg }: any) {
+		return (
+			<div
+				key={msg.id}
+				className={`d-flex ${msg.sender === "Io" ? "justify-content-end" : "justify-content-start"} mb-2`}
+			>
+				<div
+					className={`p-2 px-4 rounded-top ${msg.sender === "Io" ? "bg-primary text-white rounded-start" : "bg-light text-dark rounded-end"}`}
+					style={{ maxWidth: "70%" }}
+				>
+					<div>{msg.text}</div>
+					<div className="text-end">{msg.date}</div>
+				</div>
 			</div>
 		);
 	}
@@ -152,27 +174,16 @@ const ChatMain = () => {
 			className="d-flex flex-column vh-100"
 			style={{ backgroundColor: chatBody }}
 		>
-			{upperChat()}
+			{HeaderComponent()}
 			{/* Blocco centrale con la chat */}
 			<div className="flex-grow-1 overflow-auto p-3">
 				{messages.map((message) => (
-					<div
-						key={message.id}
-						className={`d-flex ${message.sender === "Io" ? "justify-content-end" : "justify-content-start"} mb-2`}
-					>
-						<div
-							className={`p-2 px-4 rounded ${message.sender === "Io" ? "bg-primary text-white" : "bg-light text-dark"}`}
-							style={{ maxWidth: "70%" }}
-						>
-							<div>{message.text}</div>
-							<div className="text-end">{message.date}</div>
-						</div>
-					</div>
+					<MessageComponent key={message.id} msg={message} />
 				))}
 				{/* Questo div serve per scrollare automaticamente al fondo */}
 				<div ref={chatEndRef}></div>
-				{footerChat()}
 			</div>
+			{FooterComponent()}
 		</div>
 	);
 };
