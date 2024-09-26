@@ -9,6 +9,7 @@ export interface Note {
 	_id?: ObjectId;						// ID della nota
 	ownerId: ObjectId;					// Creatore della nota, coincide col primo elemento di userList
 	summary: string,
+	categories: string;					// Categorie della nota (separate da una virgola)
 	text: string;						// Testo della nota in markdown
 	length: number;						// lunghezza testo
 	access: 
@@ -26,6 +27,7 @@ export type StringNote = ConvertToString<Note>;
 export function createNote({
 	ownerId = new ObjectId(),
 	summary = "",
+	categories = "",
 	text = "",
 	length = 0,
 	access = "PRIVATE",
@@ -37,6 +39,7 @@ export function createNote({
 	return {
 		ownerId: ownerId,
 		summary: summary,
+		categories: categories,
 		text: text,
 		length: length,
 		access: access,

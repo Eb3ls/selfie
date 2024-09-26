@@ -18,8 +18,9 @@ import { NextRequest } from "next/server";
 const requestTemplate = {
 	_id: "",
 	summary: "",
+	categories: "",
 	access: "",
-	usernameList: []
+	userIdList: []
 };
 
 type RequestType = typeof requestTemplate;
@@ -47,16 +48,16 @@ export const PATCH = async (request: NextRequest) => {
 	const noteId: string = newBody._id!;
 
 	// Estraiamo la lista degli username dal body
-	const usernameList: string[] = newBody.usernameList;
+	let userIdList: string[] = newBody.userIdList;
 
 	// Convertiamo la lista degli username in lista di id e aggiungiamo lo userId come primo elemento
-	const convertionOut = await usernameListToIds(usernameList, userId);
+	const convertionOut = await usernameListToIds(userIdList, userId);
 
 	if (convertionOut.status !== 200) {
 		return convertionOut;
 	}
 
-	const userIdList: string[] = (await convertionOut.json()).users;
+	userIdList = (await convertionOut.json()).users;
 
 	// Ottieniamo la collezione delle note
 	const client: Collection<Note> = await getCollection<Note>(NOTE_COLLECTION);
@@ -77,6 +78,7 @@ export const PATCH = async (request: NextRequest) => {
 	// Creiamo un oggetto con i campi da modificare
 	const newFields: Partial<StringNote> = {
 		summary: newBody.summary,
+		categories: newBody.categories,
 		access: newBody.access as "PRIVATE" | "INVITED" | "PUBLIC",
 		userIdList: userIdList
 	};

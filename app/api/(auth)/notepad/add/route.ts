@@ -14,7 +14,8 @@ import { Collection } from "mongodb";
 import { NextRequest } from "next/server";
 
 const requestTemplate = {
-	summary: ""
+	summary: "",
+	categories: ""
 };
 
 type RequestType = typeof requestTemplate;
