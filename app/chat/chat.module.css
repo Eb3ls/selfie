@@ -11,9 +11,13 @@
 }
 
 .iconHover:hover {
-	fill: rgb(
-		9,
-		185,
-		255
-	) !important; /* Icone bianche al passaggio del mouse */
+	fill: rgb(9, 185, 255) !important;
+}
+
+.userHover:hover {
+	background-color: rgb(
+		78,
+		78,
+		78
+	) !important; /* Utenti bianchi al passaggio del mouse */
 }
