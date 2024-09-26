@@ -153,7 +153,10 @@ export default function Notepad() {
 				<SearchBar />
 				<Row className="mt-5 gx-5 text-center">
 					{data.map((note: any) => (
-						<Col key={note.id} className="col-12 col-md-4 mb-3">
+						<Col
+							key={note.id}
+							className="col-12 col-md-6 col-lg-4 mb-3"
+						>
 							<Card>
 								<Card.Body>
 									<div className="d-flex justify-content-between align-items-center">
@@ -166,6 +169,11 @@ export default function Notepad() {
 										>
 											<FaTrash />
 										</Button>
+									</div>
+									<div className="d-flex justify-content-between align-items-center">
+										<Card.Subtitle className="mb-2 text-muted">
+											{note.category}
+										</Card.Subtitle>
 									</div>
 									<hr />
 									<Card.Text>
@@ -183,3 +191,5 @@ export default function Notepad() {
 		</>
 	);
 }
+
+// TODO: Implementare la logica, aggiungere categoria al model di note.

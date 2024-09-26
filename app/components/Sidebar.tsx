@@ -13,7 +13,7 @@ import {
 	FaStickyNote,
 	FaStopwatch
 } from "react-icons/fa";
-import "./Sidebar.module.css";
+import "./Sidebar.css";
 
 export function Sidebar() {
 	const [showSidebar, setShowSidebar] = useState(false);

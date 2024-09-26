@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
-import "./GenericModal.module.css";
+import "./GenericModal.css";
 
 // Componente per il modal generico
 // Questo componente prende in input un figlio (children) che sarà il bottone per aprire il modal
