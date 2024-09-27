@@ -10,7 +10,7 @@ import {
 	ListGroup,
 	Row
 } from "react-bootstrap";
-import { FaSearch } from "react-icons/fa";
+import { FaArrowLeft, FaSearch } from "react-icons/fa";
 import { IoIosAddCircleOutline, IoIosSend } from "react-icons/io";
 import { IoPersonCircleOutline } from "react-icons/io5";
 import { chatBody, chatFooter } from "../color_palette";
@@ -70,6 +70,7 @@ const ChatMain = () => {
 	const [selectedUser, setSelectedUser] = useState<string | null>(null);
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [newMessage, setNewMessage] = useState("");
+	const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 	const chatEndRef = useRef<HTMLDivElement>(null);
 
 	// Funzione per scrollare automaticamente alla fine della chat
@@ -86,18 +87,8 @@ const ChatMain = () => {
 
 	// Funzione per inviare un messaggio
 	const sendMessage = () => {
-		if (newMessage.trim() === "") return;
-		setMessages((prevMessages) => [
-			...prevMessages,
-			{
-				id: prevMessages.length + 1,
-				sender: "Io",
-				text: newMessage,
-				date: new Date().toLocaleTimeString()
-			}
-		]);
+		if (newMessage.trim() === "" || selectedUser === null) return;
 		setNewMessage("");
-		if (selectedUser === null) return;
 		data[selectedUser].push({
 			id: data[selectedUser].length + 1,
 			sender: "Io",
@@ -110,6 +101,7 @@ const ChatMain = () => {
 	function loadChat(user: string) {
 		setSelectedUser(user);
 		setMessages(data[user]);
+		setIsSidebarOpen(false);
 	}
 
 	// Componente per visualizzare un utente nella sidebar
@@ -121,23 +113,20 @@ const ChatMain = () => {
 				className={`fw-bold p-2 ps-4 rounded-pill border-0 d-flex align-items-center bg-transparent text-white ${styles.userHover}`}
 				onClick={() => loadChat(user)}
 			>
-				<IoPersonCircleOutline size={35} className="me-2" />
-				<Container className="d-flex flex-column justify-content-center">
-					<h5 className="fw-bold m-0">{user}</h5>
+				<IoPersonCircleOutline
+					size={35}
+					className="me-2 flex-shrink-0"
+					style={{ minWidth: "35px" }}
+				/>
+				<Container className="d-flex flex-column justify-content-center overflow-hidden">
+					<h5 className="fw-bold m-0 text-truncate">{user}</h5>{" "}
 					<p
-						className="m-0 fw-semibold"
+						className="m-0 fw-semibold text-truncate"
 						style={{ fontSize: "0.8rem" }}
 					>
 						{data[user][data[user].length - 1].sender + ": "}
-						<span className="fw-normal">
-							{data[user][data[user].length - 1].text.substring(
-								0,
-								20
-							) +
-								(data[user][data[user].length - 1].text.length >
-								20
-									? "..."
-									: "")}
+						<span className="fw-normal text-truncate">
+							{data[user][data[user].length - 1].text}
 						</span>
 					</p>
 				</Container>
@@ -174,7 +163,10 @@ const ChatMain = () => {
 						</InputGroup.Text>
 					</InputGroup>
 				</div>
-				<div style={{ flexGrow: 1, overflowY: "auto" }}>
+				<div
+					style={{ flexGrow: 1, overflowY: "auto" }}
+					className="me-sm-4"
+				>
 					<ListGroup variant="flush" className="mx-2 mt-3">
 						{filteredUsers.length > 0 ? (
 							filteredUsers.map((user) =>
@@ -211,6 +203,16 @@ const ChatMain = () => {
 	function HeaderComponent() {
 		return (
 			<div className="bg-dark text-white p-3 border-bottom border-black d-flex align-items-center justify-content-end">
+				<Button
+					variant="link"
+					className="d-block d-ld-none"
+					onClick={() => {
+						setIsSidebarOpen(true);
+						setSelectedUser(null);
+					}}
+				>
+					<FaArrowLeft fill="white" size={30}></FaArrowLeft>
+				</Button>
 				<h2 className="text-center m-0 fw-bold flex-grow-1">
 					{selectedUser}
 				</h2>
@@ -218,7 +220,6 @@ const ChatMain = () => {
 					type="text"
 					placeholder="Cerca..."
 					className="me-3 w-auto"
-					value=""
 				/>
 				<Button variant="outline-primary">Opzioni</Button>
 			</div>
@@ -273,12 +274,12 @@ const ChatMain = () => {
 		<Container fluid className="vh-100">
 			<Row className="h-100">
 				<Col
-					xs={3}
-					md={2}
-					className="d-flex flex-column p-0 px-2 position-relative bg-dark border-end border-black"
+					xs={12}
+					lg={3}
+					className={`d-flex flex-column p-0 px-2 position-relative bg-dark border-end border-black ${isSidebarOpen ? "d-block" : "d-none d-lg-block"}`}
 				>
 					{Sidebar()}
-					<Button className="bg-transparent border-0 position-absolute bottom-0 end-0 mb-2">
+					<Button className="bg-transparent border-0 position-absolute bottom-0 end-0 mb-2 z-3">
 						<IoIosAddCircleOutline
 							fill="blue"
 							size={30}
@@ -287,8 +288,10 @@ const ChatMain = () => {
 					</Button>
 				</Col>
 				<Col
+					xs={12}
+					lg={9}
 					style={{ backgroundColor: chatBody }}
-					className="d-flex flex-column p-0 h-100"
+					className={`d-flex flex-column p-0 h-100 ${isSidebarOpen ? "d-none d-lg-block" : "d-block"}`}
 				>
 					{selectedUser && MainChatComponent()}
 				</Col>
