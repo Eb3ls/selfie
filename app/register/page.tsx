@@ -10,6 +10,8 @@ function CompleteFormComponent() {
 	const [passwordShown, setPasswordShown] = useState(false); // Stato per la visibilità della password
 	const [formData, setFormData] = useState({
 		username: "",
+		firstName: "",
+		lastName: "",
 		email: "",
 		password: ""
 	}); // Stato per i dati del form
@@ -20,6 +22,24 @@ function CompleteFormComponent() {
 		setFormData((prevData) => ({
 			...prevData,
 			username: value
+		}));
+	};
+
+	// Gestore per il campo firstName
+	const handleFirstNameChange = (event: ChangeEvent<HTMLInputElement>) => {
+		const { value } = event.target;
+		setFormData((prevData) => ({
+			...prevData,
+			firstName: value
+		}));
+	};
+
+	// Gestore per il campo lastName
+	const handleLastNameChange = (event: ChangeEvent<HTMLInputElement>) => {
+		const { value } = event.target;
+		setFormData((prevData) => ({
+			...prevData,
+			lastName: value
 		}));
 	};
 
@@ -47,10 +67,27 @@ function CompleteFormComponent() {
 	};
 
 	// Gestisce il submit del form
-	const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+	const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		console.log("Form inviato:", formData);
-		// Puoi gestire ulteriori azioni qui, come inviare i dati ad un server
+
+		const response = await fetch("/api/signup", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify(formData)
+		});
+
+		if (response.status === 200) {
+			const fetched_data = await response.json();
+			alert("Successful: " + fetched_data.username);
+			window.location.href = "/home";
+		} else if (response.status === 400) {
+			alert("Failed! Wrong username or password!");
+		} else {
+			alert("Failed! Status code: " + response.status);
+		}
 	};
 
 	return (
@@ -67,6 +104,38 @@ function CompleteFormComponent() {
 					value={formData.username}
 					onChange={handleUsernameChange}
 					autoComplete="username"
+					required
+				/>
+			</Form.Group>
+
+			{/* Campo Nome */}
+			<Form.Group className="mb-3 fs-5" controlId="formBasicFirstName">
+				<Form.Label>
+					<i className="bi bi-person me-2"></i>Nome
+				</Form.Label>
+				<Form.Control
+					type="text"
+					placeholder="Inserisci il tuo nome"
+					name="firstName"
+					value={formData.firstName}
+					onChange={handleFirstNameChange}
+					autoComplete="given-name"
+					required
+				/>
+			</Form.Group>
+
+			{/* Campo Cognome */}
+			<Form.Group className="mb-3 fs-5" controlId="formBasicLastName">
+				<Form.Label>
+					<i className="bi bi-person me-2"></i>Cognome
+				</Form.Label>
+				<Form.Control
+					type="text"
+					placeholder="Inserisci il tuo cognome"
+					name="lastName"
+					value={formData.lastName}
+					onChange={handleLastNameChange}
+					autoComplete="family-name"
 					required
 				/>
 			</Form.Group>

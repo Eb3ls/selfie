@@ -9,16 +9,16 @@ import { Button, Col, Container, Form, InputGroup, Row } from "react-bootstrap";
 function CompleteFormComponent() {
 	const [passwordShown, setPasswordShown] = useState(false); // Stato per la visibilità della password
 	const [formData, setFormData] = useState({
-		email: "",
+		username: "",
 		password: ""
 	}); // Stato per i dati del form
 
-	// Gestore per il campo email
-	const handleEmailChange = (event: ChangeEvent<HTMLInputElement>) => {
+	// Gestore per il campo username
+	const handleUsernameChange = (event: ChangeEvent<HTMLInputElement>) => {
 		const { value } = event.target;
 		setFormData((prevData) => ({
 			...prevData,
-			email: value
+			username: value
 		}));
 	};
 
@@ -37,26 +37,43 @@ function CompleteFormComponent() {
 	};
 
 	// Gestisce il submit del form
-	const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+	const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		console.log("Form inviato:", formData);
-		// Puoi gestire ulteriori azioni qui, come inviare i dati ad un server
+
+		const response = await fetch("/api/signin", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify(formData)
+		});
+
+		if (response.status === 200) {
+			const fetched_data = await response.json();
+			alert("Successful: " + fetched_data.message);
+			window.location.href = "/home";
+		} else if (response.status === 400) {
+			alert("Failed! Wrong username or password!");
+		} else {
+			alert("Failed! Status code: " + response.status);
+		}
 	};
 
 	return (
 		<Form onSubmit={handleSubmit}>
-			{/* Campo Email */}
-			<Form.Group className="mb-3 fs-5" controlId="formBasicEmail">
+			{/* Campo Username */}
+			<Form.Group className="mb-3 fs-5" controlId="formBasicUsername">
 				<Form.Label>
-					<i className="bi bi-envelope me-2"></i>Email
+					<i className="bi bi-person me-2"></i>Username
 				</Form.Label>
 				<Form.Control
-					type="email"
-					placeholder="Inserisci la tua email"
-					name="email"
-					value={formData.email}
-					onChange={handleEmailChange}
-					autoComplete="email"
+					type="text"
+					placeholder="Inserisci il tuo username"
+					name="username"
+					value={formData.username}
+					onChange={handleUsernameChange}
+					autoComplete="username"
 					required
 				/>
 			</Form.Group>
