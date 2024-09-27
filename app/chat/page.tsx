@@ -16,7 +16,18 @@ import { IoPersonCircleOutline } from "react-icons/io5";
 import { chatBody, chatFooter } from "../color_palette";
 import styles from "./chat.module.css";
 
-const data = {
+type Message = {
+	id: number;
+	sender: string;
+	text: string;
+	date: string;
+};
+
+type ChatData = {
+	[key: string]: Message[];
+};
+
+const data: ChatData = {
 	Alice: [
 		{ id: 1, sender: "Alice", text: "Ciao!", date: "10:45" },
 		{
@@ -56,9 +67,9 @@ const data = {
 };
 
 const ChatMain = () => {
-	const [newMessage, setNewMessage] = useState("");
 	const [selectedUser, setSelectedUser] = useState<string | null>(null);
-	const [messages, setMessages] = useState<any[]>([]);
+	const [messages, setMessages] = useState<Message[]>([]);
+	const [newMessage, setNewMessage] = useState("");
 	const chatEndRef = useRef<HTMLDivElement>(null);
 
 	// Funzione per scrollare automaticamente alla fine della chat
@@ -68,10 +79,12 @@ const ChatMain = () => {
 		}
 	};
 
+	// Scrolla automaticamente alla fine della chat quando si aggiunge un nuovo messaggio
 	useEffect(() => {
 		scrollToBottom();
 	}, [messages]);
 
+	// Funzione per inviare un messaggio
 	const sendMessage = () => {
 		if (newMessage.trim() === "") return;
 		setMessages((prevMessages) => [
@@ -84,26 +97,55 @@ const ChatMain = () => {
 			}
 		]);
 		setNewMessage("");
+		if (selectedUser === null) return;
+		data[selectedUser].push({
+			id: data[selectedUser].length + 1,
+			sender: "Io",
+			text: newMessage,
+			date: new Date().toLocaleTimeString()
+		});
 	};
 
-	function UserItemComponent({ user }: any) {
-		return (
-			<ListGroup.Item
-				key={user}
-				action
-				className={`fw-bold p-3 rounded-pill border-0 d-flex align-items-center bg-transparent text-white ${styles.userHover}`}
-				onClick={() => loadChat(user)}
-			>
-				<IoPersonCircleOutline size={35} className="me-2" />
-				{user}
-			</ListGroup.Item>
-		);
-	}
+	// Funzione per caricare la chat con un utente
 	function loadChat(user: string) {
 		setSelectedUser(user);
 		setMessages(data[user]);
 	}
 
+	// Componente per visualizzare un utente nella sidebar
+	function UserItemComponent({ user }: any) {
+		return (
+			<ListGroup.Item
+				key={user}
+				action
+				className={`fw-bold p-2 ps-4 rounded-pill border-0 d-flex align-items-center bg-transparent text-white ${styles.userHover}`}
+				onClick={() => loadChat(user)}
+			>
+				<IoPersonCircleOutline size={35} className="me-2" />
+				<Container className="d-flex flex-column justify-content-center">
+					<h5 className="fw-bold m-0">{user}</h5>
+					<p
+						className="m-0 fw-semibold"
+						style={{ fontSize: "0.8rem" }}
+					>
+						{data[user][data[user].length - 1].sender + ": "}
+						<span className="fw-normal">
+							{data[user][data[user].length - 1].text.substring(
+								0,
+								20
+							) +
+								(data[user][data[user].length - 1].text.length >
+								20
+									? "..."
+									: "")}
+						</span>
+					</p>
+				</Container>
+			</ListGroup.Item>
+		);
+	}
+
+	// Componente per la sidebar
 	function Sidebar() {
 		const [searchTerm, setSearchTerm] = useState("");
 		const users = Object.keys(data);
@@ -139,13 +181,30 @@ const ChatMain = () => {
 								UserItemComponent({ user })
 							)
 						) : (
-							<ListGroup.Item className="text-muted">
+							<ListGroup.Item className="fw-bold p-2 ps-4 rounded-pill border-0 d-flex align-items-center bg-transparent text-white">
 								Nessun utente trovato
 							</ListGroup.Item>
 						)}
 					</ListGroup>
 				</div>
 			</>
+		);
+	}
+
+	// Componenti per la chat
+	function MessageComponent({ msg }: any) {
+		return (
+			<div
+				className={`d-flex ${msg.sender === "Io" ? "justify-content-end" : "justify-content-start"} mb-2`}
+			>
+				<div
+					className={`p-2 px-4 rounded-top text-break ${msg.sender === "Io" ? "bg-primary text-white rounded-start" : "bg-light text-dark rounded-end"}`}
+					style={{ maxWidth: "65%" }}
+				>
+					<div>{msg.text}</div>
+					<div className="text-end">{msg.date}</div>
+				</div>
+			</div>
 		);
 	}
 
@@ -159,6 +218,7 @@ const ChatMain = () => {
 					type="text"
 					placeholder="Cerca..."
 					className="me-3 w-auto"
+					value=""
 				/>
 				<Button variant="outline-primary">Opzioni</Button>
 			</div>
@@ -190,22 +250,6 @@ const ChatMain = () => {
 						/>
 					</Button>
 				</InputGroup>
-			</div>
-		);
-	}
-
-	function MessageComponent({ msg }: any) {
-		return (
-			<div
-				className={`d-flex ${msg.sender === "Io" ? "justify-content-end" : "justify-content-start"} mb-2`}
-			>
-				<div
-					className={`p-2 px-4 rounded-top ${msg.sender === "Io" ? "bg-primary text-white rounded-start" : "bg-light text-dark rounded-end"}`}
-					style={{ maxWidth: "65%" }}
-				>
-					<div>{msg.text}</div>
-					<div className="text-end">{msg.date}</div>
-				</div>
 			</div>
 		);
 	}
@@ -243,8 +287,6 @@ const ChatMain = () => {
 					</Button>
 				</Col>
 				<Col
-					xs={9}
-					md={10}
 					style={{ backgroundColor: chatBody }}
 					className="d-flex flex-column p-0 h-100"
 				>
