@@ -45,6 +45,9 @@ export const POST = async (request: NextRequest) => {
 	// Aggiungiamo il campo 'ownerId' a newNote
 	newNote.ownerId = userId;
 
+	// Aggiungiamo il campo 'userIdList' a newNote
+	newNote.userIdList.push(userId);
+
 	// Ottieniamo la collezione delle note
 	const noteClient: Collection<Note> =
 		await getCollection<Note>(NOTE_COLLECTION);
