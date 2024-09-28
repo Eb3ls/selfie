@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { Button, Col, Container, ListGroup, Row } from "react-bootstrap";
-import { IoIosAddCircleOutline } from "react-icons/io";
+import { Col, Container, ListGroup, Row } from "react-bootstrap";
 import { chatBody } from "../color_palette";
 import "./chat.css";
 import Footer from "./mainChat/Footer";
 import Header from "./mainChat/Header";
 import MessageComponent from "./mainChat/Messagge";
+import FloatingMenu from "./sideBar/FloatingMenu";
 import SideBarHeader from "./sideBar/SideBarHeader";
 import UserItem from "./sideBar/UserItem";
 
@@ -58,7 +58,22 @@ const data: ChatData = {
 			text: "Bene, grazie!",
 			date: "10:47"
 		}
-	]
+	],
+	Mario: [],
+	Franco: [],
+	Daniele: [],
+	Mirco: [],
+	Andrea: [],
+	Marco: [],
+	Giuseppe: [],
+	Antonio: [],
+	Luca: [],
+	Giovanni: [],
+	Roberto: [],
+	Giorgio: [],
+	Stefano: [],
+	Michele: [],
+	Angelo: []
 };
 
 const ChatMain = () => {
@@ -114,10 +129,10 @@ const ChatMain = () => {
 					setSearchTerm={setSearchTerm}
 				></SideBarHeader>
 				<div
-					style={{ flexGrow: 1, overflowY: "auto" }}
-					className="me-sm-4"
+					className="me-4 me-lg-0 flex-grow-1 overflow-auto"
+					style={{ maxHeight: "90vh" }}
 				>
-					<ListGroup variant="flush" className="mx-2 mt-3">
+					<ListGroup variant="flush" className="ms-1">
 						{filteredUsers.length > 0 ? (
 							filteredUsers.map((user) => (
 								<UserItem
@@ -134,6 +149,7 @@ const ChatMain = () => {
 						)}
 					</ListGroup>
 				</div>
+				<FloatingMenu></FloatingMenu>
 			</>
 		);
 	}
@@ -167,19 +183,9 @@ const ChatMain = () => {
 				<Col
 					xs={12}
 					lg={3}
-					className={`d-flex flex-column p-0 px-2 position-relative bg-dark border-end border-black ${isSidebarOpen ? "d-block" : "d-none d-lg-block"}`}
+					className={`d-flex flex-column p-0 px-2 h-100 position-relative bg-dark border-end border-black ${isSidebarOpen ? "d-block" : "d-none d-lg-block"}`}
 				>
 					{Sidebar()}
-					<Button
-						variant="link"
-						className="position-absolute bottom-0 end-0 mb-2 z-3"
-					>
-						<IoIosAddCircleOutline
-							fill="blue"
-							size={30}
-							className="iconHover"
-						></IoIosAddCircleOutline>
-					</Button>
 				</Col>
 				<Col
 					xs={12}

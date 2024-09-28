@@ -12,7 +12,7 @@ export default function SideBarHeader({
 }: SideBarHeaderProps) {
 	return (
 		<div
-			className="d-flex justify-content-between p-1 mt-2"
+			className="d-flex justify-content-between p-1 mt-2 z-2"
 			style={{
 				position: "sticky",
 				top: 0

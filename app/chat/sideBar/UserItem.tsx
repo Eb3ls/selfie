@@ -24,17 +24,19 @@ export default function UserItemComponent({
 				className="me-2 flex-shrink-0"
 				style={{ minWidth: "35px" }}
 			/>
-			<Container className="d-flex flex-column justify-content-center overflow-hidden">
+			<Container className="d-flex flex-column justify-content-center m-0 overflow-hidden">
 				<h5 className="fw-bold m-0 text-truncate">{user}</h5>{" "}
-				<p
-					className="m-0 fw-semibold text-truncate"
-					style={{ fontSize: "0.8rem" }}
-				>
-					{data[user][data[user].length - 1].sender + ": "}
-					<span className="fw-normal text-truncate">
-						{data[user][data[user].length - 1].text}
-					</span>
-				</p>
+				{data[user].length > 0 && (
+					<p
+						className="m-0 fw-semibold text-truncate"
+						style={{ fontSize: "0.8rem" }}
+					>
+						{data[user][data[user].length - 1].sender + ": "}
+						<span className="fw-normal text-truncate">
+							{data[user][data[user].length - 1].text}
+						</span>
+					</p>
+				)}
 			</Container>
 		</ListGroup.Item>
 	);
