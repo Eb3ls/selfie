@@ -1,15 +1,12 @@
+import { ChatModal } from "@/app/chat/sideBar/ChatModal";
+import { GroupChatModal } from "@/app/chat/sideBar/GroupChatModal";
 import { useState } from "react";
+import React from "react";
 import { Button } from "react-bootstrap";
 import { IoIosAddCircleOutline, IoIosClose } from "react-icons/io";
-import ChatModal from "./ChatModal";
-import GroupChatModal from "./GroupChatModal";
 
-export default function FloatingMenu() {
+export function FloatingMenu() {
 	const [showOptions, setShowOptions] = useState(false);
-
-	const toggleOptions = () => {
-		setShowOptions(!showOptions);
-	};
 
 	return (
 		<div className="position-absolute d-flex flex-column bottom-0 end-0 me-2 mb-3 z-1">
@@ -31,7 +28,9 @@ export default function FloatingMenu() {
 			{/* Pulsante principale */}
 			<Button
 				className="p-1 rounded-circle align-self-end"
-				onClick={toggleOptions}
+				onClick={() => {
+					setShowOptions(!showOptions);
+				}}
 			>
 				{showOptions ? (
 					<IoIosClose fill="white" size={30} />

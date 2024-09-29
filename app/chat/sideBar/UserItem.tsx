@@ -1,6 +1,6 @@
+import "@/app/chat/chat.css";
 import { Container, ListGroup } from "react-bootstrap";
 import { IoPersonCircleOutline } from "react-icons/io5";
-import "../chat.css";
 
 type SidebarEntry = {
 	_id: string;
@@ -9,7 +9,7 @@ type SidebarEntry = {
 	loader: () => void;
 };
 
-export default function UserItemComponent({ entry }: { entry: SidebarEntry }) {
+export function UserItem({ entry }: { entry: SidebarEntry }) {
 	return (
 		<ListGroup.Item
 			action

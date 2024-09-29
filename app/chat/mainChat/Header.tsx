@@ -1,16 +1,17 @@
+import { ChatEntry } from "@/app/chat/chatTypes";
 import { Button, Form } from "react-bootstrap";
 import { FaArrowLeft } from "react-icons/fa";
 
 interface HeaderProps {
+	chatSummary: string | undefined;
+	setSelectedChat: React.Dispatch<React.SetStateAction<ChatEntry | null>>;
 	setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
-	setSelectedChat: React.Dispatch<React.SetStateAction<any>>;
-	selectedChat: any;
 }
 
-export default function HeaderComponent({
-	setIsSidebarOpen,
+export function Header({
+	chatSummary,
 	setSelectedChat,
-	selectedChat
+	setIsSidebarOpen
 }: HeaderProps) {
 	return (
 		<div className="bg-dark text-white p-3 border-bottom border-black d-flex align-items-center justify-content-end">
@@ -25,7 +26,7 @@ export default function HeaderComponent({
 				<FaArrowLeft fill="white" size={30}></FaArrowLeft>
 			</Button>
 			<h2 className="text-center m-0 mx-3 fw-bold flex-grow-1">
-				{selectedChat}
+				{chatSummary}
 			</h2>
 			<Form.Control
 				type="text"

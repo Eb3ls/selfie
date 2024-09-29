@@ -1,10 +1,10 @@
 "use client";
 
+import "@/app/chat/sideBar/Modal.css";
 import React, { useState } from "react";
 import { Button, Container, Form, ListGroup, Modal } from "react-bootstrap";
-import "./Modal.css";
 
-export default function GroupChatModal({ children }: any) {
+export function GroupChatModal({ children }: any) {
 	const [show, setShow] = useState(false);
 	const [groupName, setGroupName] = useState("");
 	const [userName, setUserName] = useState("");

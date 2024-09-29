@@ -6,7 +6,7 @@ interface SideBarHeaderProps {
 	setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
 }
 
-export default function SideBarHeader({
+export function SideBarHeader({
 	searchTerm,
 	setSearchTerm
 }: SideBarHeaderProps) {

@@ -1,18 +1,18 @@
+import "@/app/chat/chat.css";
+import { chatFooter } from "@/app/color_palette";
 import React from "react";
 import { Button, Form, InputGroup } from "react-bootstrap";
 import { IoIosSend } from "react-icons/io";
-import { chatFooter } from "../../color_palette";
-import "../chat.css";
 
 interface FooterProps {
-	setNewMessage: React.Dispatch<React.SetStateAction<string>>;
 	newMessage: string;
+	setNewMessage: React.Dispatch<React.SetStateAction<string>>;
 	sendMessage: () => void;
 }
 
-export default function Footer({
-	setNewMessage,
+export function Footer({
 	newMessage,
+	setNewMessage,
 	sendMessage
 }: FooterProps) {
 	return (
@@ -26,7 +26,7 @@ export default function Footer({
 					name="chatInput"
 					placeholder="Scrivi un messaggio..."
 					value={newMessage}
-					className={`bg-transparent border-0 text-white chatInput`}
+					className={"bg-transparent border-0 text-white chatInput"}
 					onChange={(e) => setNewMessage(e.target.value)}
 				/>
 				<Button

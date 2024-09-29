@@ -1,10 +1,10 @@
 "use client";
 
+import "@/app/chat/sideBar/Modal.css";
 import React, { useState } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
-import "./Modal.css";
 
-export default function ChatModal({ children }: any) {
+export function ChatModal({ children }: any) {
 	const [show, setShow] = useState(false);
 	const [form, setForm] = useState({
 		username: ""

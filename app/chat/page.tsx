@@ -1,40 +1,20 @@
 "use client";
 
+// Componenti e stili
+import "@/app/chat/chat.css";
+import { ChatEntry, ChatResponse, UserElement } from "@/app/chat/chatTypes";
+import { Footer } from "@/app/chat/mainChat/Footer";
+import { Header } from "@/app/chat/mainChat/Header";
+import { Message } from "@/app/chat/mainChat/Message";
+import { FloatingMenu } from "@/app/chat/sideBar/FloatingMenu";
+import { SideBarHeader } from "@/app/chat/sideBar/SideBarHeader";
+import { UserItem } from "@/app/chat/sideBar/UserItem";
 import { chatBody } from "@/app/color_palette";
+// Librerie
 import { StringMessage } from "@/utils/db/db";
 import React, { useEffect, useRef, useState } from "react";
 import { Col, Container, ListGroup, Row } from "react-bootstrap";
 import useSWR from "swr";
-import "./chat.css";
-import Footer from "./mainChat/Footer";
-import Header from "./mainChat/Header";
-import MessageComponent from "./mainChat/MessageItem";
-import FloatingMenu from "./sideBar/FloatingMenu";
-import SideBarHeader from "./sideBar/SideBarHeader";
-import UserItem from "./sideBar/UserItem";
-
-type UserElement = {
-	_id: string;
-	username: string;
-	userStatus: string;
-	profilePic: string;
-};
-
-type ChatEntry = {
-	_id: string;
-	isGroup: boolean;
-	summary: string;
-	userIdList: string[]; // Lista degli utenti (Il primo è il proprietario)
-	createdAt: string;
-	lastMessageAt: string | null;
-	lastMessage: StringMessage | null;
-};
-
-type ChatResponse = {
-	chatList: ChatEntry[];
-	userList: UserElement[];
-	whoAmI: UserElement;
-};
 
 async function fetcher(url: string) {
 	const response = await fetch(url);
@@ -243,19 +223,19 @@ export default function ChatMain() {
 		return (
 			<>
 				<Header
-					setIsSidebarOpen={setIsSidebarOpen}
+					chatSummary={selectedChat?.summary}
 					setSelectedChat={setSelectedChat}
-					selectedChat={selectedChat?.summary}
+					setIsSidebarOpen={setIsSidebarOpen}
 				></Header>
 				<div className="flex-grow-1 overflow-auto p-3">
 					{translatedMessages.map((message) => (
-						<MessageComponent key={message._id} msg={message} />
+						<Message key={message._id} msg={message} />
 					))}
 					<div ref={chatEndRef}></div>
 				</div>
 				<Footer
-					setNewMessage={setNewMessage}
 					newMessage={newMessage}
+					setNewMessage={setNewMessage}
 					sendMessage={sendMessage}
 				></Footer>
 			</>

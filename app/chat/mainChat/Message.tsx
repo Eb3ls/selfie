@@ -5,7 +5,7 @@ type MinMessage = {
 	sentAt: string;
 };
 
-export default function MessageComponent({ msg }: { msg: MinMessage }) {
+export function Message({ msg }: { msg: MinMessage }) {
 	return (
 		<div
 			className={`d-flex ${msg.owner === "Io" ? "justify-content-end" : "justify-content-start"} mb-2`}
