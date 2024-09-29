@@ -21,6 +21,7 @@ export default function SideBarHeader({
 			<InputGroup>
 				<Form.Control
 					type="text"
+					name="searchUsersBar"
 					placeholder="Cerca utenti..."
 					value={searchTerm}
 					onChange={(e) => setSearchTerm(e.target.value)}

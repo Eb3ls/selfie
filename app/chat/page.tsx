@@ -1,126 +1,196 @@
 "use client";
 
+import { chatBody } from "@/app/color_palette";
+import { StringMessage } from "@/utils/db/db";
 import React, { useEffect, useRef, useState } from "react";
 import { Col, Container, ListGroup, Row } from "react-bootstrap";
-import { chatBody } from "../color_palette";
+import useSWR from "swr";
 import "./chat.css";
 import Footer from "./mainChat/Footer";
 import Header from "./mainChat/Header";
-import MessageComponent from "./mainChat/Messagge";
+import MessageComponent from "./mainChat/MessageItem";
 import FloatingMenu from "./sideBar/FloatingMenu";
 import SideBarHeader from "./sideBar/SideBarHeader";
 import UserItem from "./sideBar/UserItem";
 
-type Message = {
-	id: number;
-	sender: string;
-	text: string;
-	date: string;
+type UserElement = {
+	_id: string;
+	username: string;
+	userStatus: string;
+	profilePic: string;
 };
 
-type ChatData = {
-	[key: string]: Message[];
+type ChatEntry = {
+	_id: string;
+	isGroup: boolean;
+	summary: string;
+	userIdList: string[]; // Lista degli utenti (Il primo è il proprietario)
+	createdAt: string;
+	lastMessageAt: string | null;
+	lastMessage: StringMessage | null;
 };
 
-const data: ChatData = {
-	Alice: [
-		{ id: 1, sender: "Alice", text: "Ciao!", date: "10:45" },
+type ChatResponse = {
+	chatList: ChatEntry[];
+	userList: UserElement[];
+	whoAmI: UserElement;
+};
+
+async function fetcher(url: string) {
+	const response = await fetch(url);
+	if (!response.ok) {
+		alert("Errore durante il fetch delle note!");
+	}
+	return response.json();
+}
+
+function fromIdToUsername(
+	id: string,
+	userList: UserElement[]
+): string | undefined {
+	const user = userList.find((user) => user._id === id);
+	return user?.username;
+}
+
+export default function ChatMain() {
+	const [chatResponse, setChatResponse] = useState<ChatResponse | null>(null); // Risposta della API per la lista di chat
+	const [selectedChat, setSelectedChat] = useState<ChatEntry | null>(null); // Chat selezionata
+	const [currentMessages, setCurrentMessages] = useState<StringMessage[]>([]); // Messaggi della chat corrente
+
+	const [newMessage, setNewMessage] = useState<string>(""); // Nuovo messaggio da inviare
+	const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Sidebar aperta o chiusa
+
+	const chatEndRef = useRef<HTMLDivElement>(null); // Riferimento all'ultimo messaggio della chat
+
+	// Fetch dei dati dei contatti a sinistra
+	const { data: raw_contacts, error: error_contacts } = useSWR(
+		"/api/chat/getContacts",
+		fetcher,
 		{
-			id: 2,
-			sender: "Io",
-			text: "Ciao Alice, come stai?",
-			date: "10:46"
-		},
-		{
-			id: 3,
-			sender: "Alice",
-			text: "Bene, grazie!",
-			date: "10:47"
-		},
-		{
-			id: 4,
-			sender: "Io",
-			text: "Lorem Ipsum è un testo segnaposto utilizzato nel settore della tipografia e della stampa. Lorem Ipsum è considerato il testo segnaposto standard sin dal sedicesimo secolo, quando un anonimo tipografo prese una cassetta di caratteri e li assemblò per preparare un testo campione. È sopravvissuto non solo a più di cinque secoli, ma anche al passaggio alla videoimpaginazione, pervenendoci sostanzialmente inalterato. Fu reso popolare, negli anni ’60, con la diffusione dei fogli di caratteri trasferibili “Letraset”, che contenevano passaggi del Lorem Ipsum, e più recentemente da software di impaginazione come Aldus PageMaker, che includeva versioni del Lorem Ipsum.",
-			date: "10:46"
+			revalidateOnFocus: false // Disabilita il refetch quando si torna alla finestra
 		}
-	],
-	Tomba: [
-		{ id: 1, sender: "Tomba", text: "Ciao!", date: "10:45" },
-		{
-			id: 2,
-			sender: "Io",
-			text: "Ciao Tomba, come stai?",
-			date: "10:46"
-		},
-		{
-			id: 3,
-			sender: "Tomba",
-			text: "Bene, grazie!",
-			date: "10:47"
-		}
-	],
-	Mario: [],
-	Franco: [],
-	Daniele: [],
-	Mirco: [],
-	Andrea: [],
-	Marco: [],
-	Giuseppe: [],
-	Antonio: [],
-	Luca: [],
-	Giovanni: [],
-	Roberto: [],
-	Giorgio: [],
-	Stefano: [],
-	Michele: [],
-	Angelo: []
-};
+	);
 
-const ChatMain = () => {
-	const [selectedUser, setSelectedUser] = useState<string | null>(null);
-	const [messages, setMessages] = useState<Message[]>([]);
-	const [newMessage, setNewMessage] = useState("");
-	const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-	const chatEndRef = useRef<HTMLDivElement>(null);
+	// Aggiorna chatResponse quando i dati vengono recuperati
+	useEffect(() => {
+		if (raw_contacts) {
+			setChatResponse(raw_contacts);
+		}
+	}, [raw_contacts]);
+
+	// Fetch della lista di messaggi
+	const {
+		data: raw_message_list,
+		error: error_message_list,
+		mutate: mutate
+	} = useSWR(
+		selectedChat !== null && selectedChat?._id
+			? "/api/chat/" + selectedChat?._id + "/get"
+			: null,
+		fetcher,
+		{
+			// refreshInterval: 2000, // Ricarica i dati ogni 2 secondi
+			revalidateOnFocus: false // Disabilita il refetch quando si torna alla finestra
+		}
+	);
+
+	// Aggiorna currentMessages quando i dati vengono recuperati
+	useEffect(() => {
+		if (raw_message_list) {
+			setCurrentMessages(raw_message_list.messages);
+		}
+	}, [raw_message_list]);
 
 	// Funzione per scrollare automaticamente alla fine della chat
-	const scrollToBottom = () => {
+	function scrollToBottom() {
 		if (chatEndRef.current) {
 			chatEndRef.current.scrollIntoView({ behavior: "smooth" });
 		}
-	};
+	}
 
 	// Scrolla automaticamente alla fine della chat quando si aggiunge un nuovo messaggio
 	useEffect(() => {
 		scrollToBottom();
-	}, [messages]);
+	}, [currentMessages]);
 
 	// Funzione per inviare un messaggio
-	const sendMessage = () => {
-		if (newMessage.trim() === "" || selectedUser === null) return;
+	async function sendMessage() {
+		if (newMessage.trim() === "" || selectedChat === null) return;
+
+		const response = await fetch(
+			"/api/chat/" + selectedChat._id + "/push",
+			{
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify({ content: newMessage })
+			}
+		);
+
+		if (response.ok) {
+			// Aggiorno i messaggi
+			const newMessageObj: StringMessage = {
+				ownerId: chatResponse?.whoAmI._id!,
+				content: newMessage,
+				sentAt: new Date().toISOString()
+			};
+			setCurrentMessages([...currentMessages, newMessageObj]);
+		} else {
+			alert("Errore nell'invio del messaggio");
+		}
+
 		setNewMessage("");
-		data[selectedUser].push({
-			id: data[selectedUser].length + 1,
-			sender: "Io",
-			text: newMessage,
-			date: new Date().toLocaleTimeString()
-		});
-	};
+		scrollToBottom();
+		mutate();
+	}
 
 	// Funzione per caricare la chat con un utente
-	function loadChat(user: string) {
-		setSelectedUser(user);
-		setMessages(data[user]);
+	function loadChat(chatId: string) {
+		// Recupero la chat selezionata dalla lista di chat
+		const requestedChat = chatResponse?.chatList.find(
+			(chat) => chat._id === chatId
+		);
+
+		if (requestedChat === undefined) {
+			alert("Errore durante il caricamento della chat");
+			return;
+		}
+
+		setSelectedChat(requestedChat);
+		mutate();
 		setIsSidebarOpen(false);
 	}
 
 	// Componente per la sidebar
 	function Sidebar() {
 		const [searchTerm, setSearchTerm] = useState("");
-		const users = Object.keys(data);
-		const filteredUsers = users.filter((user) =>
-			user.toLowerCase().includes(searchTerm.toLowerCase())
-		);
+
+		// Filtraggio delle chat in base alla keyword di ricerca
+		const filteredChats = [];
+
+		for (const chat of chatResponse?.chatList || []) {
+			// Filtra le chat in base alla keyword di ricerca solamente nel nome
+			if (chat.summary.toLowerCase().includes(searchTerm.toLowerCase())) {
+				const lastMessage = chat.lastMessage;
+				const lastMessageObj = lastMessage
+					? {
+							name: fromIdToUsername(
+								lastMessage.ownerId,
+								chatResponse!.userList
+							)!,
+							content: lastMessage.content
+						}
+					: null;
+
+				filteredChats.push({
+					_id: chat._id,
+					summary: chat.summary,
+					lastMessage: lastMessageObj,
+					loader: () => loadChat(chat._id)
+				});
+			}
+		}
 
 		return (
 			<>
@@ -133,13 +203,11 @@ const ChatMain = () => {
 					style={{ maxHeight: "90vh" }}
 				>
 					<ListGroup variant="flush" className="ms-1">
-						{filteredUsers.length > 0 ? (
-							filteredUsers.map((user) => (
+						{filteredChats.length > 0 ? (
+							filteredChats.map((chat) => (
 								<UserItem
-									key={user}
-									user={user}
-									loadChat={loadChat}
-									data={data}
+									key={chat._id}
+									entry={chat}
 								></UserItem>
 							))
 						) : (
@@ -155,16 +223,33 @@ const ChatMain = () => {
 	}
 
 	function MainChatComponent() {
+		let index = 0;
+		const translatedMessages = currentMessages.map((message) => {
+			const newOwner =
+				chatResponse!.whoAmI._id === message.ownerId
+					? "Io"
+					: fromIdToUsername(
+							message.ownerId,
+							chatResponse!.userList
+						)!;
+			const newSentAt = new Date(message.sentAt).toLocaleTimeString();
+			return {
+				_id: index++,
+				owner: newOwner,
+				content: message.content,
+				sentAt: newSentAt
+			};
+		});
 		return (
 			<>
 				<Header
 					setIsSidebarOpen={setIsSidebarOpen}
-					setSelectedUser={setSelectedUser}
-					selectedUser={selectedUser}
+					setSelectedChat={setSelectedChat}
+					selectedChat={selectedChat?.summary}
 				></Header>
 				<div className="flex-grow-1 overflow-auto p-3">
-					{messages.map((message) => (
-						<MessageComponent key={message.id} msg={message} />
+					{translatedMessages.map((message) => (
+						<MessageComponent key={message._id} msg={message} />
 					))}
 					<div ref={chatEndRef}></div>
 				</div>
@@ -193,13 +278,11 @@ const ChatMain = () => {
 					style={{ backgroundColor: chatBody }}
 					className={`d-flex flex-column p-0 h-100 ${isSidebarOpen ? "d-none d-lg-block" : "d-block"}`}
 				>
-					{selectedUser && MainChatComponent()}
+					{selectedChat && MainChatComponent()}
 				</Col>
 			</Row>
 		</Container>
 	);
-};
-
-export default ChatMain;
+}
 
 //TODO quando si restring troppo l'header fa overflow-x

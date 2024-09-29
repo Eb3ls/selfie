@@ -23,6 +23,7 @@ export default function Footer({
 			<InputGroup>
 				<Form.Control
 					type="text"
+					name="chatInput"
 					placeholder="Scrivi un messaggio..."
 					value={newMessage}
 					className={`bg-transparent border-0 text-white chatInput`}
