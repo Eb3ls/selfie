@@ -13,19 +13,28 @@ import {
 import Youtube, { YouTubeProps } from "react-youtube";
 import { QueueListModal } from "./QueueListModal";
 
+const opts: YouTubeProps["opts"] = {
+	// https://developers.google.com/youtube/player_parameters
+	playerVars: {
+		vq: "small", // Qualità video
+		controls: 0, // Nascondi i controlli del lettore
+		disablekb: 1, // Disabilita i tasti della tastiera
+		enablejsapi: 1, // Abilita l'API JavaScript
+		iv_load_policy: 3, // Nascondi le annotazioni
+		loop: 0,
+		modestbranding: 1, // Nascondi il pulsante YouTube
+		playsinline: 1, // Riproduci video in linea
+		rel: 0, // Nascondi video correlati
+		showinfo: 0 // Nascondi informazioni video
+	}
+};
+
 // Il browser deve supportare la funzione postMessage
 // Supportato da i browser moderni ad eccezione di Internet Explorer 7
-export function MusicBar({ source }: { source: string }) {
-	if (source) {
-		source = source.replace(
-			// Correggi funzione
-			"https://www.youtube.com/watch?v=",
-			"https://www.youtube.com/embed/"
-		);
-	}
-
+// Non utilizzata una playlist in quando vogliamo che sia una coda di riproduzione
+// Utilizzandola andrebbe comunque ricaricato il componente dovendo eliminare il video corrente
+export function MusicBar() {
 	const [player, setPlayer] = useState<any>(null);
-	const [videoTitle, setVideoTitle] = useState<string>("");
 	const [videoDuration, setVideoDuration] = useState<number>(0);
 	const [hasVolume, setHasVolume] = useState<boolean>(true);
 	const [volume, setVolume] = useState<number>(50);
@@ -33,35 +42,23 @@ export function MusicBar({ source }: { source: string }) {
 	const [isPlaying, setIsPlaying] = useState<boolean>(false);
 	const [toLoop, setToLoop] = useState<boolean>(false);
 	const [isInteracting, setIsInteracting] = useState<boolean>(false);
+	const [videoList, setVideoList] = useState<string[]>([]);
+	const [videoTitleList, setVideoTitleList] = useState<string[]>([]);
 
-	const onReady = (event: any) => {
-		const player = event.target;
-		const videoData = player.getVideoData();
-
-		setVideoTitle(videoData.title);
-		setVideoDuration(player.getDuration());
-		player.setVolume(volume);
-
-		setPlayer(player);
-	};
-
-	source = "EOHh_OrMbzw";
-
-	const opts: YouTubeProps["opts"] = {
-		// https://developers.google.com/youtube/player_parameters
-		playerVars: {
-			vq: "small", // Qualità video
-			controls: 0, // Nascondi i controlli del lettore
-			disablekb: 1, // Disabilita i tasti della tastiera
-			enablejsapi: 1, // Abilita l'API JavaScript
-			iv_load_policy: 3, // Nascondi le annotazioni
-			loop: 0,
-			modestbranding: 1, // Nascondi il pulsante YouTube
-			playsinline: 1, // Riproduci video in linea
-			rel: 0, // Nascondi video correlati
-			showinfo: 0 // Nascondi informazioni video
+	function onReady(event: any) {
+		if (videoList.length !== 0) {
+			const player = event.target;
+			setPlayer(player);
+			setVideoDuration(player.getDuration());
+			player.setVolume(volume);
+			if (isPlaying) {
+				player.playVideo();
+			}
+		} else {
+			setVideoDuration(0);
+			setCurrentTime(0);
 		}
-	};
+	}
 
 	function formatTime(seconds: number) {
 		const minutes = Math.floor(seconds / 60);
@@ -85,26 +82,39 @@ export function MusicBar({ source }: { source: string }) {
 		setToLoop(!toLoop);
 	}
 
-	const handleMouseDown = () => {
+	function handleMouseDown() {
 		setIsInteracting(true);
-	};
+	}
 
-	const handleMouseUp = () => {
+	function handleMouseUp() {
 		setIsInteracting(false);
-	};
+	}
 
-	const handleProgressBarChange = (
-		e: React.ChangeEvent<HTMLInputElement>
-	) => {
-		const newTime = parseFloat(e.target.value); // Ottieni il nuovo valore dalla barra
+	function deleteFirstVideo() {
+		setVideoList(videoList.slice(1));
+		setVideoTitleList(videoTitleList.slice(1));
+	}
+
+	function handleEnd() {
+		if (toLoop) {
+			player.seekTo(0, true);
+			if (!isPlaying) {
+				player.pauseVideo();
+			}
+		} else {
+			deleteFirstVideo();
+		}
+	}
+
+	function handleProgressBarChange(event: any) {
+		const newTime = parseFloat(event.target.value); // Ottieni il nuovo valore dalla barra
 		setCurrentTime(newTime); // Aggiorna il tempo corrente
 		player.seekTo(newTime, true); // Sposta il video al nuovo punto
-		if (!isPlaying) {
-			player.pauseVideo();
+		if (player.getPlayerState() === 5) {
+			setIsPlaying(true);
 		}
-	};
+	}
 
-	// Aggiorna il tempo corrente ogni secondo
 	useEffect(() => {
 		if (player) {
 			// Imposta un intervallo per aggiornare il tempo corrente
@@ -112,8 +122,8 @@ export function MusicBar({ source }: { source: string }) {
 				if (!isInteracting) {
 					setCurrentTime(player.getCurrentTime());
 				}
-			}, 1000); // Ogni secondo
-			return () => clearInterval(interval); // Cancella l'intervallo al dismount
+			}, 1000);
+			return () => clearInterval(interval);
 		}
 	}, [player, isInteracting]); // L'effetto si esegue ogni volta che cambia YTPlayer
 
@@ -125,16 +135,19 @@ export function MusicBar({ source }: { source: string }) {
 			/>
 			<div>
 				<Youtube
-					videoId={source}
+					videoId={videoList[0]}
 					opts={opts}
 					onReady={onReady}
+					onEnd={handleEnd}
 					className={"-none"}
 				></Youtube>
 			</div>
 			<Container className="vh-100 vw-100">
 				<Container className="h-50 w-100 bg-danger rounded-pill d-flex flex-column">
 					<h3 className="mx-auto">
-						{videoTitle ? videoTitle : "Caricamento..."}
+						{videoTitleList.length !== 0
+							? videoTitleList[0]
+							: "Nessun video in coda"}
 					</h3>
 					<label htmlFor="videoRange" className="form-label"></label>
 					<input
@@ -168,7 +181,7 @@ export function MusicBar({ source }: { source: string }) {
 									<FaPlay fontSize={30}></FaPlay>
 								)}
 							</Button>
-							<Button variant="link">
+							<Button variant="link" onClick={handleEnd}>
 								<FaAnglesRight fontSize={30}></FaAnglesRight>
 							</Button>
 						</Container>
@@ -183,7 +196,12 @@ export function MusicBar({ source }: { source: string }) {
 								)}
 							</Button>
 							<Button variant="link">
-								<QueueListModal>
+								<QueueListModal
+									videoList={videoList}
+									setVideoList={setVideoList}
+									videoTitleList={videoTitleList}
+									setVideoTitleList={setVideoTitleList}
+								>
 									<FaPlus fontSize={30}></FaPlus>
 								</QueueListModal>
 							</Button>

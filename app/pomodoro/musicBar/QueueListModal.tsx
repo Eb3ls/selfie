@@ -3,29 +3,77 @@
 import "@/app/chat/sideBar/Modal.css";
 import React, { useState } from "react";
 import { Button, Container, Form, ListGroup, Modal } from "react-bootstrap";
+import YouTube, { YouTubeProps } from "react-youtube";
 
-export function QueueListModal({ children }: any) {
+const opts: YouTubeProps["opts"] = {
+	// https://developers.google.com/youtube/player_parameters
+	playerVars: {
+		vq: "small", // Qualità video
+		controls: 0, // Nascondi i controlli del lettore
+		disablekb: 1, // Disabilita i tasti della tastiera
+		enablejsapi: 1, // Abilita l'API JavaScript
+		iv_load_policy: 3, // Nascondi le annotazioni
+		loop: 0,
+		modestbranding: 1, // Nascondi il pulsante YouTube
+		playsinline: 1, // Riproduci video in linea
+		rel: 0, // Nascondi video correlati
+		showinfo: 0 // Nascondi informazioni video
+	}
+};
+
+interface ModalInteface {
+	children: React.ReactNode;
+	videoList: string[];
+	setVideoList: React.Dispatch<React.SetStateAction<string[]>>;
+	videoTitleList: string[];
+	setVideoTitleList: React.Dispatch<React.SetStateAction<string[]>>;
+}
+
+export function QueueListModal({
+	children,
+	videoList,
+	setVideoList,
+	videoTitleList,
+	setVideoTitleList
+}: ModalInteface) {
 	const [show, setShow] = useState(false);
 	const [newVideo, setNewVideo] = useState("");
-	const [videoList, setVideoList] = useState<string[]>([]);
+	const [curVideo, setCurVideo] = useState("");
 
 	// TODO rimuovere quando finito canzone
-	const handleNewVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+	function handleNewVideoChange(e: any) {
 		setNewVideo(e.target.value);
-	};
+	}
 
-	const handleAddNewVideo = () => {
+	function handleAddNewVideo() {
 		if (newVideo === "") {
 			return;
 		}
-		setVideoList([...videoList, newVideo]);
-		setNewVideo("");
-	};
+		const ytRegex =
+			/^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})$/;
 
-	// TODO possono essere ripetuti
-	const handleRemoveVideo = (name: string) => {
-		setVideoList(videoList.filter((video) => video !== name));
-	};
+		const match = newVideo.match(ytRegex);
+		if (!match) {
+			alert("Link non valido");
+			return;
+		}
+		const videoId = match[1];
+		setCurVideo(videoId);
+		setVideoList([...videoList, videoId]);
+		setNewVideo("");
+	}
+
+	function onReady(event: any) {
+		const player = event.target;
+		const data = player.getVideoData();
+		setVideoTitleList([...videoTitleList, data.title]);
+		setCurVideo("");
+	}
+
+	function handleRemoveVideo(index: number) {
+		setVideoTitleList(videoTitleList.filter((_, i) => i !== index));
+		setVideoList(videoList.filter((_, i) => i !== index));
+	}
 
 	function videoItem(videoTitle: string, index: number) {
 		return (
@@ -37,7 +85,7 @@ export function QueueListModal({ children }: any) {
 				<Button
 					variant="danger"
 					size="sm"
-					onClick={() => handleRemoveVideo(videoTitle)}
+					onClick={() => handleRemoveVideo(index)}
 				>
 					X
 				</Button>
@@ -73,11 +121,19 @@ export function QueueListModal({ children }: any) {
 							className="mt-3 overflow-y-auto"
 							style={{ maxHeight: "40vh" }}
 						>
-							{videoList.map((video, index) =>
+							{videoTitleList.map((video, index) =>
 								videoItem(video, index)
 							)}
 						</ListGroup>
 					</>
+				)}
+				{curVideo !== "" && (
+					<YouTube
+						videoId={curVideo}
+						onReady={onReady}
+						opts={opts}
+						className="d-none"
+					></YouTube>
 				)}
 			</>
 		);
