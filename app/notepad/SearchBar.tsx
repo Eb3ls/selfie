@@ -1,12 +1,11 @@
 "use client";
 
-import React from "react";
 import { Button, Form, InputGroup } from "react-bootstrap";
 import { FaFilter, FaPlus, FaSort } from "react-icons/fa";
 import { FilterModal } from "./FilterModal";
 import { SortModal } from "./SortModal";
 
-export function SearchBar({ handleFilters, handleSort }: any) {
+export function SearchBar({ handleFilters, handleSort, handleSearch }: any) {
 	return (
 		<InputGroup className="mb-3">
 			<Form.Control
@@ -14,6 +13,7 @@ export function SearchBar({ handleFilters, handleSort }: any) {
 				placeholder="Search..."
 				aria-label="Search"
 				name="searchBar"
+				onChange={handleSearch}
 			/>
 
 			<FilterModal handleFilters={handleFilters}>

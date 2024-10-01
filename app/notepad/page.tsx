@@ -27,17 +27,21 @@ async function fetcher(url: string) {
 
 export default function Notepad() {
 	const [notes, setNotes] = useState<StringNote[]>([]);
+	const [oldNotes, setOldNotes] = useState<StringNote[]>([]);
 
 	const { data, error } = useSWR("/api/notepad/getNotes", fetcher);
 
 	// Aggiorna notes quando i dati vengono recuperati
 	useEffect(() => {
 		if (data) {
+			setOldNotes(data);
 			setNotes(data);
 		}
 	}, [data]);
 
 	function handleFilters(filters: any) {
+		setOldNotes(notes);
+
 		console.log(filters);
 
 		const {
@@ -75,6 +79,7 @@ export default function Notepad() {
 
 		// Imposta le note filtrate nello stato
 		setNotes(filteredNotes);
+		setOldNotes(filteredNotes);
 	}
 
 	function handleSort(sortParams: {
@@ -115,6 +120,19 @@ export default function Notepad() {
 
 		// Aggiorna lo stato delle note ordinate
 		setNotes(sortedNotes);
+		setOldNotes(sortedNotes);
+	}
+
+	function handleSearch(e: any) {
+		const searchTerm = e.target.value;
+
+		const filteredNotes = oldNotes.filter((note: any) => {
+			return note.summary
+				.toLowerCase()
+				.includes(searchTerm.toLowerCase());
+		});
+
+		searchTerm !== "" ? setNotes(filteredNotes) : setNotes(oldNotes);
 	}
 
 	// Funzione per restituire l'icona corretta per il campo access
@@ -144,6 +162,7 @@ export default function Notepad() {
 				<SearchBar
 					handleFilters={handleFilters}
 					handleSort={handleSort}
+					handleSearch={handleSearch}
 				/>
 				<Row className="mt-5 gx-5 text-center">
 					{error && <div>Failed to load</div>}
