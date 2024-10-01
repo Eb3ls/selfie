@@ -2,10 +2,16 @@
 
 import { Button, Form, InputGroup } from "react-bootstrap";
 import { FaFilter, FaPlus, FaSort } from "react-icons/fa";
+import { AddNoteModal } from "./AddNoteModal";
 import { FilterModal } from "./FilterModal";
 import { SortModal } from "./SortModal";
 
-export function SearchBar({ handleFilters, handleSort, handleSearch }: any) {
+export function SearchBar({
+	handleFilters,
+	handleSort,
+	handleSearch,
+	handleAdd
+}: any) {
 	return (
 		<InputGroup className="mb-3">
 			<Form.Control
@@ -27,9 +33,12 @@ export function SearchBar({ handleFilters, handleSort, handleSearch }: any) {
 					<FaSort /> {/* Icona del sort */}
 				</Button>
 			</SortModal>
-			<Button variant="primary">
-				<FaPlus /> {/* Icona del '+' */}
-			</Button>
+
+			<AddNoteModal handleAdd={handleAdd}>
+				<Button variant="primary">
+					<FaPlus /> {/* Icona del '+' */}
+				</Button>
+			</AddNoteModal>
 		</InputGroup>
 	);
 }

@@ -2,6 +2,8 @@
 
 import { Sidebar } from "@/app/components/Sidebar";
 import { StringNote } from "@/utils/db/db";
+import { createNote } from "@/utils/db/models/Note";
+import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { Button, Card, Col, Container, Row } from "react-bootstrap";
 import { FaLock, FaTrash, FaUser, FaUserShield } from "react-icons/fa";
@@ -12,9 +14,6 @@ import { SearchBar } from "./SearchBar";
 // Variabile provvisoria per simulare l'utente corrente
 const currentUser = "provvisoryUserId";
 
-function onAdd() {}
-function onSort() {}
-function onFilter() {}
 function handleDelete(id: string) {}
 
 async function fetcher(url: string) {
@@ -135,6 +134,24 @@ export default function Notepad() {
 		searchTerm !== "" ? setNotes(filteredNotes) : setNotes(oldNotes);
 	}
 
+	async function handleAdd(note: { summary: string; categories: string }) {
+		console.log(note);
+
+		const response = await fetch("/api/notepad/add", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify(note)
+		});
+		if (!response.ok) {
+			alert("Errore durante il fetch delle note!");
+		} else {
+			const fetched_data = await response.json();
+			window.location.href = "./" + fetched_data._id;
+		}
+	}
+
 	// Funzione per restituire l'icona corretta per il campo access
 	function getAccessIcon(access: string) {
 		switch (access) {
@@ -163,6 +180,7 @@ export default function Notepad() {
 					handleFilters={handleFilters}
 					handleSort={handleSort}
 					handleSearch={handleSearch}
+					handleAdd={handleAdd}
 				/>
 				<Row className="mt-5 gx-5 text-center">
 					{error && <div>Failed to load</div>}
