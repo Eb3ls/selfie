@@ -1,8 +1,9 @@
 "use client";
 
 import "@/app/chat/sideBar/Modal.css";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Container, Form, ListGroup, Modal } from "react-bootstrap";
+import { FaMusic } from "react-icons/fa6";
 import YouTube, { YouTubeProps } from "react-youtube";
 
 const opts: YouTubeProps["opts"] = {
@@ -50,7 +51,7 @@ export function QueueListModal({
 			return;
 		}
 		const ytRegex =
-			/^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})$/;
+			/^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})(?:[?&].*)?$/;
 
 		const match = newVideo.match(ytRegex);
 		if (!match) {
@@ -60,19 +61,31 @@ export function QueueListModal({
 		const videoId = match[1];
 		setCurVideo(videoId);
 		setVideoList([...videoList, videoId]);
+		setVideoTitleList([...videoTitleList, "Caricamento..."]);
 		setNewVideo("");
 	}
 
 	function onReady(event: any) {
 		const player = event.target;
 		const data = player.getVideoData();
-		setVideoTitleList([...videoTitleList, data.title]);
+		console.log(videoTitleList);
+		const list = [...videoTitleList];
+		list[list.length - 1] = data.title;
+		setVideoTitleList(list);
 		setCurVideo("");
 	}
 
 	function handleRemoveVideo(index: number) {
 		setVideoTitleList(videoTitleList.filter((_, i) => i !== index));
 		setVideoList(videoList.filter((_, i) => i !== index));
+	}
+
+	function handleClose() {
+		if (curVideo !== "") {
+			alert("Aspetta che il video sia pronto");
+			return;
+		}
+		setShow(false);
 	}
 
 	function videoItem(videoTitle: string, index: number) {
@@ -104,6 +117,7 @@ export function QueueListModal({
 						<Form.Control
 							type="text"
 							name="userName"
+							autoFocus
 							value={newVideo}
 							onChange={handleNewVideoChange}
 							placeholder="Inserisci link"
@@ -141,14 +155,13 @@ export function QueueListModal({
 
 	return (
 		<>
-			{/* Bottone per aprire il modal */}
 			<span onClick={() => setShow(true)} style={{ cursor: "pointer" }}>
 				{children}
 			</span>
 
 			<Modal
 				show={show}
-				onHide={() => setShow(false)}
+				onHide={handleClose}
 				centered
 				dialogClassName="custom-modal"
 				backdropClassName="custom-backdrop"
@@ -156,7 +169,7 @@ export function QueueListModal({
 			>
 				<Modal.Header closeButton className="custom-modal-header">
 					<Modal.Title>
-						<i className="bi bi-person-plus me-2" />
+						<FaMusic className="me-2"></FaMusic>
 						Coda Player
 					</Modal.Title>
 				</Modal.Header>
@@ -164,10 +177,10 @@ export function QueueListModal({
 				<Modal.Footer>
 					<Button
 						variant="secondary"
-						onClick={() => setShow(false)}
+						onClick={handleClose}
 						className="custom-cancel-button"
 					>
-						Annulla
+						Chiudi
 					</Button>
 				</Modal.Footer>
 			</Modal>

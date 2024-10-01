@@ -29,6 +29,14 @@ const opts: YouTubeProps["opts"] = {
 	}
 };
 
+function formatTime(seconds: number) {
+	const minutes = Math.floor(seconds / 60);
+	const secs = Math.floor(seconds % 60);
+	const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+	const formattedSeconds = secs < 10 ? `0${secs}` : secs;
+	return `${formattedMinutes}:${formattedSeconds}`;
+}
+
 // Il browser deve supportare la funzione postMessage
 // Supportato da i browser moderni ad eccezione di Internet Explorer 7
 // Non utilizzata una playlist in quando vogliamo che sia una coda di riproduzione
@@ -46,34 +54,27 @@ export function MusicBar() {
 	const [videoTitleList, setVideoTitleList] = useState<string[]>([]);
 
 	function onReady(event: any) {
-		if (videoList.length !== 0) {
-			const player = event.target;
-			setPlayer(player);
-			setVideoDuration(player.getDuration());
-			player.setVolume(volume);
-			if (isPlaying) {
-				player.playVideo();
-			}
-		} else {
-			setVideoDuration(0);
-			setCurrentTime(0);
+		const player = event.target;
+		setPlayer(player);
+		setVideoDuration(player.getDuration());
+		player.setVolume(volume);
+		if (isPlaying) {
+			player.playVideo();
 		}
 	}
 
-	function formatTime(seconds: number) {
-		const minutes = Math.floor(seconds / 60);
-		const secs = Math.floor(seconds % 60);
-		const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
-		const formattedSeconds = secs < 10 ? `0${secs}` : secs;
-		return `${formattedMinutes}:${formattedSeconds}`;
-	}
-
-	function toggleVideo() {
+	function togglePlay() {
+		if (videoList.length === 0) {
+			return;
+		}
 		isPlaying ? player.pauseVideo() : player.playVideo();
 		setIsPlaying(!isPlaying);
 	}
 
 	function toggleVolume() {
+		if (videoList.length === 0) {
+			return;
+		}
 		hasVolume ? player.mute() : player.unMute();
 		setHasVolume(!hasVolume);
 	}
@@ -90,11 +91,6 @@ export function MusicBar() {
 		setIsInteracting(false);
 	}
 
-	function deleteFirstVideo() {
-		setVideoList(videoList.slice(1));
-		setVideoTitleList(videoTitleList.slice(1));
-	}
-
 	function handleEnd() {
 		if (toLoop) {
 			player.seekTo(0, true);
@@ -102,14 +98,15 @@ export function MusicBar() {
 				player.pauseVideo();
 			}
 		} else {
-			deleteFirstVideo();
+			setVideoList(videoList.slice(1));
+			setVideoTitleList(videoTitleList.slice(1));
 		}
 	}
 
 	function handleProgressBarChange(event: any) {
-		const newTime = parseFloat(event.target.value); // Ottieni il nuovo valore dalla barra
-		setCurrentTime(newTime); // Aggiorna il tempo corrente
-		player.seekTo(newTime, true); // Sposta il video al nuovo punto
+		const newTime = parseFloat(event.target.value);
+		setCurrentTime(newTime);
+		player.seekTo(newTime, true);
 		if (player.getPlayerState() === 5) {
 			setIsPlaying(true);
 		}
@@ -125,7 +122,18 @@ export function MusicBar() {
 			}, 1000);
 			return () => clearInterval(interval);
 		}
-	}, [player, isInteracting]); // L'effetto si esegue ogni volta che cambia YTPlayer
+	}, [player, isInteracting]);
+
+	useEffect(() => {
+		if (videoList.length === 0) {
+			setCurrentTime(0);
+			setVideoDuration(0);
+			setIsPlaying(false);
+			setHasVolume(true);
+			setToLoop(false);
+			setPlayer(null);
+		}
+	}, [videoList]);
 
 	return (
 		<>
@@ -134,16 +142,18 @@ export function MusicBar() {
 				strategy="afterInteractive"
 			/>
 			<div>
-				<Youtube
-					videoId={videoList[0]}
-					opts={opts}
-					onReady={onReady}
-					onEnd={handleEnd}
-					className={"-none"}
-				></Youtube>
+				{videoList.length !== 0 && (
+					<Youtube
+						videoId={videoList[0]}
+						opts={opts}
+						onReady={onReady}
+						onEnd={handleEnd}
+						className={"d-none"}
+					></Youtube>
+				)}
 			</div>
 			<Container className="vh-100 vw-100">
-				<Container className="h-50 w-100 bg-danger rounded-pill d-flex flex-column">
+				<Container className="h-50 w-100 bg-danger rounded-pill d-flex flex-column align-items-center justify-content-center">
 					<h3 className="mx-auto">
 						{videoTitleList.length !== 0
 							? videoTitleList[0]
@@ -166,15 +176,15 @@ export function MusicBar() {
 						<p>{formatTime(videoDuration)}</p>
 					</Container>
 
-					<Container className="d-flex position-relative">
-						<Container className="flex-grow-1 d-flex justify-content-center">
+					<Container className="d-flex w-100 position-relative">
+						<div className="d-flex flex-shrink-0 mx-auto">
 							<Button variant="link" onClick={toggleLoop}>
 								<FaArrowRotateRight
 									fontSize={30}
 									fill={toLoop ? "blue" : "green"}
 								></FaArrowRotateRight>
 							</Button>
-							<Button variant="link" onClick={toggleVideo}>
+							<Button variant="link" onClick={togglePlay}>
 								{isPlaying ? (
 									<FaPause fontSize={30}></FaPause>
 								) : (
@@ -184,8 +194,8 @@ export function MusicBar() {
 							<Button variant="link" onClick={handleEnd}>
 								<FaAnglesRight fontSize={30}></FaAnglesRight>
 							</Button>
-						</Container>
-						<Container className="">
+						</div>
+						<div className="d-flex position-absolute end-0">
 							<Button variant="link" onClick={toggleVolume}>
 								{hasVolume ? (
 									<FaVolumeLow fontSize={30}></FaVolumeLow>
@@ -205,7 +215,7 @@ export function MusicBar() {
 									<FaPlus fontSize={30}></FaPlus>
 								</QueueListModal>
 							</Button>
-						</Container>
+						</div>
 					</Container>
 				</Container>
 			</Container>
