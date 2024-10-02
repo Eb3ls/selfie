@@ -1,10 +1,10 @@
 "use client";
 
-import "@/app/chat/sideBar/Modal.css";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Button, Container, Form, ListGroup, Modal } from "react-bootstrap";
 import { FaMusic } from "react-icons/fa6";
 import YouTube, { YouTubeProps } from "react-youtube";
+import "./MusicBar.css";
 
 const opts: YouTubeProps["opts"] = {
 	// https://developers.google.com/youtube/player_parameters
@@ -68,7 +68,6 @@ export function QueueListModal({
 	function onReady(event: any) {
 		const player = event.target;
 		const data = player.getVideoData();
-		console.log(videoTitleList);
 		const list = [...videoTitleList];
 		list[list.length - 1] = data.title;
 		setVideoTitleList(list);

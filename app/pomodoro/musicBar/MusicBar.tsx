@@ -1,5 +1,5 @@
 import Script from "next/script";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button, Container } from "react-bootstrap";
 import {
 	FaAnglesRight,
@@ -11,7 +11,9 @@ import {
 	FaVolumeXmark
 } from "react-icons/fa6";
 import Youtube, { YouTubeProps } from "react-youtube";
+import "./MusicBar.css";
 import { QueueListModal } from "./QueueListModal";
+import { TitleBar } from "./TitleBar";
 
 const opts: YouTubeProps["opts"] = {
 	// https://developers.google.com/youtube/player_parameters
@@ -152,73 +154,64 @@ export function MusicBar() {
 					></Youtube>
 				)}
 			</div>
-			<Container className="vh-100 vw-100">
-				<Container className="h-50 w-100 bg-danger rounded-pill d-flex flex-column align-items-center justify-content-center">
-					<h3 className="mx-auto">
-						{videoTitleList.length !== 0
-							? videoTitleList[0]
-							: "Nessun video in coda"}
-					</h3>
-					<label htmlFor="videoRange" className="form-label"></label>
-					<input
-						type="range"
-						id="videoRange"
-						className="form-range"
-						min={0}
-						max={videoDuration}
-						value={currentTime}
-						onChange={handleProgressBarChange}
-						onMouseDown={handleMouseDown}
-						onMouseUp={handleMouseUp}
-					/>
-					<Container className="d-flex justify-content-between">
-						<p>{formatTime(currentTime)}</p>
-						<p>{formatTime(videoDuration)}</p>
-					</Container>
+			<div className="w-100 bg-danger p-3 mt-5 rounded-pill d-flex flex-column align-items-center justify-content-center">
+				<TitleBar videoTitleList={videoTitleList}></TitleBar>
+				<label htmlFor="videoRange" className="form-label"></label>
+				<input
+					type="range"
+					id="videoRange"
+					className="form-range"
+					min={0}
+					max={videoDuration}
+					value={currentTime}
+					onChange={handleProgressBarChange}
+					onMouseDown={handleMouseDown}
+					onMouseUp={handleMouseUp}
+				/>
+				<div className="d-flex justify-content-between w-100">
+					<p>{formatTime(currentTime)}</p>
+					<p>{formatTime(videoDuration)}</p>
+				</div>
 
-					<Container className="d-flex w-100 position-relative">
-						<div className="d-flex flex-shrink-0 mx-auto">
-							<Button variant="link" onClick={toggleLoop}>
-								<FaArrowRotateRight
-									fontSize={30}
-									fill={toLoop ? "blue" : "green"}
-								></FaArrowRotateRight>
-							</Button>
-							<Button variant="link" onClick={togglePlay}>
-								{isPlaying ? (
-									<FaPause fontSize={30}></FaPause>
-								) : (
-									<FaPlay fontSize={30}></FaPlay>
-								)}
-							</Button>
-							<Button variant="link" onClick={handleEnd}>
-								<FaAnglesRight fontSize={30}></FaAnglesRight>
-							</Button>
-						</div>
-						<div className="d-flex position-absolute end-0">
-							<Button variant="link" onClick={toggleVolume}>
-								{hasVolume ? (
-									<FaVolumeLow fontSize={30}></FaVolumeLow>
-								) : (
-									<FaVolumeXmark
-										fontSize={30}
-									></FaVolumeXmark>
-								)}
-							</Button>
-							<Button variant="link">
-								<QueueListModal
-									videoList={videoList}
-									setVideoList={setVideoList}
-									videoTitleList={videoTitleList}
-									setVideoTitleList={setVideoTitleList}
-								>
-									<FaPlus fontSize={30}></FaPlus>
-								</QueueListModal>
-							</Button>
-						</div>
-					</Container>
-				</Container>
-			</Container>
+				<div className="d-flex w-100 position-relative">
+					<div className="d-flex flex-shrink-0 mx-auto">
+						<Button variant="link" onClick={toggleLoop}>
+							<FaArrowRotateRight
+								fontSize={30}
+							></FaArrowRotateRight>
+						</Button>
+						<Button variant="link" onClick={togglePlay}>
+							{isPlaying ? (
+								<FaPause fontSize={30}></FaPause>
+							) : (
+								<FaPlay fontSize={30}></FaPlay>
+							)}
+						</Button>
+						<Button variant="link" onClick={handleEnd}>
+							<FaAnglesRight fontSize={30}></FaAnglesRight>
+						</Button>
+					</div>
+					<div className="d-flex position-absolute end-0">
+						<Button variant="link" onClick={toggleVolume}>
+							{hasVolume ? (
+								<FaVolumeLow fontSize={30}></FaVolumeLow>
+							) : (
+								<FaVolumeXmark fontSize={30}></FaVolumeXmark>
+							)}
+						</Button>
+						<Button variant="link">
+							<QueueListModal
+								videoList={videoList}
+								setVideoList={setVideoList}
+								videoTitleList={videoTitleList}
+								setVideoTitleList={setVideoTitleList}
+							>
+								<FaPlus fontSize={30}></FaPlus>
+							</QueueListModal>
+						</Button>
+					</div>
+				</div>
+			</div>
 		</>
 	);
 }
