@@ -14,8 +14,6 @@ import { SearchBar } from "./SearchBar";
 // Variabile provvisoria per simulare l'utente corrente
 const currentUser = "provvisoryUserId";
 
-function handleDelete(id: string) {}
-
 async function fetcher(url: string) {
 	const response = await fetch(url);
 	if (!response.ok) {
@@ -148,8 +146,28 @@ export default function Notepad() {
 			alert("Errore durante il fetch delle note!");
 		} else {
 			const fetched_data = await response.json();
-			window.location.href = "./" + fetched_data._id;
+			window.location.href = "./notepad/" + fetched_data._id;
 		}
+	}
+
+	async function handleDelete(id: string) {
+		const conf = confirm("Sicuro di voler eliminare?");
+
+		if (!conf) return;
+
+		const response = await fetch("/api/notepad/delete", {
+			method: "DELETE",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({ _id: id })
+		});
+
+		if (!response.ok) {
+			alert("Errore nell'eliminazione della nota!");
+		}
+
+		window.location.reload();
 	}
 
 	// Funzione per restituire l'icona corretta per il campo access
@@ -219,15 +237,23 @@ export default function Notepad() {
 											</Button>
 										</div>
 										<hr />
-										<div className="d-flex justify-content-between align-items-center">
-											<Card.Title>
-												{note.summary}
-											</Card.Title>
-										</div>
-										<div className="d-flex justify-content-between align-items-center">
-											<Card.Subtitle className="mb-2 text-muted">
-												{note.categories}
-											</Card.Subtitle>
+										<div
+											onClick={() => {
+												window.location.href =
+													"./notepad/" + note._id;
+											}}
+											style={{ cursor: "pointer" }}
+										>
+											<div className="d-flex justify-content-between align-items-center">
+												<Card.Title>
+													{note.summary}
+												</Card.Title>
+											</div>
+											<div className="d-flex justify-content-between align-items-center">
+												<Card.Subtitle className="mb-2 text-muted">
+													{note.categories}
+												</Card.Subtitle>
+											</div>
 										</div>
 										<hr />
 										<Card.Text>
