@@ -1,0 +1,61 @@
+.bottom-circle {
+	width: min(50vw, 50vh);
+	height: min(30vw, 30vh);
+	background-color: #8b4513;
+	border-radius: 0% 0% 60% 60%;
+	clip-path: inset(50% 0 0 0);
+}
+
+.oval-circle {
+	width: min(50vw, 50vh);
+	height: min(5vw, 5vh);
+	background-color: #ad581a;
+	border-radius: 50%;
+	z-index: 1;
+}
+
+.log {
+	width: min(10vw, 10vh);
+	height: min(20vw, 20vh);
+	top: calc(50% - min(7.5vw, 7.5vh));
+	left: 50%;
+	clip-path: polygon(30% 0%, 80% 0%, 80% 90%, 50% 95%, 30% 90%);
+	background: linear-gradient(to right, #834112 50%, #bd5f1d 50%);
+	z-index: 2;
+}
+
+.leaves-1 {
+	width: min(25vw, 25vh);
+	aspect-ratio: 16/9;
+	top: calc(50% - min(30vw, 30vh));
+	left: 50%;
+	clip-path: polygon(50% 0%, 10% 85%, 40% 100%, 100% 90%);
+	background: linear-gradient(180deg, #125c32bd 10%, #2be780a9 100%),
+		linear-gradient(100deg, #2e8b57 46%, #3cb371 30%);
+	transform: translateX(11vh);
+	z-index: 5;
+}
+
+.leaves-2 {
+	width: min(30vw, 30vh);
+	aspect-ratio: 16/9;
+	top: calc(50% - min(25vw, 25vh));
+	left: 50%;
+	clip-path: polygon(50% 0%, 10% 85%, 40% 100%, 100% 90%);
+	background: linear-gradient(180deg, #125c32bd 30%, #2be780a9 100%),
+		linear-gradient(100deg, #2e8b57 46%, #3cb371 30%);
+	transform: translateX(-11vh);
+	z-index: 4;
+}
+
+.leaves-3 {
+	width: min(40vw, 40vh);
+	aspect-ratio: 16/9;
+	top: calc(50% - min(20vw, 20vh));
+	left: 50%;
+	clip-path: polygon(50% 0%, 10% 85%, 40% 100%, 100% 90%);
+	background: linear-gradient(180deg, #125c32bd 30%, #2be780a9 100%),
+		linear-gradient(100deg, #2e8b57 46%, #3cb371 30%);
+	transform: translateX(-11vh);
+	z-index: 3;
+}
