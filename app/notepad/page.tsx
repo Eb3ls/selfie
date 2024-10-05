@@ -189,6 +189,11 @@ export default function Notepad() {
 		return ownerId === currentUser;
 	}
 
+	function handleNoteClick(note: any) {
+		sessionStorage.setItem("selectedNote", JSON.stringify(note));
+		window.location.href = "./notepad/" + note._id;
+	}
+
 	return (
 		<>
 			<Sidebar />
@@ -203,7 +208,9 @@ export default function Notepad() {
 				<Row className="mt-5 gx-5 text-center">
 					{error && <div>Failed to load</div>}
 					{!data && <div>Loading...</div>}
-					{data &&
+					{data && notes.length === 0 ? (
+						<p>Non ci sono note</p>
+					) : (
 						notes.map((note: StringNote) => (
 							<Col
 								key={note._id}
@@ -238,10 +245,9 @@ export default function Notepad() {
 										</div>
 										<hr />
 										<div
-											onClick={() => {
-												window.location.href =
-													"./notepad/" + note._id;
-											}}
+											onClick={() =>
+												handleNoteClick(note)
+											}
 											style={{ cursor: "pointer" }}
 										>
 											<div className="d-flex justify-content-between align-items-center">
@@ -265,7 +271,8 @@ export default function Notepad() {
 									</Card.Body>
 								</Card>
 							</Col>
-						))}
+						))
+					)}
 				</Row>
 			</Container>
 		</>

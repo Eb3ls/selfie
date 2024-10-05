@@ -64,9 +64,12 @@ export const PATCH = async (request: NextRequest) => {
 		return generateMessageResponse("Sender doesn't have access", 400);
 	}
 
+	const length = newBody.text.length;
+
 	// Creiamo un oggetto con i campi da modificare
 	const newFields: Partial<StringNote> = {
-		text: newBody.text
+		text: newBody.text,
+		length: newBody.text.length
 	};
 
 	// Modifichiamo la nota
