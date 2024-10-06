@@ -5,6 +5,7 @@ import { marked } from "marked";
 import { useEffect, useState } from "react";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import { FaEdit } from "react-icons/fa";
+import { EditNoteModal } from "./EditNoteModal";
 
 export default function Note() {
 	const [note, setNote] = useState<any>(null);
@@ -54,6 +55,8 @@ export default function Note() {
 		return <div>Loading...</div>;
 	}
 
+	function handleEdit() {}
+
 	return (
 		<Container>
 			<Sidebar />
@@ -69,15 +72,21 @@ export default function Note() {
 					>
 						{note.summary}
 					</h1>
-					<Button
-						variant="light"
-						className="align-self-center"
-						onClick={() => {
-							/* Apertura modale gestione in futuro */
-						}}
+					<EditNoteModal
+						note={note}
+						currentUserId={"66bf4fe07cbfb6be046fcda1"}
+						handleEdit={handleEdit}
 					>
-						<FaEdit />
-					</Button>
+						<Button
+							variant="light"
+							className="align-self-center"
+							onClick={() => {
+								/* Apertura modale gestione in futuro */
+							}}
+						>
+							<FaEdit />
+						</Button>
+					</EditNoteModal>
 					{/* Categorie sotto il titolo */}
 					<div className="categories" style={{ marginTop: "10px" }}>
 						<strong>Categorie: </strong>
