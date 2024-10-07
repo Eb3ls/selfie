@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ChangeEvent, FormEvent, useState } from "react";
 import { Button, Col, Container, Form, InputGroup, Row } from "react-bootstrap";
+import { IoIosSend } from "react-icons/io";
 
 function CompleteFormComponent() {
 	const [passwordShown, setPasswordShown] = useState(false); // Stato per la visibilità della password
@@ -13,6 +14,7 @@ function CompleteFormComponent() {
 		firstName: "",
 		lastName: "",
 		email: "",
+		emailToken: "",
 		password: ""
 	}); // Stato per i dati del form
 
@@ -52,6 +54,15 @@ function CompleteFormComponent() {
 		}));
 	};
 
+	// Gestore per il campo emailToken
+	const handleEmailTokenChange = (event: ChangeEvent<HTMLInputElement>) => {
+		const { value } = event.target;
+		setFormData((prevData) => ({
+			...prevData,
+			emailToken: value
+		}));
+	};
+
 	// Gestore per il campo password
 	const handlePasswordChange = (event: ChangeEvent<HTMLInputElement>) => {
 		const { value } = event.target;
@@ -64,6 +75,22 @@ function CompleteFormComponent() {
 	// Inverte la visibilità della password
 	const togglePasswordVisibility = () => {
 		setPasswordShown(!passwordShown);
+	};
+
+	// Invia una mail di conferma
+	const sendVerificationEmail = async () => {
+		const response = await fetch("/api/verifyEmail", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({
+				email: formData.email
+			})
+		});
+
+		const data = await response.json();
+		alert(data.message);
 	};
 
 	// Gestisce il submit del form
@@ -145,13 +172,37 @@ function CompleteFormComponent() {
 				<Form.Label>
 					<i className="bi bi-envelope me-2"></i>Email
 				</Form.Label>
+				<InputGroup>
+					<Form.Control
+						type="email"
+						placeholder="Inserisci la tua email"
+						name="email"
+						value={formData.email}
+						onChange={handleEmailChange}
+						autoComplete="email"
+						required
+					/>
+					<InputGroup.Text
+						onClick={sendVerificationEmail}
+						style={{ cursor: "pointer" }}
+					>
+						<IoIosSend />
+					</InputGroup.Text>
+				</InputGroup>
+			</Form.Group>
+
+			{/* Campo JWT Conferma Email */}
+			<Form.Group className="mb-3 fs-5" controlId="formBasicEmailToken">
+				<Form.Label>
+					<i className="bi bi-envelope me-2"></i>Token di conferma
+				</Form.Label>
 				<Form.Control
-					type="email"
-					placeholder="Inserisci la tua email"
-					name="email"
-					value={formData.email}
-					onChange={handleEmailChange}
-					autoComplete="email"
+					type="text"
+					placeholder="Inserisci il token ricevuto via email"
+					name="emailToken"
+					value={formData.emailToken}
+					onChange={handleEmailTokenChange}
+					autoComplete="off"
 					required
 				/>
 			</Form.Group>

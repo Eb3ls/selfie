@@ -13,6 +13,7 @@ import {
 	findCollectionWrapper,
 	getCollection
 } from "@/utils/db/db";
+import { decrypt } from "@/utils/session/session";
 import crypto from "crypto";
 import { Collection } from "mongodb";
 import { NextRequest } from "next/server";
@@ -22,7 +23,8 @@ const requestTemplate = {
 	password: "",
 	firstName: "",
 	lastName: "",
-	email: ""
+	email: "",
+	emailToken: ""
 };
 
 type RequestType = typeof requestTemplate;
@@ -43,8 +45,24 @@ export const POST = async (request: NextRequest) => {
 		return generateMessageResponse("Invalid email", 400);
 	}
 
+	// Verifichiamo che l'email all'interno del token sia uguale a quella nel body
+	try {
+		// Verifichiamo il token
+		const token: string = body.emailToken;
+		const payload = await decrypt(token);
+
+		if (payload.email !== body.email) {
+			return generateMessageResponse("Invalid token", 400);
+		}
+	} catch (e) {
+		return generateMessageResponse("Invalid token", 400);
+	}
+
+	// Rimuoviamo il campo emailToken dal body
+	const { emailToken, ...newBody } = body;
+
 	// Creaiamo un nuovo utente con quei campi
-	const newUser: StringUser = generateStringModel(body, "User");
+	const newUser: StringUser = generateStringModel(newBody, "User");
 
 	const passwordEncrypted: string = crypto
 		.createHash("sha256")

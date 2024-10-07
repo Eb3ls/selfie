@@ -10,11 +10,11 @@ const algorithm = "HS256";
 
 const expireTime: number = 7 * 24 * 60 * 60 * 1000; // 1 week in milliseconds
 
-export async function encrypt(payload: any): Promise<string> {
+export async function encrypt(payload: any, expire: string): Promise<string> {
 	return await new SignJWT(payload)
 		.setProtectedHeader({ alg: algorithm })
 		.setIssuedAt()
-		.setExpirationTime("1w")
+		.setExpirationTime(expire)
 		.sign(key);
 }
 
@@ -39,7 +39,7 @@ export async function login(
 
 	// Creazione della sessione
 	const expires = new Date(Date.now() + expireTime);
-	const session = await encrypt({ user, expires });
+	const session = await encrypt({ user, expires }, "1w");
 
 	// Salvataggio del cookie di sessione
 	res.set("session", session, { expires: expires, httpOnly: true });
@@ -77,7 +77,7 @@ export async function updateSession(request: NextRequest) {
 	parsed.expires = newDate;
 
 	// Creazione del nuovo cookie di sessione
-	const newSession = await encrypt(parsed);
+	const newSession = await encrypt(parsed, "1w");
 
 	// Preparazione della risposta
 	const res = NextResponse.next();
