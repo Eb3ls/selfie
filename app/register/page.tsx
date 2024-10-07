@@ -109,7 +109,7 @@ function CompleteFormComponent() {
 		if (response.status === 200) {
 			const fetched_data = await response.json();
 			alert("Successful: " + fetched_data.username);
-			window.location.href = "/home";
+			window.location.href = "/login";
 		} else if (response.status === 400) {
 			alert("Failed! Wrong username or password!");
 		} else {

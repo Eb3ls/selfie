@@ -1,10 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
 import { isValidSession, updateSession } from "@/utils/session/session";
+import { NextRequest, NextResponse } from "next/server";
 
 async function api_route_handler(request: NextRequest): Promise<boolean> {
 	let path: string = request.nextUrl.pathname;
 	path = path.replace("/api", "");
-	if (path.startsWith("/signup") || path.startsWith("/signin")) {
+	if (
+		path.startsWith("/signup") ||
+		path.startsWith("/signin") ||
+		path.startsWith("/verifyEmail")
+	) {
 		return true;
 	}
 	const jwt_status: boolean = await isValidSession(request.cookies);
@@ -21,7 +25,13 @@ export async function middleware(request: NextRequest) {
 		outcome = await api_route_handler(request);
 	}
 
-	if (path.startsWith("/calendar")) {
+	if (
+		path.startsWith("/calendar") ||
+		path.startsWith("/chat") ||
+		path.startsWith("/home") ||
+		path.startsWith("/notepad") ||
+		path.startsWith("/pomodoro")
+	) {
 		outcome = await isValidSession(request.cookies);
 	}
 
@@ -43,6 +53,6 @@ export const config = {
 		 * - _next/image (image optimization files)
 		 * - favicon.ico (favicon file)
 		 */
-		"/((?!_next/static|_next/image|favicon.ico).*)",
-	],
+		"/((?!_next/static|_next/image|favicon.ico).*)"
+	]
 };
