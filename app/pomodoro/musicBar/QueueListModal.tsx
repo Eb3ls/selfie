@@ -12,7 +12,7 @@ const opts: YouTubeProps["opts"] = {
 		vq: "small", // Qualità video
 		controls: 0, // Nascondi i controlli del lettore
 		disablekb: 1, // Disabilita i tasti della tastiera
-		enablejsapi: 1, // Abilita l'API JavaScript
+		enablejsapi: 0, // Abilita l'API JavaScript
 		iv_load_policy: 3, // Nascondi le annotazioni
 		loop: 0,
 		modestbranding: 1, // Nascondi il pulsante YouTube
@@ -122,7 +122,10 @@ export function QueueListModal({
 							placeholder="Inserisci link"
 							className="input-field me-2"
 						/>
-						<Button onClick={handleAddNewVideo} variant="primary">
+						<Button
+							onClick={handleAddNewVideo}
+							className="bg-brown"
+						>
 							Aggiungi
 						</Button>
 					</Container>
@@ -146,6 +149,8 @@ export function QueueListModal({
 						onReady={onReady}
 						opts={opts}
 						className="d-none"
+						frameBorder="0"
+						Allow="autoplay; encrypted-media; picture-in-picture;"
 					></YouTube>
 				)}
 			</>
@@ -166,9 +171,12 @@ export function QueueListModal({
 				backdropClassName="custom-backdrop"
 				fullscreen="lg-down"
 			>
-				<Modal.Header closeButton className="custom-modal-header">
+				<Modal.Header
+					closeButton
+					className="custom-modal-header bg-primary-green"
+				>
 					<Modal.Title>
-						<FaMusic className="me-2"></FaMusic>
+						<FaMusic className="me-2" fill="white"></FaMusic>
 						Coda Player
 					</Modal.Title>
 				</Modal.Header>

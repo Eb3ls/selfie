@@ -25,31 +25,44 @@
 }
 
 .leaves-1 {
-	width: 25vmin;
-	aspect-ratio: 16/9;
 	top: calc(50% - 30vmin);
+	--final-width: 20vmin;
 	z-index: 5;
+	animation: grow 10s forwards;
+	animation-delay: 20s;
 }
 
 .leaves-2 {
-	width: 30vmin;
-	aspect-ratio: 16/9;
+	--final-width: 30vmin;
 	top: calc(50% - 25vmin);
 	z-index: 4;
+	animation: grow 10s forwards;
+	animation-delay: 10s;
 }
 
 .leaves-3 {
-	width: 40vmin;
-	aspect-ratio: 16/9;
+	--final-width: 40vmin;
 	top: calc(50% - 20vmin);
 	z-index: 3;
+	animation: grow 10s forwards;
+	animation-delay: 0s;
 }
 
 .leaves-1,
 .leaves-2,
 .leaves-3 {
 	left: 50%;
+	aspect-ratio: 18/9;
 	clip-path: polygon(50% 0%, 10% 85%, 40% 100%, 100% 90%);
 	background: linear-gradient(180deg, #125c32bd 30%, #2be780a9 100%),
 		linear-gradient(100deg, #2e8b57 46%, #3cb371 30%);
+}
+
+@keyframes grow {
+	0% {
+		width: calc(var(--final-width) / 1.5);
+	}
+	100% {
+		width: var(--final-width);
+	}
 }

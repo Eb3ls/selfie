@@ -1,0 +1,30 @@
+:root {
+	--green-primary: #a7c957;
+	--brown-primary: #bc4749;
+	--brown-hover: #a73f41;
+}
+
+.bg-green-light {
+	background-color: var(--color-green-light) !important;
+}
+
+.bg-green-dark {
+	background-color: var(--color-green-dark) !important;
+}
+
+.bg-primary-green {
+	background-color: var(--green-primary) !important;
+}
+
+.bg-brown {
+	background-color: var(--brown-primary) !important;
+}
+
+.color-brown {
+	/* color: var(--brown-primary) !important; */
+	color: white;
+}
+
+.color-brown:hover {
+	color: var(--brown-hover) !important;
+}

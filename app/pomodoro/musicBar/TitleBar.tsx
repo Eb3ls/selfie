@@ -38,7 +38,7 @@ export function TitleBar({ videoTitleList }: { videoTitleList: string[] }) {
 		>
 			<h3
 				ref={childRef}
-				className={`text-nowrap ${
+				className={`text-nowrap m-0 ${
 					isOverflowingX ? "scrollText" : "text-center"
 				}`}
 				style={

@@ -1,6 +1,6 @@
 import Script from "next/script";
-import { useEffect, useRef, useState } from "react";
-import { Button, Container } from "react-bootstrap";
+import { useEffect, useState } from "react";
+import { Button } from "react-bootstrap";
 import {
 	FaAnglesRight,
 	FaArrowRotateRight,
@@ -14,6 +14,7 @@ import Youtube, { YouTubeProps } from "react-youtube";
 import "./MusicBar.css";
 import { QueueListModal } from "./QueueListModal";
 import { TitleBar } from "./TitleBar";
+import "./colors.css";
 
 const opts: YouTubeProps["opts"] = {
 	// https://developers.google.com/youtube/player_parameters
@@ -21,7 +22,7 @@ const opts: YouTubeProps["opts"] = {
 		vq: "small", // Qualità video
 		controls: 0, // Nascondi i controlli del lettore
 		disablekb: 1, // Disabilita i tasti della tastiera
-		enablejsapi: 1, // Abilita l'API JavaScript
+		enablejsapi: 0, // Abilita l'API JavaScript
 		iv_load_policy: 3, // Nascondi le annotazioni
 		loop: 0,
 		modestbranding: 1, // Nascondi il pulsante YouTube
@@ -154,13 +155,13 @@ export function MusicBar() {
 					></Youtube>
 				)}
 			</div>
-			<div className="w-100 bg-danger p-3 mt-5 rounded-pill d-flex flex-column align-items-center justify-content-center">
+			<div className="w-100 bg-primary-green p-3 mt-5 rounded-pill d-flex flex-column align-items-center">
 				<TitleBar videoTitleList={videoTitleList}></TitleBar>
 				<label htmlFor="videoRange" className="form-label"></label>
 				<input
 					type="range"
 					id="videoRange"
-					className="form-range"
+					className="form-range customRange"
 					min={0}
 					max={videoDuration}
 					value={currentTime}
@@ -168,35 +169,40 @@ export function MusicBar() {
 					onMouseDown={handleMouseDown}
 					onMouseUp={handleMouseUp}
 				/>
-				<div className="d-flex justify-content-between w-100">
-					<p>{formatTime(currentTime)}</p>
-					<p>{formatTime(videoDuration)}</p>
+				<div
+					className="d-flex justify-content-between w-100"
+					style={{ height: "1px" }}
+				>
+					<p className="m-0">{formatTime(currentTime)}</p>
+					<p className="m-0">{formatTime(videoDuration)}</p>
 				</div>
 
-				<div className="d-flex w-100 position-relative">
-					<div className="d-flex flex-shrink-0 mx-auto">
+				<div className="d-flex w-100">
+					<div className="d-flex mx-auto">
 						<Button variant="link" onClick={toggleLoop}>
-							<FaArrowRotateRight
-								fontSize={30}
-							></FaArrowRotateRight>
+							<FaArrowRotateRight className="color-brown"></FaArrowRotateRight>
 						</Button>
-						<Button variant="link" onClick={togglePlay}>
+						<Button
+							variant="link"
+							onClick={togglePlay}
+							className="rounded-circle p-3"
+						>
 							{isPlaying ? (
-								<FaPause fontSize={30}></FaPause>
+								<FaPause className="color-brown"></FaPause>
 							) : (
-								<FaPlay fontSize={30}></FaPlay>
+								<FaPlay className="color-brown"></FaPlay>
 							)}
 						</Button>
 						<Button variant="link" onClick={handleEnd}>
-							<FaAnglesRight fontSize={30}></FaAnglesRight>
+							<FaAnglesRight className="color-brown"></FaAnglesRight>
 						</Button>
 					</div>
-					<div className="d-flex position-absolute end-0">
+					<div className="d-flex">
 						<Button variant="link" onClick={toggleVolume}>
 							{hasVolume ? (
-								<FaVolumeLow fontSize={30}></FaVolumeLow>
+								<FaVolumeLow className="color-brown"></FaVolumeLow>
 							) : (
-								<FaVolumeXmark fontSize={30}></FaVolumeXmark>
+								<FaVolumeXmark className="color-brown"></FaVolumeXmark>
 							)}
 						</Button>
 						<Button variant="link">
@@ -206,7 +212,7 @@ export function MusicBar() {
 								videoTitleList={videoTitleList}
 								setVideoTitleList={setVideoTitleList}
 							>
-								<FaPlus fontSize={30}></FaPlus>
+								<FaPlus className="color-brown"></FaPlus>
 							</QueueListModal>
 						</Button>
 					</div>
