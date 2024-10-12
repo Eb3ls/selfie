@@ -1,35 +1,51 @@
 "use client";
 
 import React from "react";
-import { Button, Container, Form, InputGroup } from "react-bootstrap";
-import { FaAnglesDown, FaAnglesUp } from "react-icons/fa6";
+import { Button, Container } from "react-bootstrap";
 import { Sidebar } from "../components/Sidebar";
 import { Coffee } from "./Animation/Coffee";
 import { Tree } from "./Animation/Tree";
+import { MusicBar } from "./MusicBar/MusicBar";
 import "./Pomodoro.css";
-import { MusicBar } from "./musicBar/MusicBar";
+import { Setting } from "./Setting/Setting";
 
 export default function Pomodoro() {
 	const [isStudying, setIsStudying] = React.useState(true);
 	const [isActive, setIsActive] = React.useState(false);
+	const [isStarted, setIsStarted] = React.useState(false);
 	const [currentTime, setCurrentTime] = React.useState(0);
 	const [studyTime, setStudyTime] = React.useState(1);
-	const [sessions, setSessions] = React.useState(1);
 	const [breakTime, setBreakTime] = React.useState(1);
-	const [isStarted, setIsStarted] = React.useState(false);
+	const [sessions, setSessions] = React.useState(1);
+	const [remainingSessions, setRemainingSessions] = React.useState(sessions);
+
+	function handleFinish() {
+		if (remainingSessions === 1) {
+			setIsActive(false);
+			setIsStarted(false);
+			setCurrentTime(studyTime * 60);
+			setRemainingSessions(sessions);
+		} else {
+			setIsStudying(!isStudying);
+			setCurrentTime(isStudying ? breakTime * 60 : studyTime * 60);
+			if (!isStudying) {
+				setRemainingSessions(remainingSessions - 1);
+			}
+		}
+	}
 
 	React.useEffect(() => {
 		if (isActive) {
 			const interval = setInterval(() => {
-				setCurrentTime(currentTime - 1);
 				if (currentTime === 1) {
-					setIsStudying(!isStudying);
-					setIsActive(false);
+					handleFinish();
+				} else {
+					setCurrentTime(currentTime - 1);
 				}
-			}, 1000);
+			}, 50);
 			return () => clearInterval(interval);
 		}
-	}, [isStudying, currentTime, isActive]);
+	}, [isStudying, currentTime, isActive, remainingSessions]);
 
 	React.useEffect(() => {
 		setCurrentTime(studyTime * 60);
@@ -41,123 +57,27 @@ export default function Pomodoro() {
 		return `${minutes < 10 ? "0" + minutes : minutes}:${seconds < 10 ? "0" + seconds : seconds}`;
 	}
 
-	function handlePomodoroState() {
+	function handleStart() {
 		setIsActive(!isActive);
-		if (!isStarted) {
-			setIsStarted(true);
-			setCurrentTime(isStudying ? studyTime * 60 : breakTime * 60);
-		}
+		setIsStarted(true);
+		setCurrentTime(isStudying ? studyTime * 60 : breakTime * 60);
+		setRemainingSessions(sessions);
+	}
+
+	function handleResume() {
+		setIsActive(!isActive);
 	}
 
 	function TimerBlock() {
 		return (
 			<div className="d-flex flex-column align-items-center justify-content-center">
 				<h1>{calcTime()}</h1>
-				<Button variant="link" onClick={handlePomodoroState}>
+				<Button
+					variant="link"
+					onClick={isStarted ? handleResume : handleStart}
+				>
 					{isActive ? "Pause" : isStarted ? "Resume" : " Start"}
 				</Button>
-			</div>
-		);
-	}
-
-	function StudyTimeBlock() {
-		return (
-			<div className="d-flex flex-column m-3 align-items-center justify-content-center">
-				<Button
-					onClick={() => setStudyTime(Math.max(1, studyTime + 1))}
-				>
-					<FaAnglesUp className="icon"></FaAnglesUp>
-				</Button>
-				<Form.Label htmlFor="study-time" className="mt-2">
-					Study Time
-				</Form.Label>
-				<InputGroup className="mb-2">
-					<Form.Control
-						id="study-time"
-						type="number"
-						min={1}
-						value={studyTime}
-						onChange={(e: any) =>
-							setStudyTime(parseInt(e.target.value))
-						}
-						className="text-center"
-					/>
-				</InputGroup>
-				<Button
-					onClick={() => setStudyTime(Math.max(1, studyTime - 1))}
-				>
-					<FaAnglesDown className="icon"></FaAnglesDown>
-				</Button>
-			</div>
-		);
-	}
-
-	function SessionBlock() {
-		return (
-			<div className="d-flex flex-column m-3 align-items-center justify-content-center">
-				<Button onClick={() => setSessions(Math.max(1, sessions + 1))}>
-					<FaAnglesUp className="icon"></FaAnglesUp>
-				</Button>
-				<Form.Label htmlFor="sessions" className="mt-2">
-					Sessions
-				</Form.Label>
-				<InputGroup className="mb-2">
-					<Form.Control
-						id="sessions"
-						type="number"
-						className="text-center"
-						value={sessions}
-						min={1}
-						onChange={(e: any) =>
-							setSessions(parseInt(e.target.value))
-						}
-					/>
-				</InputGroup>
-				<Button onClick={() => setSessions(Math.max(1, sessions - 1))}>
-					<FaAnglesDown className="icon"></FaAnglesDown>
-				</Button>
-			</div>
-		);
-	}
-
-	function BreakTimeBlock() {
-		return (
-			<div className="d-flex flex-column m-3 align-items-center justify-content-center">
-				<Button
-					onClick={() => setBreakTime(Math.max(1, breakTime + 1))}
-				>
-					<FaAnglesUp className="icon"></FaAnglesUp>
-				</Button>
-				<Form.Label htmlFor="break-time" className="mt-2">
-					Break Time
-				</Form.Label>
-				<InputGroup className="mb-2">
-					<Form.Control
-						id="break-time"
-						type="number"
-						min={1}
-						value={breakTime}
-						onChange={(e: any) =>
-							setBreakTime(parseInt(e.target.value))
-						}
-						className="text-center"
-					/>
-				</InputGroup>
-				<Button
-					onClick={() => setBreakTime(Math.max(1, breakTime - 1))}
-				>
-					<FaAnglesDown className="icon"></FaAnglesDown>
-				</Button>
-			</div>
-		);
-	}
-
-	function PomodoroSettings() {
-		return (
-			<div className="d-flex justify-content-center">
-				<StudyTimeBlock></StudyTimeBlock>
-				<SessionBlock></SessionBlock>
-				<BreakTimeBlock></BreakTimeBlock>
 			</div>
 		);
 	}
@@ -168,13 +88,29 @@ export default function Pomodoro() {
 			className="vh-100 d-flex flex-column"
 			style={{ backgroundColor: "rgb(240, 240, 240)" }}
 		>
+			{/*{isStudying ? <Tree></Tree> : <Coffee></Coffee>}*/}
 			<Sidebar></Sidebar>
-			{/*{isPlaying ? <Tree></Tree> : <Coffee></Coffee>}*/}
 			<TimerBlock></TimerBlock>
-			<PomodoroSettings></PomodoroSettings>
+			{!isActive && (
+				<div className="d-flex justify-content-center">
+					<Setting
+						name="Study Time"
+						getter={studyTime}
+						setter={setStudyTime}
+					></Setting>
+					<Setting
+						name="Sessions"
+						getter={sessions}
+						setter={setSessions}
+					></Setting>
+					<Setting
+						name="Break Time"
+						getter={breakTime}
+						setter={setBreakTime}
+					></Setting>
+				</div>
+			)}
 			<MusicBar></MusicBar>
 		</Container>
 	);
 }
-
-// TODO: sistemare perdita del focus quando si modifica un form
