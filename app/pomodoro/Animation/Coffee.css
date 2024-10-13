@@ -70,7 +70,7 @@
 	background: linear-gradient(to bottom, var(--steam-color), transparent);
 	border-radius: 50%;
 	opacity: 0.7;
-	animation: rise 5s infinite;
+	animation: rise 5s var(--animationType);
 }
 
 .steam-1 {

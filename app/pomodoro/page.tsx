@@ -11,7 +11,7 @@ import { Setting } from "./Setting/Setting";
 
 export default function Pomodoro() {
 	const [isStudying, setIsStudying] = React.useState(true);
-	const [isActive, setIsActive] = React.useState(false);
+	const [isPaused, setIsPaused] = React.useState(true);
 	const [isStarted, setIsStarted] = React.useState(false);
 	const [currentTime, setCurrentTime] = React.useState(0);
 	const [studyTime, setStudyTime] = React.useState(1);
@@ -19,37 +19,50 @@ export default function Pomodoro() {
 	const [sessions, setSessions] = React.useState(1);
 	const [remainingSessions, setRemainingSessions] = React.useState(sessions);
 
+	function reset() {
+		setIsPaused(true);
+		setIsStarted(false);
+		setIsStudying(true);
+		setCurrentTime(studyTime * 60);
+	}
+
 	function handleFinish() {
-		if (remainingSessions === 1) {
-			setIsActive(false);
-			setIsStarted(false);
-			setCurrentTime(studyTime * 60);
-			setRemainingSessions(sessions);
+		if (remainingSessions === 0) {
+			reset();
 		} else {
+			console.log("isStudying", isStudying);
 			setIsStudying(!isStudying);
 			setCurrentTime(isStudying ? breakTime * 60 : studyTime * 60);
-			if (!isStudying) {
+			console.log("isStudying", isStudying);
+			if (isStudying) {
 				setRemainingSessions(remainingSessions - 1);
 			}
 		}
 	}
 
 	React.useEffect(() => {
-		if (isActive) {
+		if (!isPaused) {
 			const interval = setInterval(() => {
 				if (currentTime === 1) {
 					handleFinish();
 				} else {
 					setCurrentTime(currentTime - 1);
 				}
-			}, 50);
+			}, 1000);
 			return () => clearInterval(interval);
 		}
-	}, [isStudying, currentTime, isActive, remainingSessions]);
+	}, [
+		isStudying,
+		isPaused,
+		currentTime,
+		remainingSessions,
+		breakTime,
+		studyTime
+	]);
 
 	React.useEffect(() => {
-		setCurrentTime(studyTime * 60);
-	}, [studyTime]);
+		reset();
+	}, [studyTime, sessions, breakTime]);
 
 	function calcTime() {
 		const minutes = Math.floor(currentTime / 60);
@@ -58,14 +71,14 @@ export default function Pomodoro() {
 	}
 
 	function handleStart() {
-		setIsActive(!isActive);
+		setIsPaused(false);
 		setIsStarted(true);
 		setCurrentTime(isStudying ? studyTime * 60 : breakTime * 60);
 		setRemainingSessions(sessions);
 	}
 
 	function handleResume() {
-		setIsActive(!isActive);
+		setIsPaused(!isPaused);
 	}
 
 	function TimerBlock() {
@@ -76,7 +89,7 @@ export default function Pomodoro() {
 					variant="link"
 					onClick={isStarted ? handleResume : handleStart}
 				>
-					{isActive ? "Pause" : isStarted ? "Resume" : " Start"}
+					{!isStarted ? " Start" : isPaused ? "Resume" : "Pause"}
 				</Button>
 			</div>
 		);
@@ -88,10 +101,22 @@ export default function Pomodoro() {
 			className="vh-100 d-flex flex-column"
 			style={{ backgroundColor: "rgb(240, 240, 240)" }}
 		>
-			{/*{isStudying ? <Tree></Tree> : <Coffee></Coffee>}*/}
+			{isStudying ? (
+				<Tree
+					time={studyTime * 60}
+					started={isStarted}
+					paused={isPaused}
+				></Tree>
+			) : (
+				<Coffee
+					time={breakTime * 60}
+					started={isStarted}
+					paused={isPaused}
+				></Coffee>
+			)}
 			<Sidebar></Sidebar>
 			<TimerBlock></TimerBlock>
-			{!isActive && (
+			{isPaused && (
 				<div className="d-flex justify-content-center">
 					<Setting
 						name="Study Time"

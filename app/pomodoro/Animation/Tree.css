@@ -25,26 +25,26 @@
 }
 
 .leaves-1 {
-	top: calc(50% - 30vmin);
 	--final-width: 20vmin;
+	top: calc(50% - 30vmin);
 	z-index: 5;
-	animation: grow 10s forwards;
-	animation-delay: 20s;
+	animation: grow calc(var(--time) / 3) forwards;
+	animation-delay: calc(var(--time) / 1.5);
 }
 
 .leaves-2 {
 	--final-width: 30vmin;
 	top: calc(50% - 25vmin);
 	z-index: 4;
-	animation: grow 10s forwards;
-	animation-delay: 10s;
+	animation: grow calc(var(--time) / 3) forwards;
+	animation-delay: calc(var(--time) / 3);
 }
 
 .leaves-3 {
 	--final-width: 40vmin;
 	top: calc(50% - 20vmin);
 	z-index: 3;
-	animation: grow 10s forwards;
+	animation: grow calc(var(--time) / 3) forwards;
 	animation-delay: 0s;
 }
 

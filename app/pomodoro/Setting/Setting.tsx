@@ -18,6 +18,7 @@ export function Setting({ name, getter, setter }: SettingsProps) {
 
 	function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
 		const val = parseInt(e.target.value);
+		// TODO: da togliere altrimenti non si puó cancellare tutto per scrivere meglio
 		if (isNaN(val)) {
 			setter(1);
 		} else {
