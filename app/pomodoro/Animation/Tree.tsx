@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import "./Tree.css";
 
 interface TreeProps {
@@ -8,11 +8,18 @@ interface TreeProps {
 }
 
 export function Tree({ time, started, paused }: TreeProps) {
-	const state = started && !paused ? "running" : "paused";
-	const style = {
+	const [style, setStyle] = useState<React.CSSProperties>({
 		"--time": `${time}s`,
-		animationPlayState: state
-	} as React.CSSProperties;
+		animationPlayState: started && !paused ? "running" : "paused"
+	} as React.CSSProperties);
+
+	useEffect(() => {
+		const state = started && !paused ? "running" : "paused";
+		setStyle({
+			"--time": `${time}s`,
+			animationPlayState: state
+		} as React.CSSProperties);
+	}, [time, started, paused]);
 
 	return (
 		<div className="position-relative h-100">
@@ -28,9 +35,9 @@ export function Tree({ time, started, paused }: TreeProps) {
 				className="leaves-3 position-absolute translate-middle"
 				style={style}
 			></div>
-			<div className="log position-absolute translate-middle"></div>
-			<div className="oval-circle position-absolute top-50 start-50 translate-middle"></div>
-			<div className="bottom-circle position-absolute top-50 start-50 translate-middle"></div>
+			<div className="log position-absolute start-50 translate-middle"></div>
+			<div className="oval-circle position-absolute start-50 translate-middle"></div>
+			<div className="bottom-circle position-absolute start-50 translate-middle"></div>
 		</div>
 	);
 }

@@ -28,25 +28,31 @@ export function Setting({ name, getter, setter }: SettingsProps) {
 	}
 
 	return (
-		<div className="d-flex flex-column m-3 align-items-center justify-content-center">
-			<Button onClick={() => changeValue(1)}>
+		<div className="d-flex flex-md-column m-2 align-items-center justify-content-center">
+			<Button
+				className="align-self-end align-self-md-center"
+				onClick={() => changeValue(1)}
+			>
 				<FaAnglesUp className="icon"></FaAnglesUp>
 			</Button>
-			<Form.Label htmlFor="study-time" className="mt-2">
-				{name}
-			</Form.Label>
-			<InputGroup className="mb-2">
-				<Form.Control
-					id="study-time"
-					type="number"
-					min={1}
-					value={getter}
-					onChange={handleInputChange}
-					className="text-center"
-					ref={inputRef}
-				/>
-			</InputGroup>
-			<Button onClick={() => changeValue(-1)}>
+			<div className="d-flex flex-column align-items-center justify-content-center">
+				<Form.Label htmlFor="study-time">{name}</Form.Label>
+				<InputGroup className="">
+					<Form.Control
+						id="study-time"
+						type="number"
+						min={1}
+						value={getter}
+						onChange={handleInputChange}
+						className="text-center"
+						ref={inputRef}
+					/>
+				</InputGroup>
+			</div>
+			<Button
+				className="align-self-end align-self-md-center"
+				onClick={() => changeValue(-1)}
+			>
 				<FaAnglesDown className="icon"></FaAnglesDown>
 			</Button>
 		</div>

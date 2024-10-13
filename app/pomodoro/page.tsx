@@ -2,12 +2,14 @@
 
 import React from "react";
 import { Button, Container } from "react-bootstrap";
+import { FaShareNodes } from "react-icons/fa6";
 import { Sidebar } from "../components/Sidebar";
 import { Coffee } from "./Animation/Coffee";
 import { Tree } from "./Animation/Tree";
 import { MusicBar } from "./MusicBar/MusicBar";
 import "./Pomodoro.css";
 import { Setting } from "./Setting/Setting";
+import { ShareModal } from "./ShareModal";
 
 export default function Pomodoro() {
 	const [isStudying, setIsStudying] = React.useState(true);
@@ -19,26 +21,24 @@ export default function Pomodoro() {
 	const [sessions, setSessions] = React.useState(1);
 	const [remainingSessions, setRemainingSessions] = React.useState(sessions);
 
-	function reset() {
+	const reset = React.useCallback(() => {
 		setIsPaused(true);
 		setIsStarted(false);
 		setIsStudying(true);
 		setCurrentTime(studyTime * 60);
-	}
+	}, [studyTime]);
 
-	function handleFinish() {
+	const handleFinish = React.useCallback(() => {
 		if (remainingSessions === 0) {
 			reset();
 		} else {
-			console.log("isStudying", isStudying);
-			setIsStudying(!isStudying);
-			setCurrentTime(isStudying ? breakTime * 60 : studyTime * 60);
-			console.log("isStudying", isStudying);
 			if (isStudying) {
 				setRemainingSessions(remainingSessions - 1);
 			}
+			setIsStudying(!isStudying);
+			setCurrentTime(isStudying ? breakTime * 60 : studyTime * 60);
 		}
-	}
+	}, [isStudying, remainingSessions, breakTime, studyTime, reset]);
 
 	React.useEffect(() => {
 		if (!isPaused) {
@@ -51,18 +51,11 @@ export default function Pomodoro() {
 			}, 1000);
 			return () => clearInterval(interval);
 		}
-	}, [
-		isStudying,
-		isPaused,
-		currentTime,
-		remainingSessions,
-		breakTime,
-		studyTime
-	]);
+	}, [isPaused, currentTime, handleFinish]);
 
 	React.useEffect(() => {
 		reset();
-	}, [studyTime, sessions, breakTime]);
+	}, [studyTime, sessions, breakTime, reset]);
 
 	function calcTime() {
 		const minutes = Math.floor(currentTime / 60);
@@ -101,6 +94,16 @@ export default function Pomodoro() {
 			className="vh-100 d-flex flex-column"
 			style={{ backgroundColor: "rgb(240, 240, 240)" }}
 		>
+			<ShareModal
+				studyTime={studyTime}
+				sessions={sessions}
+				breakTime={breakTime}
+			>
+				<FaShareNodes
+					size={30}
+					className="position-absolute top-0 end-0 m-5 z-3"
+				/>
+			</ShareModal>
 			{isStudying ? (
 				<Tree
 					time={studyTime * 60}
@@ -117,7 +120,7 @@ export default function Pomodoro() {
 			<Sidebar></Sidebar>
 			<TimerBlock></TimerBlock>
 			{isPaused && (
-				<div className="d-flex justify-content-center">
+				<div className="d-flex flex-column flex-md-row justify-content-center">
 					<Setting
 						name="Study Time"
 						getter={studyTime}

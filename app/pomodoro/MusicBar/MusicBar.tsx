@@ -155,7 +155,7 @@ export function MusicBar() {
 					></Youtube>
 				)}
 			</div>
-			<div className="w-100 bg-primary-green p-3 mt-5 rounded-pill d-flex flex-column align-items-center">
+			<div className="w-100 bg-primary-green p-3 my-3 rounded-pill d-flex flex-column align-items-center">
 				<TitleBar videoTitleList={videoTitleList}></TitleBar>
 				<label htmlFor="videoRange" className="form-label"></label>
 				<input

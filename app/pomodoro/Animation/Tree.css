@@ -1,9 +1,10 @@
 .bottom-circle {
 	width: 50vmin;
-	height: 30vmin;
+	height: 20vmin;
 	background-color: #8b4513;
 	border-radius: 0% 0% 60% 60%;
 	clip-path: inset(50% 0 0 0);
+	top: 50%;
 }
 
 .oval-circle {
@@ -12,6 +13,7 @@
 	background-color: #ad581a;
 	border-radius: 50%;
 	z-index: 1;
+	top: 50%;
 }
 
 .log {
