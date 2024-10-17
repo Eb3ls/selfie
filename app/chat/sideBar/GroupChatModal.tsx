@@ -18,12 +18,35 @@ export function GroupChatModal({ children }: any) {
 		setUserName(e.target.value);
 	};
 
-	function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+	// Gestisce il submit del form
+	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
-		console.log("Dati del form:", groupName, users);
-		// Logica di gestione dei dati del form
-		setShow(false);
-	}
+		console.log("Form inviato:", groupName, users);
+
+		const response = await fetch("/api/chat/addGroup", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({ summary: groupName, usernameList: users })
+		});
+
+		if (response.status === 200) {
+			alert("Successful!");
+			window.location.reload();
+		} else if (response.status === 400) {
+			const out = await response.json();
+			if (out.message === undefined) {
+				alert(
+					"Failed! Users not found:" + users.map((user) => " " + user)
+				);
+			} else {
+				alert("Failed! " + out.message);
+			}
+		} else {
+			alert("Failed! Status code: " + response.status);
+		}
+	};
 
 	const handleAddUser = () => {
 		if (userName.trim() !== "" && !users.includes(userName)) {

@@ -17,12 +17,33 @@ export function ChatModal({ children }: any) {
 		});
 	};
 
-	function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+	// Gestisce il submit del form
+	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
-		console.log("Dati del form:", form);
-		// Logica di gestione dei dati del form
-		setShow(false);
-	}
+		console.log("Form inviato:", form);
+
+		const response = await fetch("/api/chat/add", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({ receiver: form.username })
+		});
+
+		if (response.status === 200) {
+			alert("Successful!");
+			window.location.reload();
+		} else if (response.status === 400) {
+			const out = await response.json();
+			if (out.message === undefined) {
+				alert("Failed! User not found: " + out.users[0]);
+			} else {
+				alert("Failed! " + out.message);
+			}
+		} else {
+			alert("Failed! Status code: " + response.status);
+		}
+	};
 
 	return (
 		<>
@@ -48,7 +69,7 @@ export function ChatModal({ children }: any) {
 				<Form onSubmit={handleSubmit} className="custom-form">
 					<Modal.Body>
 						<Form.Group className="mb-3" controlId="formFirstName">
-							<Form.Label>Nome dell`utente</Form.Label>
+							<Form.Label>Nome dell&apos;utente</Form.Label>
 							<Form.Control
 								type="text"
 								name="username"

@@ -1,6 +1,7 @@
 import "@/app/chat/chat.css";
+import { DeleteModal } from "@/app/chat/sideBar/DeleteModal";
 import { Container, ListGroup } from "react-bootstrap";
-import { IoPersonCircleOutline } from "react-icons/io5";
+import { IoPersonCircleOutline, IoTrash } from "react-icons/io5";
 
 type SidebarEntry = {
 	_id: string;
@@ -9,7 +10,13 @@ type SidebarEntry = {
 	loader: () => void;
 };
 
-export function UserItem({ entry }: { entry: SidebarEntry }) {
+export function UserItem({
+	entry,
+	setSelectedChat
+}: {
+	entry: SidebarEntry;
+	setSelectedChat: any;
+}) {
 	return (
 		<ListGroup.Item
 			action
@@ -35,6 +42,17 @@ export function UserItem({ entry }: { entry: SidebarEntry }) {
 					</p>
 				)}
 			</Container>
+			{/* // Container attached right */}
+			<DeleteModal
+				chat_id={entry._id}
+				setSelectedChat={setSelectedChat}
+				className="ms-auto"
+				style={{ textAlign: "right" }}
+			>
+				<Container className="bg-danger rounded-pill">
+					<IoTrash />
+				</Container>
+			</DeleteModal>
 		</ListGroup.Item>
 	);
 }

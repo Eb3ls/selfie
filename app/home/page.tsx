@@ -23,7 +23,7 @@ function NavbarComponent() {
 	);
 }
 
-function DivHeader(name: string, link: string) {
+function DivHeader({ name, link }: { name: string; link: string }) {
 	return (
 		<Link href={link}>
 			<Button className="btn btn-primary container p-5 h-100 rounded-5">
@@ -45,21 +45,30 @@ export default function Home() {
 				>
 					<Row className="h-100">
 						<Col xs={12} lg={3} className="small-box mb-3 mb-lg-0">
-							{DivHeader("Chat", "chat")}
+							<DivHeader name="Chat" link="chat" />
 						</Col>
 						<Col xs={12} lg={9} className="large-box">
 							<Row className="h-100">
 								<Col xs={12} lg={6} className="mb-3">
-									{DivHeader("Calendario", "calendar")}
+									<DivHeader
+										name="Calendario"
+										link="calendar"
+									/>
 								</Col>
 								<Col xs={12} lg={6} className="mb-3">
-									{DivHeader("Progetti", "projects")}
+									<DivHeader
+										name="Progetti"
+										link="projects"
+									/>
 								</Col>
 								<Col xs={12} lg={6} className="mb-3 mb-lg-0">
-									{DivHeader("Note", "notepad")}
+									<DivHeader name="Note" link="notepad" />
 								</Col>
 								<Col xs={12} lg={6} className="mb-3 mb-lg-0">
-									{DivHeader("Pomodoro", "pomodoro")}
+									<DivHeader
+										name="Pomodoro"
+										link="pomodoro"
+									/>
 								</Col>
 							</Row>
 						</Col>

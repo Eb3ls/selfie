@@ -188,6 +188,7 @@ export default function ChatMain() {
 								<UserItem
 									key={chat._id}
 									entry={chat}
+									setSelectedChat={setSelectedChat}
 								></UserItem>
 							))
 						) : (
