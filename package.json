@@ -9,8 +9,6 @@
 		"lint": "next lint"
 	},
 	"dependencies": {
-		"@types/nodemailer": "^6.4.16",
-		"@types/react-big-calendar": "^1.8.12",
 		"dompurify": "^3.1.7",
 		"jose": "^5.6.3",
 		"marked": "^14.1.2",
@@ -27,8 +25,11 @@
 	},
 	"devDependencies": {
 		"@trivago/prettier-plugin-sort-imports": "^4.3.0",
+		"@types/dompurify": "^3.0.5",
 		"@types/node": "^20",
+		"@types/nodemailer": "^6.4.16",
 		"@types/react": "^18",
+		"@types/react-big-calendar": "^1.8.12",
 		"@types/react-dom": "^18",
 		"eslint": "^8",
 		"eslint-config-next": "^14.2.13",

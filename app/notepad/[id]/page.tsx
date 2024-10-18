@@ -73,7 +73,9 @@ export default function Note() {
 	function handleEdit() {}
 
 	// Sanifica il contenuto markdown
-	const sanitizedMarkdown = DOMPurify.sanitize(marked(noteText));
+	const sanitizedMarkdown = DOMPurify.sanitize(
+		marked(noteText, { async: false })
+	);
 
 	return (
 		<Container>
