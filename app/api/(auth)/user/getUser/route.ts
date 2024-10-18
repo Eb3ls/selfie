@@ -1,5 +1,10 @@
-import { generateMessageResponse, validate } from "@/utils/api/api";
 import {
+	generateMessageResponse,
+	generateObjectResponse,
+	validate
+} from "@/utils/api/api";
+import {
+	StringUser,
 	USER_COLLECTION,
 	User,
 	findCollectionWrapper,
@@ -7,6 +12,17 @@ import {
 } from "@/utils/db/db";
 import { Collection } from "mongodb";
 import { NextRequest } from "next/server";
+
+type ReducedUser = {
+	_id: string;
+	username: string;
+	firstName: string;
+	lastName: string;
+	email: string;
+	birthDay: string;
+	userStatus: string;
+	profilePic: string;
+};
 
 export const GET = async (request: NextRequest) => {
 	// Validazione della richiesta
@@ -28,5 +44,28 @@ export const GET = async (request: NextRequest) => {
 		await getCollection<User>(USER_COLLECTION);
 
 	// Otteniamo l'utente richiesto
-	return findCollectionWrapper<User>({ _id: userId } as any, userClient);
+	const outUser = await findCollectionWrapper<User>(
+		{ _id: userId } as any,
+		userClient
+	);
+
+	if (outUser.status !== 200) {
+		// Se c'è stato un errore, ritorna un errore
+		return outUser;
+	}
+
+	const userObj: StringUser = (await outUser.json())[0];
+
+	const response: ReducedUser = {
+		_id: userObj._id!,
+		username: userObj.username,
+		firstName: userObj.firstName,
+		lastName: userObj.lastName,
+		email: userObj.email,
+		birthDay: userObj.birthDay,
+		userStatus: userObj.userStatus,
+		profilePic: userObj.profilePic
+	};
+
+	return generateObjectResponse(response, 200);
 };
