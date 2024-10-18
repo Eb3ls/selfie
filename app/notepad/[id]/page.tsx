@@ -1,26 +1,42 @@
 "use client";
 
 import { Sidebar } from "@/app/components/Sidebar";
+import DOMPurify from "dompurify";
 import { marked } from "marked";
+// Importa DOMPurify
+import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import { FaEdit } from "react-icons/fa";
 import { EditNoteModal } from "./EditNoteModal";
 
 export default function Note() {
+	const params = useParams();
+	const id = params.id;
+
 	const [note, setNote] = useState<any>(null);
 	const [noteText, setNoteText] = useState(""); // Inizializza con stringa vuota
 	const [showMarkdown, setShowMarkdown] = useState(false);
 
 	useEffect(() => {
-		// Recupera l'item dalla sessionStorage
-		const storedNote = sessionStorage.getItem("selectedNote");
-		if (storedNote) {
-			const parsedNote = JSON.parse(storedNote);
-			setNote(parsedNote);
-			setNoteText(parsedNote.text); // Imposta il testo della nota
-		}
-	}, []);
+		if (!id) return;
+
+		// Prendi la nota con api getNote con fetch
+		fetch(`/api/notepad/getNote?id=${id}`, {
+			method: "GET",
+			headers: {
+				"Content-Type": "application/json"
+			}
+		})
+			.then((response) => response.json())
+			.then((data) => {
+				setNote(data);
+				setNoteText(data.text);
+			})
+			.catch((error) => {
+				console.error("Errore durante il fetch della nota:", error);
+			});
+	}, [id]);
 
 	const handleToggleView = () => {
 		setShowMarkdown(!showMarkdown);
@@ -40,7 +56,6 @@ export default function Note() {
 			});
 			if (response.ok) {
 				sessionStorage.setItem("selectedNote", JSON.stringify(note));
-				// Aggiorna la nota salvata nella sessionStorage o gestisci il feedback di successo
 				alert("Nota salvata con successo!");
 			} else {
 				alert("Errore durante il salvataggio della nota.");
@@ -57,12 +72,14 @@ export default function Note() {
 
 	function handleEdit() {}
 
+	// Sanifica il contenuto markdown
+	const sanitizedMarkdown = DOMPurify.sanitize(marked(noteText));
+
 	return (
 		<Container>
 			<Sidebar />
 			<Row className="my-5">
 				<Col md={10} className="mt-0 mt-4 mt-sm-2">
-					{/* Aggiunta la classe condizionale */}
 					<h1
 						style={{
 							display: "inline-block",
@@ -96,7 +113,6 @@ export default function Note() {
 			</Row>
 
 			<Row className="d-flex">
-				{/* Tastino per il cambio di vista (solo per sm) */}
 				<Button
 					variant="link"
 					onClick={handleToggleView}
@@ -104,7 +120,6 @@ export default function Note() {
 				>
 					{showMarkdown ? "Visualizza Input" : "Visualizza Nota"}
 				</Button>
-				{/* Colonna con l'input text */}
 				<Col md={6} className="d-none d-md-block">
 					<Form.Control
 						as="textarea"
@@ -113,35 +128,33 @@ export default function Note() {
 						onChange={(e) => setNoteText(e.target.value)}
 						placeholder="Scrivi qui la tua nota..."
 						style={{
-							resize: "none", // Disabilita il ridimensionamento
-							height: "100%" // Imposta l'altezza al 100%
+							resize: "none",
+							height: "100%"
 						}}
 					/>
 				</Col>
 
-				{/* Colonna con il testo in markdown */}
 				<Col md={6} className="d-none d-md-block d-flex">
 					<div
 						className="preview"
-						dangerouslySetInnerHTML={{ __html: marked(noteText) }}
+						dangerouslySetInnerHTML={{ __html: sanitizedMarkdown }} // Usa il contenuto sanificato
 						style={{
 							border: "1px solid #ccc",
 							padding: "10px",
 							borderRadius: "5px",
 							height: "100%",
 							overflowY: "auto",
-							flexGrow: 1 // Permette al rettangolo di espandersi per occupare l'altezza disponibile
+							flexGrow: 1
 						}}
 					/>
 				</Col>
 
-				{/* Colonna per dimensioni small */}
 				<Col sm={12} className="d-block d-md-none">
 					{showMarkdown ? (
 						<div
 							className="preview"
 							dangerouslySetInnerHTML={{
-								__html: marked(noteText)
+								__html: sanitizedMarkdown // Usa il contenuto sanificato
 							}}
 							style={{
 								border: "1px solid #ccc",
@@ -167,7 +180,6 @@ export default function Note() {
 				</Col>
 			</Row>
 
-			{/* Pulsante Save */}
 			<Row className="mt-3">
 				<Col>
 					<Button variant="primary" onClick={handleSave}>

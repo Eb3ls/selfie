@@ -158,7 +158,7 @@ export function EditNoteModal({
 												name="invitedUser"
 												value={formData.invitedUser}
 												onChange={handleChange}
-												placeholder="Aggiungi un utente per ID"
+												placeholder="Aggiungi un utente per username"
 												className="input-field"
 											/>
 											<Button

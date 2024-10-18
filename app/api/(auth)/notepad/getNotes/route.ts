@@ -1,6 +1,7 @@
 import {
 	generateMessageResponse,
 	generateObjectResponse,
+	idListToNameList,
 	validate
 } from "@/utils/api/api";
 import {
@@ -46,6 +47,10 @@ export const GET = async (request: NextRequest) => {
 		notes = [];
 	} else {
 		notes = await outNote.json();
+		notes.map(async (note: any) => await idListToNameList(note));
+		for (let i = 0; i < notes.length; i++) {
+			notes[i] = await idListToNameList(notes[i]);
+		}
 	}
 
 	return generateObjectResponse(notes, 200);
