@@ -18,6 +18,14 @@ export interface User {
 	profilePic: string;			// Path dell'immagine di profilo
 	isResource: boolean;		// Se l'utente è una risorsa - es. un luogo specifico
 	pomodoro: Pomodoro;			// Setting iniziale per il pomodoro
+	subscriptionList: {
+		endpoint: "",
+		expirationTime: 0,
+		keys: {
+			p256dh: "",
+			auth: ""
+		}
+	}[]	// Lista di subscription per le notifiche
 }
 
 export type StringUser = ConvertToString<User>;
@@ -32,7 +40,8 @@ export function createUser({
 	userStatus = "Attivo",
 	profilePic = "/images/?.png",
 	isResource = false,
-	pomodoro = createPomodoro({})
+	pomodoro = createPomodoro({}),
+	subscriptionList = []
 }: Partial<User>): User {
 	return {
 		username: username,
@@ -44,6 +53,7 @@ export function createUser({
 		userStatus: userStatus,
 		profilePic: profilePic,
 		isResource: isResource,
-		pomodoro: pomodoro
+		pomodoro: pomodoro,
+		subscriptionList: subscriptionList
 	};
 }
