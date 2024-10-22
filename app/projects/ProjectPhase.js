@@ -23,6 +23,15 @@
  * }
  * */
 
+const waiting_color = "#6c757d";
+const activable_color = "#ffc107";
+const active_color = "#007bff";
+const submitted_color = "#28a745";
+const completed_color = "#17a2b8";
+const reactivated_color = "#6610f2";
+const overdue_color = "#dc3545";
+const dropped_color = "#343a40";
+
 class ProjectPhase extends HTMLElement {
 	constructor() {
 		super();
@@ -44,21 +53,37 @@ class ProjectPhase extends HTMLElement {
 	}
 
 	getStatusIcon(status) {
-		let icon = "CIAO";
+		const icon = document.createElement("i");
+		icon.className = "bi bi-circle-fill fs-5";
 		switch (status) {
 			case "WAITING":
-				icon = `<i class="bi bi-circle-fill fs-5 text-warning"></i>`;
+				icon.style.color = waiting_color;
 				break;
-			case "IN_PROGRESS":
-				icon = `<i class="bi bi-circle-fill fs-5 text-success"></i>`;
+			case "ACTIVABLE":
+				icon.style.color = activable_color;
+				break;
+			case "ACTIVE":
+				icon.style.color = active_color;
+				break;
+			case "SUBMITTED":
+				icon.style.color = submitted_color;
 				break;
 			case "COMPLETED":
-				icon = `<i class="bi bi-circle-fill fs-5 text-info"></i>`;
+				icon.style.color = completed_color;
+				break;
+			case "REACTIVATED":
+				icon.style.color = reactivated_color;
+				break;
+			case "OVERDUE":
+				icon.style.color = overdue_color;
+				break;
+			case "DROPPED":
+				icon.style.color = dropped_color;
 				break;
 			default:
-				icon = `<i class="bi bi-circle-fill fs-5 text-secondary"></i>`;
+				console.error("Stato non riconosciuto:", status);
 		}
-		return icon;
+		return icon.outerHTML;
 	}
 
 	handleItem(activity) {

@@ -1,5 +1,14 @@
 "use client";
 
+/*
+ * Bottone per scorrere avanti e indietro di 12 giorni (non il massimo, magari temporaneo)
+ * Associare il toggle delle fasi al toggle visivo del gantt
+ * Definire la lunghezza delle attivitá in base alle colonne che dovrebbero occupare
+ * Capire come avere una griglia sotto alle colonne
+ * Partire dalla data corrente (da integrare poi con la time machine)
+ * Poter scorrere in verticale il gantt
+ *
+ * */
 import { useEffect } from "react";
 
 declare global {
@@ -50,7 +59,49 @@ export default function Projects() {
 					{
 						id: 81401873949,
 						summary: "Attività 1",
-						status: "WAITING",
+						status: "ACTIVABLE",
+						dtStart: "2024-03-17T00:00:00", // Usa stringhe ISO
+						dtEnd: "2024-03-19T00:00:00"
+					},
+					{
+						id: 81401873950,
+						summary: "Attività 1",
+						status: "ACTIVE",
+						dtStart: "2024-03-17T00:00:00", // Usa stringhe ISO
+						dtEnd: "2024-03-19T00:00:00"
+					},
+					{
+						id: 81401873951,
+						summary: "Attività 1",
+						status: "SUBMITTED",
+						dtStart: "2024-03-17T00:00:00", // Usa stringhe ISO
+						dtEnd: "2024-03-19T00:00:00"
+					},
+					{
+						id: 81401873952,
+						summary: "Attività 1",
+						status: "COMPLETED",
+						dtStart: "2024-03-17T00:00:00", // Usa stringhe ISO
+						dtEnd: "2024-03-19T00:00:00"
+					},
+					{
+						id: 81401873953,
+						summary: "Attività 1",
+						status: "REACTIVATED",
+						dtStart: "2024-03-17T00:00:00", // Usa stringhe ISO
+						dtEnd: "2024-03-19T00:00:00"
+					},
+					{
+						id: 81401873954,
+						summary: "Attività 1",
+						status: "OVERDUE",
+						dtStart: "2024-03-17T00:00:00", // Usa stringhe ISO
+						dtEnd: "2024-03-19T00:00:00"
+					},
+					{
+						id: 81401873955,
+						summary: "Attività 1",
+						status: "DROPPED",
 						dtStart: "2024-03-17T00:00:00", // Usa stringhe ISO
 						dtEnd: "2024-03-19T00:00:00"
 					}
