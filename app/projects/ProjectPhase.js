@@ -32,6 +32,8 @@ const reactivated_color = "#6610f2";
 const overdue_color = "#dc3545";
 const dropped_color = "#343a40";
 
+const row_height = "70px";
+
 class ProjectPhase extends HTMLElement {
 	constructor() {
 		super();
@@ -89,6 +91,7 @@ class ProjectPhase extends HTMLElement {
 	handleItem(activity) {
 		const activityElement = document.createElement("div");
 		activityElement.className = "row p-3";
+		activityElement.style.height = `${row_height}`;
 		activityElement.innerHTML = `
 			<div class="col">
 				${this.getStatusIcon(activity.status)} ${activity.summary}
@@ -101,17 +104,19 @@ class ProjectPhase extends HTMLElement {
 
 	render(data) {
 		// Creiamo il toggler per la fase
-		const toggler = `
-	    <div class="row p-3">
-        	<button class="btn btn-primary"
+		const toggler = document.createElement("div");
+		toggler.className = "row p-3";
+		toggler.style.height = `${row_height}`;
+		toggler.innerHTML = `
+        <button class="btn btn-primary"
           	type="button"
           	data-bs-toggle="collapse"
           	data-bs-target="#collapse${data.id}" 
           	aria-expanded="false"
           	aria-controls="collapse">
           	${data.summary}
-        	</button>
-      	</div>`;
+        </button>
+      	`;
 
 		// Contenitore per il collapse
 		const collapse = document.createElement("div");
@@ -135,7 +140,7 @@ class ProjectPhase extends HTMLElement {
 			}
 		}
 
-		this.innerHTML = `${toggler} ${collapse.outerHTML}`;
+		this.innerHTML = `${toggler.outerHTML} ${collapse.outerHTML}`;
 	}
 }
 

@@ -1,0 +1,89 @@
+const row_height = "70px";
+
+class ProjectPhaseRow extends HTMLElement {
+	constructor() {
+		super();
+	}
+
+	static get observedAttributes() {
+		return ["data"];
+	}
+
+	attributeChangedCallback(name, oldValue, newValue) {
+		if (name === "data") {
+			try {
+				const data = JSON.parse(newValue);
+				this.render(data);
+			} catch (error) {
+				console.error("Errore nel parsing dei dati:", error);
+			}
+		}
+	}
+
+	handleRow(summary) {
+		const row = document.createElement("div");
+		row.className = "row";
+		row.style.height = `${row_height}`;
+		row.style.display = "grid";
+		row.style.gridTemplateColumns = "repeat(12, 1fr)";
+		row.style.gap = "0";
+
+		// Crea le 15 colonne con un bordo grigio
+		for (let i = 1; i <= 12; i++) {
+			const cell = document.createElement("div");
+			cell.style.borderBottom = "1px solid grey";
+			cell.style.borderRight = "1px solid grey";
+
+			if (i === 6) {
+				const phaseBlock = document.createElement("div");
+				phaseBlock.style.gridColumn = "span 4"; // Estendi su 4 colonne (6-9)
+				phaseBlock.style.backgroundColor = "#ffcccc";
+				phaseBlock.style.color = "white";
+				phaseBlock.style.borderRight = "1px solid grey";
+				phaseBlock.style.borderBottom = "1px solid grey";
+				phaseBlock.className =
+					"d-flex justify-content-center align-items-center";
+				phaseBlock.innerText = summary;
+				row.appendChild(phaseBlock);
+				i += 3;
+			} else {
+				row.appendChild(cell);
+			}
+		}
+		return row;
+	}
+
+	render(data) {
+		// Row per la fase
+		const phaseRow = this.handleRow(data.summary);
+
+		// Contenitore per il collapse con lo stesso id per fare il toggle di tutti
+		const collapse = document.createElement("div");
+		collapse.id = `collapse${data.id}`;
+		collapse.className = "collapse";
+
+		// Gestione delle sottofasi
+		if (data.subPhases) {
+			for (const subPhase of data.subPhases) {
+				const subPhaseElement =
+					document.createElement("project-phase-row");
+				subPhaseElement.setAttribute("data", JSON.stringify(subPhase));
+				collapse.appendChild(subPhaseElement);
+			}
+		}
+
+		//Gestione delle attività
+		if (data.activities) {
+			for (const activity of data.activities) {
+				const activityElement = this.handleRow(activity.summary);
+				collapse.appendChild(activityElement);
+			}
+		}
+
+		this.innerHTML = `${phaseRow.outerHTML} ${collapse.outerHTML}`;
+	}
+}
+
+customElements.define("project-phase-row", ProjectPhaseRow);
+
+export default ProjectPhaseRow;
