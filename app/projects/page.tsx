@@ -5,7 +5,7 @@ import { useEffect } from "react";
 declare global {
 	namespace JSX {
 		interface IntrinsicElements {
-			"project-phase": { data: string };
+			"project-phase": { data: any };
 		}
 	}
 }
@@ -16,6 +16,48 @@ export default function Projects() {
 			import("./ProjectPhase");
 		}
 	}, []);
+
+	const testDays = [
+		{ day: "Mon", number: 17 },
+		{ day: "Tue", number: 18 },
+		{ day: "Wed", number: 19 },
+		{ day: "Thu", number: 20 },
+		{ day: "Fri", number: 21 },
+		{ day: "Sat", number: 22 },
+		{ day: "Sun", number: 23 },
+		{ day: "Mon", number: 24 },
+		{ day: "Tue", number: 25 },
+		{ day: "Wed", number: 26 },
+		{ day: "Thu", number: 27 },
+		{ day: "Fri", number: 28 }
+	];
+
+	const testData = {
+		id: 11820918,
+		summary: "Fase 1",
+		subPhases: [
+			{
+				id: 172010381,
+				summary: "Sottofase 1",
+				activities: [
+					{
+						id: 81401873948,
+						summary: "Attività 1",
+						status: "WAITING",
+						dtStart: "2024-03-17T00:00:00", // Usa stringhe ISO
+						dtEnd: "2024-03-19T00:00:00"
+					},
+					{
+						id: 81401873949,
+						summary: "Attività 1",
+						status: "WAITING",
+						dtStart: "2024-03-17T00:00:00", // Usa stringhe ISO
+						dtEnd: "2024-03-19T00:00:00"
+					}
+				]
+			}
+		]
+	};
 
 	return (
 		<div>
@@ -108,8 +150,21 @@ export default function Projects() {
 								Range
 							</div>
 						</div>
-						<div className="row p-3">
-							<project-phase data="Fase 1"></project-phase>
+						<project-phase
+							data={JSON.stringify(testData)}
+						></project-phase>
+					</div>
+					<div className="col-9 border-end border-secondary">
+						<div className="row p-1 border-bottom border-secondary">
+							{testDays.map((item, index) => (
+								<div
+									className="col d-flex flex-column align-items-center justify-content-between border-end border-secondary"
+									key={index}
+								>
+									<div>{item.day}</div>
+									<div>{item.number}</div>
+								</div>
+							))}
 						</div>
 					</div>
 				</div>
