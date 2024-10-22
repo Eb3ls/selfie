@@ -3,7 +3,8 @@
 // Assumendo che il modello Note sia in models
 import React, { useState } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
-import { FaEdit } from "react-icons/fa";
+import { FaEdit, FaTrash } from "react-icons/fa";
+// Importa l'icona FaTrash
 import "../GenericModal.css";
 
 export function EditNoteModal({
@@ -18,7 +19,7 @@ export function EditNoteModal({
 		categories: note.categories,
 		access: note.access,
 		invitedUser: "", // Per input di aggiunta nuovi utenti
-		userIdList: note.userIdList || [] // Invited users
+		userNameList: note.userNameList || [] // Invited users
 	});
 
 	function handleChange(
@@ -34,10 +35,21 @@ export function EditNoteModal({
 		if (formData.invitedUser) {
 			setFormData({
 				...formData,
-				userIdList: [...formData.userIdList, formData.invitedUser],
+				userNameList: [...formData.userNameList, formData.invitedUser],
 				invitedUser: ""
 			});
 		}
+	}
+
+	function handleRemoveUser(index: number) {
+		const updatedUserList = formData.userNameList.filter(
+			// @ts-ignore
+			(_, i) => i !== index
+		);
+		setFormData({
+			...formData,
+			userNameList: updatedUserList
+		});
 	}
 
 	function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -51,11 +63,11 @@ export function EditNoteModal({
 
 		// Aggiorna la nota con i nuovi dati
 		handleEdit({
+			_id: note._id,
 			summary: formData.summary,
 			categories: formData.categories,
 			access: formData.access,
-			userIdList: formData.userIdList,
-			dtModified: new Date()
+			usernameList: formData.userNameList
 		});
 
 		// Chiude il modal
@@ -143,11 +155,26 @@ export function EditNoteModal({
 												<strong>Utenti invitati</strong>
 											</Form.Label>
 											<ul>
-												{formData.userIdList.map(
-													(userId: any) => (
+												{formData.userNameList.map(
+													(
+														userId: any,
+														index: number
+													) => (
 														<li
 															key={userId.toString()}
 														>
+															<Button
+																variant="danger"
+																size="sm"
+																className="me-2"
+																onClick={() =>
+																	handleRemoveUser(
+																		index
+																	)
+																}
+															>
+																<FaTrash />
+															</Button>
 															{userId.toString()}
 														</li>
 													)

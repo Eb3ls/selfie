@@ -20,7 +20,7 @@ const requestTemplate = {
 	summary: "",
 	categories: "",
 	access: "",
-	userIdList: []
+	usernameList: []
 };
 
 type RequestType = typeof requestTemplate;
@@ -35,10 +35,11 @@ export const PATCH = async (request: NextRequest) => {
 
 	// Se la validazione fallisce, ritorna il messaggio di errore
 	if (validation === null) {
-		return generateMessageResponse("Invalid request", 400);
+		generateMessageResponse("Invalid Request", 400);
 	}
 
 	// Estraiamo l'utente e il corpo della richiesta
+	// @ts-ignore
 	const { user: user, body: newBody } = validation;
 
 	// Estraiamo l'id dell'utente
@@ -48,16 +49,16 @@ export const PATCH = async (request: NextRequest) => {
 	const noteId: string = newBody._id!;
 
 	// Estraiamo la lista degli username dal body
-	let userIdList: string[] = newBody.userIdList;
+	const usernameList: string[] = newBody.usernameList;
 
 	// Convertiamo la lista degli username in lista di id e aggiungiamo lo userId come primo elemento
-	const convertionOut = await usernameListToIds(userIdList, userId);
+	const convertionOut = await usernameListToIds(usernameList, userId);
 
 	if (convertionOut.status !== 200) {
 		return convertionOut;
 	}
 
-	userIdList = (await convertionOut.json()).users;
+	const userIdList = (await convertionOut.json()).users;
 
 	// Ottieniamo la collezione delle note
 	const client: Collection<Note> = await getCollection<Note>(NOTE_COLLECTION);
@@ -76,7 +77,10 @@ export const PATCH = async (request: NextRequest) => {
 	}
 
 	// Creiamo un oggetto con i campi da modificare
-	const newFields: Partial<StringNote> = {
+
+	let newFields: Partial<StringNote>;
+
+	newFields = {
 		summary: newBody.summary,
 		categories: newBody.categories,
 		access: newBody.access as "PRIVATE" | "INVITED" | "PUBLIC",

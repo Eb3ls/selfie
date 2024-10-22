@@ -3,40 +3,40 @@
 import { Sidebar } from "@/app/components/Sidebar";
 import DOMPurify from "dompurify";
 import { marked } from "marked";
-// Importa DOMPurify
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import { FaEdit } from "react-icons/fa";
+import useSWR from "swr";
 import { EditNoteModal } from "./EditNoteModal";
+
+// Funzione fetcher per SWR
+async function fetcher(url: string) {
+	const response = await fetch(url);
+	if (!response.ok) {
+		throw new Error("Errore durante il fetch della nota");
+	}
+	return response.json();
+}
 
 export default function Note() {
 	const params = useParams();
 	const id = params.id;
 
-	const [note, setNote] = useState<any>(null);
+	const {
+		data: note,
+		error,
+		mutate
+	} = useSWR(() => (id ? `/api/notepad/getNote?id=${id}` : null), fetcher);
+
 	const [noteText, setNoteText] = useState(""); // Inizializza con stringa vuota
 	const [showMarkdown, setShowMarkdown] = useState(false);
 
 	useEffect(() => {
-		if (!id) return;
-
-		// Prendi la nota con api getNote con fetch
-		fetch(`/api/notepad/getNote?id=${id}`, {
-			method: "GET",
-			headers: {
-				"Content-Type": "application/json"
-			}
-		})
-			.then((response) => response.json())
-			.then((data) => {
-				setNote(data);
-				setNoteText(data.text);
-			})
-			.catch((error) => {
-				console.error("Errore durante il fetch della nota:", error);
-			});
-	}, [id]);
+		if (note) {
+			setNoteText(note.text);
+		}
+	}, [note]);
 
 	const handleToggleView = () => {
 		setShowMarkdown(!showMarkdown);
@@ -55,7 +55,7 @@ export default function Note() {
 				})
 			});
 			if (response.ok) {
-				sessionStorage.setItem("selectedNote", JSON.stringify(note));
+				await mutate(); // Refetch dei dati per aggiornare la visualizzazione
 				alert("Nota salvata con successo!");
 			} else {
 				alert("Errore durante il salvataggio della nota.");
@@ -65,12 +65,36 @@ export default function Note() {
 		}
 	};
 
-	// Se la nota non è ancora caricata, mostra un messaggio di caricamento
-	if (!note) {
-		return <div>Loading...</div>;
-	}
+	// Funzione per modificare i permessi della nota
+	const handleEdit = async (body: {
+		_id: string;
+		summary: string;
+		categories: string;
+		access: string;
+		usernameList: [string];
+	}) => {
+		try {
+			const response = await fetch("/api/notepad/modifyPermission", {
+				method: "PATCH",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify(body)
+			});
+			if (response.ok) {
+				await mutate(); // Refetch dei dati per aggiornare la visualizzazione
+				alert("Permessi aggiornati con successo!");
+			} else {
+				alert("Errore durante l'aggiornamento dei permessi.");
+			}
+		} catch (error) {
+			alert("Errore durante la comunicazione con l'API:" + error);
+		}
+	};
 
-	function handleEdit() {}
+	// Se c'è un errore durante il fetch o i dati non sono ancora caricati, mostra messaggio appropriato
+	if (error) return <div>Errore durante il caricamento della nota.</div>;
+	if (!note) return <div>Loading...</div>;
 
 	// Sanifica il contenuto markdown
 	const sanitizedMarkdown = DOMPurify.sanitize(
@@ -139,7 +163,7 @@ export default function Note() {
 				<Col md={6} className="d-none d-md-block d-flex">
 					<div
 						className="preview"
-						dangerouslySetInnerHTML={{ __html: sanitizedMarkdown }} // Usa il contenuto sanificato
+						dangerouslySetInnerHTML={{ __html: sanitizedMarkdown }}
 						style={{
 							border: "1px solid #ccc",
 							padding: "10px",
@@ -156,7 +180,7 @@ export default function Note() {
 						<div
 							className="preview"
 							dangerouslySetInnerHTML={{
-								__html: sanitizedMarkdown // Usa il contenuto sanificato
+								__html: sanitizedMarkdown
 							}}
 							style={{
 								border: "1px solid #ccc",
