@@ -7,7 +7,8 @@ async function api_route_handler(request: NextRequest): Promise<boolean> {
 	if (
 		path.startsWith("/signup") ||
 		path.startsWith("/signin") ||
-		path.startsWith("/verifyEmail")
+		path.startsWith("/verifyEmail") ||
+		path.startsWith("/timeMachine")
 	) {
 		return true;
 	}
