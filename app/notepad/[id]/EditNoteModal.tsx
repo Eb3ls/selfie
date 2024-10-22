@@ -1,10 +1,8 @@
 "use client";
 
-// Assumendo che il modello Note sia in models
 import React, { useState } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
 import { FaEdit, FaTrash } from "react-icons/fa";
-// Importa l'icona FaTrash
 import "../GenericModal.css";
 
 export function EditNoteModal({

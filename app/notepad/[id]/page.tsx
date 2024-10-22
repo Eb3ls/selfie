@@ -10,6 +10,8 @@ import { FaEdit } from "react-icons/fa";
 import useSWR from "swr";
 import { EditNoteModal } from "./EditNoteModal";
 
+// TODO: utente da cookie
+
 // Funzione fetcher per SWR
 async function fetcher(url: string) {
 	const response = await fetch(url);

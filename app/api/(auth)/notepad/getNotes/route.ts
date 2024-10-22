@@ -49,6 +49,7 @@ export const GET = async (request: NextRequest) => {
 		notes = await outNote.json();
 		notes.map(async (note: any) => await idListToNameList(note));
 		for (let i = 0; i < notes.length; i++) {
+			// TODO: controllo che se non è l'owner, oltre a essere nella lista la nota deve essere INVITED
 			notes[i] = await idListToNameList(notes[i]);
 		}
 	}
