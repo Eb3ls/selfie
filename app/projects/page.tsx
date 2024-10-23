@@ -16,6 +16,7 @@ declare global {
 		interface IntrinsicElements {
 			"project-phase": { data: any };
 			"project-phase-row": { data: any };
+			"time-line": { date: string };
 		}
 	}
 }
@@ -25,23 +26,9 @@ export default function Projects() {
 		if (typeof window !== "undefined") {
 			import("./ProjectPhase");
 			import("./ProjectPhaseRow");
+			import("./TimeLine");
 		}
 	}, []);
-
-	const testDays = [
-		{ day: "Mon", number: 17 },
-		{ day: "Tue", number: 18 },
-		{ day: "Wed", number: 19 },
-		{ day: "Thu", number: 20 },
-		{ day: "Fri", number: 21 },
-		{ day: "Sat", number: 22 },
-		{ day: "Sun", number: 23 },
-		{ day: "Mon", number: 24 },
-		{ day: "Tue", number: 25 },
-		{ day: "Wed", number: 26 },
-		{ day: "Thu", number: 27 },
-		{ day: "Fri", number: 28 }
-	];
 
 	const testData = {
 		id: 11820918,
@@ -246,13 +233,16 @@ export default function Projects() {
 					<button className="btn ms-2 p-0">List</button>
 				</div>
 				<div className="col-9 d-flex flex-column align-items-center">
-					<div className="fs-4">2024</div>
-					<div className="fs-5">Marzo</div>
+					<div className="fs-4" id="yearDiv"></div>
+					<div className="fs-5" id="monthDiv"></div>
 				</div>
 			</div>
 			<div className="row flex-grow-1 overflow-y-auto">
 				<div className="col-3 border-end border-secondary">
-					<div className="row p-3 border-bottom border-secondary sticky-top bg-white">
+					<div
+						className="row p-3 border-bottom border-secondary sticky-top bg-white"
+						style={{ height: "70px" }}
+					>
 						<div className="col-6">Titolo</div>
 						<div className="col-6 d-flex justify-content-center">
 							Range
@@ -263,17 +253,11 @@ export default function Projects() {
 					></project-phase>
 				</div>
 				<div className="col-9 border-end border-secondary">
-					<div className="row p-1 border-bottom border-secondary sticky-top bg-white">
-						{testDays.map((item, index) => (
-							<div
-								className="col d-flex flex-column align-items-center justify-content-between border-end border-secondary"
-								key={index}
-							>
-								<div>{item.day}</div>
-								<div>{item.number}</div>
-							</div>
-						))}
-					</div>
+					<time-line
+						date={new Date(
+							new Date().setDate(new Date().getDate() - 0)
+						).toString()}
+					></time-line>
 					<project-phase-row
 						data={JSON.stringify(testData)}
 					></project-phase-row>

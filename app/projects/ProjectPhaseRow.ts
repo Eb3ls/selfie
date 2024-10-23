@@ -1,3 +1,5 @@
+import { OrderedBulkOperation } from "mongodb";
+
 const row_height = "70px";
 
 class ProjectPhaseRow extends HTMLElement {
@@ -9,7 +11,7 @@ class ProjectPhaseRow extends HTMLElement {
 		return ["data"];
 	}
 
-	attributeChangedCallback(name, oldValue, newValue) {
+	attributeChangedCallback(name: string, oldValue: string, newValue: string) {
 		if (name === "data") {
 			try {
 				const data = JSON.parse(newValue);
@@ -20,7 +22,7 @@ class ProjectPhaseRow extends HTMLElement {
 		}
 	}
 
-	handleRow(summary) {
+	handleRow(summary: string) {
 		const row = document.createElement("div");
 		row.className = "row";
 		row.style.height = `${row_height}`;
@@ -53,7 +55,7 @@ class ProjectPhaseRow extends HTMLElement {
 		return row;
 	}
 
-	render(data) {
+	render(data: any) {
 		// Row per la fase
 		const phaseRow = this.handleRow(data.summary);
 
@@ -80,7 +82,7 @@ class ProjectPhaseRow extends HTMLElement {
 			}
 		}
 
-		this.innerHTML = `${phaseRow.outerHTML} ${collapse.outerHTML}`;
+		this.innerHTML = phaseRow.outerHTML + collapse.outerHTML;
 	}
 }
 

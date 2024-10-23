@@ -43,7 +43,7 @@ class ProjectPhase extends HTMLElement {
 		return ["data"];
 	}
 
-	attributeChangedCallback(name, oldValue, newValue) {
+	attributeChangedCallback(name: string, oldValue: string, newValue: string) {
 		if (name === "data") {
 			try {
 				const data = JSON.parse(newValue);
@@ -54,7 +54,7 @@ class ProjectPhase extends HTMLElement {
 		}
 	}
 
-	getStatusIcon(status) {
+	getStatusIcon(status: string) {
 		const icon = document.createElement("i");
 		icon.className = "bi bi-circle-fill fs-5";
 		switch (status) {
@@ -88,7 +88,7 @@ class ProjectPhase extends HTMLElement {
 		return icon.outerHTML;
 	}
 
-	handleItem(activity) {
+	handleItem(activity: any) {
 		const activityElement = document.createElement("div");
 		activityElement.className = "row p-3";
 		activityElement.style.height = `${row_height}`;
@@ -102,7 +102,7 @@ class ProjectPhase extends HTMLElement {
 		return activityElement;
 	}
 
-	render(data) {
+	render(data: any) {
 		// Creiamo il toggler per la fase
 		const toggler = document.createElement("div");
 		toggler.className = "row p-3";
@@ -140,7 +140,7 @@ class ProjectPhase extends HTMLElement {
 			}
 		}
 
-		this.innerHTML = `${toggler.outerHTML} ${collapse.outerHTML}`;
+		this.innerHTML = toggler.outerHTML + collapse.outerHTML;
 	}
 }
 
