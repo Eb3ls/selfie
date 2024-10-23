@@ -237,11 +237,14 @@ export default function Projects() {
 					<div className="fs-5" id="monthDiv"></div>
 				</div>
 			</div>
-			<div className="row flex-grow-1 overflow-y-auto">
-				<div className="col-3 border-end border-secondary">
+			<div className="row flex-grow-1 overflow-auto max-vw-100">
+				<div
+					className="col-3 border-end border-secondary bg-white z-2"
+					style={{ position: "sticky", left: "0" }}
+				>
 					<div
+						id="header"
 						className="row p-3 border-bottom border-secondary sticky-top bg-white"
-						style={{ height: "70px" }}
 					>
 						<div className="col-6">Titolo</div>
 						<div className="col-6 d-flex justify-content-center">
@@ -252,7 +255,7 @@ export default function Projects() {
 						data={JSON.stringify(testData)}
 					></project-phase>
 				</div>
-				<div className="col-9 border-end border-secondary">
+				<div className="col-9">
 					<time-line
 						date={new Date(
 							new Date().setDate(new Date().getDate() - 0)

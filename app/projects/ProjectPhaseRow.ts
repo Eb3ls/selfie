@@ -1,6 +1,5 @@
 import { OrderedBulkOperation } from "mongodb";
-
-const row_height = "70px";
+import * as CONSTANT from "./constants";
 
 class ProjectPhaseRow extends HTMLElement {
 	constructor() {
@@ -24,14 +23,14 @@ class ProjectPhaseRow extends HTMLElement {
 
 	handleRow(summary: string) {
 		const row = document.createElement("div");
-		row.className = "row";
-		row.style.height = `${row_height}`;
+		row.className = "row z-0";
+		row.style.height = `${CONSTANT.ROW_HEIGHT}`;
 		row.style.display = "grid";
-		row.style.gridTemplateColumns = "repeat(12, 1fr)";
+		row.style.gridTemplateColumns = `repeat(${CONSTANT.COL_NUM}, ${CONSTANT.CELL_WIDTH})`;
 		row.style.gap = "0";
 
 		// Crea le 15 colonne con un bordo grigio
-		for (let i = 1; i <= 12; i++) {
+		for (let i = 1; i <= CONSTANT.COL_NUM; i++) {
 			const cell = document.createElement("div");
 			cell.style.borderBottom = "1px solid grey";
 			cell.style.borderRight = "1px solid grey";

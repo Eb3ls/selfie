@@ -22,17 +22,7 @@
  * 	}]
  * }
  * */
-
-const waiting_color = "#6c757d";
-const activable_color = "#ffc107";
-const active_color = "#007bff";
-const submitted_color = "#28a745";
-const completed_color = "#17a2b8";
-const reactivated_color = "#6610f2";
-const overdue_color = "#dc3545";
-const dropped_color = "#343a40";
-
-const row_height = "70px";
+import * as CONSTANT from "./constants";
 
 class ProjectPhase extends HTMLElement {
 	constructor() {
@@ -59,28 +49,28 @@ class ProjectPhase extends HTMLElement {
 		icon.className = "bi bi-circle-fill fs-5";
 		switch (status) {
 			case "WAITING":
-				icon.style.color = waiting_color;
+				icon.style.color = CONSTANT.waiting_color;
 				break;
 			case "ACTIVABLE":
-				icon.style.color = activable_color;
+				icon.style.color = CONSTANT.activable_color;
 				break;
 			case "ACTIVE":
-				icon.style.color = active_color;
+				icon.style.color = CONSTANT.active_color;
 				break;
 			case "SUBMITTED":
-				icon.style.color = submitted_color;
+				icon.style.color = CONSTANT.submitted_color;
 				break;
 			case "COMPLETED":
-				icon.style.color = completed_color;
+				icon.style.color = CONSTANT.completed_color;
 				break;
 			case "REACTIVATED":
-				icon.style.color = reactivated_color;
+				icon.style.color = CONSTANT.reactivated_color;
 				break;
 			case "OVERDUE":
-				icon.style.color = overdue_color;
+				icon.style.color = CONSTANT.overdue_color;
 				break;
 			case "DROPPED":
-				icon.style.color = dropped_color;
+				icon.style.color = CONSTANT.dropped_color;
 				break;
 			default:
 				console.error("Stato non riconosciuto:", status);
@@ -91,7 +81,7 @@ class ProjectPhase extends HTMLElement {
 	handleItem(activity: any) {
 		const activityElement = document.createElement("div");
 		activityElement.className = "row p-3";
-		activityElement.style.height = `${row_height}`;
+		activityElement.style.height = `${CONSTANT.ROW_HEIGHT}`;
 		activityElement.innerHTML = `
 			<div class="col">
 				${this.getStatusIcon(activity.status)} ${activity.summary}
@@ -103,10 +93,15 @@ class ProjectPhase extends HTMLElement {
 	}
 
 	render(data: any) {
+		// Impostiamo l'altezza dell'header con Titolo e Range
+		const header = document.getElementById("header");
+		if (header) {
+			header.style.height = `${CONSTANT.ROW_HEIGHT}`;
+		}
 		// Creiamo il toggler per la fase
 		const toggler = document.createElement("div");
 		toggler.className = "row p-3";
-		toggler.style.height = `${row_height}`;
+		toggler.style.height = `${CONSTANT.ROW_HEIGHT}`;
 		toggler.innerHTML = `
         <button class="btn btn-primary"
           	type="button"

@@ -1,4 +1,4 @@
-const row_height = "70px";
+import * as CONSTANTS from "./constants";
 
 class TimeLine extends HTMLElement {
 	constructor() {
@@ -17,16 +17,18 @@ class TimeLine extends HTMLElement {
 
 	handleTimeline(date: Date) {
 		const timeline = document.createElement("div");
-		timeline.className = "row sticky-top bg-white";
-		timeline.style.height = `${row_height}`;
+		timeline.className = "row bg-white z-1 sticky-top w-100";
+		timeline.style.height = `${CONSTANTS.ROW_HEIGHT}`;
 		timeline.style.display = "grid";
-		timeline.style.gridTemplateColumns = "repeat(12, 1fr)";
+		timeline.style.gridTemplateColumns = `repeat(${CONSTANTS.COL_NUM}, ${CONSTANTS.CELL_WIDTH})`;
 		timeline.style.gap = "0";
 
-		const timeFormat = "en-US";
-
-		const year = date.toLocaleDateString(timeFormat, { year: "numeric" });
-		const month = date.toLocaleDateString(timeFormat, { month: "long" });
+		const year = date.toLocaleDateString(CONSTANTS.timeFormat, {
+			year: "numeric"
+		});
+		const month = date.toLocaleDateString(CONSTANTS.timeFormat, {
+			month: "long"
+		});
 		const yearDiv = document.getElementById("yearDiv");
 		const monthDiv = document.getElementById("monthDiv");
 
@@ -37,7 +39,12 @@ class TimeLine extends HTMLElement {
 		yearDiv.textContent = year;
 		monthDiv.textContent = month;
 
-		for (let i = 0; i < 12; i++) {
+		const startDate = new Date();
+		startDate.setDate(
+			date.getDate() - Math.floor(CONSTANTS.COL_NUM / 2) + 2
+		);
+
+		for (let i = 0; i < CONSTANTS.COL_NUM; i++) {
 			const cell = document.createElement("div");
 			cell.className =
 				"d-flex flex-column align-items-center justify-content-center";
@@ -45,15 +52,18 @@ class TimeLine extends HTMLElement {
 			cell.style.borderRight = "1px solid grey";
 
 			const curDay = new Date();
-			curDay.setDate(date.getDate() + i);
+			curDay.setDate(startDate.getDate() + i);
 
 			const dayText = document.createElement("div");
 			dayText.textContent = curDay.getDate().toString();
 
 			const dayNum = document.createElement("div");
-			dayNum.textContent = curDay.toLocaleDateString(timeFormat, {
-				weekday: "short"
-			});
+			dayNum.textContent = curDay.toLocaleDateString(
+				CONSTANTS.timeFormat,
+				{
+					weekday: "short"
+				}
+			);
 
 			cell.appendChild(dayText);
 			cell.appendChild(dayNum);
