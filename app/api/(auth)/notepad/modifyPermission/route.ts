@@ -35,11 +35,10 @@ export const PATCH = async (request: NextRequest) => {
 
 	// Se la validazione fallisce, ritorna il messaggio di errore
 	if (validation === null) {
-		generateMessageResponse("Invalid Request", 400);
+		return generateMessageResponse("Invalid Request", 400);
 	}
 
 	// Estraiamo l'utente e il corpo della richiesta
-	// @ts-ignore
 	const { user: user, body: newBody } = validation;
 
 	// Estraiamo l'id dell'utente
@@ -78,9 +77,7 @@ export const PATCH = async (request: NextRequest) => {
 
 	// Creiamo un oggetto con i campi da modificare
 
-	let newFields: Partial<StringNote>;
-
-	newFields = {
+	const newFields: Partial<StringNote> = {
 		summary: newBody.summary,
 		categories: newBody.categories,
 		access: newBody.access as "PRIVATE" | "INVITED" | "PUBLIC",
