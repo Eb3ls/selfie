@@ -1,6 +1,6 @@
 export const ROW_HEIGHT = "70px";
-export const CELL_WIDTH = "300px";
-export const COL_NUM = 12;
+export const CELL_WIDTH = "100px";
+export const COL_NUM = 25;
 
 export const waiting_color = "#6c757d";
 export const activable_color = "#ffc107";

@@ -1,5 +1,5 @@
 import { OrderedBulkOperation } from "mongodb";
-import * as CONSTANT from "./constants";
+import * as CONSTANTS from "./constants";
 
 class ProjectPhaseRow extends HTMLElement {
 	constructor() {
@@ -24,20 +24,24 @@ class ProjectPhaseRow extends HTMLElement {
 	handleRow(summary: string) {
 		const row = document.createElement("div");
 		row.className = "row z-0";
-		row.style.height = `${CONSTANT.ROW_HEIGHT}`;
+		row.style.height = `${CONSTANTS.ROW_HEIGHT}`;
 		row.style.display = "grid";
-		row.style.gridTemplateColumns = `repeat(${CONSTANT.COL_NUM}, ${CONSTANT.CELL_WIDTH})`;
+		row.style.gridTemplateColumns = `repeat(${CONSTANTS.COL_NUM}, ${CONSTANTS.CELL_WIDTH})`;
 		row.style.gap = "0";
+		row.style.width =
+			parseInt(CONSTANTS.CELL_WIDTH, 10) * CONSTANTS.COL_NUM + "px";
+
+		const fragment = document.createDocumentFragment();
 
 		// Crea le 15 colonne con un bordo grigio
-		for (let i = 1; i <= CONSTANT.COL_NUM; i++) {
+		for (let i = 1; i <= CONSTANTS.COL_NUM; i++) {
 			const cell = document.createElement("div");
 			cell.style.borderBottom = "1px solid grey";
 			cell.style.borderRight = "1px solid grey";
 
-			if (i === 6) {
+			if (i === Math.floor(CONSTANTS.COL_NUM / 2) + 1) {
 				const phaseBlock = document.createElement("div");
-				phaseBlock.style.gridColumn = "span 4"; // Estendi su 4 colonne (6-9)
+				phaseBlock.style.gridColumn = "span 1"; // Estendi su 4 colonne (6-9)
 				phaseBlock.style.backgroundColor = "#ffcccc";
 				phaseBlock.style.color = "white";
 				phaseBlock.style.borderRight = "1px solid grey";
@@ -45,12 +49,13 @@ class ProjectPhaseRow extends HTMLElement {
 				phaseBlock.className =
 					"d-flex justify-content-center align-items-center";
 				phaseBlock.innerText = summary;
-				row.appendChild(phaseBlock);
-				i += 3;
+				fragment.appendChild(phaseBlock);
 			} else {
-				row.appendChild(cell);
+				fragment.appendChild(cell);
 			}
 		}
+		row.appendChild(fragment);
+
 		return row;
 	}
 

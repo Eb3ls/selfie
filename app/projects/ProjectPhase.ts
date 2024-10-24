@@ -93,11 +93,6 @@ class ProjectPhase extends HTMLElement {
 	}
 
 	render(data: any) {
-		// Impostiamo l'altezza dell'header con Titolo e Range
-		const header = document.getElementById("header");
-		if (header) {
-			header.style.height = `${CONSTANT.ROW_HEIGHT}`;
-		}
 		// Creiamo il toggler per la fase
 		const toggler = document.createElement("div");
 		toggler.className = "row p-3";

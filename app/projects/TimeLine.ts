@@ -17,11 +17,13 @@ class TimeLine extends HTMLElement {
 
 	handleTimeline(date: Date) {
 		const timeline = document.createElement("div");
-		timeline.className = "row bg-white z-1 sticky-top w-100";
+		timeline.className = "row bg-white z-1 sticky-top";
 		timeline.style.height = `${CONSTANTS.ROW_HEIGHT}`;
 		timeline.style.display = "grid";
 		timeline.style.gridTemplateColumns = `repeat(${CONSTANTS.COL_NUM}, ${CONSTANTS.CELL_WIDTH})`;
 		timeline.style.gap = "0";
+		timeline.style.width =
+			parseInt(CONSTANTS.CELL_WIDTH, 10) * CONSTANTS.COL_NUM + "px";
 
 		const year = date.toLocaleDateString(CONSTANTS.timeFormat, {
 			year: "numeric"
@@ -41,8 +43,10 @@ class TimeLine extends HTMLElement {
 
 		const startDate = new Date();
 		startDate.setDate(
-			date.getDate() - Math.floor(CONSTANTS.COL_NUM / 2) + 2
+			date.getDate() - Math.floor(CONSTANTS.COL_NUM / 2) + 1
 		);
+
+		const fragment = document.createDocumentFragment();
 
 		for (let i = 0; i < CONSTANTS.COL_NUM; i++) {
 			const cell = document.createElement("div");
@@ -53,6 +57,11 @@ class TimeLine extends HTMLElement {
 
 			const curDay = new Date();
 			curDay.setDate(startDate.getDate() + i);
+
+			if (curDay.getDate() === date.getDate()) {
+				cell.id = "target";
+				cell.style.backgroundColor = "#ffcccc";
+			}
 
 			const dayText = document.createElement("div");
 			dayText.textContent = curDay.getDate().toString();
@@ -68,8 +77,11 @@ class TimeLine extends HTMLElement {
 			cell.appendChild(dayText);
 			cell.appendChild(dayNum);
 
-			timeline.appendChild(cell);
+			fragment.appendChild(cell);
 		}
+
+		timeline.appendChild(fragment);
+
 		return timeline;
 	}
 
