@@ -1,4 +1,3 @@
-import { OrderedBulkOperation } from "mongodb";
 import * as CONSTANTS from "./constants";
 
 class ProjectPhaseRow extends HTMLElement {
@@ -24,12 +23,11 @@ class ProjectPhaseRow extends HTMLElement {
 	handleRow(summary: string) {
 		const row = document.createElement("div");
 		row.className = "z-0";
-		row.style.height = `${CONSTANTS.ROW_HEIGHT}`;
+		row.style.height = `${CONSTANTS.ROW_HEIGHT_PX}`;
 		row.style.display = "grid";
-		row.style.gridTemplateColumns = `repeat(${CONSTANTS.COL_NUM}, ${CONSTANTS.CELL_WIDTH})`;
+		row.style.gridTemplateColumns = `repeat(${CONSTANTS.COL_NUM}, ${CONSTANTS.CELL_WIDTH_PX})`;
 		row.style.gap = "0";
-		row.style.width =
-			parseInt(CONSTANTS.CELL_WIDTH, 10) * CONSTANTS.COL_NUM + "px";
+		row.style.width = CONSTANTS.CELL_WIDTH * CONSTANTS.COL_NUM + "px";
 
 		const fragment = document.createDocumentFragment();
 
@@ -68,8 +66,7 @@ class ProjectPhaseRow extends HTMLElement {
 		const collapse = document.createElement("div");
 		collapse.id = `collapse${data.id}`;
 		collapse.className = "collapse";
-		collapse.style.width =
-			parseInt(CONSTANTS.CELL_WIDTH, 10) * CONSTANTS.COL_NUM + "px";
+		collapse.style.width = CONSTANTS.CELL_WIDTH * CONSTANTS.COL_NUM + "px";
 
 		// Gestione delle sottofasi
 		if (data.subPhases) {

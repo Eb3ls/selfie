@@ -81,7 +81,7 @@ class ProjectPhase extends HTMLElement {
 	handleItem(activity: any) {
 		const activityElement = document.createElement("div");
 		activityElement.className = "row p-3";
-		activityElement.style.height = `${CONSTANT.ROW_HEIGHT}`;
+		activityElement.style.height = `${CONSTANT.ROW_HEIGHT_PX}`;
 		activityElement.innerHTML = `
 			<div class="col">
 				${this.getStatusIcon(activity.status)} ${activity.summary}
@@ -96,7 +96,7 @@ class ProjectPhase extends HTMLElement {
 		// Creiamo il toggler per la fase
 		const toggler = document.createElement("div");
 		toggler.className = "row p-3";
-		toggler.style.height = `${CONSTANT.ROW_HEIGHT}`;
+		toggler.style.height = `${CONSTANT.ROW_HEIGHT_PX}`;
 		toggler.innerHTML = `
         <button class="btn btn-primary"
           	type="button"

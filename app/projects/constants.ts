@@ -1,5 +1,7 @@
-export const ROW_HEIGHT = "70px";
-export const CELL_WIDTH = "70px";
+export const ROW_HEIGHT_PX = "70px";
+export const CELL_WIDTH_PX = "200px";
+export const ROW_HEIGHT = parseInt(ROW_HEIGHT_PX, 10)
+export const CELL_WIDTH = parseInt(CELL_WIDTH_PX, 10);
 export const COL_NUM = 25;
 
 export const waiting_color = "#6c757d";

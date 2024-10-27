@@ -1,26 +1,6 @@
-import * as CONSTANT from "./constants";
-
 class OnLoadFunctions extends HTMLElement {
 	constructor() {
 		super();
-	}
-
-	scrollToCenter() {
-		const ganttView = document.getElementById("ganttView");
-		const currentDay = document.getElementById("currentDay");
-		if (ganttView && currentDay) {
-			const currentDateWidth = currentDay.offsetWidth;
-			const ganttViewWidth = ganttView.offsetWidth;
-
-			const scrollLeft =
-				currentDay.offsetLeft -
-				ganttViewWidth / 2 +
-				currentDateWidth / 2;
-
-			ganttView.scrollLeft = scrollLeft;
-		} else {
-			console.error("Elementi per centrare la data corrente non trovati");
-		}
 	}
 
 	syncGanttScroll() {
@@ -45,7 +25,6 @@ class OnLoadFunctions extends HTMLElement {
 		await customElements.whenDefined("project-phase-row");
 		await customElements.whenDefined("time-line");
 
-		this.scrollToCenter();
 		this.syncGanttScroll();
 	}
 }

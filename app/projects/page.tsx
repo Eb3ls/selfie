@@ -11,6 +11,7 @@
  * */
 import { useEffect } from "react";
 import * as CONSTANTS from "./constants";
+import "./styles.css";
 
 declare global {
 	namespace JSX {
@@ -253,7 +254,7 @@ export default function Projects() {
 				>
 					<div
 						id="listView"
-						className="col-3 z-2 border-end border-secondary bg-white mh-100 overflow-y-auto"
+						className="col-3 hide-scroll z-2 border-end border-secondary bg-white mh-100 overflow-y-auto"
 						style={{
 							position: "sticky",
 							left: "0"
@@ -262,7 +263,7 @@ export default function Projects() {
 						<div
 							id="header"
 							className="row p-3 border-bottom border-secondary sticky-top bg-white"
-							style={{ minHeight: `${CONSTANTS.ROW_HEIGHT}` }}
+							style={{ minHeight: `${CONSTANTS.ROW_HEIGHT_PX}` }}
 						>
 							<div className="col-6">Titolo</div>
 							<div className="col-6 d-flex justify-content-center">
@@ -275,7 +276,7 @@ export default function Projects() {
 					</div>
 					<div
 						id="ganttView"
-						className="col-9 mh-100 overflow-auto p-0"
+						className="col-9 hide-scrll mh-100 overflow-auto p-0"
 					>
 						<time-line
 							date={new Date(
