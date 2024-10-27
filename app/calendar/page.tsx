@@ -1,8 +1,8 @@
 "use client";
 
-import { AddActivityModal } from "@/app/calendar/AddActivityModal";
-import { AddEventModal } from "@/app/calendar/AddEventModal";
-import { AddSessionModal } from "@/app/calendar/AddSessionModal";
+import { AddActivityModal } from "@/app/calendar/AddModals/AddActivityModal";
+import { AddEventModal } from "@/app/calendar/AddModals/AddEventModal";
+import { AddSessionModal } from "@/app/calendar/AddModals/AddSessionModal";
 import { StringActivity, StringEvent, StringSession } from "@/utils/db/db";
 import moment from "moment";
 import { useEffect, useState } from "react";
