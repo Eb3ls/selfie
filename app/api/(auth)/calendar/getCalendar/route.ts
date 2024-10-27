@@ -85,7 +85,7 @@ export const GET = async (request: NextRequest) => {
 
 	// Otteniamo tutte le sessioni dell'utente
 	const outSession = await findCollectionWrapper<Session>(
-		{ userIdList: { $in: [userId] } } as any,
+		{ ownerId: userId } as any,
 		sessionClient
 	);
 

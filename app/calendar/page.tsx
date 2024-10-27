@@ -1,109 +1,100 @@
 "use client";
 
+import { AddActivityModal } from "@/app/calendar/AddActivityModal";
+import { AddEventModal } from "@/app/calendar/AddEventModal";
+import { AddSessionModal } from "@/app/calendar/AddSessionModal";
+import { StringActivity, StringEvent, StringSession } from "@/utils/db/db";
 import moment from "moment";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Calendar, View, momentLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import { Container } from "react-bootstrap";
+import { Button, Container } from "react-bootstrap";
+import useSWR from "swr";
 // Importa il file CSS per lo stile del calendario
 import "./calendar.css";
 
 const localizer = momentLocalizer(moment);
 
-type Event = {
-	id: number;
+type CalendarEvent = {
+	id: string;
 	title: string;
 	start: Date;
 	end: Date;
 };
 
+interface CalendarResponse {
+	activities: StringActivity[];
+	events: StringEvent[];
+	sessions: StringSession[];
+}
+
+async function fetcher(url: string) {
+	const response = await fetch(url);
+	if (!response.ok) {
+		alert("Errore durante il fetch delle note!");
+	}
+	return response.json();
+}
+
 export default function CalendarPage() {
-	const [myEvents, setEvents] = useState<Event[]>([
-		{
-			id: 1,
-			title: "Passeggiata al parco",
-			start: moment("2024-10-03T09:00:00").toDate(),
-			end: moment("2024-10-03T10:00:00").toDate()
-		},
-		{
-			id: 2,
-			title: "Caffè con un amico",
-			start: moment("2024-10-03T10:30:00").toDate(),
-			end: moment("2024-10-03T11:00:00").toDate()
-		},
-		{
-			id: 3,
-			title: "Spesa al supermercato",
-			start: moment("2024-10-04T14:00:00").toDate(),
-			end: moment("2024-10-04T15:00:00").toDate()
-		},
-		{
-			id: 4,
-			title: "Pranzo con i colleghi",
-			start: moment("2024-10-04T12:00:00").toDate(),
-			end: moment("2024-10-04T13:00:00").toDate()
-		},
-		{
-			id: 5,
-			title: "Allenamento in palestra",
-			start: moment("2024-10-05T09:00:00").toDate(),
-			end: moment("2024-10-05T10:30:00").toDate()
-		},
-		{
-			id: 6,
-			title: "Chiamata con la famiglia",
-			start: moment("2024-10-05T11:00:00").toDate(),
-			end: moment("2024-10-05T12:00:00").toDate()
-		},
-		{
-			id: 7,
-			title: "Sessione di yoga",
-			start: moment("2024-10-06T14:00:00").toDate(),
-			end: moment("2024-10-06T15:00:00").toDate()
-		},
-		{
-			id: 8,
-			title: "Lettura di un libro",
-			start: moment("2024-10-07T09:00:00").toDate(),
-			end: moment("2024-10-07T10:00:00").toDate()
-		},
-		{
-			id: 9,
-			title: "Corso di cucina",
-			start: moment("2024-10-07T11:00:00").toDate(),
-			end: moment("2024-10-07T13:00:00").toDate()
-		},
-		{
-			id: 10,
-			title: "Organizzazione della settimana",
-			start: moment("2024-10-08T15:00:00").toDate(),
-			end: moment("2024-10-08T16:00:00").toDate()
-		},
-		{
-			id: 11,
-			title: "Videochiamata con un amico",
-			start: moment("2024-10-08T16:30:00").toDate(),
-			end: moment("2024-10-08T17:00:00").toDate()
-		},
-		{
-			id: 12,
-			title: "Visita al museo",
-			start: moment("2024-10-09T10:00:00").toDate(),
-			end: moment("2024-10-09T11:00:00").toDate()
-		},
-		{
-			id: 13,
-			title: "Incontro con il gruppo di lettura",
-			start: moment("2024-10-09T14:00:00").toDate(),
-			end: moment("2024-10-09T15:00:00").toDate()
-		},
-		{
-			id: 14,
-			title: "Incontro con il gruppo di scienza",
-			start: moment("2024-10-09T14:00:00").toDate(),
-			end: moment("2024-10-09T15:00:00").toDate()
+	const [events, setEvents] = useState<CalendarEvent[]>([]);
+
+	// Fetch della lista di elementi
+	const {
+		data: raw_elements_list,
+		error: error_elements_list,
+		mutate: mutate
+	} = useSWR("/api/calendar/getCalendar", fetcher, {
+		// refreshInterval: 2000, // Ricarica i dati ogni 2 secondi
+		revalidateOnFocus: false // Disabilita il refetch quando si torna alla finestra
+	}) as { data: CalendarResponse; error: any; mutate: () => void };
+
+	// Aggiorna events quando i dati vengono recuperati
+	useEffect(() => {
+		if (raw_elements_list) {
+			// Trasformazione dei dati grezzi in eventi
+			const pulledActivities = raw_elements_list.activities;
+			const pulledEvents = raw_elements_list.events;
+			const pulledSessions = raw_elements_list.sessions;
+
+			const events: CalendarEvent[] = [];
+
+			// Aggiungi le attività come eventi
+			pulledActivities.forEach((activity: StringActivity) => {
+				events.push({
+					id: activity._id!,
+					title: activity.summary,
+					start: moment(activity.dtStart).toDate(),
+					end: moment(activity.dtStart).toDate()
+				});
+			});
+
+			// Aggiungi gli eventi come eventi
+			pulledEvents.forEach((event: StringEvent) => {
+				events.push({
+					id: event._id!,
+					title: event.summary,
+					start: moment(event.dtStart).toDate(),
+					end: moment(event.dtEnd).toDate()
+				});
+			});
+
+			// Aggiungi le sessioni come eventi
+			pulledSessions.forEach((session: StringSession) => {
+				events.push({
+					id: session._id!,
+					title: session.summary,
+					start: moment(session.dtStart).toDate(),
+					end: moment(session.dtEnd).toDate()
+				});
+			});
+
+			console.log("Raw elements list:", raw_elements_list);
+			console.log("Eventi:", events);
+
+			setEvents(events);
 		}
-	]);
+	}, [raw_elements_list]);
 
 	// Stato per la vista attuale (month, week, day)
 	const [currentView, setCurrentView] = useState<View>("month");
@@ -122,8 +113,9 @@ export default function CalendarPage() {
 	}
 
 	// Funzione per gestire la selezione di un evento
-	function handleSelectEvent(event: Event) {
+	function handleSelectEvent(event: CalendarEvent) {
 		console.log("Evento selezionato:", event);
+		setCurrentDate(event.start); // Imposta la data corrente come la data di inizio dell'evento
 		setCurrentView("day"); // Cambia la vista in "day"
 		// Qui possiamo aggiungere un modale che mostra i dettagli dell'evento
 	}
@@ -136,7 +128,7 @@ export default function CalendarPage() {
 			</p>
 			<Calendar
 				localizer={localizer}
-				events={myEvents}
+				events={events}
 				popup={true}
 				startAccessor="start"
 				endAccessor="end"
@@ -148,6 +140,15 @@ export default function CalendarPage() {
 				onSelectEvent={handleSelectEvent} // Gestisce la selezione di un evento
 				className="custom-calendar" // Classe per lo stile
 			/>
+			<AddActivityModal>
+				<Button>Aggiungi Attività</Button>
+			</AddActivityModal>
+			<AddEventModal>
+				<Button>Aggiungi Evento</Button>
+			</AddEventModal>
+			<AddSessionModal>
+				<Button>Aggiungi Sessione</Button>
+			</AddSessionModal>
 		</Container>
 	);
 }
