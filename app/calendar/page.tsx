@@ -3,6 +3,9 @@
 import { AddActivityModal } from "@/app/calendar/AddModals/AddActivityModal";
 import { AddEventModal } from "@/app/calendar/AddModals/AddEventModal";
 import { AddSessionModal } from "@/app/calendar/AddModals/AddSessionModal";
+import { ModifyActivityModal } from "@/app/calendar/ModifyModals/ModifyActivityModal";
+import { ModifyEventModal } from "@/app/calendar/ModifyModals/ModifyEventModal";
+import { ModifySessionModal } from "@/app/calendar/ModifyModals/ModifySessionModal";
 import { StringActivity, StringEvent, StringSession } from "@/utils/db/db";
 import moment from "moment";
 import { useEffect, useState } from "react";
@@ -20,6 +23,7 @@ type CalendarEvent = {
 	title: string;
 	start: Date;
 	end: Date;
+	typology: "activity" | "event" | "session";
 };
 
 interface CalendarResponse {
@@ -39,6 +43,15 @@ async function fetcher(url: string) {
 export default function CalendarPage() {
 	const [events, setEvents] = useState<CalendarEvent[]>([]);
 
+	const [rawActivities, setRawActivities] = useState<StringActivity[]>([]);
+	const [rawEvents, setRawEvents] = useState<StringEvent[]>([]);
+	const [rawSessions, setRawSessions] = useState<StringSession[]>([]);
+
+	const [showModal, setShowModal] = useState(false);
+
+	const [selectedCalendarEvent, setSelectedCalendarEvent] =
+		useState<CalendarEvent | null>(null);
+
 	// Fetch della lista di elementi
 	const {
 		data: raw_elements_list,
@@ -57,6 +70,10 @@ export default function CalendarPage() {
 			const pulledEvents = raw_elements_list.events;
 			const pulledSessions = raw_elements_list.sessions;
 
+			setRawActivities(pulledActivities);
+			setRawEvents(pulledEvents);
+			setRawSessions(pulledSessions);
+
 			const events: CalendarEvent[] = [];
 
 			// Aggiungi le attività come eventi
@@ -65,7 +82,8 @@ export default function CalendarPage() {
 					id: activity._id!,
 					title: activity.summary,
 					start: moment(activity.dtStart).toDate(),
-					end: moment(activity.dtStart).toDate()
+					end: moment(activity.dtStart).toDate(),
+					typology: "activity"
 				});
 			});
 
@@ -75,7 +93,8 @@ export default function CalendarPage() {
 					id: event._id!,
 					title: event.summary,
 					start: moment(event.dtStart).toDate(),
-					end: moment(event.dtEnd).toDate()
+					end: moment(event.dtEnd).toDate(),
+					typology: "event"
 				});
 			});
 
@@ -85,7 +104,8 @@ export default function CalendarPage() {
 					id: session._id!,
 					title: session.summary,
 					start: moment(session.dtStart).toDate(),
-					end: moment(session.dtEnd).toDate()
+					end: moment(session.dtEnd).toDate(),
+					typology: "session"
 				});
 			});
 
@@ -115,9 +135,8 @@ export default function CalendarPage() {
 	// Funzione per gestire la selezione di un evento
 	function handleSelectEvent(event: CalendarEvent) {
 		console.log("Evento selezionato:", event);
-		setCurrentDate(event.start); // Imposta la data corrente come la data di inizio dell'evento
-		setCurrentView("day"); // Cambia la vista in "day"
-		// Qui possiamo aggiungere un modale che mostra i dettagli dell'evento
+		setSelectedCalendarEvent(event);
+		setShowModal(true);
 	}
 
 	return (
@@ -149,6 +168,47 @@ export default function CalendarPage() {
 			<AddSessionModal>
 				<Button>Aggiungi Sessione</Button>
 			</AddSessionModal>
+
+			{/* Se l'evento selezionato è una attività*/}
+			{selectedCalendarEvent?.typology === "activity" && (
+				<ModifyActivityModal
+					show={showModal}
+					setShow={setShowModal}
+					activity={
+						rawActivities.find(
+							(activity) =>
+								activity._id === selectedCalendarEvent.id
+						) as StringActivity
+					}
+				/>
+			)}
+
+			{/* Se l'evento selezionato è un evento*/}
+			{selectedCalendarEvent?.typology === "event" && (
+				<ModifyEventModal
+					show={showModal}
+					setShow={setShowModal}
+					event={
+						rawEvents.find(
+							(event) => event._id === selectedCalendarEvent.id
+						) as StringEvent
+					}
+				/>
+			)}
+
+			{/* Se l'evento selezionato è una sessione*/}
+			{selectedCalendarEvent?.typology === "session" && (
+				<ModifySessionModal
+					show={showModal}
+					setShow={setShowModal}
+					session={
+						rawSessions.find(
+							(session) =>
+								session._id === selectedCalendarEvent.id
+						) as StringSession
+					}
+				/>
+			)}
 		</Container>
 	);
 }
