@@ -23,7 +23,7 @@ class ProjectPhaseRow extends HTMLElement {
 
 	handleRow(summary: string) {
 		const row = document.createElement("div");
-		row.className = "row z-0";
+		row.className = "z-0";
 		row.style.height = `${CONSTANTS.ROW_HEIGHT}`;
 		row.style.display = "grid";
 		row.style.gridTemplateColumns = `repeat(${CONSTANTS.COL_NUM}, ${CONSTANTS.CELL_WIDTH})`;
@@ -46,6 +46,7 @@ class ProjectPhaseRow extends HTMLElement {
 				phaseBlock.style.color = "white";
 				phaseBlock.style.borderRight = "1px solid grey";
 				phaseBlock.style.borderBottom = "1px solid grey";
+				phaseBlock.style.padding = "0";
 				phaseBlock.className =
 					"d-flex justify-content-center align-items-center";
 				phaseBlock.innerText = summary;
@@ -67,6 +68,8 @@ class ProjectPhaseRow extends HTMLElement {
 		const collapse = document.createElement("div");
 		collapse.id = `collapse${data.id}`;
 		collapse.className = "collapse";
+		collapse.style.width =
+			parseInt(CONSTANTS.CELL_WIDTH, 10) * CONSTANTS.COL_NUM + "px";
 
 		// Gestione delle sottofasi
 		if (data.subPhases) {

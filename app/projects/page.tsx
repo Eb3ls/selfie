@@ -248,11 +248,12 @@ export default function Projects() {
 					</div>
 				</div>
 				<div
-					id="scrollDiv"
-					className="row flex-grow-1 d-flex flex-nowrap overflow-auto max-vw-100"
+					className="row border-bottom border-secondary"
+					style={{ height: "500px" }}
 				>
 					<div
-						className="col-3 z-2 d-flex flex-column flex-grow-1 border-end border-secondary bg-white"
+						id="listView"
+						className="col-3 z-2 border-end border-secondary bg-white mh-100 overflow-y-auto"
 						style={{
 							position: "sticky",
 							left: "0"
@@ -274,9 +275,7 @@ export default function Projects() {
 					</div>
 					<div
 						id="ganttView"
-						style={{
-							minWidth: `${parseInt(CONSTANTS.CELL_WIDTH, 10) * CONSTANTS.COL_NUM + "px"}`
-						}}
+						className="col-9 mh-100 overflow-auto p-0"
 					>
 						<time-line
 							date={new Date(

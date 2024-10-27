@@ -17,7 +17,7 @@ class TimeLine extends HTMLElement {
 
 	handleTimeline(date: Date) {
 		const timeline = document.createElement("div");
-		timeline.className = "row bg-white z-1 sticky-top";
+		timeline.className = "bg-white z-1 sticky-top";
 		timeline.style.height = `${CONSTANTS.ROW_HEIGHT}`;
 		timeline.style.display = "grid";
 		timeline.style.gridTemplateColumns = `repeat(${CONSTANTS.COL_NUM}, ${CONSTANTS.CELL_WIDTH})`;
@@ -59,7 +59,7 @@ class TimeLine extends HTMLElement {
 			curDay.setDate(startDate.getDate() + i);
 
 			if (curDay.getDate() === date.getDate()) {
-				cell.id = "target";
+				cell.id = "currentDay";
 				cell.style.backgroundColor = "#ffcccc";
 			}
 

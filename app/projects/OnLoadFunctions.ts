@@ -6,29 +6,37 @@ class OnLoadFunctions extends HTMLElement {
 	}
 
 	scrollToCenter() {
-		const scrollDiv = document.getElementById("scrollDiv");
-		const header = document.getElementById("header");
+		const ganttView = document.getElementById("ganttView");
+		const currentDay = document.getElementById("currentDay");
+		if (ganttView && currentDay) {
+			const currentDateWidth = currentDay.offsetWidth;
+			const ganttViewWidth = ganttView.offsetWidth;
 
-		if (scrollDiv && header) {
-			// Calcola la posizione del target
-			const headerRect = header.getBoundingClientRect();
+			const scrollLeft =
+				currentDay.offsetLeft -
+				ganttViewWidth / 2 +
+				currentDateWidth / 2;
 
-			// Calcola la posizione centrale di ganttView come la larghezza della viewport - la larghezza dell'header
-			const ganttViewCenter = (window.innerWidth - headerRect.width) / 2;
-
-			// Calcola la posizione centrale del target
-			const targetWidth = parseInt(CONSTANT.CELL_WIDTH, 10);
-			const targetLeft =
-				(Math.floor(CONSTANT.COL_NUM / 2) - 1) * targetWidth;
-			const targetCenter = targetLeft + targetWidth / 2;
-
-			// Calcola la distanza di scorrimento necessaria
-			const scrollDistance = targetCenter - ganttViewCenter;
-
-			// Imposta scrollLeft per centrare il target
-			scrollDiv.scrollLeft = scrollDistance;
+			ganttView.scrollLeft = scrollLeft;
 		} else {
 			console.error("Elementi per centrare la data corrente non trovati");
+		}
+	}
+
+	syncGanttScroll() {
+		const ganttView = document.getElementById("ganttView");
+		const listView = document.getElementById("listView");
+
+		if (ganttView && listView) {
+			ganttView.addEventListener("scroll", () => {
+				listView.scrollTop = ganttView.scrollTop;
+			});
+
+			listView.addEventListener("scroll", () => {
+				ganttView.scrollTop = listView.scrollTop;
+			});
+		} else {
+			console.error("Elementi per sincronizzare lo scroll non trovati");
 		}
 	}
 
@@ -38,6 +46,7 @@ class OnLoadFunctions extends HTMLElement {
 		await customElements.whenDefined("time-line");
 
 		this.scrollToCenter();
+		this.syncGanttScroll();
 	}
 }
 

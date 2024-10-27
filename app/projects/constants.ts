@@ -1,5 +1,5 @@
 export const ROW_HEIGHT = "70px";
-export const CELL_WIDTH = "100px";
+export const CELL_WIDTH = "70px";
 export const COL_NUM = 25;
 
 export const waiting_color = "#6c757d";
