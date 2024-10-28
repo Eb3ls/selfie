@@ -2,14 +2,18 @@ import * as CONSTANTS from "./constants";
 
 class TimeLine extends HTMLElement {
 	private timeline: HTMLElement;
-	private lastScrollLeft: number;
-	private isScrolling: boolean;
+	private startScroll: number;
+	private firstDate: Date;
+	private lastDate: Date;
+	private centerDate: Date;
 
 	constructor() {
 		super();
-		this.lastScrollLeft = 0;
+		this.startScroll = 0;
 		this.timeline = document.createElement("div");
-		this.isScrolling = false;
+		this.firstDate = new Date();
+		this.lastDate = new Date();
+		this.centerDate = new Date();
 	}
 
 	static get observedAttributes() {
@@ -22,8 +26,8 @@ class TimeLine extends HTMLElement {
 		}
 	}
 
-	handleMonth(date: Date) {
-		const month = date.toLocaleDateString(CONSTANTS.timeFormat, {
+	updateMonth() {
+		const month = this.centerDate.toLocaleDateString(CONSTANTS.timeFormat, {
 			month: "long"
 		});
 
@@ -36,8 +40,8 @@ class TimeLine extends HTMLElement {
 		monthDiv.textContent = month;
 	}
 
-	handleYear(date: Date) {
-		const year = date.toLocaleDateString(CONSTANTS.timeFormat, {
+	updateYear() {
+		const year = this.centerDate.toLocaleDateString(CONSTANTS.timeFormat, {
 			year: "numeric"
 		});
 
@@ -50,35 +54,38 @@ class TimeLine extends HTMLElement {
 		yearDiv.textContent = year;
 	}
 
-	createCells(startDate: Date, currentDate: Date) {
-		for (let i = 0; i < CONSTANTS.COL_NUM; i++) {
-			const cell = document.createElement("div");
-			cell.className =
-				"d-flex flex-column align-items-center justify-content-center";
-			cell.style.borderBottom = "1px solid grey";
-			cell.style.borderRight = "1px solid grey";
+	createSingleCell(date: Date) {
+		const cell = document.createElement("div");
+		cell.className =
+			"d-flex flex-column align-items-center justify-content-center";
+		cell.style.borderBottom = "1px solid grey";
+		cell.style.borderRight = "1px solid grey";
 
+		const dayText = document.createElement("div");
+		dayText.textContent = date.getDate().toString();
+
+		const dayNum = document.createElement("div");
+		dayNum.textContent = date.toLocaleDateString(CONSTANTS.timeFormat, {
+			weekday: "short"
+		});
+
+		cell.appendChild(dayText);
+		cell.appendChild(dayNum);
+
+		return cell;
+	}
+
+	createCells(currentDate: Date) {
+		for (let i = 0; i < CONSTANTS.COL_NUM; i++) {
 			const curDate = new Date();
-			curDate.setDate(startDate.getDate() + i);
+			curDate.setDate(this.firstDate.getDate() + i);
+
+			const cell = this.createSingleCell(curDate);
 
 			if (curDate.getDate() === currentDate.getDate()) {
 				cell.id = "currentDay";
 				cell.style.backgroundColor = "#ffcccc";
 			}
-
-			const dayText = document.createElement("div");
-			dayText.textContent = curDate.getDate().toString();
-
-			const dayNum = document.createElement("div");
-			dayNum.textContent = curDate.toLocaleDateString(
-				CONSTANTS.timeFormat,
-				{
-					weekday: "short"
-				}
-			);
-
-			cell.appendChild(dayText);
-			cell.appendChild(dayNum);
 
 			this.timeline.appendChild(cell);
 		}
@@ -86,43 +93,39 @@ class TimeLine extends HTMLElement {
 
 	handleScrollLeft(cellScrolled: number) {
 		for (let i = 0; i < cellScrolled; i++) {
-			const newDiv = document.createElement("div");
-			newDiv.style.borderBottom = "1px solid grey";
-			newDiv.style.borderRight = "1px solid grey";
-			newDiv.style.height = CONSTANTS.ROW_HEIGHT_PX;
-			newDiv.style.width = CONSTANTS.CELL_WIDTH_PX;
-			newDiv.textContent = "New Cell";
-			this.timeline.prepend(newDiv);
+			this.firstDate.setDate(this.firstDate.getDate() - 1);
+			this.lastDate.setDate(this.lastDate.getDate() - 1);
+			const cell = this.createSingleCell(this.firstDate);
+			this.timeline.prepend(cell);
 			this.timeline.removeChild(
 				this.timeline.children[this.timeline.children.length - 1]
 			);
+			this.centerDate.setDate(this.centerDate.getDate() + cellScrolled);
 		}
 	}
+
 	handleScrollRight(cellScrolled: number) {
 		for (let i = 0; i < cellScrolled; i++) {
-			const newDiv = document.createElement("div");
-			newDiv.style.borderBottom = "1px solid grey";
-			newDiv.style.borderRight = "1px solid grey";
-			newDiv.style.height = CONSTANTS.ROW_HEIGHT_PX;
-			newDiv.style.width = CONSTANTS.CELL_WIDTH_PX;
-			newDiv.textContent = "New Cell";
-			this.timeline.appendChild(newDiv);
+			this.firstDate.setDate(this.firstDate.getDate() + 1);
+			this.lastDate.setDate(this.lastDate.getDate() + 1);
+			const cell = this.createSingleCell(this.lastDate);
+			this.timeline.appendChild(cell);
 			this.timeline.removeChild(this.timeline.children[0]);
 		}
+		this.centerDate.setDate(this.centerDate.getDate() - cellScrolled);
 	}
 
 	handleScroll = (event: Event) => {
-		if (this.isScrolling) return; // Se già in esecuzione, esci
-
 		const target = event.target as HTMLElement;
-		const scroll = target.scrollLeft - this.lastScrollLeft;
-		const cellScrolled = Math.abs(
-			Math.floor(scroll / CONSTANTS.CELL_WIDTH)
+		const scroll = target.scrollLeft - this.startScroll;
+		const cellScrolled = Math.floor(
+			Math.abs(scroll) / CONSTANTS.CELL_WIDTH
 		);
 
 		if (cellScrolled !== 0) {
-			this.isScrolling = true; // Imposta il flag su true
+			const prevCenterDate = new Date(this.centerDate);
 
+			console.log("scroll", scroll);
 			if (scroll < 0) {
 				this.handleScrollLeft(cellScrolled);
 				target.scrollLeft = target.scrollLeft - scroll;
@@ -130,26 +133,34 @@ class TimeLine extends HTMLElement {
 				this.handleScrollRight(cellScrolled);
 				target.scrollLeft = target.scrollLeft - scroll;
 			}
-			this.isScrolling = false;
+
+			if (prevCenterDate.getMonth() !== this.centerDate.getMonth()) {
+				this.updateMonth();
+			}
+			if (
+				prevCenterDate.getFullYear() !== this.centerDate.getFullYear()
+			) {
+				this.updateYear();
+			}
 		}
 	};
 
 	scrollToCenter() {
-		const ganttView = document.getElementById("ganttView");
 		const currentDay = document.getElementById("currentDay");
-		if (ganttView && currentDay) {
-			const currentDateWidth = currentDay.offsetWidth;
-			const ganttViewWidth = ganttView.offsetWidth;
-
-			const scrollLeft =
-				currentDay.offsetLeft -
-				ganttViewWidth / 2 +
-				currentDateWidth / 2;
-
-			this.lastScrollLeft = scrollLeft;
-			ganttView.scrollLeft = scrollLeft;
+		if (currentDay) {
+			currentDay.scrollIntoView({
+				block: "center",
+				inline: "center"
+			});
 		} else {
-			console.error("Elementi per centrare la data corrente non trovati");
+			console.error("Elemento currentDay non trovato");
+		}
+
+		const ganttView = document.getElementById("ganttView");
+		if (ganttView) {
+			this.startScroll = ganttView.scrollLeft;
+		} else {
+			console.error("Elemento ganttView non trovato");
 		}
 	}
 
@@ -165,20 +176,22 @@ class TimeLine extends HTMLElement {
 
 		fragment.appendChild(this.timeline);
 
-		const startDate = new Date();
-		startDate.setDate(
-			date.getDate() - Math.floor(CONSTANTS.COL_NUM / 2) + 1
+		this.firstDate.setDate(
+			date.getDate() - Math.floor(CONSTANTS.COL_NUM / 2)
 		);
+		this.centerDate = new Date(date);
+		this.lastDate.setDate(this.firstDate.getDate() + CONSTANTS.COL_NUM);
 
-		this.handleMonth(date);
-		this.handleYear(date);
-		this.createCells(startDate, date);
+		this.updateMonth();
+		this.updateYear();
+		this.createCells(date);
 
 		return fragment;
 	}
 
 	render(dateString: string) {
 		let date = new Date(dateString);
+
 		// Timeline
 		this.appendChild(this.handleTimeline(date));
 		this.scrollToCenter();

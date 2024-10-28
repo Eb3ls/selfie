@@ -278,11 +278,7 @@ export default function Projects() {
 						id="ganttView"
 						className="col-9 hide-scrll mh-100 overflow-auto p-0"
 					>
-						<time-line
-							date={new Date(
-								new Date().setDate(new Date().getDate() - 0)
-							).toString()}
-						></time-line>
+						<time-line date={new Date().toString()}></time-line>
 						<project-phase-row
 							data={JSON.stringify(testData)}
 						></project-phase-row>

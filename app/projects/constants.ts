@@ -1,6 +1,6 @@
 export const ROW_HEIGHT_PX = "70px";
 export const CELL_WIDTH_PX = "200px";
-export const ROW_HEIGHT = parseInt(ROW_HEIGHT_PX, 10)
+export const ROW_HEIGHT = parseInt(ROW_HEIGHT_PX, 10);
 export const CELL_WIDTH = parseInt(CELL_WIDTH_PX, 10);
 export const COL_NUM = 25;
 
