@@ -22,7 +22,7 @@
  * 	}]
  * }
  * */
-import * as CONSTANT from "./constants";
+import * as CONST from "./constants";
 
 class ProjectPhase extends HTMLElement {
 	constructor() {
@@ -49,28 +49,28 @@ class ProjectPhase extends HTMLElement {
 		icon.className = "bi bi-circle-fill fs-5";
 		switch (status) {
 			case "WAITING":
-				icon.style.color = CONSTANT.waiting_color;
+				icon.style.color = CONST.waiting_color;
 				break;
 			case "ACTIVABLE":
-				icon.style.color = CONSTANT.activable_color;
+				icon.style.color = CONST.activable_color;
 				break;
 			case "ACTIVE":
-				icon.style.color = CONSTANT.active_color;
+				icon.style.color = CONST.active_color;
 				break;
 			case "SUBMITTED":
-				icon.style.color = CONSTANT.submitted_color;
+				icon.style.color = CONST.submitted_color;
 				break;
 			case "COMPLETED":
-				icon.style.color = CONSTANT.completed_color;
+				icon.style.color = CONST.completed_color;
 				break;
 			case "REACTIVATED":
-				icon.style.color = CONSTANT.reactivated_color;
+				icon.style.color = CONST.reactivated_color;
 				break;
 			case "OVERDUE":
-				icon.style.color = CONSTANT.overdue_color;
+				icon.style.color = CONST.overdue_color;
 				break;
 			case "DROPPED":
-				icon.style.color = CONSTANT.dropped_color;
+				icon.style.color = CONST.dropped_color;
 				break;
 			default:
 				console.error("Stato non riconosciuto:", status);
@@ -81,7 +81,7 @@ class ProjectPhase extends HTMLElement {
 	handleItem(activity: any) {
 		const activityElement = document.createElement("div");
 		activityElement.className = "row p-3";
-		activityElement.style.height = `${CONSTANT.ROW_HEIGHT_PX}`;
+		activityElement.style.height = `${CONST.ROW_HEIGHT_PX}`;
 		activityElement.innerHTML = `
 			<div class="col">
 				${this.getStatusIcon(activity.status)} ${activity.summary}
@@ -96,7 +96,7 @@ class ProjectPhase extends HTMLElement {
 		// Creiamo il toggler per la fase
 		const toggler = document.createElement("div");
 		toggler.className = "row p-3";
-		toggler.style.height = `${CONSTANT.ROW_HEIGHT_PX}`;
+		toggler.style.height = `${CONST.ROW_HEIGHT_PX}`;
 		toggler.innerHTML = `
         <button class="btn btn-primary"
           	type="button"

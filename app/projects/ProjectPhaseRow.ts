@@ -1,4 +1,4 @@
-import * as CONSTANTS from "./constants";
+import * as CONST from "./constants";
 
 class ProjectPhaseRow extends HTMLElement {
 	constructor() {
@@ -23,21 +23,21 @@ class ProjectPhaseRow extends HTMLElement {
 	handleRow(summary: string) {
 		const row = document.createElement("div");
 		row.className = "z-0";
-		row.style.height = `${CONSTANTS.ROW_HEIGHT_PX}`;
+		row.style.height = `${CONST.ROW_HEIGHT_PX}`;
 		row.style.display = "grid";
-		row.style.gridTemplateColumns = `repeat(${CONSTANTS.COL_NUM}, ${CONSTANTS.CELL_WIDTH_PX})`;
+		row.style.gridTemplateColumns = `repeat(${CONST.COL_NUM}, ${CONST.CELL_WIDTH_PX})`;
 		row.style.gap = "0";
-		row.style.width = CONSTANTS.CELL_WIDTH * CONSTANTS.COL_NUM + "px";
+		row.style.width = CONST.CELL_WIDTH * CONST.COL_NUM + "px";
 
 		const fragment = document.createDocumentFragment();
 
 		// Crea le 15 colonne con un bordo grigio
-		for (let i = 1; i <= CONSTANTS.COL_NUM; i++) {
+		for (let i = 1; i <= CONST.COL_NUM; i++) {
 			const cell = document.createElement("div");
 			cell.style.borderBottom = "1px solid grey";
 			cell.style.borderRight = "1px solid grey";
 
-			if (i === Math.floor(CONSTANTS.COL_NUM / 2) + 1) {
+			if (i === Math.floor(CONST.COL_NUM / 2) + 1) {
 				const phaseBlock = document.createElement("div");
 				phaseBlock.style.gridColumn = "span 1"; // Estendi su 4 colonne (6-9)
 				phaseBlock.style.backgroundColor = "#ffcccc";
@@ -66,7 +66,7 @@ class ProjectPhaseRow extends HTMLElement {
 		const collapse = document.createElement("div");
 		collapse.id = `collapse${data.id}`;
 		collapse.className = "collapse";
-		collapse.style.width = CONSTANTS.CELL_WIDTH * CONSTANTS.COL_NUM + "px";
+		collapse.style.width = CONST.CELL_WIDTH * CONST.COL_NUM + "px";
 
 		// Gestione delle sottofasi
 		if (data.subPhases) {

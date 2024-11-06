@@ -10,7 +10,7 @@
  *
  * */
 import { useEffect } from "react";
-import * as CONSTANTS from "./constants";
+import * as CONST from "./constants";
 import "./styles.css";
 
 declare global {
@@ -20,6 +20,7 @@ declare global {
 			"project-phase-row": { data: any };
 			"time-line": { date: string };
 			"onload-functions": {};
+			"form-component": {};
 		}
 	}
 }
@@ -162,6 +163,7 @@ export default function Projects() {
 			import("./ProjectPhaseRow");
 			import("./TimeLine");
 			import("./OnLoadFunctions");
+			import("./Form");
 		}
 	}, []);
 
@@ -230,9 +232,7 @@ export default function Projects() {
 						<div className="ms-1">Progetto di prova</div>
 					</div>
 					<div className="col d-flex justify-content-end align-items-center">
-						<button className="btn btn-primary me-2 rounded-pill">
-							<div>+ New</div>
-						</button>
+						<form-component></form-component>
 						<button className="btn btn-primary rounded-pill">
 							<div>Settings</div>
 						</button>
@@ -263,7 +263,7 @@ export default function Projects() {
 						<div
 							id="header"
 							className="row p-3 border-bottom border-secondary sticky-top bg-white"
-							style={{ minHeight: `${CONSTANTS.ROW_HEIGHT_PX}` }}
+							style={{ minHeight: `${CONST.ROW_HEIGHT_PX}` }}
 						>
 							<div className="col-6">Titolo</div>
 							<div className="col-6 d-flex justify-content-center">

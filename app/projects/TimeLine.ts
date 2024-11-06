@@ -1,4 +1,4 @@
-import * as CONSTANTS from "./constants";
+import * as CONST from "./constants";
 
 class TimeLine extends HTMLElement {
 	private timeline: HTMLElement;
@@ -6,6 +6,7 @@ class TimeLine extends HTMLElement {
 	private firstDate: Date;
 	private lastDate: Date;
 	private centerDate: Date;
+	private scrollTimeout: NodeJS.Timeout | null;
 
 	constructor() {
 		super();
@@ -14,6 +15,7 @@ class TimeLine extends HTMLElement {
 		this.firstDate = new Date();
 		this.lastDate = new Date();
 		this.centerDate = new Date();
+		this.scrollTimeout = null;
 	}
 
 	static get observedAttributes() {
@@ -27,7 +29,7 @@ class TimeLine extends HTMLElement {
 	}
 
 	updateMonth() {
-		const month = this.centerDate.toLocaleDateString(CONSTANTS.timeFormat, {
+		const month = this.centerDate.toLocaleDateString(CONST.timeFormat, {
 			month: "long"
 		});
 
@@ -41,7 +43,7 @@ class TimeLine extends HTMLElement {
 	}
 
 	updateYear() {
-		const year = this.centerDate.toLocaleDateString(CONSTANTS.timeFormat, {
+		const year = this.centerDate.toLocaleDateString(CONST.timeFormat, {
 			year: "numeric"
 		});
 
@@ -65,7 +67,7 @@ class TimeLine extends HTMLElement {
 		dayText.textContent = date.getDate().toString();
 
 		const dayNum = document.createElement("div");
-		dayNum.textContent = date.toLocaleDateString(CONSTANTS.timeFormat, {
+		dayNum.textContent = date.toLocaleDateString(CONST.timeFormat, {
 			weekday: "short"
 		});
 
@@ -76,7 +78,7 @@ class TimeLine extends HTMLElement {
 	}
 
 	createCells(currentDate: Date) {
-		for (let i = 0; i < CONSTANTS.COL_NUM; i++) {
+		for (let i = 0; i < CONST.COL_NUM; i++) {
 			const curDate = new Date();
 			curDate.setDate(this.firstDate.getDate() + i);
 
@@ -116,33 +118,40 @@ class TimeLine extends HTMLElement {
 	}
 
 	handleScroll = (event: Event) => {
-		const target = event.target as HTMLElement;
-		const scroll = target.scrollLeft - this.startScroll;
-		const cellScrolled = Math.floor(
-			Math.abs(scroll) / CONSTANTS.CELL_WIDTH
-		);
-
-		if (cellScrolled !== 0) {
-			const prevCenterDate = new Date(this.centerDate);
-
-			console.log("scroll", scroll);
-			if (scroll < 0) {
-				this.handleScrollLeft(cellScrolled);
-				target.scrollLeft = target.scrollLeft - scroll;
-			} else {
-				this.handleScrollRight(cellScrolled);
-				target.scrollLeft = target.scrollLeft - scroll;
-			}
-
-			if (prevCenterDate.getMonth() !== this.centerDate.getMonth()) {
-				this.updateMonth();
-			}
-			if (
-				prevCenterDate.getFullYear() !== this.centerDate.getFullYear()
-			) {
-				this.updateYear();
-			}
+		if (this.scrollTimeout) {
+			clearTimeout(this.scrollTimeout);
 		}
+		this.scrollTimeout = setTimeout(() => {
+			const target = event.target as HTMLElement;
+			const scroll = target.scrollLeft - this.startScroll;
+			const cellScrolled = Math.floor(
+				Math.abs(scroll) / CONST.CELL_WIDTH
+			);
+			console.log(cellScrolled);
+			console.log(scroll);
+
+			if (cellScrolled !== 0) {
+				const prevCenterDate = new Date(this.centerDate);
+
+				if (scroll < 0) {
+					this.handleScrollLeft(cellScrolled);
+					target.scrollLeft = target.scrollLeft - scroll;
+				} else {
+					this.handleScrollRight(cellScrolled);
+					target.scrollLeft = target.scrollLeft - scroll;
+				}
+
+				if (prevCenterDate.getMonth() !== this.centerDate.getMonth()) {
+					this.updateMonth();
+				}
+				if (
+					prevCenterDate.getFullYear() !==
+					this.centerDate.getFullYear()
+				) {
+					this.updateYear();
+				}
+			}
+		}, 1000);
 	};
 
 	scrollToCenter() {
@@ -167,20 +176,17 @@ class TimeLine extends HTMLElement {
 	handleTimeline(date: Date) {
 		const fragment = document.createDocumentFragment();
 		this.timeline.className = "bg-white z-1 sticky-top";
-		this.timeline.style.height = `${CONSTANTS.ROW_HEIGHT_PX}`;
+		this.timeline.style.height = `${CONST.ROW_HEIGHT_PX}`;
 		this.timeline.style.display = "grid";
-		this.timeline.style.gridTemplateColumns = `repeat(${CONSTANTS.COL_NUM}, ${CONSTANTS.CELL_WIDTH_PX})`;
+		this.timeline.style.gridTemplateColumns = `repeat(${CONST.COL_NUM}, ${CONST.CELL_WIDTH_PX})`;
 		this.timeline.style.gap = "0";
-		this.timeline.style.width =
-			CONSTANTS.CELL_WIDTH * CONSTANTS.COL_NUM + "px";
+		this.timeline.style.width = CONST.CELL_WIDTH * CONST.COL_NUM + "px";
 
 		fragment.appendChild(this.timeline);
 
-		this.firstDate.setDate(
-			date.getDate() - Math.floor(CONSTANTS.COL_NUM / 2)
-		);
+		this.firstDate.setDate(date.getDate() - Math.floor(CONST.COL_NUM / 2));
 		this.centerDate = new Date(date);
-		this.lastDate.setDate(this.firstDate.getDate() + CONSTANTS.COL_NUM);
+		this.lastDate.setDate(this.firstDate.getDate() + CONST.COL_NUM);
 
 		this.updateMonth();
 		this.updateYear();
