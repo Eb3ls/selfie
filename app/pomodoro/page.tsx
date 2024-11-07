@@ -12,9 +12,9 @@ import { Setting } from "./Setting/Setting";
 import { ShareModal } from "./ShareModal";
 
 export default function Pomodoro() {
-	const [isStudying, setIsStudying] = React.useState(true);
-	const [isPaused, setIsPaused] = React.useState(true);
-	const [isStarted, setIsStarted] = React.useState(false);
+	const [isStudying, setIsStudying] = React.useState(true); // true for studying, false for break
+	const [isPaused, setIsPaused] = React.useState(true); // true for paused, false for running
+	const [isStarted, setIsStarted] = React.useState(false); // true for started, false for not started
 	const [currentTime, setCurrentTime] = React.useState(0);
 	const [studyTime, setStudyTime] = React.useState(1);
 	const [breakTime, setBreakTime] = React.useState(1);
@@ -28,6 +28,12 @@ export default function Pomodoro() {
 		setCurrentTime(studyTime * 60);
 	}, [studyTime]);
 
+	/*
+	 * Se sono finite le sessioni resetta tutto
+	 * Se sta studiando decrementa le sessioni
+	 * Cambia lo stato studio/break
+	 * Imposta il tempo associato allo stato
+	 * */
 	const handleFinish = React.useCallback(() => {
 		if (remainingSessions === 0) {
 			reset();
@@ -40,6 +46,7 @@ export default function Pomodoro() {
 		}
 	}, [isStudying, remainingSessions, breakTime, studyTime, reset]);
 
+	// Timer
 	React.useEffect(() => {
 		if (!isPaused) {
 			const interval = setInterval(() => {
@@ -53,6 +60,7 @@ export default function Pomodoro() {
 		}
 	}, [isPaused, currentTime, handleFinish]);
 
+	// Necessario per impostare il tempo inziale corretto, altimenti si setta a 0
 	React.useEffect(() => {
 		reset();
 	}, [studyTime, sessions, breakTime, reset]);
@@ -74,6 +82,16 @@ export default function Pomodoro() {
 		setIsPaused(!isPaused);
 	}
 
+	function handleRestart() {
+		setIsPaused(false);
+		setCurrentTime(isStudying ? studyTime * 60 : breakTime * 60);
+	}
+
+	function handleSetCompleted() {
+		setIsPaused(false);
+		handleFinish();
+	}
+
 	function TimerBlock() {
 		return (
 			<div className="d-flex flex-column align-items-center justify-content-center">
@@ -84,6 +102,16 @@ export default function Pomodoro() {
 				>
 					{!isStarted ? " Start" : isPaused ? "Resume" : "Pause"}
 				</Button>
+				{isStarted && isPaused && (
+					<>
+						<Button variant="link" onClick={handleRestart}>
+							Restart
+						</Button>
+						<Button variant="link" onClick={handleSetCompleted}>
+							Completed
+						</Button>
+					</>
+				)}
 			</div>
 		);
 	}
