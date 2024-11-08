@@ -1,4 +1,8 @@
-import { generateMessageResponse, validate } from "@/utils/api/api";
+import {
+	generateMessageResponse,
+	removeInvitations,
+	validate
+} from "@/utils/api/api";
 import {
 	ACTIVITY_COLLECTION,
 	Activity,
@@ -56,6 +60,13 @@ export const DELETE = async (request: NextRequest) => {
 	// Controlliamo che l'owner sia l'utente corrispondente
 	if (activity[0].ownerId !== userId) {
 		return generateMessageResponse("Unauthorized", 400);
+	}
+
+	// Rimuoviamo gli inviti associati all'attività
+	const inviteOut = await removeInvitations("ACTIVITY", activityId);
+
+	if (inviteOut.status !== 200) {
+		return inviteOut;
 	}
 
 	return await deleteCollectionWrapper<Activity>({ _id: activityId }, client);

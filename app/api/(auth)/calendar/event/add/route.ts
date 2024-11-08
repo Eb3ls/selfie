@@ -1,6 +1,9 @@
 import {
+	addInvitations,
 	generateMessageResponse,
+	generateObjectResponse,
 	generateStringModel,
+	removeArrayDuplicates,
 	validate
 } from "@/utils/api/api";
 import {
@@ -8,7 +11,6 @@ import {
 	Event,
 	StringEvent,
 	addCollectionWrapper,
-	createEvent,
 	getCollection
 } from "@/utils/db/db";
 import { Collection } from "mongodb";
@@ -21,10 +23,10 @@ const requestTemplate = {
 	rrule: "",
 	dtStart: "",
 	dtEnd: "",
-	categories: [],
+	categories: [""],
 	location: "",
 	geo: "",
-	userIdList: [],
+	userIdList: [""],
 	alarms: []
 };
 
@@ -52,13 +54,37 @@ export const POST = async (request: NextRequest) => {
 		"Event"
 	);
 
+	// Otteniamo gli utenti da invitare
+	const usersToBeInvited = removeArrayDuplicates(
+		newEvent.userIdList.filter((userId) => userId !== owner._id)
+	);
+
 	// Aggiungiamo il campo 'owner' a newEvent
 	newEvent.ownerId = owner._id!;
-	newEvent.userIdList.push(owner._id!);
+	newEvent.userIdList = [owner._id!];
 
 	// Ottieniamo la collezione degli eventi
 	const client: Collection<Event> =
 		await getCollection<Event>(EVENT_COLLECTION);
 
-	return await addCollectionWrapper(newEvent, client);
+	const eventOut = await addCollectionWrapper(newEvent, client);
+
+	if (eventOut.status !== 200) {
+		return eventOut;
+	}
+
+	const createdEvent: StringEvent = await eventOut.json();
+
+	// Invitiamo gli utenti
+	const inviteOut = await addInvitations(
+		usersToBeInvited,
+		"EVENT",
+		createdEvent._id!
+	);
+
+	if (inviteOut.status !== 200) {
+		return inviteOut;
+	}
+
+	return generateObjectResponse(createdEvent, 200);
 };

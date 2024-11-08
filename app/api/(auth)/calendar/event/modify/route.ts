@@ -1,6 +1,8 @@
 import {
+	addInvitations,
 	generateMessageResponse,
 	generateObjectResponse,
+	removeArrayDuplicates,
 	validate
 } from "@/utils/api/api";
 import {
@@ -19,11 +21,13 @@ const requestTemplate = {
 	summary: "",
 	description: "",
 	status: "",
+	rrule: "",
 	dtStart: "",
 	dtEnd: "",
-	categories: [],
+	categories: [""],
 	location: "",
-	geo: ""
+	geo: "",
+	userIdList: [""]
 };
 
 type RequestType = typeof requestTemplate;
@@ -70,6 +74,31 @@ export const PATCH = async (request: NextRequest) => {
 		return generateMessageResponse("Unauthorized", 400);
 	}
 
+	// Aggiungiamo l'utente alla lista di utenti partecipanti con la modifica richiesta
+	newFields.userIdList.push(userId);
+	newFields.userIdList = removeArrayDuplicates(newFields.userIdList);
+
+	// Otteniamo la lista di utenti partecipanti prima della modifica
+	const userListBefore = event[0].userIdList;
+	// Otteniamo la lista di utenti partecipanti con la modifica richiesta
+	const userListAfter = newFields.userIdList;
+
+	// Otteniamo i nuovi utenti
+	const newUsers = userListAfter.filter(
+		(userId: string) => !userListBefore.includes(userId)
+	);
+
+	// Otteniamo gli utenti rimossi
+	const removedUsers = userListBefore.filter(
+		(userId: string) => !userListAfter.includes(userId)
+	);
+
+	// Impostiamo gli utenti partecipanti come prima della modifica
+	// ma rimuovendo quelli rimossi
+	newFields.userIdList = userListBefore.filter(
+		(userId: string) => !removedUsers.includes(userId)
+	);
+
 	// Modifichiamo l'evento
 	const updateOut = await updateCollectionWrapper<Event>(
 		{ _id: eventId },
@@ -82,6 +111,13 @@ export const PATCH = async (request: NextRequest) => {
 	}
 
 	const updatedActivity: StringEvent = (await updateOut.json())[0];
+
+	// Invitiamo i nuovi utenti
+	const inviteOut = await addInvitations(newUsers, "EVENT", eventId);
+
+	if (inviteOut.status !== 200) {
+		return inviteOut;
+	}
 
 	return generateObjectResponse(updatedActivity, 200);
 };

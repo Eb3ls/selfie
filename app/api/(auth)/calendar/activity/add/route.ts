@@ -1,6 +1,9 @@
 import {
+	addInvitations,
 	generateMessageResponse,
+	generateObjectResponse,
 	generateStringModel,
+	removeArrayDuplicates,
 	validate
 } from "@/utils/api/api";
 import {
@@ -19,10 +22,11 @@ const requestTemplate = {
 	status: "",
 	dtStart: "",
 	due: "",
-	categories: [],
+	categories: [""],
 	location: "",
 	geo: "",
 	parentActivityId: "",
+	userIdList: [""],
 	alarms: []
 };
 
@@ -50,13 +54,37 @@ export const POST = async (request: NextRequest) => {
 		"Activity"
 	);
 
+	// Otteniamo gli utenti da invitare
+	const usersToBeInvited = removeArrayDuplicates(
+		newActivity.userIdList.filter((userId) => userId !== owner._id)
+	);
+
 	// Aggiungiamo il campo 'owner' a newActivity
 	newActivity.ownerId = owner._id!;
-	newActivity.userIdList.unshift(owner._id!);
+	newActivity.userIdList = [owner._id!];
 
 	// Ottieniamo la collezione delle attività
 	const client: Collection<Activity> =
 		await getCollection<Activity>(ACTIVITY_COLLECTION);
 
-	return await addCollectionWrapper(newActivity, client);
+	const activityOut = await addCollectionWrapper(newActivity, client);
+
+	if (activityOut.status !== 200) {
+		return activityOut;
+	}
+
+	const createdActivity: StringActivity = await activityOut.json();
+
+	// Invitiamo gli utenti
+	const inviteOut = await addInvitations(
+		usersToBeInvited,
+		"ACTIVITY",
+		createdActivity._id!
+	);
+
+	if (inviteOut.status !== 200) {
+		return inviteOut;
+	}
+
+	return generateObjectResponse(createdActivity, 200);
 };

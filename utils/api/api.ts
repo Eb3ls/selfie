@@ -7,13 +7,17 @@ import {
 	stringsToObjectId
 } from "@/utils/api/common";
 import {
+	INVITATION_COLLECTION,
+	Invitation,
 	Note,
 	Phase,
 	ProjectActivity,
+	StringInvitation,
 	StringPhase,
 	StringProjectActivity,
 	USER_COLLECTION,
 	User,
+	addCollectionWrapper,
 	createActivity,
 	createAlarm,
 	createChat,
@@ -548,4 +552,50 @@ export async function idListToNameList(note: Note) {
 
 	delete newNote.userIdList;
 	return newNote; // Aggiungi il return della nuova nota
+}
+
+// Funzione per invitare una lista di utenti ad un particolare evento (target in generale)
+export async function addInvitations(
+	userIdList: string[],
+	type: "ACTIVITY" | "EVENT" | "SESSION" | "PROJECT",
+	targetId: string
+) {
+	// Otteniamo la collezione delle invitation
+	const invitationClient: Collection<Invitation> =
+		await getCollection<Invitation>(INVITATION_COLLECTION);
+
+	// Per ogni utente nella lista, creiamo un invito
+	for (const userId of userIdList) {
+		const newInvitation = generateStringModel<StringInvitation>(
+			{ userId: userId, type: type, targetId: targetId },
+			"Invitation"
+		);
+
+		// Aggiungiamo l'invito alla collezione
+		const out = await addCollectionWrapper(newInvitation, invitationClient);
+
+		if (out.status !== 200) {
+			return out;
+		}
+	}
+
+	return generateMessageResponse("Invitations sent", 200);
+}
+
+// Funzione per rimuovere gli inviti relativi ad un particolare evento (target in generale)
+export async function removeInvitations(
+	type: "ACTIVITY" | "EVENT" | "SESSION" | "PROJECT",
+	targetId: string
+) {
+	// Otteniamo la collezione delle invitation
+	const invitationClient: Collection<Invitation> =
+		await getCollection<Invitation>(INVITATION_COLLECTION);
+
+	// Rimuoviamo gli inviti relativi all'evento
+	const out = await deleteCollectionWrapper<Invitation>(
+		{ type: type, targetId: targetId },
+		invitationClient
+	);
+
+	return out;
 }
