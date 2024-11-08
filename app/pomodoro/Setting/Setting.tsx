@@ -32,6 +32,7 @@ export function Setting({ name, getter, setter }: SettingsProps) {
 			<Button
 				className="align-self-end align-self-md-center"
 				onClick={() => changeValue(1)}
+				variant="link"
 			>
 				<FaAnglesUp className="icon"></FaAnglesUp>
 			</Button>
@@ -52,6 +53,7 @@ export function Setting({ name, getter, setter }: SettingsProps) {
 			<Button
 				className="align-self-end align-self-md-center"
 				onClick={() => changeValue(-1)}
+				variant="link"
 			>
 				<FaAnglesDown className="icon"></FaAnglesDown>
 			</Button>

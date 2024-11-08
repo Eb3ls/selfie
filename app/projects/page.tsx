@@ -9,6 +9,7 @@
  * Poter scorrere in verticale il gantt
  *
  * */
+import Image from "next/image";
 import { useEffect } from "react";
 import { PiBroom } from "react-icons/pi";
 import * as CONST from "./constants";
@@ -174,7 +175,7 @@ export default function Projects() {
 				<nav className="navbar navbar-expand-lg navbar-light bg-light p-0">
 					<div className="container-fluid">
 						<a className="navbar-brand" href="./home">
-							<img
+							<Image
 								src="./Sloth.png"
 								alt="Logo"
 								height="50"

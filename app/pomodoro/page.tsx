@@ -1,9 +1,10 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import React from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { Button, Container } from "react-bootstrap";
 import { FaLightbulb, FaShareNodes } from "react-icons/fa6";
+import useSWR from "swr";
 import { Sidebar } from "../components/Sidebar";
 import { Coffee } from "./Animation/Coffee";
 import { Tree } from "./Animation/Tree";
@@ -13,20 +14,53 @@ import { MusicBar } from "./MusicBar/MusicBar";
 import "./Pomodoro.css";
 import { Setting } from "./Setting/Setting";
 
-export default function Pomodoro() {
-	const [isStudying, setIsStudying] = React.useState(true); // true for studying, false for break
-	const [isPaused, setIsPaused] = React.useState(true); // true for paused, false for running
-	const [isStarted, setIsStarted] = React.useState(false); // true for started, false for not started
-	const [currentTime, setCurrentTime] = React.useState(0);
-	const [studyTime, setStudyTime] = React.useState(1);
-	const [breakTime, setBreakTime] = React.useState(1);
-	const [sessions, setSessions] = React.useState(1);
-	const [remainingSessions, setRemainingSessions] = React.useState(sessions);
+async function fetcher(url: string) {
+	const response = await fetch(url);
+	return response.json();
+}
+
+function PomodoroComponent() {
+	const [isStudying, setIsStudying] = useState(true); // true for studying, false for break
+	const [isPaused, setIsPaused] = useState(true); // true for paused, false for running
+	const [isStarted, setIsStarted] = useState(false); // true for started, false for not started
+	const [currentTime, setCurrentTime] = useState(0);
+	const [studyTime, setStudyTime] = useState(1);
+	const [breakTime, setBreakTime] = useState(1);
+	const [sessions, setSessions] = useState(1);
+	const [remainingSessions, setRemainingSessions] = useState(sessions);
 
 	const searchParams = useSearchParams();
 	const id = searchParams.get("id");
 
-	const reset = React.useCallback(() => {
+	const { data, error } = useSWR(
+		id ? "/api/calendar/getCalendar" : null,
+		fetcher
+	);
+
+	const [idInvalid, setIdInvalid] = useState<null | boolean>(null);
+
+	useEffect(() => {
+		if (data) {
+			const sessionData = data.sessions.find(
+				(session: any) => session._id === id
+			);
+			if (sessionData) {
+				const pomodoroData = sessionData.pomodoro;
+				setStudyTime(pomodoroData.studyDuration);
+				setBreakTime(pomodoroData.breakDuration);
+				setSessions(pomodoroData.cycles);
+				setIdInvalid(false);
+			} else {
+				setIdInvalid(true);
+			}
+		}
+	}, [data, id]);
+
+	useEffect(() => {
+		setCurrentTime(studyTime * 60);
+	}, [studyTime]);
+
+	const reset = useCallback(() => {
 		setIsPaused(true);
 		setIsStarted(false);
 		setIsStudying(true);
@@ -39,7 +73,7 @@ export default function Pomodoro() {
 	 * Cambia lo stato studio/break
 	 * Imposta il tempo associato allo stato
 	 * */
-	const handleFinish = React.useCallback(() => {
+	const handleFinish = useCallback(() => {
 		if (remainingSessions === 0) {
 			reset();
 		} else {
@@ -52,7 +86,7 @@ export default function Pomodoro() {
 	}, [isStudying, remainingSessions, breakTime, studyTime, reset]);
 
 	// Timer
-	React.useEffect(() => {
+	useEffect(() => {
 		if (!isPaused) {
 			const interval = setInterval(() => {
 				if (currentTime === 1) {
@@ -65,27 +99,6 @@ export default function Pomodoro() {
 		}
 	}, [isPaused, currentTime, handleFinish]);
 
-	async function getPomodoroData() {
-		//const response = await fetch(`/api/pomodoro/${id}`);
-		//const data = await response.json();
-		const data = {
-			studyTime: 25,
-			sessions: 4,
-			breakTime: 5
-		};
-		setStudyTime(data.studyTime);
-		setSessions(data.sessions);
-		setBreakTime(data.breakTime);
-	}
-
-	// Fetch dei dati del pomodoro
-	React.useEffect(() => {
-		if (id) {
-			getPomodoroData();
-		}
-		reset();
-	}, [reset, id]);
-
 	function calcTime() {
 		const minutes = Math.floor(currentTime / 60);
 		const seconds = currentTime % 60;
@@ -95,7 +108,6 @@ export default function Pomodoro() {
 	function handleStart() {
 		setIsPaused(false);
 		setIsStarted(true);
-		setCurrentTime(isStudying ? studyTime * 60 : breakTime * 60);
 		setRemainingSessions(sessions);
 	}
 
@@ -151,57 +163,71 @@ export default function Pomodoro() {
 			className="vh-100 d-flex flex-column"
 			style={{ backgroundColor: "rgb(240, 240, 240)" }}
 		>
-			<div className="d-flex position-absolute top-0 end-0 m-5 z-3">
-				<ReminderModal
-					studyTime={studyTime}
-					sessions={sessions}
-					breakTime={breakTime}
-				>
-					<FaLightbulb size={30} className="me-2" />
-				</ReminderModal>
-				<ShareModal
-					studyTime={studyTime}
-					sessions={sessions}
-					breakTime={breakTime}
-				>
-					<FaShareNodes size={30} />
-				</ShareModal>
-			</div>
-			{isStudying ? (
-				<Tree
-					time={studyTime * 60}
-					started={isStarted}
-					paused={isPaused}
-				></Tree>
-			) : (
-				<Coffee
-					time={breakTime * 60}
-					started={isStarted}
-					paused={isPaused}
-				></Coffee>
+			{id !== null && (idInvalid || error) && <h1>Invalid Session</h1>}
+			{id !== null && !data && <h1>Caricamento...</h1>}
+			{(id === null || !idInvalid) && (
+				<>
+					<div className="d-flex position-absolute top-0 end-0 m-5 z-3">
+						<ReminderModal
+							studyTime={studyTime}
+							sessions={sessions}
+							breakTime={breakTime}
+						>
+							<FaLightbulb size={30} className="me-2" />
+						</ReminderModal>
+						<ShareModal
+							studyTime={studyTime}
+							sessions={sessions}
+							breakTime={breakTime}
+						>
+							<FaShareNodes size={30} />
+						</ShareModal>
+					</div>
+					{isStudying ? (
+						<Tree
+							time={studyTime * 60}
+							started={isStarted}
+							paused={isPaused}
+						></Tree>
+					) : (
+						<Coffee
+							time={breakTime * 60}
+							started={isStarted}
+							paused={isPaused}
+						></Coffee>
+					)}
+					<Sidebar></Sidebar>
+					<TimerBlock></TimerBlock>
+					{!isStarted && id === null && (
+						<div className="d-flex flex-column flex-md-row justify-content-center">
+							<Setting
+								name="Study Time"
+								getter={studyTime}
+								setter={setStudyTime}
+							></Setting>
+							<Setting
+								name="Sessions"
+								getter={sessions}
+								setter={setSessions}
+							></Setting>
+							<Setting
+								name="Break Time"
+								getter={breakTime}
+								setter={setBreakTime}
+							></Setting>
+						</div>
+					)}
+					<MusicBar></MusicBar>
+				</>
 			)}
-			<Sidebar></Sidebar>
-			<TimerBlock></TimerBlock>
-			{!isStarted && id === null && (
-				<div className="d-flex flex-column flex-md-row justify-content-center">
-					<Setting
-						name="Study Time"
-						getter={studyTime}
-						setter={setStudyTime}
-					></Setting>
-					<Setting
-						name="Sessions"
-						getter={sessions}
-						setter={setSessions}
-					></Setting>
-					<Setting
-						name="Break Time"
-						getter={breakTime}
-						setter={setBreakTime}
-					></Setting>
-				</div>
-			)}
-			<MusicBar></MusicBar>
 		</Container>
+	);
+}
+
+export default function Pomodoro() {
+	return (
+		<Suspense fallback={<h1>Caricamento...</h1>}>
+			<PomodoroComponent />
+		</Suspense>
 	);
 }
