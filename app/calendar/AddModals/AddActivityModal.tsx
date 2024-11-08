@@ -16,6 +16,7 @@ export function AddActivityModal({ children }: any) {
 		location: "",
 		geo: "",
 		parentActivityId: "",
+		userIdList: [],
 		alarms: []
 	});
 
