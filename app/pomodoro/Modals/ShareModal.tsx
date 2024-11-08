@@ -70,20 +70,6 @@ export function ShareModal({
 								required
 							/>
 						</Form.Group>
-						<div className="d-flex justify-content-between">
-							<div className="d-flex flex-column  align-items-center">
-								<p>studyTime</p>
-								<p>{studyTime}</p>
-							</div>
-							<div className="d-flex flex-column  align-items-center">
-								<p>sessions</p>
-								<p>{sessions}</p>
-							</div>
-							<div className="d-flex flex-column  align-items-center">
-								<p>breakTime</p>
-								<p>{breakTime}</p>
-							</div>
-						</div>
 					</Modal.Body>
 					<Modal.Footer>
 						<Button

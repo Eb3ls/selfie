@@ -66,6 +66,11 @@ export const PATCH = async (request: NextRequest) => {
 		return generateMessageResponse("Unauthorized", 400);
 	}
 
+	// Controlliamo che il numero di cicli sia maggiore o uguale a 0
+	if (cycles < 0) {
+		return generateMessageResponse("Invalid number of cycles", 400);
+	}
+
 	const pomodoro = session[0].pomodoro;
 	pomodoro.cycles = cycles;
 
