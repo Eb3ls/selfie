@@ -19,6 +19,7 @@ import {
 	createChat,
 	createEvent,
 	createGroupChat,
+	createInvitation,
 	createMessage,
 	createNote,
 	createPhase,
@@ -317,6 +318,7 @@ type names =
 	| "Chat"
 	| "Event"
 	| "GroupChat"
+	| "Invitation"
 	| "Message"
 	| "Note"
 	| "Phase"
@@ -333,6 +335,7 @@ const functionsMap = {
 	"Chat": createChat,
 	"Event": createEvent,
 	"GroupChat": createGroupChat,
+	"Invitation": createInvitation,
 	"Message": createMessage,
 	"Note": createNote,
 	"Phase": createPhase,

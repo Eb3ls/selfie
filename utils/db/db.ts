@@ -6,6 +6,7 @@ import {
 	CHAT_COLLECTION,
 	EVENT_COLLECTION,
 	GROUP_CHAT_COLLECTION,
+	INVITATION_COLLECTION,
 	NOTE_COLLECTION,
 	PHASE_COLLECTION,
 	PROJECT_ACTIVITY_COLLECTION,
@@ -47,6 +48,11 @@ import {
 	createGroupChat
 } from "@/utils/db/models/GroupChat";
 import {
+	Invitation,
+	StringInvitation,
+	createInvitation
+} from "@/utils/db/models/Invitation";
+import {
 	Message,
 	StringMessage,
 	createMessage
@@ -82,6 +88,7 @@ export {
 	CHAT_COLLECTION,
 	EVENT_COLLECTION,
 	GROUP_CHAT_COLLECTION,
+	INVITATION_COLLECTION,
 	NOTE_COLLECTION,
 	PHASE_COLLECTION,
 	PROJECT_ACTIVITY_COLLECTION,
@@ -106,6 +113,7 @@ export {
 	createChat,
 	createEvent,
 	createGroupChat,
+	createInvitation,
 	createNote,
 	createPhase,
 	createProject,
@@ -124,6 +132,7 @@ export type {
 	StringChat,
 	StringEvent,
 	StringGroupChat,
+	StringInvitation,
 	StringNote,
 	StringPhase,
 	StringProject,
@@ -137,6 +146,7 @@ export type {
 	Chat,
 	Event,
 	GroupChat,
+	Invitation,
 	Note,
 	Phase,
 	Project,

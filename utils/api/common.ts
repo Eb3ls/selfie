@@ -10,7 +10,9 @@ const IdFields = [
 	"projectId",
 	"parentId",
 	"noteId",
-	"phaseId"
+	"phaseId",
+	"userId",
+	"targetId"
 ];
 
 // Campi che possono essere ObjectId o null

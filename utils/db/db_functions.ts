@@ -5,6 +5,7 @@ import { Activity, StringActivity } from "@/utils/db/models/Activity";
 import { Chat, StringChat } from "@/utils/db/models/Chat";
 import { Event, StringEvent } from "@/utils/db/models/Event";
 import { GroupChat, StringGroupChat } from "@/utils/db/models/GroupChat";
+import { Invitation, StringInvitation } from "@/utils/db/models/Invitation";
 import { Note, StringNote } from "@/utils/db/models/Note";
 import { Phase, StringPhase } from "@/utils/db/models/Phase";
 import { Project, StringProject } from "@/utils/db/models/Project";
@@ -31,6 +32,7 @@ export const ACTIVITY_COLLECTION = "activities";
 export const CHAT_COLLECTION = "chats";
 export const SESSION_COLLECTION = "sessions";
 export const GROUP_CHAT_COLLECTION = "groupChats";
+export const INVITATION_COLLECTION = "invitations";
 export const NOTE_COLLECTION = "notes";
 export const PHASE_COLLECTION = "phases";
 export const PROJECT_COLLECTION = "projects";
@@ -43,6 +45,7 @@ export type Schema =
 	| Chat
 	| Session
 	| GroupChat
+	| Invitation
 	| Note
 	| Phase
 	| Project
@@ -55,6 +58,7 @@ export type StringSchema =
 	| StringChat
 	| StringSession
 	| StringGroupChat
+	| StringInvitation
 	| StringNote
 	| StringPhase
 	| StringProject
