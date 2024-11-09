@@ -109,6 +109,21 @@ export function ModifySessionModal({
 		}
 	};
 
+	async function handleDelete() {
+		const response = await fetch("/api/calendar/session/delete", {
+			method: "DELETE",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({ _id: form._id })
+		});
+
+		if (response.ok) {
+			alert("Sessione eliminata con successo!");
+			window.location.reload();
+		}
+	}
+
 	return (
 		<>
 			<Modal
@@ -223,6 +238,13 @@ export function ModifySessionModal({
 						</Form.Group>
 					</Modal.Body>
 					<Modal.Footer>
+						<Button
+							variant="danger"
+							onClick={handleDelete}
+							className="custom-cancel-button"
+						>
+							Elimina
+						</Button>
 						<Button
 							variant="secondary"
 							onClick={() => setShow(false)}

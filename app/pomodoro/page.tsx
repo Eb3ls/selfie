@@ -165,7 +165,7 @@ function PomodoroComponent() {
 		>
 			{id !== null && (idInvalid || error) && <h1>Invalid Session</h1>}
 			{id !== null && !data && <h1>Caricamento...</h1>}
-			{(id === null || !idInvalid) && (
+			{(id === null || (idInvalid !== null && !idInvalid)) && (
 				<>
 					<div className="d-flex position-absolute top-0 end-0 m-5 z-3">
 						<ReminderModal

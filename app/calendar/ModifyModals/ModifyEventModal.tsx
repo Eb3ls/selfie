@@ -41,11 +41,13 @@ export function ModifyEventModal({
 			summary: form.summary,
 			description: form.description,
 			status: form.status,
+			rrule: form.rrule,
 			dtStart: form.dtStart,
 			dtEnd: form.dtEnd,
 			categories: form.categories,
 			location: form.location,
-			geo: form.geo
+			geo: form.geo,
+			userIdList: form.userIdList
 		};
 
 		console.log("Form inviato:", { ...newForm });
@@ -72,6 +74,21 @@ export function ModifyEventModal({
 			alert("Failed! Status code: " + response.status);
 		}
 	};
+
+	async function handleDelete() {
+		const response = await fetch("/api/calendar/event/delete", {
+			method: "DELETE",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({ _id: form._id })
+		});
+
+		if (response.ok) {
+			alert("Evento eliminato con successo!");
+			window.location.reload();
+		}
+	}
 
 	return (
 		<>
@@ -145,6 +162,13 @@ export function ModifyEventModal({
 						</Form.Group>
 					</Modal.Body>
 					<Modal.Footer>
+						<Button
+							variant="danger"
+							onClick={handleDelete}
+							className="custom-cancel-button"
+						>
+							Elimina
+						</Button>
 						<Button
 							variant="secondary"
 							onClick={() => setShow(false)}

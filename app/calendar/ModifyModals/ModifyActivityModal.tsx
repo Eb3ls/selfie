@@ -46,7 +46,8 @@ export function ModifyActivityModal({
 			due: form.due,
 			categories: form.categories,
 			location: form.location,
-			geo: form.geo
+			geo: form.geo,
+			userIdList: form.userIdList
 		};
 
 		console.log("Form inviato:", { ...newForm });
@@ -73,6 +74,21 @@ export function ModifyActivityModal({
 			alert("Failed! Status code: " + response.status);
 		}
 	};
+
+	async function handleDelete() {
+		const response = await fetch("/api/calendar/activity/delete", {
+			method: "DELETE",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({ _id: form._id })
+		});
+
+		if (response.ok) {
+			alert("Attività eliminata con successo!");
+			window.location.reload();
+		}
+	}
 
 	return (
 		<>
@@ -146,6 +162,13 @@ export function ModifyActivityModal({
 						</Form.Group>
 					</Modal.Body>
 					<Modal.Footer>
+						<Button
+							variant="danger"
+							onClick={handleDelete}
+							className="custom-cancel-button"
+						>
+							Elimina
+						</Button>
 						<Button
 							variant="secondary"
 							onClick={() => setShow(false)}

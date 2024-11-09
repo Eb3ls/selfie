@@ -610,5 +610,9 @@ export async function removeInvitations(
 		invitationClient
 	);
 
-	return out;
+	if (out.status === 500) {
+		return generateMessageResponse("Internal error", 500);
+	}
+
+	return generateMessageResponse("Invitations removed", 200);
 }
