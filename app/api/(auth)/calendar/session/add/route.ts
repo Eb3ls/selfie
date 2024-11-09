@@ -22,7 +22,7 @@ const requestTemplate = {
 	dtEnd: "",
 	pomodoro: {
 		cycles: 0,
-		cyclesCompleted: 0,
+		remainingCycles: 0,
 		studyDuration: 0,
 		breakDuration: 0,
 		alarms: []

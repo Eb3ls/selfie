@@ -16,7 +16,7 @@ import { NextRequest } from "next/server";
 
 const requestTemplate = {
 	cycles: 0,
-	cyclesCompleted: 0,
+	remainingCycles: 0,
 	studyDuration: 0,
 	breakDuration: 0
 };
@@ -45,7 +45,7 @@ export const PATCH = async (request: NextRequest) => {
 	// Creiamo un oggetto con i campi da modificare
 	const newFields: Partial<Pomodoro> = {
 		cycles: newBody.cycles,
-		cyclesCompleted: newBody.cyclesCompleted,
+		remainingCycles: newBody.remainingCycles,
 		studyDuration: newBody.studyDuration,
 		breakDuration: newBody.breakDuration
 	};

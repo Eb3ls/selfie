@@ -209,13 +209,13 @@ export function ModifySessionModal({
 								className="input-field"
 								required
 							/>
-							<Form.Label>Cicli completati</Form.Label>
+							<Form.Label>Cicli rimanenti</Form.Label>
 							<Form.Control
 								type="number"
-								name="cyclesCompleted"
-								value={form.pomodoro.cyclesCompleted}
+								name="remainingCycles"
+								value={form.pomodoro.remainingCycles}
 								onChange={handleChangePomodoro}
-								placeholder="Inserisci il numero di cicli completati"
+								placeholder="Inserisci il numero di cicli rimanenti"
 								className="input-field"
 								required
 							/>
