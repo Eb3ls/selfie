@@ -124,6 +124,10 @@ export function ModifySessionModal({
 		}
 	}
 
+	function handleRedirect() {
+		window.location.href = "/pomodoro?id=" + form._id;
+	}
+
 	return (
 		<>
 			<Modal
@@ -238,6 +242,13 @@ export function ModifySessionModal({
 						</Form.Group>
 					</Modal.Body>
 					<Modal.Footer>
+						<Button
+							variant="success"
+							onClick={handleRedirect}
+							className="custom-cancel-button"
+						>
+							Pomi
+						</Button>
 						<Button
 							variant="danger"
 							onClick={handleDelete}

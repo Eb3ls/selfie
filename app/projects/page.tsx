@@ -176,10 +176,10 @@ export default function Projects() {
 					<div className="container-fluid">
 						<a className="navbar-brand" href="./home">
 							<Image
-								src="./Sloth.png"
+								src="/Sloth.png"
 								alt="Logo"
 								height="50"
-								aspect-ratio="2.2/1"
+								width="110"
 								className="d-inline-block align-text-top"
 							/>
 						</a>
