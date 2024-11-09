@@ -37,6 +37,7 @@ import {
 	getCollection,
 	updateCollectionWrapper
 } from "@/utils/db/db";
+import { sendNotification } from "@/utils/notification/notification_server";
 import { getSession } from "@/utils/session/session";
 import { JWTPayload } from "jose";
 import { ObjectId } from "mongodb";
@@ -577,6 +578,18 @@ export async function addInvitations(
 		if (out.status !== 200) {
 			return out;
 		}
+
+		// Inviamo la notifica all'utente
+		const notificationData = {
+			title: "Nuova notifica",
+			body: "Hai ricevuto un invito, premi per visualizzarlo",
+			image: "",
+			icon: "",
+			url: "/inbox"
+		};
+
+		// Inviamo la notifica (Non gestiamo il caso di fallimento)
+		await sendNotification(userId, notificationData);
 	}
 
 	return generateMessageResponse("Invitations sent", 200);
