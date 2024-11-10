@@ -60,9 +60,12 @@ import {
 import { Note, StringNote, createNote } from "@/utils/db/models/Note";
 import { Phase, StringPhase, createPhase } from "@/utils/db/models/Phase";
 import {
-	Pomodoro,
-	StringPomodoro,
-	createPomodoro
+	DayInstance,
+	PomodoroSettings,
+	StringDayInstance,
+	StringPomodoroSettings,
+	createDayInstance,
+	createPomodoroSettings
 } from "@/utils/db/models/Pomodoro";
 import {
 	Project,
@@ -122,7 +125,8 @@ export {
 	createUser,
 	createAlarm,
 	createMessage,
-	createPomodoro
+	createDayInstance,
+	createPomodoroSettings
 };
 
 export type {
@@ -141,7 +145,8 @@ export type {
 	StringUser,
 	StringAlarm,
 	StringMessage,
-	StringPomodoro,
+	StringDayInstance,
+	StringPomodoroSettings,
 	Activity,
 	Chat,
 	Event,
@@ -155,5 +160,6 @@ export type {
 	User,
 	Alarm,
 	Message,
-	Pomodoro
+	DayInstance,
+	PomodoroSettings
 };

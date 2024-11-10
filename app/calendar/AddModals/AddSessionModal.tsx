@@ -13,12 +13,10 @@ export function AddSessionModal({ children }: any) {
 		rrule: "",
 		dtStart: "",
 		dtEnd: "",
-		pomodoro: {
+		settings: {
 			cycles: 0,
-			remainingCycles: 0,
-			studyDuration: 0,
-			breakDuration: 0,
-			alarms: []
+			studyTime: 0,
+			breakTime: 0
 		}
 	});
 
@@ -32,8 +30,8 @@ export function AddSessionModal({ children }: any) {
 	const handleChangePomodoro = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setForm({
 			...form,
-			pomodoro: {
-				...form.pomodoro,
+			settings: {
+				...form.settings,
 				[e.target.name]: parseInt(e.target.value)
 			}
 		});
@@ -152,27 +150,17 @@ export function AddSessionModal({ children }: any) {
 							<Form.Control
 								type="number"
 								name="cycles"
-								value={form.pomodoro.cycles}
+								value={form.settings.cycles}
 								onChange={handleChangePomodoro}
 								placeholder="Inserisci il numero di cicli"
-								className="input-field"
-								required
-							/>
-							<Form.Label>Cicli rimanenti</Form.Label>
-							<Form.Control
-								type="number"
-								name="remainingCycles"
-								value={form.pomodoro.remainingCycles}
-								onChange={handleChangePomodoro}
-								placeholder="Inserisci il numero di cicli rimanenti"
 								className="input-field"
 								required
 							/>
 							<Form.Label>Durata studio</Form.Label>
 							<Form.Control
 								type="number"
-								name="studyDuration"
-								value={form.pomodoro.studyDuration}
+								name="studyTime"
+								value={form.settings.studyTime}
 								onChange={handleChangePomodoro}
 								placeholder="Inserisci la durata dello studio"
 								className="input-field"
@@ -181,8 +169,8 @@ export function AddSessionModal({ children }: any) {
 							<Form.Label>Durata pausa</Form.Label>
 							<Form.Control
 								type="number"
-								name="breakDuration"
-								value={form.pomodoro.breakDuration}
+								name="breakTime"
+								value={form.settings.breakTime}
 								onChange={handleChangePomodoro}
 								placeholder="Inserisci la durata della pausa"
 								className="input-field"

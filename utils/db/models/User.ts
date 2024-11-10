@@ -1,5 +1,5 @@
 import { ConvertToString } from "@/utils/db/models/ModelConverter";
-import { Pomodoro, createPomodoro } from "@/utils/db/models/Pomodoro";
+import { createPomodoroSettings, PomodoroSettings } from "@/utils/db/models/Pomodoro";
 import { ObjectId } from "mongodb";
 
 /*
@@ -17,7 +17,7 @@ export interface User {
 	userStatus: string;			// Attivo, Disattivo
 	profilePic: string;			// Path dell'immagine di profilo
 	isResource: boolean;		// Se l'utente è una risorsa - es. un luogo specifico
-	pomodoro: Pomodoro;			// Setting iniziale per il pomodoro
+	pomodoro: PomodoroSettings;	// Setting iniziale per il pomodoro
 	subscriptionList: {
 		endpoint: "",
 		expirationTime: 0,
@@ -40,7 +40,7 @@ export function createUser({
 	userStatus = "Attivo",
 	profilePic = "/images/?.png",
 	isResource = false,
-	pomodoro = createPomodoro({}),
+	pomodoro = createPomodoroSettings({}),
 	subscriptionList = []
 }: Partial<User>): User {
 	return {

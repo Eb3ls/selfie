@@ -33,10 +33,13 @@ export function ModifySessionModal({
 	const handleChangePomodoro = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setForm({
 			...form,
-			pomodoro: {
-				...form.pomodoro,
-				[e.target.name]: parseInt(e.target.value)
-			}
+			settingsList: [
+				...form.settingsList.slice(0, form.settingsList.length - 1),
+				{
+					...form.settingsList[form.settingsList.length - 1],
+					[e.target.name]: parseInt(e.target.value)
+				}
+			]
 		});
 	};
 
@@ -52,8 +55,17 @@ export function ModifySessionModal({
 			_id: form._id,
 			summary: form.summary,
 			description: form.description,
+			status: form.status,
+			rrule: form.rrule,
 			dtStart: form.dtStart,
-			dtEnd: form.dtEnd
+			dtEnd: form.dtEnd,
+			newSetting: {
+				cycles: form.settingsList[form.settingsList.length - 1].cycles,
+				studyTime:
+					form.settingsList[form.settingsList.length - 1].studyTime,
+				breakTime:
+					form.settingsList[form.settingsList.length - 1].breakTime
+			}
 		};
 
 		console.log("Primo form inviato:", { ...newForm });
@@ -66,46 +78,11 @@ export function ModifySessionModal({
 			body: JSON.stringify({ ...newForm })
 		});
 
-		if (response.status === 200) {
-			const newForm = {
-				_id: form._id,
-				cycles: form.pomodoro.cycles
-			};
-
-			console.log("Secondo form inviato:", { ...newForm });
-
-			const response = await fetch(
-				"/api/calendar/session/modifyPomodoro",
-				{
-					method: "PATCH",
-					headers: {
-						"Content-Type": "application/json"
-					},
-					body: JSON.stringify({ ...newForm })
-				}
-			);
-			if (response.status === 200) {
-				alert("Successful!");
-				window.location.reload();
-			} else if (response.status === 400) {
-				const out = await response.json();
-				if (out.message === undefined) {
-					alert("Failed! User not found: " + out.users[0]);
-				} else {
-					alert("Failed! " + out.message);
-				}
-			} else {
-				alert("Failed! Status code: " + response.status);
-			}
-		} else if (response.status === 400) {
-			const out = await response.json();
-			if (out.message === undefined) {
-				alert("Failed! User not found: " + out.users[0]);
-			} else {
-				alert("Failed! " + out.message);
-			}
+		if (response.ok) {
+			alert("Sessione modificata con successo!");
+			// window.location.reload();
 		} else {
-			alert("Failed! Status code: " + response.status);
+			alert("Errore nella modifica della sessione!");
 		}
 	};
 
@@ -203,27 +180,25 @@ export function ModifySessionModal({
 							<Form.Control
 								type="number"
 								name="cycles"
-								value={form.pomodoro.cycles}
+								value={
+									form.settingsList[
+										form.settingsList.length - 1
+									].cycles
+								}
 								onChange={handleChangePomodoro}
 								placeholder="Inserisci il numero di cicli"
-								className="input-field"
-								required
-							/>
-							<Form.Label>Cicli rimanenti</Form.Label>
-							<Form.Control
-								type="number"
-								name="remainingCycles"
-								value={form.pomodoro.remainingCycles}
-								onChange={handleChangePomodoro}
-								placeholder="Inserisci il numero di cicli rimanenti"
 								className="input-field"
 								required
 							/>
 							<Form.Label>Durata studio</Form.Label>
 							<Form.Control
 								type="number"
-								name="studyDuration"
-								value={form.pomodoro.studyDuration}
+								name="studyTime"
+								value={
+									form.settingsList[
+										form.settingsList.length - 1
+									].studyTime
+								}
 								onChange={handleChangePomodoro}
 								placeholder="Inserisci la durata dello studio"
 								className="input-field"
@@ -232,8 +207,12 @@ export function ModifySessionModal({
 							<Form.Label>Durata pausa</Form.Label>
 							<Form.Control
 								type="number"
-								name="breakDuration"
-								value={form.pomodoro.breakDuration}
+								name="breakTime"
+								value={
+									form.settingsList[
+										form.settingsList.length - 1
+									].breakTime
+								}
 								onChange={handleChangePomodoro}
 								placeholder="Inserisci la durata della pausa"
 								className="input-field"

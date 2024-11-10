@@ -21,13 +21,14 @@ import {
 	createActivity,
 	createAlarm,
 	createChat,
+	createDayInstance,
 	createEvent,
 	createGroupChat,
 	createInvitation,
 	createMessage,
 	createNote,
 	createPhase,
-	createPomodoro,
+	createPomodoroSettings,
 	createProject,
 	createProjectActivity,
 	createSession,
@@ -327,7 +328,8 @@ type names =
 	| "Message"
 	| "Note"
 	| "Phase"
-	| "Pomodoro"
+	| "DayInstance"
+	| "PomodoroSettings"
 	| "Project"
 	| "ProjectActivity"
 	| "Session"
@@ -344,7 +346,8 @@ const functionsMap = {
 	"Message": createMessage,
 	"Note": createNote,
 	"Phase": createPhase,
-	"Pomodoro": createPomodoro,
+	"DayInstance": createDayInstance,
+	"PomodoroSettings": createPomodoroSettings,
 	"Project": createProject,
 	"ProjectActivity": createProjectActivity,
 	"Session": createSession,

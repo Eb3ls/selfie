@@ -1,36 +1,45 @@
-import { Alarm } from "@/utils/db/models/Alarm";
 import { ConvertToString } from "@/utils/db/models/ModelConverter";
-import { ObjectId } from "mongodb";
 
 /*
 NO COLLECTION
 */
 
-export interface Pomodoro {
-	_id: ObjectId;					// ID del pomodoro
-	cycles: number;					// Numero di cicli
-	remainingCycles: number;		// Cicli rimanenti
-	studyDuration: number;			// Durata timer di studio, in minuti
-	breakDuration: number;			// Durata timer di pausa, in minuti
-	alarms: Alarm[];				// Notifiche associate
+export interface PomodoroSettings {
+	modificationDate: Date;		// Data di modifica delle impostazioni
+	cycles: number;				// Numero di cicli
+	studyTime: number;			// Durata timer di studio, in minuti
+	breakTime: number;			// Durata timer di pausa, in minuti
 }
 
-export type StringPomodoro = ConvertToString<Pomodoro>;
+export type StringPomodoroSettings = ConvertToString<PomodoroSettings>;
 
-export function createPomodoro({
-	_id = new ObjectId(),
+export interface DayInstance {
+	date: Date;					// Data di completamento del ciclo
+	cycles: number;				// Numero di cicli completati
+}
+
+export type StringDayInstance = ConvertToString<DayInstance>;
+
+export function createPomodoroSettings({
+	modificationDate = new Date(new Date().toISOString()),
 	cycles = 4,
-	remainingCycles = 0,
-	studyDuration = 25,
-	breakDuration = 5,
-	alarms = []
-}: Partial<Pomodoro>): Pomodoro {
+	studyTime = 25,
+	breakTime = 5
+}: Partial<PomodoroSettings>): PomodoroSettings {
 	return {
-		_id: _id,
+		modificationDate: modificationDate,
 		cycles: cycles,
-		remainingCycles: remainingCycles,
-		studyDuration: studyDuration,
-		breakDuration: breakDuration,
-		alarms: alarms
+		studyTime: studyTime,
+		breakTime: breakTime
+	};
+}
+
+export function createDayInstance({
+	date = new Date(new Date().toISOString()),
+	cycles = 0
+}: Partial<DayInstance>): DayInstance {
+	return {
+		date: date,
+		cycles: cycles
 	};
 }

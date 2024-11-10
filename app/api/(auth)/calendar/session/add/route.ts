@@ -10,6 +10,7 @@ import {
 	addCollectionWrapper,
 	getCollection
 } from "@/utils/db/db";
+import { timeMachine } from "@/utils/timeMachine/timeMachine";
 import { Collection } from "mongodb";
 import { NextRequest } from "next/server";
 
@@ -20,12 +21,10 @@ const requestTemplate = {
 	rrule: "",
 	dtStart: "",
 	dtEnd: "",
-	pomodoro: {
+	settings: {
 		cycles: 0,
-		remainingCycles: 0,
-		studyDuration: 0,
-		breakDuration: 0,
-		alarms: []
+		studyTime: 0,
+		breakTime: 0
 	}
 };
 
@@ -47,6 +46,9 @@ export const POST = async (request: NextRequest) => {
 	// Estraiamo l'utente e il corpo della richiesta
 	const { user: owner, body: newBody } = validation;
 
+	// Estraiamo le impostazioni da newBody
+	const settings = newBody.settings;
+
 	// Assumiamo che la validazione abbia validato anche il pomodoro
 
 	// Creiamo una nuova sessione con quei campi
@@ -54,6 +56,16 @@ export const POST = async (request: NextRequest) => {
 		newBody,
 		"Session"
 	);
+
+	// Aggiungiamo le impostazioni alla lista delle impostazioni
+	newSession.settingsList = [
+		{
+			modificationDate: timeMachine.timeMachineTime.toDateString(),
+			cycles: settings.cycles,
+			studyTime: settings.studyTime,
+			breakTime: settings.breakTime
+		}
+	];
 
 	// Aggiungiamo il campo 'owner' a newSession
 	newSession.ownerId = owner._id!;

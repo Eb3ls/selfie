@@ -11,6 +11,7 @@ import {
 	getCollection,
 	updateCollectionWrapper
 } from "@/utils/db/db";
+import { timeMachine } from "@/utils/timeMachine/timeMachine";
 import { Collection } from "mongodb";
 import { NextRequest } from "next/server";
 
@@ -71,13 +72,41 @@ export const PATCH = async (request: NextRequest) => {
 		return generateMessageResponse("Invalid number of cycles", 400);
 	}
 
-	const pomodoro = session[0].pomodoro;
-	pomodoro.cycles = cycles;
+	// TODO: Controllare che il numero di cicli sia inferiore al debito accumulato
+
+	// Rimuoviamo tutti gli elementi in completedCycles che sono futuri rispetto a TimeMachine
+	const todayDate: string = timeMachine.timeMachineTime.toDateString();
+	session[0].completedCycles = session[0].completedCycles.filter(
+		(element) => {
+			return new Date(element.date) <= new Date(todayDate);
+		}
+	);
+
+	// Controlliamo se in completedCycles c'è la giornata odierna secondo TimeMachine
+	const today: string = timeMachine.timeMachineTime.toDateString();
+	const completedCycles = session[0].completedCycles;
+	const found = completedCycles.find((element) => {
+		return element.date === today;
+	});
+
+	if (found === undefined) {
+		session[0].completedCycles.push({
+			date: today,
+			cycles: 0
+		});
+	}
+
+	// Modifichiamo il numero di cicli
+	session[0].completedCycles.forEach((element) => {
+		if (element.date === today) {
+			element.cycles = cycles;
+		}
+	});
 
 	// Modifichiamo la sessione
 	const updateOut = await updateCollectionWrapper<Session>(
 		{ _id: sessionId },
-		{ $set: { pomodoro: pomodoro } } as any,
+		{ $set: { completedCycles: session[0].completedCycles } } as any,
 		client
 	);
 

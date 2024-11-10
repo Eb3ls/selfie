@@ -4,7 +4,6 @@ import {
 	validate
 } from "@/utils/api/api";
 import {
-	Pomodoro,
 	StringUser,
 	USER_COLLECTION,
 	User,
@@ -16,9 +15,8 @@ import { NextRequest } from "next/server";
 
 const requestTemplate = {
 	cycles: 0,
-	remainingCycles: 0,
-	studyDuration: 0,
-	breakDuration: 0
+	studyTime: 0,
+	breakTime: 0
 };
 
 type RequestType = typeof requestTemplate;
@@ -42,21 +40,22 @@ export const PATCH = async (request: NextRequest) => {
 	// Estraiamo l'id dell'utente
 	const userId: string = user._id!;
 
-	// Creiamo un oggetto con i campi da modificare
-	const newFields: Partial<Pomodoro> = {
-		cycles: newBody.cycles,
-		remainingCycles: newBody.remainingCycles,
-		studyDuration: newBody.studyDuration,
-		breakDuration: newBody.breakDuration
-	};
-
 	// Ottieniamo la collezione degli utenti
 	const client: Collection<User> = await getCollection<User>(USER_COLLECTION);
 
 	// Modifichiamo l'utente
 	const outUser = await updateCollectionWrapper<User>(
 		{ _id: userId },
-		{ $set: { pomodoro: newFields } } as any,
+		{
+			$set: {
+				pomodoro: {
+					modificationDate: new Date().toDateString(),
+					cycles: newBody.cycles,
+					studyTime: newBody.studyTime,
+					breakTime: newBody.breakTime
+				}
+			}
+		} as any,
 		client
 	);
 

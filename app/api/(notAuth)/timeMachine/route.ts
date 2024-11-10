@@ -4,6 +4,7 @@ import {
 	isTemplateValid,
 	parseJSONInput
 } from "@/utils/api/api";
+import { timeMachine } from "@/utils/timeMachine/timeMachine";
 import { NextRequest } from "next/server";
 
 let baseDate: Date = new Date(); // Data di partenza selezionata (default: tempo reale)
@@ -27,6 +28,8 @@ function backgroundServiceFunction() {
 		"Data attuale:",
 		new Date(baseDate.getTime() + ms_diff).toString()
 	);
+
+	timeMachine.timeMachineTime = new Date(baseDate.getTime() + ms_diff);
 }
 
 export const GET = async (request: NextRequest) => {
