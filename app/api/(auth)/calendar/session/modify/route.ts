@@ -96,12 +96,26 @@ export const PATCH = async (request: NextRequest) => {
 		...newSetting
 	};
 
+	// Controlliamo se in completedCycles c'è la giornata odierna secondo TimeMachine
+	const foundDay = session[0].completedCycles.find((element) => {
+		return (
+			new Date(element.date).toDateString() ==
+			new Date(today).toDateString()
+		);
+	});
+
+	if (foundDay) {
+		const index = session[0].completedCycles.indexOf(foundDay);
+		session[0].completedCycles[index] = {
+			date: session[0].completedCycles[index].date,
+			cycles: newSetting.cycles
+		};
+	}
+
 	let settingsList = session[0].settingsList;
 
 	// Controlliamo se in settingsList c'è la giornata odierna secondo TimeMachine
 	const found = settingsList.find((element) => {
-		console.log(element.modificationDate);
-		console.log(today);
 		return (
 			new Date(element.modificationDate).toDateString() ==
 			new Date(today).toDateString()
@@ -115,7 +129,11 @@ export const PATCH = async (request: NextRequest) => {
 		settingsList.push(readyNewSetting);
 	}
 
-	const settingsReadyFields = { ...readyFields, settingsList: settingsList };
+	const settingsReadyFields = {
+		...readyFields,
+		settingsList: settingsList,
+		completedCycles: session[0].completedCycles
+	};
 
 	// Riordiniamo settingsList in ordine cronologico
 	settingsReadyFields.settingsList.sort((a, b) => {

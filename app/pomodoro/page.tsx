@@ -1,5 +1,6 @@
 "use client";
 
+import { StringPomodoroSettings } from "@/utils/db/db";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { Button, Container } from "react-bootstrap";
@@ -14,8 +15,18 @@ import { MusicBar } from "./MusicBar/MusicBar";
 import "./Pomodoro.css";
 import { Setting } from "./Setting/Setting";
 
+interface SessionResponse {
+	settings: StringPomodoroSettings;
+	cycles: number;
+}
+
 async function fetcher(url: string) {
 	const response = await fetch(url);
+
+	if (!response.ok) {
+		throw new Error("Errore durante il fetch dei dati");
+	}
+
 	return response.json();
 }
 
@@ -24,6 +35,7 @@ function PomodoroComponent() {
 	const [isPaused, setIsPaused] = useState(true); // true for paused, false for running
 	const [isStarted, setIsStarted] = useState(false); // true for started, false for not started
 	const [currentTime, setCurrentTime] = useState(0);
+	const [doneCycles, setDoneCycles] = useState(0);
 	const [studyTime, setStudyTime] = useState(1);
 	const [breakTime, setBreakTime] = useState(1);
 	const [sessions, setSessions] = useState(1);
@@ -33,28 +45,19 @@ function PomodoroComponent() {
 	const id = searchParams.get("id");
 
 	const { data, error } = useSWR(
-		id ? "/api/calendar/getCalendar" : null,
+		id ? "/api/calendar/session/" + id + "/getSession" : null,
 		fetcher
-	);
-
-	const [idInvalid, setIdInvalid] = useState<null | boolean>(null);
+	) as { data: SessionResponse; error: any };
 
 	useEffect(() => {
 		if (data) {
-			const sessionData = data.sessions.find(
-				(session: any) => session._id === id
-			);
-			if (sessionData) {
-				const pomodoroData = sessionData.pomodoro;
-				setStudyTime(pomodoroData.studyDuration);
-				setBreakTime(pomodoroData.breakDuration);
-				setSessions(pomodoroData.cycles);
-				setIdInvalid(false);
-			} else {
-				setIdInvalid(true);
-			}
+			const pomodoroData = data.settings;
+			setStudyTime(pomodoroData.studyTime);
+			setBreakTime(pomodoroData.breakTime);
+			setSessions(pomodoroData.cycles - data.cycles);
+			setDoneCycles(data.cycles);
 		}
-	}, [data, id]);
+	}, [data]);
 
 	useEffect(() => {
 		setCurrentTime(studyTime * 60);
@@ -67,6 +70,34 @@ function PomodoroComponent() {
 		setCurrentTime(studyTime * 60);
 	}, [studyTime]);
 
+	const updateCycles = useCallback(
+		async (retries = 5) => {
+			const response = await fetch(
+				"/api/calendar/session/modifyPomodoro",
+				{
+					method: "PATCH",
+					body: JSON.stringify({
+						_id: id,
+						cycles: doneCycles + 1
+					}),
+					headers: {
+						"Content-Type": "application/json"
+					}
+				}
+			);
+
+			if (!response.ok && retries > 0) {
+				console.log("Errore, nuovo tentativo...");
+				setTimeout(() => updateCycles(retries - 1), 1000);
+			} else if (!response.ok) {
+				console.log(
+					"Errore persistente. Impossibile aggiornare la sessione."
+				);
+			}
+		},
+		[id, doneCycles]
+	);
+
 	/*
 	 * Se sono finite le sessioni resetta tutto
 	 * Se sta studiando decrementa le sessioni
@@ -78,12 +109,27 @@ function PomodoroComponent() {
 			reset();
 		} else {
 			if (isStudying) {
-				setRemainingSessions(remainingSessions - 1);
+				const updatedSessions = remainingSessions - 1;
+				setRemainingSessions(updatedSessions);
+				if (id) {
+					setSessions(updatedSessions);
+					updateCycles();
+					setDoneCycles(doneCycles + 1);
+				}
 			}
 			setIsStudying(!isStudying);
 			setCurrentTime(isStudying ? breakTime * 60 : studyTime * 60);
 		}
-	}, [isStudying, remainingSessions, breakTime, studyTime, reset]);
+	}, [
+		id,
+		isStudying,
+		remainingSessions,
+		breakTime,
+		studyTime,
+		reset,
+		updateCycles,
+		doneCycles
+	]);
 
 	// Timer
 	useEffect(() => {
@@ -163,9 +209,9 @@ function PomodoroComponent() {
 			className="vh-100 d-flex flex-column"
 			style={{ backgroundColor: "rgb(240, 240, 240)" }}
 		>
-			{id !== null && (idInvalid || error) && <h1>Invalid Session</h1>}
-			{id !== null && !data && <h1>Caricamento...</h1>}
-			{(id === null || (idInvalid !== null && !idInvalid)) && (
+			{id !== null && error && <h1>Invalid Session</h1>}
+			{id !== null && !data && !error && <h1>Caricamento...</h1>}
+			{(id === null || data) && (
 				<>
 					<div className="d-flex position-absolute top-0 end-0 m-5 z-3">
 						<ReminderModal

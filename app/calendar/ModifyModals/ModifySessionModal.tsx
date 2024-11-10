@@ -80,7 +80,7 @@ export function ModifySessionModal({
 
 		if (response.ok) {
 			alert("Sessione modificata con successo!");
-			// window.location.reload();
+			window.location.reload();
 		} else {
 			alert("Errore nella modifica della sessione!");
 		}
