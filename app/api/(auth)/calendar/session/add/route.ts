@@ -67,6 +67,17 @@ export const POST = async (request: NextRequest) => {
 		}
 	];
 
+	// Controlliamo che la data di inizio sia nello stesso giorno della data di fine
+	const dtStart = new Date(newSession.dtStart).toDateString();
+	const dtEnd = new Date(newSession.dtEnd).toDateString();
+
+	if (dtStart !== dtEnd) {
+		return generateMessageResponse(
+			"Start date and end date are not in the same day",
+			400
+		);
+	}
+
 	// Aggiungiamo il campo 'owner' a newSession
 	newSession.ownerId = owner._id!;
 

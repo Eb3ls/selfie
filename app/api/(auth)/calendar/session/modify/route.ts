@@ -83,6 +83,17 @@ export const PATCH = async (request: NextRequest) => {
 		return generateMessageResponse("Unauthorized", 400);
 	}
 
+	// Controlliamo che la data di inizio sia nello stesso giorno della data di fine
+	const dtStart = new Date(session[0].dtStart).toDateString();
+	const dtEnd = new Date(session[0].dtEnd).toDateString();
+
+	if (dtStart !== dtEnd) {
+		return generateMessageResponse(
+			"Start date and end date are not in the same day",
+			400
+		);
+	}
+
 	// Rimuoviamo tutti gli elementi in completedCycles che sono futuri rispetto a TimeMachine
 	const today = timeMachine.timeMachineTime.toDateString();
 	session[0].completedCycles = session[0].completedCycles.filter(
