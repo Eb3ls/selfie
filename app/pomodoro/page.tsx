@@ -1,6 +1,6 @@
 "use client";
 
-import { StringPomodoroSettings } from "@/utils/db/db";
+import { StringPomodoroSettings, User } from "@/utils/db/db";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { Button, Container } from "react-bootstrap";
@@ -15,12 +15,8 @@ import { MusicBar } from "./MusicBar/MusicBar";
 import "./Pomodoro.css";
 import { Setting } from "./Setting/Setting";
 
-interface SessionResponse {
-	settings: StringPomodoroSettings;
-	cycles: number;
-}
-
 async function fetcher(url: string) {
+	console.log("Fetching data from " + url);
 	const response = await fetch(url);
 
 	if (!response.ok) {
@@ -45,19 +41,25 @@ function PomodoroComponent() {
 	const id = searchParams.get("id");
 
 	const { data, error } = useSWR(
-		id ? "/api/calendar/session/" + id + "/getSession" : null,
+		id
+			? "/api/calendar/session/" + id + "/getSession"
+			: "/api/user/getUser",
 		fetcher
-	) as { data: SessionResponse; error: any };
+	);
 
 	useEffect(() => {
 		if (data) {
-			const pomodoroData = data.settings;
+			const pomodoroData = id ? data.settings : data.pomodoro;
 			setStudyTime(pomodoroData.studyTime);
 			setBreakTime(pomodoroData.breakTime);
-			setSessions(pomodoroData.cycles - data.cycles);
-			setDoneCycles(data.cycles);
+			if (id) {
+				setSessions(pomodoroData.cycles - data.cycles);
+				setDoneCycles(data.cycles);
+			} else {
+				setSessions(pomodoroData.cycles);
+			}
 		}
-	}, [data]);
+	}, [data, id]);
 
 	useEffect(() => {
 		setCurrentTime(studyTime * 60);
@@ -70,33 +72,52 @@ function PomodoroComponent() {
 		setCurrentTime(studyTime * 60);
 	}, [studyTime]);
 
-	const updateCycles = useCallback(
+	const updatePomodoro = useCallback(
 		async (retries = 5) => {
-			const response = await fetch(
-				"/api/calendar/session/modifyPomodoro",
-				{
-					method: "PATCH",
-					body: JSON.stringify({
-						_id: id,
-						cycles: doneCycles + 1
-					}),
-					headers: {
-						"Content-Type": "application/json"
-					}
-				}
-			);
+			const url = id
+				? "/api/calendar/session/modifyPomodoro"
+				: "/api/user/modifyPomodoro";
 
-			if (!response.ok && retries > 0) {
-				console.log("Errore, nuovo tentativo...");
-				setTimeout(() => updateCycles(retries - 1), 1000);
-			} else if (!response.ok) {
-				console.log(
-					"Errore persistente. Impossibile aggiornare la sessione."
-				);
+			const bodyData = id
+				? { _id: id, cycles: doneCycles + 1 }
+				: {
+						cycles: sessions,
+						studyTime: studyTime,
+						breakTime: breakTime
+					};
+
+			const response = await fetch(url, {
+				method: "PATCH",
+				body: JSON.stringify(bodyData),
+				headers: {
+					"Content-Type": "application/json"
+				}
+			});
+
+			if (!response.ok) {
+				if (retries > 0) {
+					console.log("Errore, nuovo tentativo...");
+					setTimeout(() => updatePomodoro(retries - 1), 1000);
+				} else {
+					console.log("Errore persistente. Impossibile aggiornare.");
+				}
 			}
 		},
-		[id, doneCycles]
+		[id, doneCycles, sessions, studyTime, breakTime]
 	);
+
+	const [loadedSettings, setLoadedSettings] = useState(false);
+	useEffect(() => {
+		if (loadedSettings) {
+			const updateTimer = setTimeout(() => {
+				console.log("Salvataggio...");
+				updatePomodoro();
+			}, 10000);
+			return () => clearTimeout(updateTimer);
+		} else {
+			setLoadedSettings(true);
+		}
+	}, [sessions, studyTime, breakTime, loadedSettings, updatePomodoro]);
 
 	/*
 	 * Se sono finite le sessioni resetta tutto
@@ -113,7 +134,8 @@ function PomodoroComponent() {
 				setRemainingSessions(updatedSessions);
 				if (id) {
 					setSessions(updatedSessions);
-					updateCycles();
+					console.log("Aggiornamento sessioni...");
+					updatePomodoro();
 					setDoneCycles(doneCycles + 1);
 				}
 			}
@@ -127,8 +149,8 @@ function PomodoroComponent() {
 		breakTime,
 		studyTime,
 		reset,
-		updateCycles,
-		doneCycles
+		doneCycles,
+		updatePomodoro
 	]);
 
 	// Timer
@@ -177,7 +199,10 @@ function PomodoroComponent() {
 				<h1 style={{ fontSize: "100px" }}>{calcTime()}</h1>
 				{isStarted && (
 					<h1 style={{ fontSize: "50px" }}>
-						Sessioni rimanenti: {remainingSessions}
+						Sessioni rimanenti:
+						{remainingSessions === 1 && !isStudying
+							? "Ultima pausa!"
+							: remainingSessions}
 					</h1>
 				)}
 				<Button
@@ -199,6 +224,9 @@ function PomodoroComponent() {
 						</Button>
 					</>
 				)}
+				{id !== null && !isStarted && remainingSessions === 1 && (
+					<h1> Sessioni completate! </h1>
+				)}
 			</div>
 		);
 	}
@@ -209,9 +237,9 @@ function PomodoroComponent() {
 			className="vh-100 d-flex flex-column"
 			style={{ backgroundColor: "rgb(240, 240, 240)" }}
 		>
-			{id !== null && error && <h1>Invalid Session</h1>}
-			{id !== null && !data && !error && <h1>Caricamento...</h1>}
-			{(id === null || data) && (
+			{error && <h1>Invalid Session</h1>}
+			{!data && !error && <h1>Caricamento...</h1>}
+			{data && !error && (
 				<>
 					<div className="d-flex position-absolute top-0 end-0 m-5 z-3">
 						<ReminderModal

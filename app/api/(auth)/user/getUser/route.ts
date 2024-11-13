@@ -4,6 +4,7 @@ import {
 	validate
 } from "@/utils/api/api";
 import {
+	PomodoroSettings,
 	StringUser,
 	USER_COLLECTION,
 	User,
@@ -22,6 +23,7 @@ type ReducedUser = {
 	birthDay: string;
 	userStatus: string;
 	profilePic: string;
+	pomodoro: PomodoroSettings;
 };
 
 export const GET = async (request: NextRequest) => {
@@ -64,7 +66,8 @@ export const GET = async (request: NextRequest) => {
 		email: userObj.email,
 		birthDay: userObj.birthDay,
 		userStatus: userObj.userStatus,
-		profilePic: userObj.profilePic
+		profilePic: userObj.profilePic,
+		pomodoro: userObj.pomodoro
 	};
 
 	return generateObjectResponse(response, 200);

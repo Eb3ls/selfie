@@ -37,6 +37,10 @@ export const PATCH = async (request: NextRequest) => {
 	// Estraiamo l'utente e il corpo della richiesta
 	const { user: user, body: newBody } = validation;
 
+	if (newBody.cycles < 0 || newBody.studyTime < 1 || newBody.breakTime < 1) {
+		return generateMessageResponse("Invalid request", 400);
+	}
+
 	// Estraiamo l'id dell'utente
 	const userId: string = user._id!;
 
