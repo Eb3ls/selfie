@@ -2,7 +2,7 @@
 
 import { StringPomodoroSettings, User } from "@/utils/db/db";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Button, Container } from "react-bootstrap";
 import { FaLightbulb, FaShareNodes } from "react-icons/fa6";
 import useSWR from "swr";
@@ -74,19 +74,38 @@ function PomodoroComponent() {
 
 	const updatePomodoro = useCallback(
 		async (retries = 5) => {
-			const url = id
-				? "/api/calendar/session/modifyPomodoro"
-				: "/api/user/modifyPomodoro";
+			const response = await fetch(
+				"/api/calendar/session/modifyPomodoro",
+				{
+					method: "PATCH",
+					body: JSON.stringify({ _id: id, cycles: doneCycles + 1 }),
+					headers: {
+						"Content-Type": "application/json"
+					}
+				}
+			);
 
-			const bodyData = id
-				? { _id: id, cycles: doneCycles + 1 }
-				: {
-						cycles: sessions,
-						studyTime: studyTime,
-						breakTime: breakTime
-					};
+			if (!response.ok) {
+				if (retries > 0) {
+					console.log("Errore, nuovo tentativo...");
+					setTimeout(() => updatePomodoro(retries - 1), 1000);
+				} else {
+					console.log("Errore persistente. Impossibile aggiornare.");
+				}
+			}
+		},
+		[id, doneCycles]
+	);
 
-			const response = await fetch(url, {
+	const saveSettingsFetch = useCallback(
+		async (retries = 5) => {
+			const bodyData = {
+				cycles: sessions,
+				studyTime: studyTime,
+				breakTime: breakTime
+			};
+
+			const response = await fetch("/api/user/modifyPomodoro", {
 				method: "PATCH",
 				body: JSON.stringify(bodyData),
 				headers: {
@@ -103,21 +122,23 @@ function PomodoroComponent() {
 				}
 			}
 		},
-		[id, doneCycles, sessions, studyTime, breakTime]
+		[sessions, studyTime, breakTime]
 	);
 
-	const [loadedSettings, setLoadedSettings] = useState(false);
-	useEffect(() => {
-		if (loadedSettings) {
-			const updateTimer = setTimeout(() => {
-				console.log("Salvataggio...");
-				updatePomodoro();
+	// Ogni 10 secondi se non ci sono nuove modifiche salva le impostazioni
+	const timeout = useRef(null);
+	function saveSettings() {
+		if (id === null) {
+			if (timeout.current) {
+				clearTimeout(timeout.current);
+			}
+
+			timeout.current = setTimeout(() => {
+				console.log("Salvataggio impostazioni...");
+				saveSettingsFetch();
 			}, 10000);
-			return () => clearTimeout(updateTimer);
-		} else {
-			setLoadedSettings(true);
 		}
-	}, [sessions, studyTime, breakTime, loadedSettings, updatePomodoro]);
+	}
 
 	/*
 	 * Se sono finite le sessioni resetta tutto
@@ -194,39 +215,54 @@ function PomodoroComponent() {
 	}
 
 	function TimerBlock() {
+		let header = calcTime();
+		if (id !== null && !isStarted && sessions === 0) {
+			header = "Sessioni completate!";
+		}
+
+		let handlerButtons;
+		if (isStarted && isPaused) {
+			handlerButtons = (
+				<>
+					<Button variant="link" onClick={handleRestart}>
+						Restart
+					</Button>
+					<Button variant="link" onClick={handleSetCompleted}>
+						Completed
+					</Button>
+					<Button variant="link" onClick={reset}>
+						Stop
+					</Button>
+				</>
+			);
+		}
+
+		let subHeader = <>Sessioni rimanenti: {remainingSessions}</>;
+		if (isStudying && sessions === 1) {
+			subHeader = <>Ultima sessione!</>;
+		} else if (!isStudying && sessions === 0) {
+			subHeader = <>Ultima pausa!</>;
+		}
+
+		/*
+		 * Mostriamo i bottoni per start, resume e pause solo se
+		 * il numero di sessioni > 0
+		 * oppure se é in pausa (l'ultima ha sessions = 0)
+		 * Necessario per evitare che si possa iniziare una nuova sessione quando id
+		 */
 		return (
 			<div className="d-flex flex-column align-items-center justify-content-center">
-				<h1 style={{ fontSize: "100px" }}>{calcTime()}</h1>
-				{isStarted && (
-					<h1 style={{ fontSize: "50px" }}>
-						Sessioni rimanenti:
-						{remainingSessions === 1 && !isStudying
-							? "Ultima pausa!"
-							: remainingSessions}
-					</h1>
+				<h1 style={{ fontSize: "100px" }}>{header}</h1>
+				{isStarted && <h1 style={{ fontSize: "50px" }}>{subHeader}</h1>}
+				{(sessions > 0 || !isStudying) && (
+					<Button
+						variant="link"
+						onClick={isStarted ? handleResume : handleStart}
+					>
+						{!isStarted ? " Start" : isPaused ? "Resume" : "Pause"}
+					</Button>
 				)}
-				<Button
-					variant="link"
-					onClick={isStarted ? handleResume : handleStart}
-				>
-					{!isStarted ? " Start" : isPaused ? "Resume" : "Pause"}
-				</Button>
-				{isStarted && isPaused && (
-					<>
-						<Button variant="link" onClick={handleRestart}>
-							Restart
-						</Button>
-						<Button variant="link" onClick={handleSetCompleted}>
-							Completed
-						</Button>
-						<Button variant="link" onClick={reset}>
-							Stop
-						</Button>
-					</>
-				)}
-				{id !== null && !isStarted && remainingSessions === 1 && (
-					<h1> Sessioni completate! </h1>
-				)}
+				{handlerButtons}
 			</div>
 		);
 	}
@@ -278,16 +314,19 @@ function PomodoroComponent() {
 								name="Study Time"
 								getter={studyTime}
 								setter={setStudyTime}
+								updateSettings={saveSettings}
 							></Setting>
 							<Setting
 								name="Sessions"
 								getter={sessions}
 								setter={setSessions}
+								updateSettings={saveSettings}
 							></Setting>
 							<Setting
 								name="Break Time"
 								getter={breakTime}
 								setter={setBreakTime}
+								updateSettings={saveSettings}
 							></Setting>
 						</div>
 					)}
