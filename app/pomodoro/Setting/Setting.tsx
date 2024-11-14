@@ -6,20 +6,13 @@ interface SettingsProps {
 	name: string;
 	getter: number;
 	setter: React.Dispatch<React.SetStateAction<number>>;
-	updateSettings: Function;
 }
 
-export function Setting({
-	name,
-	getter,
-	setter,
-	updateSettings
-}: SettingsProps) {
+export function Setting({ name, getter, setter }: SettingsProps) {
 	const inputRef = useRef<HTMLInputElement | null>(null);
 
 	function changeValue(value: number) {
 		setter(Math.max(1, getter + value));
-		updateSettings();
 		return;
 	}
 
@@ -31,7 +24,6 @@ export function Setting({
 		} else {
 			setter(val);
 		}
-		updateSettings();
 		inputRef.current?.focus();
 	}
 

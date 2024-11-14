@@ -116,7 +116,7 @@ function PomodoroComponent() {
 			if (!response.ok) {
 				if (retries > 0) {
 					console.log("Errore, nuovo tentativo...");
-					setTimeout(() => updatePomodoro(retries - 1), 1000);
+					setTimeout(() => saveSettingsFetch(retries - 1), 1000);
 				} else {
 					console.log("Errore persistente. Impossibile aggiornare.");
 				}
@@ -126,8 +126,8 @@ function PomodoroComponent() {
 	);
 
 	// Ogni 10 secondi se non ci sono nuove modifiche salva le impostazioni
-	const timeout = useRef(null);
-	function saveSettings() {
+	const timeout = useRef<null | NodeJS.Timeout>(null);
+	useEffect(() => {
 		if (id === null) {
 			if (timeout.current) {
 				clearTimeout(timeout.current);
@@ -136,9 +136,9 @@ function PomodoroComponent() {
 			timeout.current = setTimeout(() => {
 				console.log("Salvataggio impostazioni...");
 				saveSettingsFetch();
-			}, 10000);
+			}, 5000);
 		}
-	}
+	}, [sessions, studyTime, breakTime, saveSettingsFetch, id]);
 
 	/*
 	 * Se sono finite le sessioni resetta tutto
@@ -314,19 +314,16 @@ function PomodoroComponent() {
 								name="Study Time"
 								getter={studyTime}
 								setter={setStudyTime}
-								updateSettings={saveSettings}
 							></Setting>
 							<Setting
 								name="Sessions"
 								getter={sessions}
 								setter={setSessions}
-								updateSettings={saveSettings}
 							></Setting>
 							<Setting
 								name="Break Time"
 								getter={breakTime}
 								setter={setBreakTime}
-								updateSettings={saveSettings}
 							></Setting>
 						</div>
 					)}
