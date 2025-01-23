@@ -1,11 +1,14 @@
 "use client";
 
+// Import necessari per il componente
 import React, { useState } from "react";
 import { Button, Container, Form, ListGroup, Modal } from "react-bootstrap";
 import { FaMusic } from "react-icons/fa6";
 import YouTube, { YouTubeProps } from "react-youtube";
 import "./MusicBar.css";
 
+// Opzioni di configurazione per il player YouTube
+// Disabilita la maggior parte dei controlli e delle funzionalità interattive
 const opts: YouTubeProps["opts"] = {
 	// https://developers.google.com/youtube/player_parameters
 	playerVars: {
@@ -22,6 +25,8 @@ const opts: YouTubeProps["opts"] = {
 	}
 };
 
+// Interfaccia per le props del componente
+// Definisce la struttura dati necessaria per gestire la lista di video
 interface ModalInteface {
 	children: React.ReactNode;
 	videoList: string[];
@@ -30,6 +35,7 @@ interface ModalInteface {
 	setVideoTitleList: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
+// Componente principale per la gestione della coda di riproduzione musicale
 export function QueueListModal({
 	children,
 	videoList,
@@ -37,15 +43,18 @@ export function QueueListModal({
 	videoTitleList,
 	setVideoTitleList
 }: ModalInteface) {
-	const [show, setShow] = useState(false);
-	const [newVideo, setNewVideo] = useState("");
-	const [curVideo, setCurVideo] = useState("");
+	// Stati locali per gestire il modale e i video
+	const [show, setShow] = useState(false);         // Controlla visibilità del modale
+	const [newVideo, setNewVideo] = useState("");    // Input per nuovo video
+	const [curVideo, setCurVideo] = useState("");    // Video attualmente in caricamento
 
-	// TODO rimuovere quando finito canzone
+	// Gestisce il cambio di input nel campo nuovo video
 	function handleNewVideoChange(e: any) {
 		setNewVideo(e.target.value);
 	}
 
+	// Aggiunge un nuovo video alla coda
+	// Valida il link YouTube e estrae l'ID del video
 	function handleAddNewVideo() {
 		if (newVideo === "") {
 			return;
@@ -65,6 +74,8 @@ export function QueueListModal({
 		setNewVideo("");
 	}
 
+	// Callback eseguita quando un video è pronto
+	// Aggiorna il titolo del video nella lista
 	function onReady(event: any) {
 		const player = event.target;
 		const data = player.getVideoData();
@@ -74,11 +85,14 @@ export function QueueListModal({
 		setCurVideo("");
 	}
 
+	// Rimuove un video dalla coda
 	function handleRemoveVideo(index: number) {
 		setVideoTitleList(videoTitleList.filter((_, i) => i !== index));
 		setVideoList(videoList.filter((_, i) => i !== index));
 	}
 
+	// Gestisce la chiusura del modale
+	// Impedisce la chiusura se un video è in caricamento
 	function handleClose() {
 		if (curVideo !== "") {
 			alert("Aspetta che il video sia pronto");
@@ -87,6 +101,7 @@ export function QueueListModal({
 		setShow(false);
 	}
 
+	// Renderizza un singolo elemento della lista video
 	function videoItem(videoTitle: string, index: number) {
 		return (
 			<ListGroup.Item
@@ -105,6 +120,8 @@ export function QueueListModal({
 		);
 	}
 
+	// Renderizza il blocco principale della lista video
+	// Include form di input e lista dei video in coda
 	function videoListBlock() {
 		return (
 			<>
@@ -157,6 +174,7 @@ export function QueueListModal({
 		);
 	}
 
+	// Template principale del componente
 	return (
 		<>
 			<span onClick={() => setShow(true)} style={{ cursor: "pointer" }}>

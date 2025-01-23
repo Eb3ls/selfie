@@ -69,7 +69,7 @@ export default function ChatMain() {
 			: null,
 		fetcher,
 		{
-			// refreshInterval: 2000, // Ricarica i dati ogni 2 secondi
+			refreshInterval: 5000, // Ricarica i dati ogni 5 secondi
 			revalidateOnFocus: false // Disabilita il refetch quando si torna alla finestra
 		}
 	);
@@ -155,12 +155,12 @@ export default function ChatMain() {
 				const lastMessage = chat.lastMessage;
 				const lastMessageObj = lastMessage
 					? {
-							name: fromIdToUsername(
-								lastMessage.ownerId,
-								chatResponse!.userList
-							)!,
-							content: lastMessage.content
-						}
+						name: fromIdToUsername(
+							lastMessage.ownerId,
+							chatResponse!.userList
+						)!,
+						content: lastMessage.content
+					}
 					: null;
 
 				filteredChats.push({
@@ -210,10 +210,13 @@ export default function ChatMain() {
 				chatResponse!.whoAmI._id === message.ownerId
 					? "Io"
 					: fromIdToUsername(
-							message.ownerId,
-							chatResponse!.userList
-						)!;
-			const newSentAt = new Date(message.sentAt).toLocaleTimeString();
+						message.ownerId,
+						chatResponse!.userList
+					)!;
+			const newSentAt = new Date(message.sentAt).toLocaleTimeString([], {
+				hour: "2-digit",
+				minute: "2-digit"
+			});
 			return {
 				_id: index++,
 				owner: newOwner,

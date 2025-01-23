@@ -7,6 +7,7 @@ import {
 	FaPause,
 	FaPlay,
 	FaPlus,
+	FaVolumeHigh,
 	FaVolumeLow,
 	FaVolumeXmark
 } from "react-icons/fa6";
@@ -16,6 +17,7 @@ import { QueueListModal } from "./QueueListModal";
 import { TitleBar } from "./TitleBar";
 import "./colors.css";
 
+// Configurazione del player YouTube
 const opts: YouTubeProps["opts"] = {
 	// https://developers.google.com/youtube/player_parameters
 	playerVars: {
@@ -32,6 +34,7 @@ const opts: YouTubeProps["opts"] = {
 	}
 };
 
+// Funzione di utilità per formattare i secondi nel formato MM:SS
 function formatTime(seconds: number) {
 	const minutes = Math.floor(seconds / 60);
 	const secs = Math.floor(seconds % 60);
@@ -44,18 +47,28 @@ function formatTime(seconds: number) {
 // Supportato da i browser moderni ad eccezione di Internet Explorer 7
 // Non utilizzata una playlist in quando vogliamo che sia una coda di riproduzione
 // Utilizzandola andrebbe comunque ricaricato il componente dovendo eliminare il video corrente
+// Componente MusicBar - Player YouTube personalizzato con controlli di riproduzione
 export function MusicBar() {
-	const [player, setPlayer] = useState<any>(null);
-	const [videoDuration, setVideoDuration] = useState<number>(0);
-	const [hasVolume, setHasVolume] = useState<boolean>(true);
-	const [volume, setVolume] = useState<number>(50);
-	const [currentTime, setCurrentTime] = useState<number>(0);
-	const [isPlaying, setIsPlaying] = useState<boolean>(false);
-	const [toLoop, setToLoop] = useState<boolean>(false);
-	const [isInteracting, setIsInteracting] = useState<boolean>(false);
-	const [videoList, setVideoList] = useState<string[]>([]);
-	const [videoTitleList, setVideoTitleList] = useState<string[]>([]);
+	// Stati relativi al player e al video
+	const [player, setPlayer] = useState<any>(null); // Istanza del player YouTube
+	const [videoDuration, setVideoDuration] = useState<number>(0); // Durata totale del video
+	const [currentTime, setCurrentTime] = useState<number>(0); // Tempo di riproduzione corrente
+	const [isPlaying, setIsPlaying] = useState<boolean>(false); // Stato di riproduzione
 
+	// Stati relativi al volume
+	const [hasVolume, setHasVolume] = useState<boolean>(true); // Stato muto/non muto
+	const [showVolumeSlider, setShowVolumeSlider] = useState<boolean>(false); // Mostra/nascondi slider volume
+	const [volume, setVolume] = useState<number>(50); // Livello del volume (0-100)
+
+	// Stati dei controlli del player
+	const [toLoop, setToLoop] = useState<boolean>(false); // Ripetizione video corrente
+	const [isInteracting, setIsInteracting] = useState<boolean>(false); // Interazione con la barra di avanzamento
+
+	// Stati della playlist
+	const [videoList, setVideoList] = useState<string[]>([]); // Lista degli ID dei video
+	const [videoTitleList, setVideoTitleList] = useState<string[]>([]); // Lista dei titoli dei video
+
+	// Gestore evento quando il player YouTube è pronto
 	function onReady(event: any) {
 		const player = event.target;
 		setPlayer(player);
@@ -66,6 +79,7 @@ export function MusicBar() {
 		}
 	}
 
+	// Alterna riproduzione/pausa
 	function togglePlay() {
 		if (videoList.length === 0) {
 			return;
@@ -74,18 +88,16 @@ export function MusicBar() {
 		setIsPlaying(!isPlaying);
 	}
 
-	function toggleVolume() {
-		if (videoList.length === 0) {
-			return;
-		}
-		hasVolume ? player.mute() : player.unMute();
-		setHasVolume(!hasVolume);
+	function toggleShowVolume() {
+		setShowVolumeSlider(!showVolumeSlider)
 	}
 
+	// Alterna la ripetizione del video corrente
 	function toggleLoop() {
 		setToLoop(!toLoop);
 	}
 
+	// Gestori interazione barra di avanzamento
 	function handleMouseDown() {
 		setIsInteracting(true);
 	}
@@ -94,6 +106,7 @@ export function MusicBar() {
 		setIsInteracting(false);
 	}
 
+	// Gestore fine video
 	function handleEnd() {
 		if (toLoop) {
 			player.seekTo(0, true);
@@ -106,6 +119,7 @@ export function MusicBar() {
 		}
 	}
 
+	// Gestore cambio posizione barra di avanzamento
 	function handleProgressBarChange(event: any) {
 		const newTime = parseFloat(event.target.value);
 		setCurrentTime(newTime);
@@ -115,6 +129,7 @@ export function MusicBar() {
 		}
 	}
 
+	// Effect per aggiornare il tempo corrente durante la riproduzione
 	useEffect(() => {
 		if (player) {
 			// Imposta un intervallo per aggiornare il tempo corrente
@@ -127,6 +142,7 @@ export function MusicBar() {
 		}
 	}, [player, isInteracting]);
 
+	// Effect per resettare lo stato del player quando la playlist è vuota
 	useEffect(() => {
 		if (videoList.length === 0) {
 			setCurrentTime(0);
@@ -137,6 +153,57 @@ export function MusicBar() {
 			setPlayer(null);
 		}
 	}, [videoList]);
+
+	// Gestore cambio volume
+	function handleVolumeChange(event: any) {
+		const newVolume = parseInt(event.target.value);
+		setVolume(newVolume);
+		if (player) {
+			player.setVolume(newVolume);
+		}
+	}
+
+	function VolumeBarBlock() {
+		return (
+			<Button
+				variant="link"
+				onMouseEnter={toggleShowVolume}
+				onMouseLeave={toggleShowVolume}
+				className="d-flex align-items-center position-relative p-2"
+			>
+				<div className="d-flex align-items-center"
+					style={{
+						transition: 'all 0.3s ease',
+						width: showVolumeSlider ? '160px' : '20px',
+						overflow: 'hidden'
+					}}>
+					<FaVolumeLow
+						className="color-brown"
+						size={20}
+						style={{ flexShrink: 0 }}
+					/>
+					<input
+						type="range"
+						className="form-range mx-2"
+						style={{
+							width: '100px',
+							height: '4px',
+							cursor: 'pointer'
+						}}
+						min={0}
+						max={100}
+						value={volume}
+						onChange={handleVolumeChange}
+					/>
+					<FaVolumeHigh
+						className="color-brown"
+						size={20}
+						style={{ flexShrink: 0 }}
+					/>
+				</div>
+			</Button>
+		)
+	}
 
 	return (
 		<>
@@ -198,13 +265,7 @@ export function MusicBar() {
 						</Button>
 					</div>
 					<div className="d-flex">
-						<Button variant="link" onClick={toggleVolume}>
-							{hasVolume ? (
-								<FaVolumeLow className="color-brown"></FaVolumeLow>
-							) : (
-								<FaVolumeXmark className="color-brown"></FaVolumeXmark>
-							)}
-						</Button>
+						{VolumeBarBlock()}
 						<Button variant="link">
 							<QueueListModal
 								videoList={videoList}
