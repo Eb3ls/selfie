@@ -56,7 +56,6 @@ export function MusicBar() {
 	const [isPlaying, setIsPlaying] = useState<boolean>(false); // Stato di riproduzione
 
 	// Stati relativi al volume
-	const [hasVolume, setHasVolume] = useState<boolean>(true); // Stato muto/non muto
 	const [showVolumeSlider, setShowVolumeSlider] = useState<boolean>(false); // Mostra/nascondi slider volume
 	const [volume, setVolume] = useState<number>(50); // Livello del volume (0-100)
 
@@ -148,7 +147,6 @@ export function MusicBar() {
 			setCurrentTime(0);
 			setVideoDuration(0);
 			setIsPlaying(false);
-			setHasVolume(true);
 			setToLoop(false);
 			setPlayer(null);
 		}

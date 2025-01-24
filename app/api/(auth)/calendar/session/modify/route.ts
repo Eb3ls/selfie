@@ -94,6 +94,8 @@ export const PATCH = async (request: NextRequest) => {
 		);
 	}
 
+	// TODO: Validare anche i dati del pomodoro, study/break non possono essere 0
+
 	// Rimuoviamo tutti gli elementi in completedCycles che sono futuri rispetto a TimeMachine
 	const today = timeMachine.timeMachineTime.toDateString();
 	session[0].completedCycles = session[0].completedCycles.filter(

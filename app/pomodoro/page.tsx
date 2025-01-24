@@ -1,6 +1,5 @@
 "use client";
 
-import { StringPomodoroSettings, User } from "@/utils/db/db";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Button, Container } from "react-bootstrap";
@@ -38,8 +37,12 @@ function PomodoroComponent() {
 	const [remainingSessions, setRemainingSessions] = useState(sessions);
 
 	const searchParams = useSearchParams();
-	const id = searchParams.get("id");
+	let id = searchParams.get("id");
+	if (id === "") {
+		id = null;
+	}
 
+	// Prendimao il pomodoro generale o quello specifico se id é diverso da null
 	const { data, error } = useSWR(
 		id
 			? "/api/calendar/session/" + id + "/getSession"

@@ -15,8 +15,8 @@ export function AddSessionModal({ children }: any) {
 		dtEnd: "",
 		settings: {
 			cycles: 0,
-			studyTime: 0,
-			breakTime: 0
+			studyTime: 1,
+			breakTime: 1
 		}
 	});
 
@@ -151,6 +151,7 @@ export function AddSessionModal({ children }: any) {
 								type="number"
 								name="cycles"
 								value={form.settings.cycles}
+								min={0}
 								onChange={handleChangePomodoro}
 								placeholder="Inserisci il numero di cicli"
 								className="input-field"
@@ -161,6 +162,7 @@ export function AddSessionModal({ children }: any) {
 								type="number"
 								name="studyTime"
 								value={form.settings.studyTime}
+								min={1}
 								onChange={handleChangePomodoro}
 								placeholder="Inserisci la durata dello studio"
 								className="input-field"
@@ -171,6 +173,7 @@ export function AddSessionModal({ children }: any) {
 								type="number"
 								name="breakTime"
 								value={form.settings.breakTime}
+								min={1}
 								onChange={handleChangePomodoro}
 								placeholder="Inserisci la durata della pausa"
 								className="input-field"

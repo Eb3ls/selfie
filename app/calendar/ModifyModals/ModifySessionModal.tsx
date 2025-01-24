@@ -185,6 +185,7 @@ export function ModifySessionModal({
 										form.settingsList.length - 1
 									].cycles
 								}
+								min={0}
 								onChange={handleChangePomodoro}
 								placeholder="Inserisci il numero di cicli"
 								className="input-field"
@@ -199,6 +200,7 @@ export function ModifySessionModal({
 										form.settingsList.length - 1
 									].studyTime
 								}
+								min={1}
 								onChange={handleChangePomodoro}
 								placeholder="Inserisci la durata dello studio"
 								className="input-field"
@@ -213,6 +215,7 @@ export function ModifySessionModal({
 										form.settingsList.length - 1
 									].breakTime
 								}
+								min={1}
 								onChange={handleChangePomodoro}
 								placeholder="Inserisci la durata della pausa"
 								className="input-field"

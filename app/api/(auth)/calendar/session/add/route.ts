@@ -49,7 +49,7 @@ export const POST = async (request: NextRequest) => {
 	// Estraiamo le impostazioni da newBody
 	const settings = newBody.settings;
 
-	// Assumiamo che la validazione abbia validato anche il pomodoro
+	// TODO: Validare anche i dati del pomodoro, study/break non possono essere 0
 
 	// Creiamo una nuova sessione con quei campi
 	const newSession: StringSession = generateStringModel<StringSession>(
