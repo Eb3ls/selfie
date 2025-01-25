@@ -12,6 +12,7 @@ import useSWR from "swr";
 import { SearchBar } from "./SearchBar";
 
 // Variabile provvisoria per simulare l'utente corrente
+// TODO: utente da cookie
 const currentUser = "provvisoryUserId";
 
 async function fetcher(url: string) {

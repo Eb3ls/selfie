@@ -5,10 +5,13 @@ import {
 	validate
 } from "@/utils/api/api";
 import {
+	NOTE_COLLECTION,
+	Note,
 	PROJECT_ACTIVITY_COLLECTION,
 	PROJECT_COLLECTION,
 	Project,
 	ProjectActivity,
+	StringNote,
 	StringProject,
 	StringProjectActivity,
 	findCollectionWrapper,
@@ -134,6 +137,41 @@ export const PATCH = async (request: NextRequest) => {
 	}
 
 	const updatedProject: StringProject = (await updateOut.json())[0];
+
+	// Dopo aver aggiornato il progetto, aggiungiamo la parte per aggiornare le note
+	const noteClient: Collection<Note> =
+		await getCollection<Note>(NOTE_COLLECTION);
+
+	// Otteniamo l'elenco degli ID delle note associate al progetto
+	const noteId: string = updatedProject.noteId;
+
+	// Controlliamo se il progetto ha delle note associate
+	if (noteId.length > 0) {
+		// Otteniamo le note utilizzando gli ID presenti in noteId
+		const noteOut = await findCollectionWrapper<Note>(
+			{ _id: noteId },
+			noteClient
+		);
+
+		if (noteOut.status !== 200) {
+			return noteOut;
+		}
+
+		const notes: StringNote[] = await noteOut.json();
+
+		// Aggiungiamo gli utenti alla lista delle note
+		for (const note of notes) {
+			const updateNoteOut = await updateCollectionWrapper<Note>(
+				{ _id: note._id },
+				{ $set: { userIdList: userIdList } } as any,
+				noteClient
+			);
+
+			if (updateNoteOut.status !== 200) {
+				return updateNoteOut;
+			}
+		}
+	}
 
 	return generateObjectResponse(updatedProject, 200);
 };

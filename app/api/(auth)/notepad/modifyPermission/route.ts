@@ -15,6 +15,8 @@ import {
 import { Collection } from "mongodb";
 import { NextRequest } from "next/server";
 
+// TODO: Validare l'access per invited da progetti
+
 const requestTemplate = {
 	_id: "",
 	summary: "",

@@ -43,8 +43,32 @@ export const GET = async (request: NextRequest) => {
 	}
 
 	let note = await outNote.json();
-	note[0] = await idListToNameList(note[0]);
 
-	// Restituisci la nota
+	// Verifica che la lista userIdList esista nella nota
+	if (!note[0].userIdList || !Array.isArray(note[0].userIdList)) {
+		return generateMessageResponse(
+			"Invalid or missing userIdList in note",
+			400
+		);
+	}
+
+	// Convertiamo la lista di ID in una lista di nomi
+	const idConversionResult = await idListToNameList(note[0].userIdList);
+
+	if (idConversionResult.status !== 200) {
+		// Gestione degli errori nella conversione
+		return generateMessageResponse(
+			idConversionResult.error || "Error while converting user IDs",
+			idConversionResult.status
+		);
+	}
+
+	// Aggiungiamo la lista di nomi utente alla nota
+	note[0].userNameList = idConversionResult.userNameList;
+
+	// Rimuoviamo la lista di userIdList per evitare di esporla
+	delete note[0].userIdList;
+
+	// Restituiamo la nota aggiornata
 	return generateObjectResponse(note[0], 200);
 };

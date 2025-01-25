@@ -1,293 +1,216 @@
 "use client";
 
-/*
- * Bottone per scorrere avanti e indietro di 12 giorni (non il massimo, magari temporaneo)
- * Associare il toggle delle fasi al toggle visivo del gantt
- * Definire la lunghezza delle attivitá in base alle colonne che dovrebbero occupare
- * Capire come avere una griglia sotto alle colonne
- * Partire dalla data corrente (da integrare poi con la time machine)
- * Poter scorrere in verticale il gantt
- *
- * */
-import Image from "next/image";
-import { useEffect } from "react";
-import { PiBroom } from "react-icons/pi";
-import * as CONST from "./constants";
-import "./styles.css";
+import { Sidebar } from "@/app/components/Sidebar";
+import { useRouter } from "next/navigation";
+import React, { useEffect, useState } from "react";
+import { Button, Card, Col, Container, Row } from "react-bootstrap";
+import { FaTrash, FaUserShield } from "react-icons/fa";
+import { SearchBar } from "./SearchBar";
 
-declare global {
-	namespace JSX {
-		interface IntrinsicElements {
-			"project-phase": { data: any };
-			"project-phase-row": { data: any };
-			"time-line": { date: string };
-			"onload-functions": {};
-			"form-component": {};
-		}
-	}
+// Importa il router di Next.js
+
+export interface Project {
+	_id?: string; // ID del progetto (stringa)
+	summary: string; // Titolo del progetto
+	ownerName: string; // Nome del proprietario
+	userNameList: string[]; // Lista di nomi degli utenti
+	noteId: string; // ID della nota associata (stringa)
 }
 
-const testData = {
-	id: 1,
-	summary: "Fase 1",
-	subPhases: [
-		{
-			id: 2,
-			summary: "Sottofase 1",
-			activities: [
-				{
-					id: 81401873948,
-					summary: "Attività 1",
-					status: "WAITING",
-					dtStart: "2024-03-17T00:00:00",
-					dtEnd: "2024-03-19T00:00:00"
-				},
-				{
-					id: 81401873949,
-					summary: "Attività 1",
-					status: "ACTIVABLE",
-					dtStart: "2024-03-17T00:00:00",
-					dtEnd: "2024-03-19T00:00:00"
-				},
-				{
-					id: 81401873950,
-					summary: "Attività 1",
-					status: "ACTIVE",
-					dtStart: "2024-03-17T00:00:00",
-					dtEnd: "2024-03-19T00:00:00"
-				},
-				{
-					id: 81401873951,
-					summary: "Attività 1",
-					status: "SUBMITTED",
-					dtStart: "2024-03-17T00:00:00",
-					dtEnd: "2024-03-19T00:00:00"
-				},
-				{
-					id: 81401873952,
-					summary: "Attività 1",
-					status: "COMPLETED",
-					dtStart: "2024-03-17T00:00:00",
-					dtEnd: "2024-03-19T00:00:00"
-				},
-				{
-					id: 81401873953,
-					summary: "Attività 1",
-					status: "REACTIVATED",
-					dtStart: "2024-03-17T00:00:00",
-					dtEnd: "2024-03-19T00:00:00"
-				},
-				{
-					id: 81401873954,
-					summary: "Attività 1",
-					status: "OVERDUE",
-					dtStart: "2024-03-17T00:00:00",
-					dtEnd: "2024-03-19T00:00:00"
-				},
-				{
-					id: 81401873955,
-					summary: "Attività 1",
-					status: "DROPPED",
-					dtStart: "2024-03-17T00:00:00",
-					dtEnd: "2024-03-19T00:00:00"
-				}
-			]
-		},
-		{
-			id: 3,
-			summary: "Sottofase 1",
-			activities: [
-				{
-					id: 81401873948,
-					summary: "Attività 1",
-					status: "WAITING",
-					dtStart: "2024-03-17T00:00:00",
-					dtEnd: "2024-03-19T00:00:00"
-				},
-				{
-					id: 81401873949,
-					summary: "Attività 1",
-					status: "ACTIVABLE",
-					dtStart: "2024-03-17T00:00:00",
-					dtEnd: "2024-03-19T00:00:00"
-				},
-				{
-					id: 81401873950,
-					summary: "Attività 1",
-					status: "ACTIVE",
-					dtStart: "2024-03-17T00:00:00",
-					dtEnd: "2024-03-19T00:00:00"
-				},
-				{
-					id: 81401873951,
-					summary: "Attività 1",
-					status: "SUBMITTED",
-					dtStart: "2024-03-17T00:00:00",
-					dtEnd: "2024-03-19T00:00:00"
-				},
-				{
-					id: 81401873952,
-					summary: "Attività 1",
-					status: "COMPLETED",
-					dtStart: "2024-03-17T00:00:00",
-					dtEnd: "2024-03-19T00:00:00"
-				},
-				{
-					id: 81401873953,
-					summary: "Attività 1",
-					status: "REACTIVATED",
-					dtStart: "2024-03-17T00:00:00",
-					dtEnd: "2024-03-19T00:00:00"
-				},
-				{
-					id: 81401873954,
-					summary: "Attività 1",
-					status: "OVERDUE",
-					dtStart: "2024-03-17T00:00:00",
-					dtEnd: "2024-03-19T00:00:00"
-				},
-				{
-					id: 81401873955,
-					summary: "Attività 1",
-					status: "DROPPED",
-					dtStart: "2024-03-17T00:00:00",
-					dtEnd: "2024-03-19T00:00:00"
-				}
-			]
-		}
-	]
-};
+// TODO: utente da cookie
+// Variabile provvisoria per simulare l'utente corrente
+const currentUser = "prova";
 
-export default function Projects() {
+export default function ProjectPage() {
+	const [projects, setProjects] = useState<Project[]>([]);
+	const [oldProjects, setOldProjects] = useState<Project[]>([]);
+	const router = useRouter(); // Inizializza il router
+
 	useEffect(() => {
-		if (typeof window !== "undefined") {
-			import("./ProjectPhase");
-			import("./ProjectPhaseRow");
-			import("./TimeLine");
-			import("./OnLoadFunctions");
-			import("./Form");
+		async function fetchProjects() {
+			try {
+				const response = await fetch("/api/project/getProjects");
+				if (!response.ok)
+					throw new Error("Errore nella richiesta dei dati");
+				const data: Project[] = await response.json();
+				setProjects(data);
+				setOldProjects(data);
+			} catch (error) {
+				console.error("Errore durante il fetch dei progetti:", error);
+			}
 		}
+		fetchProjects();
 	}, []);
+
+	function handleSort(sortParams: {
+		field: string;
+		direction: "asc" | "desc";
+	}) {
+		const { field, direction } = sortParams;
+
+		const sortedProjects = [...projects].sort((a, b) => {
+			let valueA, valueB;
+
+			switch (field) {
+				case "summary":
+					valueA = a.summary.toLowerCase();
+					valueB = b.summary.toLowerCase();
+					break;
+				case "owner":
+					valueA = a.ownerName.toLowerCase();
+					valueB = b.ownerName.toLowerCase();
+					break;
+				default:
+					return 0;
+			}
+
+			return direction === "asc"
+				? valueA > valueB
+					? 1
+					: valueA < valueB
+						? -1
+						: 0
+				: valueA < valueB
+					? 1
+					: valueA > valueB
+						? -1
+						: 0;
+		});
+
+		setProjects(sortedProjects);
+	}
+
+	function handleSearch(e: any) {
+		const searchTerm = e.target.value;
+
+		const filteredProjects = oldProjects.filter((project) =>
+			project.summary.toLowerCase().includes(searchTerm.toLowerCase())
+		);
+
+		setProjects(searchTerm !== "" ? filteredProjects : oldProjects);
+	}
+
+	async function handleAdd(project: { summary: string }) {
+		console.log(project);
+
+		const response = await fetch("/api/project/add", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify(project)
+		});
+		if (!response.ok) {
+			alert("Errore durante il fetch dei progetti!");
+		} else {
+			const fetched_data = await response.json();
+			window.location.href = "./projects/" + fetched_data._id;
+		}
+	}
+
+	async function handleDelete(id: string) {
+		const conf = confirm("Sicuro di voler eliminare?");
+
+		if (!conf) return;
+
+		const updatedProjects = projects.filter(
+			(project) => project._id !== id
+		);
+		setProjects(updatedProjects);
+		alert("Progetto eliminato con successo!");
+	}
+
+	// Controlla se l'utente è il proprietario del progetto
+	function isOwner(ownerName: string) {
+		return ownerName === currentUser;
+	}
+
+	function handleProjectClick(project: Project) {
+		// Usa il router di Next.js per navigare alla pagina del progetto
+		router.push(`/projects/${project._id}`);
+	}
+
+	function handleNoteClick(noteId: string) {
+		// Usa il router di Next.js per navigare alla pagina della nota
+		router.push(`/notepad/${noteId}`);
+	}
 
 	return (
 		<>
-			<div className="container-fluid d-flex flex-column vh-100">
-				<nav className="navbar navbar-expand-lg navbar-light bg-light p-0">
-					<div className="container-fluid">
-						<a className="navbar-brand" href="./home">
-							<Image
-								src="/Sloth.png"
-								alt="Logo"
-								height="50"
-								width="110"
-								className="d-inline-block align-text-top"
-							/>
-						</a>
-						<button
-							className="navbar-toggler"
-							type="button"
-							data-bs-toggle="collapse"
-							data-bs-target="#navbarNav"
-							aria-controls="navbarNav"
-							aria-expanded="false"
-							aria-label="Toggle navigation"
-						>
-							<span className="navbar-toggler-icon"></span>
-						</button>
-						<div
-							className="collapse navbar-collapse"
-							id="navbarNav"
-						>
-							<div className="navbar-nav nav-underline mx-auto">
-								<a className="nav-link" href="./calendar">
-									Calendario
-								</a>
-								<a
-									className="nav-link active"
-									aria-current="page"
-									href="./projects"
-								>
-									Progetti
-								</a>
-								<a className="nav-link" href="./notepad">
-									Note
-								</a>
-								<a className="nav-link" href="./chat">
-									Chat
-								</a>
-								<a className="nav-link" href="./pomodoro">
-									Pomodoro
-								</a>
-							</div>
-						</div>
-					</div>
-				</nav>
-				<div className="row p-3 border-bottom border-secondary">
-					<div className="col d-flex align-items-center">
-						<a
-							className="btn text-secondary me-1 p-0"
-							href="./error"
-						>
-							Dashboard
-						</a>
-						<div>/</div>
-						<div className="ms-1">Progetto di prova</div>
-					</div>
-					<div className="col d-flex justify-content-end align-items-center">
-						<form-component></form-component>
-						<button className="btn btn-primary rounded-pill">
-							<div>Settings</div>
-						</button>
-					</div>
-				</div>
-				<div className="row p-3 border-bottom border-secondary">
-					<div className="col-3 d-flex align-items-center">
-						<button className="btn me-2 p-0">Gantt</button>
-						<button className="btn ms-2 p-0">List</button>
-					</div>
-					<div className="col-9 d-flex flex-column align-items-center">
-						<div className="fs-4" id="yearDiv"></div>
-						<div className="fs-5" id="monthDiv"></div>
-					</div>
-				</div>
-				<div
-					className="row border-bottom border-secondary"
-					style={{ height: "500px" }}
-				>
-					<div
-						id="listView"
-						className="col-3 hide-scroll z-2 border-end border-secondary bg-white mh-100 overflow-y-auto"
-						style={{
-							position: "sticky",
-							left: "0"
-						}}
-					>
-						<div
-							id="header"
-							className="row p-3 border-bottom border-secondary sticky-top bg-white"
-							style={{ minHeight: `${CONST.ROW_HEIGHT_PX}` }}
-						>
-							<div className="col-6">Titolo</div>
-							<div className="col-6 d-flex justify-content-center">
-								Range
-							</div>
-						</div>
-						<project-phase
-							data={JSON.stringify(testData)}
-						></project-phase>
-					</div>
-					<div
-						id="ganttView"
-						className="col-9 hide-scrll mh-100 overflow-auto p-0"
-					>
-						<time-line date={new Date().toString()}></time-line>
-						<project-phase-row
-							data={JSON.stringify(testData)}
-						></project-phase-row>
-					</div>
-				</div>
-			</div>
-			<onload-functions></onload-functions>
+			<Sidebar />
+			<Container fluid="sm" className="mt-5 text-center px-5">
+				<h1 className="mb-5">Projects</h1>
+				<SearchBar
+					handleSort={handleSort}
+					handleSearch={handleSearch}
+					handleAdd={handleAdd}
+				/>
+				<Row className="mt-5 gx-5 text-center">
+					{projects.length === 0 ? (
+						<p>Non ci sono progetti</p>
+					) : (
+						projects.map((project) => (
+							<Col
+								key={project._id}
+								className="col-12 col-md-6 col-lg-4 mb-3"
+							>
+								<Card>
+									<Card.Body>
+										<div
+											onClick={() =>
+												handleProjectClick(project)
+											}
+											style={{ cursor: "pointer" }}
+										>
+											<Card.Title>
+												{project.summary}
+											</Card.Title>
+											<Card.Subtitle className="mb-2 text-muted">
+												Proprietario:{" "}
+												{project.ownerName}
+											</Card.Subtitle>
+										</div>
+										<hr />
+										<Card.Text>
+											{/* Aggiungi l'emoji della nota con link */}
+											<span
+												style={{ cursor: "pointer" }}
+												onClick={() =>
+													handleNoteClick(
+														project.noteId
+													)
+												}
+											>
+												📝
+											</span>
+											{currentUser ==
+												project.ownerName && (
+												<Button
+													variant="danger"
+													className="ms-2 p-0"
+													onClick={() =>
+														handleDelete(
+															project._id!
+														)
+													}
+													style={{
+														border: "none",
+														backgroundColor:
+															"transparent",
+														color: "inherit"
+													}}
+												>
+													<FaTrash title="Delete" />
+												</Button>
+											)}
+										</Card.Text>
+									</Card.Body>
+								</Card>
+							</Col>
+						))
+					)}
+				</Row>
+			</Container>
 		</>
 	);
 }

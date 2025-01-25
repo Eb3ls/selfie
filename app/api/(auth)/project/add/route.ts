@@ -43,7 +43,13 @@ export const POST = async (request: NextRequest) => {
 
 	// Creiamo la nota associata al progetto
 	const newNote: StringNote = generateStringModel<StringNote>(
-		newBody,
+		{
+			ownerId: userId,
+			summary: newBody.summary,
+			categories: "Project",
+			access: "INVITED",
+			userIdList: [userId]
+		},
 		"Note"
 	);
 

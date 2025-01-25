@@ -527,7 +527,7 @@ export async function deletePhase(
 	// Eliminiamo la fase
 	return await deleteCollectionWrapper<Phase>({ _id: phaseId }, phaseClient);
 }
-
+/*
 // Funzione per convertire una lista di id di utenti in una lista di nomi utente
 export async function idListToNameList(note: Note) {
 	// Creo una copia della nota
@@ -556,6 +556,56 @@ export async function idListToNameList(note: Note) {
 
 	delete newNote.userIdList;
 	return newNote; // Aggiungi il return della nuova nota
+}
+*/
+// Funzione per convertire una lista di id di utenti in una lista di nomi utente
+export async function idListToNameList(
+	idList: string[]
+): Promise<{ status: number; userNameList?: string[]; error?: string }> {
+	// Inizializza la lista dei nomi utente come vuota
+	const userNameList: string[] = [];
+
+	try {
+		// Recupera il client della collezione utenti
+		const userClient: Collection<User> =
+			await getCollection<User>(USER_COLLECTION);
+
+		// Itera sugli ID per trovare gli utenti corrispondenti
+		for (const userId of idList) {
+			const outUser = await findCollectionWrapper<User>(
+				{ _id: userId } as any,
+				userClient
+			);
+
+			if (outUser.status !== 200) {
+				// Se c'è stato un errore, ritorna un errore con lo stato corrispondente
+				return {
+					status: outUser.status,
+					error: `Errore nel recupero dell'utente con ID ${userId}`
+				};
+			} else {
+				const user = await outUser.json();
+				// Aggiungi lo username alla lista (assumendo che ci sia almeno un risultato)
+				if (user.length > 0) {
+					userNameList.push(user[0].username);
+				} else {
+					return {
+						status: 404,
+						error: `Nessun utente trovato con ID ${userId}`
+					};
+				}
+			}
+		}
+
+		// Ritorna la lista di nomi utente con lo stato 200
+		return { status: 200, userNameList };
+	} catch (error: any) {
+		// Gestione generale degli errori
+		return {
+			status: 500,
+			error: `Errore interno del server: ${error.message}`
+		};
+	}
 }
 
 // Funzione per invitare una lista di utenti ad un particolare evento (target in generale)
