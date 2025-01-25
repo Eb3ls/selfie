@@ -10,7 +10,7 @@ import { SearchBar } from "./SearchBar";
 // Importa il router di Next.js
 
 export interface Project {
-	_id?: string; // ID del progetto (stringa)
+	_id: string; // ID del progetto (stringa)
 	summary: string; // Titolo del progetto
 	ownerName: string; // Nome del proprietario
 	userNameList: string[]; // Lista di nomi degli utenti
@@ -110,14 +110,31 @@ export default function ProjectPage() {
 
 	async function handleDelete(id: string) {
 		const conf = confirm("Sicuro di voler eliminare?");
-
 		if (!conf) return;
 
-		const updatedProjects = projects.filter(
-			(project) => project._id !== id
-		);
-		setProjects(updatedProjects);
-		alert("Progetto eliminato con successo!");
+		try {
+			const response = await fetch("/api/project/delete", {
+				method: "DELETE",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify({ _id: id })
+			});
+
+			if (response.ok) {
+				alert("Progetto eliminato con successo!");
+
+				// Aggiorna lo stato dei progetti rimuovendo quello eliminato
+				setProjects((prevProjects) =>
+					prevProjects.filter((project) => project._id !== id)
+				);
+			} else {
+				alert("Errore durante l'eliminazione del progetto!");
+			}
+		} catch (error) {
+			console.error("Errore durante la cancellazione:", error);
+			alert("Errore durante la cancellazione!");
+		}
 	}
 
 	// Controlla se l'utente è il proprietario del progetto
@@ -190,7 +207,7 @@ export default function ProjectPage() {
 													className="ms-2 p-0"
 													onClick={() =>
 														handleDelete(
-															project._id!
+															project._id
 														)
 													}
 													style={{
