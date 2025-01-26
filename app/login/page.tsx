@@ -61,10 +61,10 @@ function CompleteFormComponent() {
 	};
 
 	return (
-		<Form onSubmit={handleSubmit}>
+		<Form onSubmit={handleSubmit} className="w-100">
 			{/* Campo Username */}
-			<Form.Group className="mb-3 fs-5" controlId="formBasicUsername">
-				<Form.Label>
+			<Form.Group className="mb-4" controlId="formBasicUsername">
+				<Form.Label className="fw-semibold">
 					<i className="bi bi-person me-2"></i>Username
 				</Form.Label>
 				<Form.Control
@@ -75,12 +75,14 @@ function CompleteFormComponent() {
 					onChange={handleUsernameChange}
 					autoComplete="username"
 					required
+					className="py-2 shadow-sm"
+					style={{ transition: "all 0.2s ease" }}
 				/>
 			</Form.Group>
 
 			{/* Campo Password */}
-			<Form.Group className="mb-3 fs-5" controlId="formBasicPassword">
-				<Form.Label>
+			<Form.Group className="mb-4" controlId="formBasicPassword">
+				<Form.Label className="fw-semibold">
 					<i className="bi bi-lock me-2"></i>Password
 				</Form.Label>
 				<InputGroup>
@@ -92,10 +94,13 @@ function CompleteFormComponent() {
 						onChange={handlePasswordChange}
 						autoComplete="current-password"
 						required
+						className="py-2 shadow-sm"
+						style={{ transition: "all 0.2s ease" }}
 					/>
 					<InputGroup.Text
 						onClick={togglePasswordVisibility}
 						style={{ cursor: "pointer" }}
+						className="shadow-sm"
 					>
 						{passwordShown ? (
 							<i className="bi bi-eye-slash"></i>
@@ -110,8 +115,23 @@ function CompleteFormComponent() {
 			<Button
 				variant="primary"
 				type="submit"
-				className="btn rounded-5 mb-4 text-white"
-				style={{ backgroundColor: greenColor }}
+				className="w-100 py-2 mb-4 fw-semibold"
+				style={{
+					backgroundColor: greenColor,
+					border: "none",
+					borderRadius: "12px",
+					transition: "all 0.3s ease",
+				}}
+				onMouseOver={(e) => {
+					e.currentTarget.style.transform = "translateY(-2px)";
+					e.currentTarget.style.boxShadow = "0 6px 20px rgba(0,0,0,0.1)";
+					e.currentTarget.style.backgroundColor = `${greenColor}dd`;
+				}}
+				onMouseOut={(e) => {
+					e.currentTarget.style.transform = "translateY(0)";
+					e.currentTarget.style.boxShadow = "none";
+					e.currentTarget.style.backgroundColor = greenColor;
+				}}
 			>
 				Sign in
 			</Button>
@@ -121,39 +141,56 @@ function CompleteFormComponent() {
 
 export default function Login() {
 	return (
-		<main>
-			<Container className="vh-100 vw-100 d-flex justify-content-center align-items-center">
-				<Container>
-					<Row>
-						<Col
-							xs={12}
-							md={6}
-							className="order-2 order-md-1 d-flex flex-column"
-						>
-							<h1 className="mb-4">Sign in</h1>
-							<CompleteFormComponent />
-							<p className="text-center">
-								Needs to create an account?
-								<Link
-									href="/register"
-									className="ms-2 text-decoration-underline"
+		<main className="min-vh-100 d-flex align-items-center py-5"
+			style={{ background: "#f8f9fa" }}>
+			<Container>
+				<Row className="justify-content-center">
+					<Col xs={11} lg={10} xl={9}>
+						<div className="bg-white p-4 p-md-5 rounded-4 shadow-lg"
+							style={{ transition: "all 0.3s ease" }}>
+							<Row className="align-items-center">
+								<Col
+									xs={12}
+									md={6}
+									className="order-2 order-md-1 d-flex flex-column"
 								>
-									Sign up
-								</Link>
-							</p>
-						</Col>
-						<Col xs={12} md={6} className="order-1 order-md-2">
-							<Image
-								src="/Sloth.png"
-								alt="Logo"
-								width={500}
-								height={500}
-								priority={true}
-								draggable={false}
-							/>
-						</Col>
-					</Row>
-				</Container>
+									<h1 className="mb-4 fw-bold">Welcome Back!</h1>
+									<CompleteFormComponent />
+									<p className="text-center mb-0">
+										Needs to create an account?{' '}
+										<Link
+											href="/register"
+											className="ms-1 text-decoration-none"
+											style={{
+												color: greenColor,
+												transition: "all 0.2s ease"
+											}}
+											onMouseOver={(e) => {
+												e.currentTarget.style.opacity = "0.8";
+											}}
+											onMouseOut={(e) => {
+												e.currentTarget.style.opacity = "1";
+											}}
+										>
+											Sign up
+										</Link>
+									</p>
+								</Col>
+								<Col xs={12} md={6} className="order-1 order-md-2 text-center mb-4 mb-md-0">
+									<Image
+										src="/Sloth.png"
+										alt="Logo"
+										width={400}
+										height={400}
+										priority={true}
+										draggable={false}
+										className="img-fluid"
+									/>
+								</Col>
+							</Row>
+						</div>
+					</Col>
+				</Row>
 			</Container>
 		</main>
 	);

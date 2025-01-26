@@ -118,131 +118,187 @@ function CompleteFormComponent() {
 	};
 
 	return (
-		<Form onSubmit={handleSubmit}>
-			{/* Campo Username */}
-			<Form.Group className="mb-3 fs-5" controlId="formBasicUsername">
-				<Form.Label>
-					<i className="bi bi-person me-2"></i>Username
-				</Form.Label>
-				<Form.Control
-					type="text"
-					placeholder="Inserisci il tuo username"
-					name="username"
-					value={formData.username}
-					onChange={handleUsernameChange}
-					autoComplete="username"
-					required
-				/>
-			</Form.Group>
+		<Form onSubmit={handleSubmit} className="w-100">
+			<div className="row g-3">
+				{/* Campo Username */}
+				<div className="col-12">
+					<Form.Group controlId="formBasicUsername">
+						<Form.Label className="fw-semibold mb-2">
+							<i className="bi bi-person me-2"></i>Username
+						</Form.Label>
+						<Form.Control
+							type="text"
+							placeholder="Inserisci il tuo username"
+							name="username"
+							value={formData.username}
+							onChange={handleUsernameChange}
+							autoComplete="username"
+							required
+							className="py-2 shadow-sm rounded-3"
+							style={{ transition: "all 0.2s ease" }}
+						/>
+					</Form.Group>
+				</div>
 
-			{/* Campo Nome */}
-			<Form.Group className="mb-3 fs-5" controlId="formBasicFirstName">
-				<Form.Label>
-					<i className="bi bi-person me-2"></i>Nome
-				</Form.Label>
-				<Form.Control
-					type="text"
-					placeholder="Inserisci il tuo nome"
-					name="firstName"
-					value={formData.firstName}
-					onChange={handleFirstNameChange}
-					autoComplete="given-name"
-					required
-				/>
-			</Form.Group>
+				{/* Nome - ora occupa tutta la larghezza */}
+				<div className="col-12">
+					<Form.Group controlId="formBasicFirstName">
+						<Form.Label className="fw-semibold mb-2">
+							<i className="bi bi-person me-2"></i>Nome
+						</Form.Label>
+						<Form.Control
+							type="text"
+							placeholder="Inserisci il tuo nome"
+							name="firstName"
+							value={formData.firstName}
+							onChange={handleFirstNameChange}
+							autoComplete="given-name"
+							required
+							className="py-2 shadow-sm rounded-3"
+							style={{ transition: "all 0.2s ease" }}
+						/>
+					</Form.Group>
+				</div>
 
-			{/* Campo Cognome */}
-			<Form.Group className="mb-3 fs-5" controlId="formBasicLastName">
-				<Form.Label>
-					<i className="bi bi-person me-2"></i>Cognome
-				</Form.Label>
-				<Form.Control
-					type="text"
-					placeholder="Inserisci il tuo cognome"
-					name="lastName"
-					value={formData.lastName}
-					onChange={handleLastNameChange}
-					autoComplete="family-name"
-					required
-				/>
-			</Form.Group>
+				{/* Cognome - ora occupa tutta la larghezza */}
+				<div className="col-12">
+					<Form.Group controlId="formBasicLastName">
+						<Form.Label className="fw-semibold mb-2">
+							<i className="bi bi-person me-2"></i>Cognome
+						</Form.Label>
+						<Form.Control
+							type="text"
+							placeholder="Inserisci il tuo cognome"
+							name="lastName"
+							value={formData.lastName}
+							onChange={handleLastNameChange}
+							autoComplete="family-name"
+							required
+							className="py-2 shadow-sm rounded-3"
+							style={{ transition: "all 0.2s ease" }}
+						/>
+					</Form.Group>
+				</div>
 
-			{/* Campo Email */}
-			<Form.Group className="mb-3 fs-5" controlId="formBasicEmail">
-				<Form.Label>
-					<i className="bi bi-envelope me-2"></i>Email
-				</Form.Label>
-				<InputGroup>
-					<Form.Control
-						type="email"
-						placeholder="Inserisci la tua email"
-						name="email"
-						value={formData.email}
-						onChange={handleEmailChange}
-						autoComplete="email"
-						required
-					/>
-					<InputGroup.Text
-						onClick={sendVerificationEmail}
-						style={{ cursor: "pointer" }}
-					>
-						<IoIosSend />
-					</InputGroup.Text>
-				</InputGroup>
-			</Form.Group>
+				{/* Email e Token */}
+				<div className="col-12">
+					<Form.Group controlId="formBasicEmail">
+						<Form.Label className="fw-semibold mb-2">
+							<i className="bi bi-envelope me-2"></i>Email
+						</Form.Label>
+						<InputGroup>
+							<Form.Control
+								type="email"
+								placeholder="Inserisci la tua email"
+								name="email"
+								value={formData.email}
+								onChange={handleEmailChange}
+								autoComplete="email"
+								required
+								className="py-2 shadow-sm"
+								style={{ transition: "all 0.2s ease", borderRadius: "12px 0 0 12px" }}
+							/>
+							<InputGroup.Text
+								onClick={sendVerificationEmail}
+								className="shadow-sm"
+								style={{
+									cursor: "pointer",
+									transition: "all 0.2s ease",
+									backgroundColor: "#fff",
+									borderRadius: "0 12px 12px 0"
+								}}
+								onMouseOver={(e) => {
+									e.currentTarget.style.backgroundColor = "#f8f9fa";
+								}}
+								onMouseOut={(e) => {
+									e.currentTarget.style.backgroundColor = "#fff";
+								}}
+							>
+								<IoIosSend />
+							</InputGroup.Text>
+						</InputGroup>
+					</Form.Group>
+				</div>
+				<div className="col-12">
+					<Form.Group controlId="formBasicEmailToken">
+						<Form.Label className="fw-semibold mb-2">
+							<i className="bi bi-shield-lock me-2"></i>Token
+						</Form.Label>
+						<Form.Control
+							type="text"
+							placeholder="Inserisci il token ricevuto"
+							name="emailToken"
+							value={formData.emailToken}
+							onChange={handleEmailTokenChange}
+							autoComplete="off"
+							required
+							className="py-2 shadow-sm rounded-3"
+							style={{ transition: "all 0.2s ease" }}
+						/>
+					</Form.Group>
+				</div>
 
-			{/* Campo JWT Conferma Email */}
-			<Form.Group className="mb-3 fs-5" controlId="formBasicEmailToken">
-				<Form.Label>
-					<i className="bi bi-envelope me-2"></i>Token di conferma
-				</Form.Label>
-				<Form.Control
-					type="text"
-					placeholder="Inserisci il token ricevuto via email"
-					name="emailToken"
-					value={formData.emailToken}
-					onChange={handleEmailTokenChange}
-					autoComplete="off"
-					required
-				/>
-			</Form.Group>
+				{/* Password */}
+				<div className="col-12">
+					<Form.Group controlId="formBasicPassword">
+						<Form.Label className="fw-semibold mb-2">
+							<i className="bi bi-lock me-2"></i>Password
+						</Form.Label>
+						<InputGroup>
+							<Form.Control
+								type={passwordShown ? "text" : "password"}
+								placeholder="Inserisci la tua password"
+								name="password"
+								value={formData.password}
+								onChange={handlePasswordChange}
+								autoComplete="new-password"
+								required
+								className="py-2 shadow-sm"
+								style={{ transition: "all 0.2s ease", borderRadius: "12px 0 0 12px" }}
+							/>
+							<InputGroup.Text
+								onClick={togglePasswordVisibility}
+								className="shadow-sm"
+								style={{
+									cursor: "pointer",
+									transition: "all 0.2s ease",
+									borderRadius: "0 12px 12px 0"
+								}}
+							>
+								{passwordShown ? (
+									<i className="bi bi-eye-slash"></i>
+								) : (
+									<i className="bi bi-eye"></i>
+								)}
+							</InputGroup.Text>
+						</InputGroup>
+					</Form.Group>
+				</div>
+			</div>
 
-			{/* Campo Password */}
-			<Form.Group className="mb-3 fs-5" controlId="formBasicPassword">
-				<Form.Label>
-					<i className="bi bi-lock me-2"></i>Password
-				</Form.Label>
-				<InputGroup>
-					<Form.Control
-						type={passwordShown ? "text" : "password"}
-						placeholder="Inserisci la tua password"
-						name="password"
-						value={formData.password}
-						onChange={handlePasswordChange}
-						autoComplete="current-password"
-						required
-					/>
-					<InputGroup.Text
-						onClick={togglePasswordVisibility}
-						style={{ cursor: "pointer" }}
-					>
-						{passwordShown ? (
-							<i className="bi bi-eye-slash"></i>
-						) : (
-							<i className="bi bi-eye"></i>
-						)}
-					</InputGroup.Text>
-				</InputGroup>
-			</Form.Group>
-
-			{/* Bottone di invio */}
+			{/* Submit Button */}
 			<Button
 				variant="primary"
 				type="submit"
-				className="btn rounded-5 mb-4 text-white"
-				style={{ backgroundColor: greenColor }}
+				className="w-100 py-2 mt-4 mb-3 fw-semibold"
+				style={{
+					backgroundColor: greenColor,
+					border: "none",
+					borderRadius: "12px",
+					transition: "all 0.3s ease",
+				}}
+				onMouseOver={(e) => {
+					e.currentTarget.style.transform = "translateY(-2px)";
+					e.currentTarget.style.boxShadow = "0 6px 20px rgba(0,0,0,0.1)";
+					e.currentTarget.style.backgroundColor = `${greenColor}dd`;
+				}}
+				onMouseOut={(e) => {
+					e.currentTarget.style.transform = "translateY(0)";
+					e.currentTarget.style.boxShadow = "none";
+					e.currentTarget.style.backgroundColor = greenColor;
+				}}
 			>
-				Sign in
+				Sign up
 			</Button>
 		</Form>
 	);
@@ -250,39 +306,52 @@ function CompleteFormComponent() {
 
 export default function Register() {
 	return (
-		<main>
-			<Container className="vh-100 vw-100 d-flex justify-content-center align-items-center">
-				<Container>
-					<Row>
-						<Col
-							xs={12}
-							md={6}
-							className="order-2 order-md-1 d-flex flex-column"
-						>
-							<h1 className="mb-4">Sign up</h1>
-							<CompleteFormComponent />
-							<p className="text-center">
-								Already have an account?
-								<Link
-									href="/login"
-									className="ms-2 text-decoration-underline"
-								>
-									Sign in
-								</Link>
-							</p>
-						</Col>
-						<Col xs={12} md={6} className="order-1 order-md-2">
-							<Image
-								src="/Sloth.png"
-								alt="Logo"
-								width={500}
-								height={500}
-								priority={true}
-								draggable={false}
-							/>
-						</Col>
-					</Row>
-				</Container>
+		<main className="min-vh-100 d-flex align-items-center py-4"
+			style={{ background: "#f8f9fa" }}>
+			<Container fluid="xxl"> {/* Cambiato a fluid="xxl" per più controllo */}
+				<Row className="justify-content-center">
+					<Col xs={11} lg={10} xxl={9}>
+						<div className="bg-white p-3 p-md-4 rounded-4 shadow-lg"
+							style={{ transition: "all 0.3s ease" }}>
+							<Row className="align-items-center g-4">
+								<Col xs={12} lg={7} className="order-2 order-lg-1 d-flex flex-column">
+									<h1 className="mb-4 fw-bold">Create Account</h1>
+									<CompleteFormComponent />
+									<p className="text-center mb-0">
+										Already have an account?{' '}
+										<Link
+											href="/login"
+											className="ms-1 text-decoration-none"
+											style={{
+												color: greenColor,
+												transition: "all 0.2s ease"
+											}}
+											onMouseOver={(e) => {
+												e.currentTarget.style.opacity = "0.8";
+											}}
+											onMouseOut={(e) => {
+												e.currentTarget.style.opacity = "1";
+											}}
+										>
+											Sign in
+										</Link>
+									</p>
+								</Col>
+								<Col xs={12} lg={5} className="order-1 order-lg-2 text-center mb-4 mb-lg-0">
+									<Image
+										src="/Sloth.png"
+										alt="Logo"
+										width={280}
+										height={280}
+										priority={true}
+										draggable={false}
+										className="img-fluid"
+									/>
+								</Col>
+							</Row>
+						</div>
+					</Col>
+				</Row>
 			</Container>
 		</main>
 	);
