@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button, Modal, Nav, Offcanvas } from "react-bootstrap";
+import Image from "next/image";
+import { Button, Modal, Nav, Navbar, NavDropdown, Container, Offcanvas } from "react-bootstrap";
 import {
 	FaBars, FaCalendarAlt, FaCog, FaComments,
 	FaHome, FaInbox, FaProjectDiagram,
@@ -9,13 +10,28 @@ import {
 } from "react-icons/fa";
 import "./Sidebar.css";
 
+// Riorganizzare i link principali
+const mainLinks = [
+	{ name: "Calendario", link: "/calendar" },
+	{ name: "Progetti", link: "/projects" },
+	{ name: "Note", link: "/notepad" },
+	{ name: "Chat", link: "/chat" },
+	{ name: "Pomodoro", link: "/pomodoro" },
+];
+
+// Link secondari raggruppati in "Altro"
+const otherLinks = [
+	{ name: "Impostazioni", icon: FaCog, link: "#impostazioni" },
+	{ name: "Inbox", icon: FaInbox, link: "#inbox" },
+];
+
 // Struttura del menu principale
 const menuItems = [
 	{
-		title: "Principale",
+		title: "Sistema",
 		items: [
 			{ name: "Inbox", icon: FaInbox, link: "#inbox" },
-			{ name: "Home", icon: FaHome, link: "/" },
+			{ name: "Impostazioni", icon: FaCog, link: "#impostazioni" },
 		]
 	},
 	{
@@ -28,29 +44,64 @@ const menuItems = [
 			{ name: "Pomodoro", icon: FaStopwatch, link: "/pomodoro" },
 		]
 	},
-	{
-		title: "Sistema",
-		items: [
-			{ name: "Impostazioni", icon: FaCog, link: "#impostazioni" },
-		]
-	}
 ];
 
 export function Sidebar() {
-	// Gestione stati per sidebar e modal
 	const [showSidebar, setShowSidebar] = useState(false);
 	const [showModal, setShowModal] = useState(false);
 
-	// Funzione per aprire il modal di logout
 	const handleLogout = () => setShowModal(true);
 
 	return (
 		<>
-			{/* Pulsante per aprire la sidebar */}
+			{/* Navbar per md+ */}
+			<Navbar bg="light" expand="md" className="d-none d-md-flex border-bottom shadow-sm" fixed="top">
+				<Container>
+					<Navbar.Brand href="/" className="fw-bold">
+						<Image
+							src="/Sloth.png"
+							alt="Logo"
+							height="50"
+							width="110"
+							className="d-inline-block align-text-top"
+						/>
+					</Navbar.Brand>
+					<Nav className="mx-auto">
+						{mainLinks.map((item, i) => (
+							<Nav.Link
+								key={i}
+								href={item.link}
+								className="px-4 py-3 nav-link-hover text-black"
+							>
+								{item.name}
+							</Nav.Link>
+						))}
+					</Nav>
+					<Nav>
+						<NavDropdown
+							title={<span className="text-black">Menu</span>}
+							align="end"
+							className="px-3"
+						>
+							{otherLinks.map((item, idx) => (
+								<NavDropdown.Item href={item.link} key={idx}>
+									{item.name}
+								</NavDropdown.Item>
+							))}
+							<NavDropdown.Divider />
+							<NavDropdown.Item onClick={handleLogout}>
+								Logout
+							</NavDropdown.Item>
+						</NavDropdown>
+					</Nav>
+				</Container>
+			</Navbar>
+
+			{/* Pulsante sidebar per schermi < md */}
 			<Button
 				variant="primary"
 				onClick={() => setShowSidebar(true)}
-				className="toggle_btn"
+				className="toggle_btn d-md-none"
 				style={{
 					position: 'fixed',
 					top: '1rem',
@@ -63,18 +114,26 @@ export function Sidebar() {
 				<FaBars />
 			</Button>
 
-			{/* Sidebar principale */}
+			{/* Offcanvas sidebar per schermi piccoli */}
 			<Offcanvas
 				show={showSidebar}
 				onHide={() => setShowSidebar(false)}
-				className="bg-light sidebar"
+				className="bg-light sidebar d-md-none"
 				style={{
 					width: '250px',
 					boxShadow: '2px 0 5px rgba(0,0,0,0.1)'
 				}}
 			>
 				<Offcanvas.Header closeButton>
-					<Offcanvas.Title className="fs-4 fw-bold">Menu</Offcanvas.Title>
+					<a className="navbar-brand" href="./home">
+						<Image
+							src="/Sloth.png"
+							alt="Logo"
+							height="50"
+							width="110"
+							className="d-inline-block align-text-top"
+						/>
+					</a>
 				</Offcanvas.Header>
 
 				<Offcanvas.Body className="d-flex flex-column">

@@ -42,3 +42,73 @@
 .sidebar .btn-outline-danger:hover {
   transform: scale(1.02);
 }
+
+/* Configurazione base */
+body {
+  padding-top: 72px;
+}
+
+/* Stili comuni per elementi interattivi */
+.nav-link,
+.dropdown-item,
+.btn {
+  transition: all 0.2s ease;
+}
+
+/* Effetti hover */
+.nav-link:hover,
+.dropdown-item:hover {
+  color: var(--bs-primary) !important;
+  transform: translateX(3px);
+}
+
+/* Stili mobile */
+@media (max-width: 992) {
+  body {
+    padding-top: 0;
+  }
+}
+
+/* Dropdown personalizzato */
+.dropdown-item {
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.dropdown-item:hover {
+  background-color: var(--bs-primary-bg-subtle);
+  color: var(--bs-primary);
+}
+
+/* Stili navbar desktop */
+.nav-link-hover {
+  position: relative;
+  font-weight: 500;
+}
+
+.nav-link-hover::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background-color: var(--bs-primary);
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+}
+
+.nav-link-hover:hover::after {
+  width: 60%;
+}
+
+.nav-link-hover.active::after {
+  width: 60%;
+}
+
+.dropdown-menu {
+  border-radius: 0.5rem;
+  border: none;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
