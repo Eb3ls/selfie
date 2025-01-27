@@ -1,6 +1,6 @@
 "use client";
 
-import { Sidebar } from "@/app/components/GlobalSideBar";
+import { GlobalSideBar } from "@/app/components/GlobalSideBar";
 import DOMPurify from "dompurify";
 import { marked } from "marked";
 import { useParams } from "next/navigation";
@@ -105,7 +105,7 @@ export default function Note() {
 
 	return (
 		<Container>
-			<Sidebar />
+			<GlobalSideBar />
 			<Row className="my-5">
 				<Col md={10} className="mt-0 mt-4 mt-sm-2">
 					<h1

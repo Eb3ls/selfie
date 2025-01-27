@@ -1,0 +1,334 @@
+import {
+	generateMessageResponse,
+	generateObjectResponse,
+	idListToNameList,
+	validate
+} from "@/utils/api/api";
+import {
+	ACTIVITY_COLLECTION,
+	Alarm,
+	PHASE_COLLECTION,
+	PROJECT_COLLECTION,
+	Phase,
+	Project,
+	ProjectActivity,
+	findCollectionWrapper,
+	getCollection
+} from "@/utils/db/db";
+import { Collection } from "mongodb";
+import { NextRequest, NextResponse } from "next/server";
+
+export interface ProjectResponse {
+	_id: string;
+	summary: string;
+	owner: { id: string; name: string };
+	users: { id: string; name: string }[];
+	noteId: string;
+	phases: PhaseResponse[];
+}
+
+export interface PhaseResponse {
+	_id: string;
+	summary: string;
+	owner: { id: string; name: string };
+	dtStart: string;
+	due: string;
+	subPhases: SubPhaseResponse[];
+	activities: ProjectActivityResponse[];
+}
+
+export interface SubPhaseResponse {
+	_id: string;
+	summary: string;
+	owner: { id: string; name: string };
+	dtStart: string;
+	due: string;
+	activities: ProjectActivityResponse[];
+}
+
+export interface ProjectActivityResponse {
+	_id: string;
+	summary: string;
+	description: string;
+	status: string;
+	dtStart: string;
+	due: string;
+	isMilestone: boolean;
+	owner: { id: string; name: string };
+	users: { id: string; name: string }[];
+	alarms: Alarm[];
+	noteId?: string;
+	noteLink: string | null;
+}
+
+export const GET = async (
+	request: NextRequest,
+	params: { params: { id: string } }
+) => {
+	// Validazione della richiesta
+	const validation = await validate<{}>(request, {}, false);
+
+	// Se la validazione fallisce, ritorna il messaggio di errore
+	if (validation === null) {
+		return generateMessageResponse("Invalid request", 400);
+	}
+
+	// Estraiamo l'utente e il corpo della richiesta
+	const { user } = validation;
+
+	// Estraiamo l'ID dell'utente
+	const userId: string = user._id!;
+
+	const projectId = params.params.id;
+
+	if (!projectId) {
+		return generateMessageResponse("Invalid request", 400);
+	}
+
+	// Otteniamo la collezione dei progetti
+	const projectClient: Collection<Project> =
+		await getCollection<Project>(PROJECT_COLLECTION);
+	const outProject = await findCollectionWrapper<Project>(
+		{ _id: projectId },
+		projectClient
+	);
+
+	if (outProject.status !== 200) {
+		return outProject;
+	}
+
+	const project: Project = (await outProject.json())[0];
+
+	// Controlla che l'utente dei cookie sia l'owner del progetto
+	if (project.ownerId.toString() !== userId) {
+		return generateMessageResponse("Unauthorized", 401);
+	}
+
+	// Convertiamo ownerId in nome utente
+	const ownerConversion = await idListToNameList([
+		project.ownerId.toString()
+	]);
+	if (ownerConversion.status !== 200) {
+		return generateMessageResponse("Error converting owner ID", 500);
+	}
+
+	const userConversion = await idListToNameList(
+		project.userIdList.map((id) => id.toString())
+	);
+	if (userConversion.status !== 200) {
+		return generateMessageResponse("Error converting user IDs", 500);
+	}
+
+	const projectResponse: ProjectResponse = {
+		_id: project._id!.toString(),
+		summary: project.summary,
+		owner: {
+			id: project.ownerId.toString(),
+			name: ownerConversion.userNameList![0]
+		},
+		users: project.userIdList.map((id, index) => ({
+			id: id.toString(),
+			name: userConversion.userNameList![index]
+		})),
+		noteId: project.noteId.toString(),
+		phases: []
+	};
+
+	// Otteniamo le fasi del progetto
+	const phaseClient: Collection<Phase> =
+		await getCollection<Phase>(PHASE_COLLECTION);
+	const outPhases = await findCollectionWrapper<Phase>(
+		{ projectId: projectId, parentId: projectId },
+		phaseClient
+	);
+
+	// Otteniamo le attività delle sottofasi
+	const activityClient: Collection<ProjectActivity> =
+		await getCollection<ProjectActivity>(ACTIVITY_COLLECTION);
+
+	if (outPhases.status === 200) {
+		const phases: Phase[] = await outPhases.json();
+
+		for (const phase of phases) {
+			const phaseOwnerConversion = await idListToNameList([
+				phase.ownerId.toString()
+			]);
+			if (phaseOwnerConversion.status !== 200) {
+				return generateMessageResponse(
+					"Error converting phase owner ID",
+					500
+				);
+			}
+
+			const phaseResponse: PhaseResponse = {
+				_id: phase._id!.toString(),
+				summary: phase.summary,
+				owner: {
+					id: phase.ownerId.toString(),
+					name: phaseOwnerConversion.userNameList![0]
+				},
+				dtStart: phase.dtStart.toISOString(),
+				due: phase.due.toISOString(),
+				subPhases: [],
+				activities: []
+			};
+
+			// Otteniamo le sottofasi
+			const outSubPhases = await findCollectionWrapper<Phase>(
+				{ parentId: phase._id!.toString() },
+				phaseClient
+			);
+			if (outSubPhases.status === 200) {
+				const subPhases: Phase[] = await outSubPhases.json();
+
+				for (const subPhase of subPhases) {
+					const subPhaseOwnerConversion = await idListToNameList([
+						subPhase.ownerId.toString()
+					]);
+					if (subPhaseOwnerConversion.status !== 200) {
+						return generateMessageResponse(
+							"Error converting subphase owner ID",
+							500
+						);
+					}
+
+					const subPhaseResponse: SubPhaseResponse = {
+						_id: subPhase._id!.toString(),
+						summary: subPhase.summary,
+						owner: {
+							id: subPhase.ownerId.toString(),
+							name: subPhaseOwnerConversion.userNameList![0]
+						},
+						dtStart: subPhase.dtStart.toISOString(),
+						due: subPhase.due.toISOString(),
+						activities: []
+					};
+
+					const outActivities =
+						await findCollectionWrapper<ProjectActivity>(
+							{ phaseId: subPhase._id!.toString() },
+							activityClient
+						);
+					if (outActivities.status === 200) {
+						const activities: ProjectActivity[] =
+							await outActivities.json();
+
+						for (const activity of activities) {
+							const activityOwnerConversion =
+								await idListToNameList([
+									activity.ownerId.toString()
+								]);
+							if (activityOwnerConversion.status !== 200) {
+								return generateMessageResponse(
+									"Error converting activity owner ID",
+									500
+								);
+							}
+
+							const activityUsersConversion =
+								await idListToNameList(
+									activity.userIdList.map((id) =>
+										id.toString()
+									)
+								);
+							if (activityUsersConversion.status !== 200) {
+								return generateMessageResponse(
+									"Error converting activity user IDs",
+									500
+								);
+							}
+
+							const activityResponse: ProjectActivityResponse = {
+								_id: activity._id!.toString(),
+								summary: activity.summary,
+								description: activity.description,
+								status: activity.status,
+								dtStart: activity.dtStart.toISOString(),
+								due: activity.due.toISOString(),
+								isMilestone: activity.isMilestone,
+								owner: {
+									id: activity.ownerId.toString(),
+									name: activityOwnerConversion
+										.userNameList![0]
+								},
+								users: activity.userIdList.map((id, index) => ({
+									id: id.toString(),
+									name: activityUsersConversion.userNameList![
+										index
+									]
+								})),
+								alarms: activity.alarms,
+								noteId: activity.noteId?.toString(),
+								noteLink: activity.noteLink
+							};
+
+							subPhaseResponse.activities.push(activityResponse);
+						}
+					}
+
+					phaseResponse.subPhases.push(subPhaseResponse);
+				}
+			}
+
+			// Otteniamo le attività delle fasi principali
+			const outPhaseActivities =
+				await findCollectionWrapper<ProjectActivity>(
+					{ phaseId: phase._id!.toString() },
+					activityClient
+				);
+			if (outPhaseActivities.status === 200) {
+				const activities: ProjectActivity[] =
+					await outPhaseActivities.json();
+
+				for (const activity of activities) {
+					const activityOwnerConversion = await idListToNameList([
+						activity.ownerId.toString()
+					]);
+					if (activityOwnerConversion.status !== 200) {
+						return generateMessageResponse(
+							"Error converting activity owner ID",
+							500
+						);
+					}
+
+					const activityUsersConversion = await idListToNameList(
+						activity.userIdList.map((id) => id.toString())
+					);
+					if (activityUsersConversion.status !== 200) {
+						return generateMessageResponse(
+							"Error converting activity user IDs",
+							500
+						);
+					}
+
+					const activityResponse: ProjectActivityResponse = {
+						_id: activity._id!.toString(),
+						summary: activity.summary,
+						description: activity.description,
+						status: activity.status,
+						dtStart: activity.dtStart.toISOString(),
+						due: activity.due.toISOString(),
+						isMilestone: activity.isMilestone,
+						owner: {
+							id: activity.ownerId.toString(),
+							name: activityOwnerConversion.userNameList![0]
+						},
+						users: activity.userIdList.map((id, index) => ({
+							id: id.toString(),
+							name: activityUsersConversion.userNameList![index]
+						})),
+						alarms: activity.alarms,
+						noteId: activity.noteId?.toString(),
+						noteLink: activity.noteLink
+					};
+
+					phaseResponse.activities.push(activityResponse);
+				}
+			}
+
+			projectResponse.phases.push(phaseResponse);
+		}
+	}
+
+	return generateObjectResponse(projectResponse, 200);
+};
