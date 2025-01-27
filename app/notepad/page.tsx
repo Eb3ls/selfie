@@ -1,9 +1,7 @@
 "use client";
 
-import { Sidebar } from "@/app/components/Sidebar";
+import { GlobalSideBar } from "@/app/components/GlobalSideBar";
 import { StringNote } from "@/utils/db/db";
-import { createNote } from "@/utils/db/models/Note";
-import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { Button, Card, Col, Container, Row } from "react-bootstrap";
 import { FaLock, FaTrash, FaUser, FaUserShield } from "react-icons/fa";
@@ -197,7 +195,7 @@ export default function Notepad() {
 
 	return (
 		<>
-			<Sidebar />
+			<GlobalSideBar />
 			<Container fluid="sm" className="mt-5 text-center px-5">
 				<h1 className="mb-5">Notepad</h1>
 				<SearchBar
@@ -267,7 +265,7 @@ export default function Notepad() {
 											{note.text.length < 200
 												? note.text
 												: note.text.substring(0, 200) +
-													"..."}
+												"..."}
 										</Card.Text>
 									</Card.Body>
 								</Card>

@@ -14,6 +14,7 @@ import { chatBody } from "@/app/color_palette";
 import { StringMessage } from "@/utils/db/db";
 import React, { useEffect, useRef, useState } from "react";
 import { Col, Container, ListGroup, Row } from "react-bootstrap";
+import { GlobalSideBar } from "../components/GlobalSideBar";
 import useSWR from "swr";
 
 async function fetcher(url: string) {
@@ -247,25 +248,28 @@ export default function ChatMain() {
 	}
 
 	return (
-		<Container fluid className="vh-100">
-			<Row className="h-100">
-				<Col
-					xs={12}
-					lg={3}
-					className={`d-flex flex-column p-0 px-2 h-100 position-relative bg-dark border-end border-black ${isSidebarOpen ? "d-block" : "d-none d-lg-block"}`}
-				>
-					{Sidebar()}
-				</Col>
-				<Col
-					xs={12}
-					lg={9}
-					style={{ backgroundColor: chatBody }}
-					className={`d-flex flex-column p-0 h-100 ${isSidebarOpen ? "d-none d-lg-block" : "d-block"}`}
-				>
-					{selectedChat && MainChatComponent()}
-				</Col>
-			</Row>
-		</Container>
+		<>
+			<GlobalSideBar />
+			<Container fluid className="vh-100">
+				<Row className="h-100">
+					<Col
+						xs={12}
+						lg={3}
+						className={`d-flex flex-column p-0 px-2 h-100 position-relative bg-dark border-end border-black ${isSidebarOpen ? "d-block" : "d-none d-lg-block"}`}
+					>
+						{Sidebar()}
+					</Col>
+					<Col
+						xs={12}
+						lg={9}
+						style={{ backgroundColor: chatBody }}
+						className={`d-flex flex-column p-0 h-100 ${isSidebarOpen ? "d-none d-lg-block" : "d-block"}`}
+					>
+						{selectedChat && MainChatComponent()}
+					</Col>
+				</Row>
+			</Container>
+		</>
 	);
 }
 

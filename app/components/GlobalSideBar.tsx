@@ -5,10 +5,10 @@ import Image from "next/image";
 import { Button, Modal, Nav, Navbar, NavDropdown, Container, Offcanvas } from "react-bootstrap";
 import {
 	FaBars, FaCalendarAlt, FaCog, FaComments,
-	FaHome, FaInbox, FaProjectDiagram,
+	FaInbox, FaProjectDiagram,
 	FaStickyNote, FaStopwatch, FaUser
 } from "react-icons/fa";
-import "./Sidebar.css";
+import "./GlobalSideBar.css";
 
 // Riorganizzare i link principali
 const mainLinks = [
@@ -46,7 +46,7 @@ const menuItems = [
 	},
 ];
 
-export function Sidebar() {
+export function GlobalSideBar() {
 	const [showSidebar, setShowSidebar] = useState(false);
 	const [showModal, setShowModal] = useState(false);
 
@@ -57,7 +57,7 @@ export function Sidebar() {
 			{/* Navbar per md+ */}
 			<Navbar bg="light" expand="md" className="d-none d-md-flex border-bottom shadow-sm" fixed="top">
 				<Container>
-					<Navbar.Brand href="/" className="fw-bold">
+					<Navbar.Brand href="/home" className="fw-bold">
 						<Image
 							src="/Sloth.png"
 							alt="Logo"

@@ -1,6 +1,6 @@
 "use client";
 
-import { Sidebar } from "@/app/components/Sidebar";
+import { Sidebar } from "@/app/components/GlobalSideBar";
 import DOMPurify from "dompurify";
 import { marked } from "marked";
 import { useParams } from "next/navigation";

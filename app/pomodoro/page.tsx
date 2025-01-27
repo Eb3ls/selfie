@@ -5,7 +5,7 @@ import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Button, Container } from "react-bootstrap";
 import { FaLightbulb, FaShareNodes } from "react-icons/fa6";
 import useSWR from "swr";
-import { Sidebar } from "../components/Sidebar";
+import { GlobalSideBar } from "../components/GlobalSideBar";
 import { Coffee } from "./Animation/Coffee";
 import { Tree } from "./Animation/Tree";
 import { ReminderModal } from "./Modals/ReminderModal";
@@ -271,69 +271,71 @@ function PomodoroComponent() {
 	}
 
 	return (
-		<Container
-			fluid
-			className="vh-100 d-flex flex-column"
-			style={{ backgroundColor: "rgb(240, 240, 240)" }}
-		>
-			{error && <h1>Invalid Session</h1>}
-			{!data && !error && <h1>Caricamento...</h1>}
-			{data && !error && (
-				<>
-					<div className="d-flex position-absolute top-0 end-0 m-5 z-3">
-						<ReminderModal
-							studyTime={studyTime}
-							sessions={sessions}
-							breakTime={breakTime}
-						>
-							<FaLightbulb size={30} className="me-2" />
-						</ReminderModal>
-						<ShareModal
-							studyTime={studyTime}
-							sessions={sessions}
-							breakTime={breakTime}
-						>
-							<FaShareNodes size={30} />
-						</ShareModal>
-					</div>
-					{isStudying ? (
-						<Tree
-							time={studyTime * 60}
-							started={isStarted}
-							paused={isPaused}
-						></Tree>
-					) : (
-						<Coffee
-							time={breakTime * 60}
-							started={isStarted}
-							paused={isPaused}
-						></Coffee>
-					)}
-					<Sidebar></Sidebar>
-					<TimerBlock></TimerBlock>
-					{!isStarted && id === null && (
-						<div className="d-flex flex-column flex-md-row justify-content-center">
-							<Setting
-								name="Study Time"
-								getter={studyTime}
-								setter={setStudyTime}
-							></Setting>
-							<Setting
-								name="Sessions"
-								getter={sessions}
-								setter={setSessions}
-							></Setting>
-							<Setting
-								name="Break Time"
-								getter={breakTime}
-								setter={setBreakTime}
-							></Setting>
+		<>
+			<GlobalSideBar />
+			<Container
+				fluid
+				className="vh-100 d-flex flex-column"
+				style={{ backgroundColor: "rgb(240, 240, 240)" }}
+			>
+				{error && <h1>Invalid Session</h1>}
+				{!data && !error && <h1>Caricamento...</h1>}
+				{data && !error && (
+					<>
+						<div className="d-flex position-absolute top-0 end-0 m-5 z-3">
+							<ReminderModal
+								studyTime={studyTime}
+								sessions={sessions}
+								breakTime={breakTime}
+							>
+								<FaLightbulb size={30} className="me-2" />
+							</ReminderModal>
+							<ShareModal
+								studyTime={studyTime}
+								sessions={sessions}
+								breakTime={breakTime}
+							>
+								<FaShareNodes size={30} />
+							</ShareModal>
 						</div>
-					)}
-					<MusicBar></MusicBar>
-				</>
-			)}
-		</Container>
+						{isStudying ? (
+							<Tree
+								time={studyTime * 60}
+								started={isStarted}
+								paused={isPaused}
+							></Tree>
+						) : (
+							<Coffee
+								time={breakTime * 60}
+								started={isStarted}
+								paused={isPaused}
+							></Coffee>
+						)}
+						<TimerBlock></TimerBlock>
+						{!isStarted && id === null && (
+							<div className="d-flex flex-column flex-md-row justify-content-center">
+								<Setting
+									name="Study Time"
+									getter={studyTime}
+									setter={setStudyTime}
+								></Setting>
+								<Setting
+									name="Sessions"
+									getter={sessions}
+									setter={setSessions}
+								></Setting>
+								<Setting
+									name="Break Time"
+									getter={breakTime}
+									setter={setBreakTime}
+								></Setting>
+							</div>
+						)}
+						<MusicBar></MusicBar>
+					</>
+				)}
+			</Container>
+		</>
 	);
 }
 

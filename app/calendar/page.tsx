@@ -13,6 +13,7 @@ import { Calendar, View, momentLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { Button, Container } from "react-bootstrap";
 import useSWR from "swr";
+import { GlobalSideBar } from "../components/GlobalSideBar";
 // Importa il file CSS per lo stile del calendario
 import "./calendar.css";
 
@@ -140,75 +141,78 @@ export default function CalendarPage() {
 	}
 
 	return (
-		<Container style={{ height: "80vh" }}>
-			<h1 className="calendar-title">Calendario Eventi</h1>
-			<p className="calendar-description">
-				Gestisci i tuoi eventi quotidiani
-			</p>
-			<Calendar
-				localizer={localizer}
-				events={events}
-				popup={true}
-				startAccessor="start"
-				endAccessor="end"
-				views={["month", "week", "day"]}
-				view={currentView} // Stato attuale della vista
-				onView={handleViewChange} // Cambia la vista quando l'utente preme un bottone
-				date={currentDate} // Imposta la data corrente
-				onNavigate={handleNavigate} // Cambia la data quando l'utente preme i bottoni (Today, Back, Next)
-				onSelectEvent={handleSelectEvent} // Gestisce la selezione di un evento
-				className="custom-calendar" // Classe per lo stile
-			/>
-			<AddActivityModal>
-				<Button>Aggiungi Attività</Button>
-			</AddActivityModal>
-			<AddEventModal>
-				<Button>Aggiungi Evento</Button>
-			</AddEventModal>
-			<AddSessionModal>
-				<Button>Aggiungi Sessione</Button>
-			</AddSessionModal>
-
-			{/* Se l'evento selezionato è una attività*/}
-			{selectedCalendarEvent?.typology === "activity" && (
-				<ModifyActivityModal
-					show={showModal}
-					setShow={setShowModal}
-					activity={
-						rawActivities.find(
-							(activity) =>
-								activity._id === selectedCalendarEvent.id
-						) as StringActivity
-					}
+		<>
+			<GlobalSideBar />
+			<Container style={{ height: "80vh" }}>
+				<h1 className="calendar-title">Calendario Eventi</h1>
+				<p className="calendar-description">
+					Gestisci i tuoi eventi quotidiani
+				</p>
+				<Calendar
+					localizer={localizer}
+					events={events}
+					popup={true}
+					startAccessor="start"
+					endAccessor="end"
+					views={["month", "week", "day"]}
+					view={currentView} // Stato attuale della vista
+					onView={handleViewChange} // Cambia la vista quando l'utente preme un bottone
+					date={currentDate} // Imposta la data corrente
+					onNavigate={handleNavigate} // Cambia la data quando l'utente preme i bottoni (Today, Back, Next)
+					onSelectEvent={handleSelectEvent} // Gestisce la selezione di un evento
+					className="custom-calendar" // Classe per lo stile
 				/>
-			)}
+				<AddActivityModal>
+					<Button>Aggiungi Attività</Button>
+				</AddActivityModal>
+				<AddEventModal>
+					<Button>Aggiungi Evento</Button>
+				</AddEventModal>
+				<AddSessionModal>
+					<Button>Aggiungi Sessione</Button>
+				</AddSessionModal>
 
-			{/* Se l'evento selezionato è un evento*/}
-			{selectedCalendarEvent?.typology === "event" && (
-				<ModifyEventModal
-					show={showModal}
-					setShow={setShowModal}
-					event={
-						rawEvents.find(
-							(event) => event._id === selectedCalendarEvent.id
-						) as StringEvent
-					}
-				/>
-			)}
+				{/* Se l'evento selezionato è una attività*/}
+				{selectedCalendarEvent?.typology === "activity" && (
+					<ModifyActivityModal
+						show={showModal}
+						setShow={setShowModal}
+						activity={
+							rawActivities.find(
+								(activity) =>
+									activity._id === selectedCalendarEvent.id
+							) as StringActivity
+						}
+					/>
+				)}
 
-			{/* Se l'evento selezionato è una sessione*/}
-			{selectedCalendarEvent?.typology === "session" && (
-				<ModifySessionModal
-					show={showModal}
-					setShow={setShowModal}
-					session={
-						rawSessions.find(
-							(session) =>
-								session._id === selectedCalendarEvent.id
-						) as StringSession
-					}
-				/>
-			)}
-		</Container>
+				{/* Se l'evento selezionato è un evento*/}
+				{selectedCalendarEvent?.typology === "event" && (
+					<ModifyEventModal
+						show={showModal}
+						setShow={setShowModal}
+						event={
+							rawEvents.find(
+								(event) => event._id === selectedCalendarEvent.id
+							) as StringEvent
+						}
+					/>
+				)}
+
+				{/* Se l'evento selezionato è una sessione*/}
+				{selectedCalendarEvent?.typology === "session" && (
+					<ModifySessionModal
+						show={showModal}
+						setShow={setShowModal}
+						session={
+							rawSessions.find(
+								(session) =>
+									session._id === selectedCalendarEvent.id
+							) as StringSession
+						}
+					/>
+				)}
+			</Container>
+		</>
 	);
 }

@@ -1,11 +1,11 @@
 "use client";
 
-import { Sidebar } from "@/app/components/Sidebar";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { Button, Card, Col, Container, Row } from "react-bootstrap";
 import { FaTrash, FaUserShield } from "react-icons/fa";
 import { SearchBar } from "./SearchBar";
+import { GlobalSideBar } from "../components/GlobalSideBar";
 
 // Importa il router di Next.js
 
@@ -154,7 +154,7 @@ export default function ProjectPage() {
 
 	return (
 		<>
-			<Sidebar />
+			<GlobalSideBar />
 			<Container fluid="sm" className="mt-5 text-center px-5">
 				<h1 className="mb-5">Projects</h1>
 				<SearchBar
@@ -202,24 +202,24 @@ export default function ProjectPage() {
 											</span>
 											{currentUser ==
 												project.ownerName && (
-												<Button
-													variant="danger"
-													className="ms-2 p-0"
-													onClick={() =>
-														handleDelete(
-															project._id
-														)
-													}
-													style={{
-														border: "none",
-														backgroundColor:
-															"transparent",
-														color: "inherit"
-													}}
-												>
-													<FaTrash title="Delete" />
-												</Button>
-											)}
+													<Button
+														variant="danger"
+														className="ms-2 p-0"
+														onClick={() =>
+															handleDelete(
+																project._id
+															)
+														}
+														style={{
+															border: "none",
+															backgroundColor:
+																"transparent",
+															color: "inherit"
+														}}
+													>
+														<FaTrash title="Delete" />
+													</Button>
+												)}
 										</Card.Text>
 									</Card.Body>
 								</Card>

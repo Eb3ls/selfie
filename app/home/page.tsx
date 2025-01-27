@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Button, Col, Container, Row } from "react-bootstrap";
+import { GlobalSideBar } from "../components/GlobalSideBar";
 import useSWR from "swr";
 
 type ReducedUser = {
@@ -100,6 +101,7 @@ export default function Home() {
 	return (
 		<>
 			<main>
+				<GlobalSideBar />
 				<NavbarComponent user={user} />
 				<Container
 					fluid
