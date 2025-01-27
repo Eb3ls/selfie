@@ -8,6 +8,7 @@ import {
 	FaInbox, FaProjectDiagram,
 	FaStickyNote, FaStopwatch, FaUser
 } from "react-icons/fa";
+import { useUser } from "./UserContext";
 import "./GlobalSideBar.css";
 
 // Riorganizzare i link principali
@@ -46,16 +47,40 @@ const menuItems = [
 	},
 ];
 
+// Nuovo componente per le info utente
+const UserInfo = ({ user }: { user: any }) => (
+	<div className="d-flex align-items-center gap-3 p-3">
+		{/* <div className="position-relative" style={{ width: '48px', height: '48px' }}>
+			<Image
+				src={user?.profilePic || "/default-avatar.png"}
+				alt="Profile"
+				fill
+				style={{ objectFit: 'cover', borderRadius: '50%' }}
+			/>
+		</div> */}
+		<i className="bi bi-person fs-1 me-2"></i>
+		<div className="d-flex flex-column">
+			<span className="fw-bold fs-3">{user?.username}</span>
+			<span className="text-muted small">{user?.email}</span>
+		</div>
+	</div>
+);
+
 export function GlobalSideBar() {
 	const [showSidebar, setShowSidebar] = useState(false);
 	const [showModal, setShowModal] = useState(false);
+	const { user, logOut } = useUser();
 
 	const handleLogout = () => setShowModal(true);
+	const confirmLogout = () => {
+		setShowModal(false);
+		logOut();
+	};
 
 	return (
 		<>
 			{/* Navbar per md+ */}
-			<Navbar bg="light" expand="md" className="d-none d-md-flex border-bottom shadow-sm" fixed="top">
+			<Navbar bg="light" expand="md" className="d-none d-lg-flex border-bottom shadow-sm" fixed="top">
 				<Container>
 					<Navbar.Brand href="/home" className="fw-bold">
 						<Image
@@ -66,6 +91,12 @@ export function GlobalSideBar() {
 							className="d-inline-block align-text-top"
 						/>
 					</Navbar.Brand>
+
+					{/* Aggiunta UserInfo nella navbar */}
+					<div className="ms-4">
+						<UserInfo user={user} />
+					</div>
+
 					<Nav className="mx-auto">
 						{mainLinks.map((item, i) => (
 							<Nav.Link
@@ -101,7 +132,7 @@ export function GlobalSideBar() {
 			<Button
 				variant="primary"
 				onClick={() => setShowSidebar(true)}
-				className="toggle_btn d-md-none"
+				className="toggle_btn d-lg-none"
 				style={{
 					position: 'fixed',
 					top: '1rem',
@@ -118,7 +149,7 @@ export function GlobalSideBar() {
 			<Offcanvas
 				show={showSidebar}
 				onHide={() => setShowSidebar(false)}
-				className="bg-light sidebar d-md-none"
+				className="bg-light sidebar d-lg-none"
 				style={{
 					width: '250px',
 					boxShadow: '2px 0 5px rgba(0,0,0,0.1)'
@@ -137,6 +168,9 @@ export function GlobalSideBar() {
 				</Offcanvas.Header>
 
 				<Offcanvas.Body className="d-flex flex-column">
+					{/* Aggiunta UserInfo nella sidebar mobile */}
+					<UserInfo user={user} />
+
 					{/* Menu principale */}
 					<div className="flex-grow-1">
 						{menuItems.map((section, idx) => (
@@ -186,7 +220,9 @@ export function GlobalSideBar() {
 					<Button variant="secondary" onClick={() => setShowModal(false)}>
 						Annulla
 					</Button>
-					<Button variant="danger">Logout</Button>
+					<Button variant="danger" onClick={confirmLogout}>
+						Logout
+					</Button>
 				</Modal.Footer>
 			</Modal>
 		</>
