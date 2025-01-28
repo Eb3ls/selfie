@@ -31,7 +31,7 @@ export default function RootLayout({
 				/>
 			</head>
 			<UserProvider>
-				<body className={inter.className}>{children}</body>
+				<body className={`${inter.className} m-0 p-0`}>{children}</body>
 			</UserProvider>
 			<Script
 				src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"

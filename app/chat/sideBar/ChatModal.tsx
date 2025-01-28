@@ -58,11 +58,10 @@ export function ChatModal({ children }: any) {
 				centered
 				dialogClassName="custom-modal"
 				backdropClassName="custom-backdrop"
-				fullscreen="lg-down"
 			>
 				<Modal.Header closeButton className="custom-modal-header">
 					<Modal.Title>
-						<i className="bi bi-person-plus me-2" />
+						<i className="bi bi-chat-dots-fill" />
 						Nuova chat
 					</Modal.Title>
 				</Modal.Header>

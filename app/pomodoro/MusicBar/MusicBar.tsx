@@ -9,7 +9,6 @@ import {
 	FaPlus,
 	FaVolumeHigh,
 	FaVolumeLow,
-	FaVolumeXmark
 } from "react-icons/fa6";
 import Youtube, { YouTubeProps } from "react-youtube";
 import "./MusicBar.css";

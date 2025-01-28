@@ -9,10 +9,10 @@ export function FloatingMenu() {
 	const [showOptions, setShowOptions] = useState(false);
 
 	return (
-		<div className="position-absolute d-flex flex-column bottom-0 end-0 me-2 mb-3 z-1">
+		<div className="position-relative">
 			{/* Menu con le opzioni */}
 			{showOptions && (
-				<>
+				<div className="position-absolute end-0 top-100 mt-2">
 					<ChatModal>
 						<Button variant="primary" className="mb-2 w-100">
 							Crea nuova chat
@@ -23,19 +23,23 @@ export function FloatingMenu() {
 							Crea nuovo gruppo
 						</Button>
 					</GroupChatModal>
-				</>
+				</div>
 			)}
+
 			{/* Pulsante principale */}
 			<Button
-				className="p-1 rounded-circle align-self-end"
-				onClick={() => {
-					setShowOptions(!showOptions);
+				variant="primary"
+				className="p-2 rounded-circle d-flex align-items-center justify-content-center shadow-sm hover-shadow transition-all"
+				style={{
+					width: '42px',
+					height: '42px',
 				}}
+				onClick={() => setShowOptions(!showOptions)}
 			>
 				{showOptions ? (
-					<IoIosClose fill="white" size={30} />
+					<IoIosClose className="text-white" size={24} />
 				) : (
-					<IoIosAddCircleOutline fill="white" size={30} />
+					<IoIosAddCircleOutline className="text-white" size={24} />
 				)}
 			</Button>
 		</div>

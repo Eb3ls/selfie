@@ -1,5 +1,6 @@
 import { Form, InputGroup } from "react-bootstrap";
 import { FaSearch } from "react-icons/fa";
+import { FloatingMenu } from "./FloatingMenu";
 
 interface SideBarHeaderProps {
 	searchTerm: string;
@@ -12,13 +13,14 @@ export function SideBarHeader({
 }: SideBarHeaderProps) {
 	return (
 		<div
-			className="d-flex justify-content-between p-1 mt-2 z-2"
+			className="d-flex justify-content-between p-1 mt-2"
 			style={{
 				position: "sticky",
-				top: 0
+				top: 0,
+				zIndex: 1030
 			}}
 		>
-			<InputGroup>
+			<InputGroup className="me-2" style={{ flex: 1 }}>
 				<Form.Control
 					type="text"
 					name="searchUsersBar"
@@ -30,6 +32,7 @@ export function SideBarHeader({
 					<FaSearch />
 				</InputGroup.Text>
 			</InputGroup>
+			<FloatingMenu />
 		</div>
 	);
 }

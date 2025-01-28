@@ -80,7 +80,7 @@ export function GlobalSideBar() {
 	return (
 		<>
 			{/* Navbar per md+ */}
-			<Navbar bg="light" expand="md" className="d-none d-lg-flex border-bottom shadow-sm" fixed="top">
+			<Navbar bg="light" expand="md" className="d-none d-lg-flex border-bottom shadow-sm sticky-top">
 				<Container>
 					<Navbar.Brand href="/home" className="fw-bold">
 						<Image

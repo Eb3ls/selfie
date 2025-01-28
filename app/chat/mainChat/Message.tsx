@@ -1,3 +1,5 @@
+import "./Message.css";
+
 type MinMessage = {
 	_id: number;
 	owner: string;
@@ -6,16 +8,22 @@ type MinMessage = {
 };
 
 export function Message({ msg }: { msg: MinMessage }) {
+	const isOwn = msg.owner === "Io";
+
 	return (
-		<div
-			className={`d-flex ${msg.owner === "Io" ? "justify-content-end" : "justify-content-start"} mb-2`}
-		>
-			<div
-				className={`p-2 px-4 rounded-top text-break ${msg.owner === "Io" ? "bg-primary text-white rounded-start" : "bg-light text-dark rounded-end"}`}
-				style={{ maxWidth: "65%" }}
-			>
-				<div>{msg.content}</div>
-				<div className="text-end">{msg.sentAt}</div>
+		<div className={`message-wrapper ${isOwn ? "message-own" : "message-other"}`}>
+			{!isOwn && (
+				// Posizionato in basso a sinistra
+				<div className="message-avatar d-flex align-items-end">
+					<div className="avatar-circle">
+						<small>{msg.owner[0]}</small>
+					</div>
+				</div>
+			)}
+
+			<div className={`message-bubble ${isOwn ? "bubble-own" : "bubble-other"}`}>
+				<div className="message-content">{msg.content}</div>
+				<div className="message-time">{msg.sentAt}</div>
 			</div>
 		</div>
 	);

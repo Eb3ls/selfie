@@ -10,6 +10,7 @@ export function DeleteModal({ chat_id, setSelectedChat, children }: any) {
 	// Gestisce il submit del form
 	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
+		event.stopPropagation();
 
 		setSelectedChat(null);
 
@@ -31,10 +32,15 @@ export function DeleteModal({ chat_id, setSelectedChat, children }: any) {
 		setShow(false);
 	};
 
+	const handleClick = (e: React.MouseEvent) => {
+		e.stopPropagation();
+		setShow(true);
+	};
+
 	return (
 		<>
 			{/* Bottone per aprire il modal */}
-			<span onClick={() => setShow(true)} style={{ cursor: "pointer" }}>
+			<span onClick={handleClick} style={{ cursor: "pointer" }}>
 				{children}
 			</span>
 
@@ -45,11 +51,12 @@ export function DeleteModal({ chat_id, setSelectedChat, children }: any) {
 				dialogClassName="custom-modal"
 				backdropClassName="custom-backdrop"
 				fullscreen="lg-down"
+				onClick={(e: any) => e.stopPropagation()}
 			>
 				<Modal.Header closeButton className="custom-modal-header">
 					<Modal.Title>
 						<i className="bi bi-person-plus me-2" />
-						Nuova chat
+						Elimina Chat
 					</Modal.Title>
 				</Modal.Header>
 				<Form onSubmit={handleSubmit} className="custom-form">

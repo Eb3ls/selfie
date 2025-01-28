@@ -6,14 +6,13 @@ import { ChatEntry, ChatResponse, UserElement } from "@/app/chat/chatTypes";
 import { Footer } from "@/app/chat/mainChat/Footer";
 import { Header } from "@/app/chat/mainChat/Header";
 import { Message } from "@/app/chat/mainChat/Message";
-import { FloatingMenu } from "@/app/chat/sideBar/FloatingMenu";
 import { SideBarHeader } from "@/app/chat/sideBar/SideBarHeader";
 import { UserItem } from "@/app/chat/sideBar/UserItem";
 import { chatBody } from "@/app/color_palette";
 // Librerie
 import { StringMessage } from "@/utils/db/db";
 import React, { useEffect, useRef, useState } from "react";
-import { Col, Container, ListGroup, Row } from "react-bootstrap";
+import { ListGroup } from "react-bootstrap";
 import { GlobalSideBar } from "../components/GlobalSideBar";
 import useSWR from "swr";
 
@@ -183,7 +182,7 @@ export default function ChatMain() {
 					className="me-4 me-lg-0 flex-grow-1 overflow-auto"
 					style={{ maxHeight: "90vh" }}
 				>
-					<ListGroup variant="flush" className="ms-1">
+					<ListGroup variant="flush" className="ms-1 mt-3">
 						{filteredChats.length > 0 ? (
 							filteredChats.map((chat) => (
 								<UserItem
@@ -199,7 +198,6 @@ export default function ChatMain() {
 						)}
 					</ListGroup>
 				</div>
-				<FloatingMenu></FloatingMenu>
 			</>
 		);
 	}
@@ -248,28 +246,27 @@ export default function ChatMain() {
 	}
 
 	return (
-		<>
+		<div className="d-flex flex-column vh-100 ">
 			<GlobalSideBar />
-			<Container fluid className="vh-100">
-				<Row className="h-100">
-					<Col
-						xs={12}
-						lg={3}
-						className={`d-flex flex-column p-0 px-2 h-100 position-relative bg-dark border-end border-black ${isSidebarOpen ? "d-block" : "d-none d-lg-block"}`}
-					>
-						{Sidebar()}
-					</Col>
-					<Col
-						xs={12}
-						lg={9}
-						style={{ backgroundColor: chatBody }}
-						className={`d-flex flex-column p-0 h-100 ${isSidebarOpen ? "d-none d-lg-block" : "d-block"}`}
-					>
-						{selectedChat && MainChatComponent()}
-					</Col>
-				</Row>
-			</Container>
-		</>
+			<div className="d-flex flex-grow-1 overflow-hidden">
+				{/* Sidebar */}
+				<div
+					className={`col-12 col-lg-3 d-flex flex-column p-0 px-2 bg-dark border-end border-black ${isSidebarOpen ? "d-block" : "d-none d-lg-block"
+						}`}
+				>
+					{Sidebar()}
+				</div>
+
+				{/* Chat principale */}
+				<div
+					className={`col flex-grow-1 d-flex flex-column p-0 ${isSidebarOpen ? "d-none d-lg-block" : "d-block"
+						}`}
+					style={{ backgroundColor: chatBody }}
+				>
+					{selectedChat && MainChatComponent()}
+				</div>
+			</div>
+		</div>
 	);
 }
 
