@@ -8,6 +8,7 @@ import {
 	ACTIVITY_COLLECTION,
 	Alarm,
 	PHASE_COLLECTION,
+	PROJECT_ACTIVITY_COLLECTION,
 	PROJECT_COLLECTION,
 	Phase,
 	Project,
@@ -144,7 +145,7 @@ export const GET = async (
 
 	// Otteniamo le attività delle sottofasi
 	const activityClient: Collection<ProjectActivity> =
-		await getCollection<ProjectActivity>(ACTIVITY_COLLECTION);
+		await getCollection<ProjectActivity>(PROJECT_ACTIVITY_COLLECTION);
 
 	if (outPhases.status === 200) {
 		const phases: Phase[] = await outPhases.json();
@@ -210,6 +211,7 @@ export const GET = async (
 							{ phaseId: subPhase._id!.toString() },
 							activityClient
 						);
+
 					if (outActivities.status === 200) {
 						const activities: ProjectActivity[] =
 							await outActivities.json();
