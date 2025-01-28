@@ -153,6 +153,7 @@ export const GET = async (
 			const phaseOwnerConversion = await idListToNameList([
 				phase.ownerId.toString()
 			]);
+
 			if (phaseOwnerConversion.status !== 200) {
 				return generateMessageResponse(
 					"Error converting phase owner ID",
@@ -167,8 +168,8 @@ export const GET = async (
 					id: phase.ownerId.toString(),
 					name: phaseOwnerConversion.userNameList![0]
 				},
-				dtStart: phase.dtStart.toISOString(),
-				due: phase.due.toISOString(),
+				dtStart: new Date(phase.dtStart).toISOString(),
+				due: new Date(phase.due).toISOString(),
 				subPhases: [],
 				activities: []
 			};
@@ -199,8 +200,8 @@ export const GET = async (
 							id: subPhase.ownerId.toString(),
 							name: subPhaseOwnerConversion.userNameList![0]
 						},
-						dtStart: subPhase.dtStart.toISOString(),
-						due: subPhase.due.toISOString(),
+						dtStart: new Date(subPhase.dtStart).toISOString(),
+						due: new Date(subPhase.due).toISOString(),
 						activities: []
 					};
 
@@ -243,8 +244,10 @@ export const GET = async (
 								summary: activity.summary,
 								description: activity.description,
 								status: activity.status,
-								dtStart: activity.dtStart.toISOString(),
-								due: activity.due.toISOString(),
+								dtStart: new Date(
+									activity.dtStart
+								).toISOString(),
+								due: new Date(activity.due).toISOString(),
 								isMilestone: activity.isMilestone,
 								owner: {
 									id: activity.ownerId.toString(),
@@ -306,8 +309,8 @@ export const GET = async (
 						summary: activity.summary,
 						description: activity.description,
 						status: activity.status,
-						dtStart: activity.dtStart.toISOString(),
-						due: activity.due.toISOString(),
+						dtStart: new Date(activity.dtStart).toISOString(),
+						due: new Date(activity.due).toISOString(),
 						isMilestone: activity.isMilestone,
 						owner: {
 							id: activity.ownerId.toString(),
