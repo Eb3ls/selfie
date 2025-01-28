@@ -14,6 +14,7 @@ import {
 } from "@/utils/db/db";
 import { Collection } from "mongodb";
 import { NextRequest } from "next/server";
+import { BiBody } from "react-icons/bi";
 
 // TODO: Validare l'access per invited da progetti
 
@@ -73,8 +74,30 @@ export const PATCH = async (request: NextRequest) => {
 	const note: StringNote[] = await noteOut.json();
 
 	// Controlliamo che l'owner sia l'utente corrispondente
-	if (note[0].ownerId !== userId) {
+	if (note[0].ownerId !== userId && note[0].access == "PRIVATE") {
 		return generateMessageResponse("Unauthorized", 400);
+	}
+
+	// Controlliamo caso invited
+	if (note[0].access == "INVITED" && note[0].userIdList.includes(userId)) {
+		if (newBody.access !== "INVITED") {
+			return generateMessageResponse("Unauthorized", 400);
+		}
+
+		if (userIdList.length !== note[0].userIdList.length) {
+			return generateMessageResponse("Unauthorized", 400);
+		}
+
+		let unauthorized: boolean = false;
+
+		for (let i = 0; i < userIdList.length; i++) {
+			if (!note[0].userIdList.includes(userIdList[i])) {
+				unauthorized = true;
+			}
+		}
+		if (unauthorized) {
+			return generateMessageResponse("Unauthorized", 400);
+		}
 	}
 
 	// Creiamo un oggetto con i campi da modificare

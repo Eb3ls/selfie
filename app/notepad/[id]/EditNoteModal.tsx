@@ -120,8 +120,7 @@ export function EditNoteModal({
 							/>
 						</Form.Group>
 
-						{note.ownerId.toString() ===
-							currentUserId.toString() && (
+						{note.ownerId.toString() === currentUserId && (
 							<>
 								<Form.Group
 									className="mb-4"

@@ -1,6 +1,7 @@
 "use client";
 
 import { GlobalSideBar } from "@/app/components/GlobalSideBar";
+import { useUser } from "@/app/components/UserContext";
 import DOMPurify from "dompurify";
 import { marked } from "marked";
 import { useParams } from "next/navigation";
@@ -9,8 +10,6 @@ import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import { FaEdit } from "react-icons/fa";
 import useSWR from "swr";
 import { EditNoteModal } from "./EditNoteModal";
-
-// TODO: utente da cookie
 
 // Funzione fetcher per SWR
 async function fetcher(url: string) {
@@ -22,6 +21,8 @@ async function fetcher(url: string) {
 }
 
 export default function Note() {
+	const { user } = useUser();
+
 	const params = useParams();
 	const id = params.id;
 
@@ -119,7 +120,7 @@ export default function Note() {
 					</h1>
 					<EditNoteModal
 						note={note}
-						currentUserId={"66bf4fe07cbfb6be046fcda1"}
+						currentUserId={user?._id}
 						handleEdit={handleEdit}
 					>
 						<Button
