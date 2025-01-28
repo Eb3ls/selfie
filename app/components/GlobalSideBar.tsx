@@ -49,7 +49,7 @@ const menuItems = [
 
 // Nuovo componente per le info utente
 const UserInfo = ({ user }: { user: any }) => (
-	<div className="d-flex align-items-center gap-3 p-3">
+	<div className="d-flex align-items-center gap-3">
 		{/* <div className="position-relative" style={{ width: '48px', height: '48px' }}>
 			<Image
 				src={user?.profilePic || "/default-avatar.png"}

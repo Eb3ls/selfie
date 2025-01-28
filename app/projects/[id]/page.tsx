@@ -1,4 +1,5 @@
 "use client";
+import { GlobalSideBar } from "@/app/components/GlobalSideBar";
 
 /*
  * Bottone per scorrere avanti e indietro di 12 giorni (non il massimo, magari temporaneo)
@@ -172,61 +173,12 @@ export default function Projects() {
 	return (
 		<>
 			<div className="container-fluid d-flex flex-column vh-100">
-				<nav className="navbar navbar-expand-lg navbar-light bg-light p-0">
-					<div className="container-fluid">
-						<a className="navbar-brand" href="./home">
-							<Image
-								src="/Sloth.png"
-								alt="Logo"
-								height="50"
-								width="110"
-								className="d-inline-block align-text-top"
-							/>
-						</a>
-						<button
-							className="navbar-toggler"
-							type="button"
-							data-bs-toggle="collapse"
-							data-bs-target="#navbarNav"
-							aria-controls="navbarNav"
-							aria-expanded="false"
-							aria-label="Toggle navigation"
-						>
-							<span className="navbar-toggler-icon"></span>
-						</button>
-						<div
-							className="collapse navbar-collapse"
-							id="navbarNav"
-						>
-							<div className="navbar-nav nav-underline mx-auto">
-								<a className="nav-link" href="./calendar">
-									Calendario
-								</a>
-								<a
-									className="nav-link active"
-									aria-current="page"
-									href="./projects"
-								>
-									Progetti
-								</a>
-								<a className="nav-link" href="./notepad">
-									Note
-								</a>
-								<a className="nav-link" href="./chat">
-									Chat
-								</a>
-								<a className="nav-link" href="./pomodoro">
-									Pomodoro
-								</a>
-							</div>
-						</div>
-					</div>
-				</nav>
+				<GlobalSideBar />
 				<div className="row p-3 border-bottom border-secondary">
 					<div className="col d-flex align-items-center">
 						<a
 							className="btn text-secondary me-1 p-0"
-							href="./error"
+							href="/projects"
 						>
 							Dashboard
 						</a>
