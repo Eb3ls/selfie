@@ -5,7 +5,6 @@ import {
 	validate
 } from "@/utils/api/api";
 import {
-	ACTIVITY_COLLECTION,
 	Alarm,
 	PHASE_COLLECTION,
 	PROJECT_ACTIVITY_COLLECTION,
@@ -17,9 +16,9 @@ import {
 	getCollection
 } from "@/utils/db/db";
 import { Collection } from "mongodb";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 
-export interface ProjectResponse {
+interface ProjectResponse {
 	_id: string;
 	summary: string;
 	owner: { id: string; name: string };
@@ -28,7 +27,7 @@ export interface ProjectResponse {
 	phases: PhaseResponse[];
 }
 
-export interface PhaseResponse {
+interface PhaseResponse {
 	_id: string;
 	summary: string;
 	owner: { id: string; name: string };
@@ -38,7 +37,7 @@ export interface PhaseResponse {
 	activities: ProjectActivityResponse[];
 }
 
-export interface SubPhaseResponse {
+interface SubPhaseResponse {
 	_id: string;
 	summary: string;
 	owner: { id: string; name: string };
@@ -47,7 +46,7 @@ export interface SubPhaseResponse {
 	activities: ProjectActivityResponse[];
 }
 
-export interface ProjectActivityResponse {
+interface ProjectActivityResponse {
 	_id: string;
 	summary: string;
 	description: string;

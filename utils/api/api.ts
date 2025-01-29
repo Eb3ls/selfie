@@ -527,37 +527,7 @@ export async function deletePhase(
 	// Eliminiamo la fase
 	return await deleteCollectionWrapper<Phase>({ _id: phaseId }, phaseClient);
 }
-/*
-// Funzione per convertire una lista di id di utenti in una lista di nomi utente
-export async function idListToNameList(note: Note) {
-	// Creo una copia della nota
-	const newNote: any = { ...note };
 
-	// Inizializza userNameList come un array vuoto
-	newNote.userNameList = newNote.userNameList || []; // Assicurati che esista e sia un array
-
-	// Iterazione asincrona con async/await
-	for (const userId of note.userIdList) {
-		const userClient: Collection<User> =
-			await getCollection<User>(USER_COLLECTION);
-		const outUser = await findCollectionWrapper<User>(
-			{ _id: userId } as any,
-			userClient
-		);
-
-		if (outUser.status !== 200) {
-			// Se c'è stato un errore, ritorna un errore
-			return outUser; // Assicurati che questo comportamento sia appropriato nel tuo contesto
-		} else {
-			const user = await outUser.json();
-			newNote.userNameList.push(user[0].username);
-		}
-	}
-
-	delete newNote.userIdList;
-	return newNote; // Aggiungi il return della nuova nota
-}
-*/
 // Funzione per convertire una lista di id di utenti in una lista di nomi utente
 export async function idListToNameList(
 	idList: string[]
@@ -605,6 +575,29 @@ export async function idListToNameList(
 			status: 500,
 			error: `Errore interno del server: ${error.message}`
 		};
+	}
+}
+
+// Funzione per ottenere un nome utente da un ID
+export async function getNameFromId(userId: string): Promise<string> {
+	// Recupera il client della collezione utenti
+	const userClient: Collection<User> =
+		await getCollection<User>(USER_COLLECTION);
+
+	// Cerca l'utente con l'ID specificato
+	const outUser = await findCollectionWrapper<User>(
+		{ _id: userId } as any,
+		userClient
+	);
+
+	if (outUser.status !== 200) {
+		// Se c'è stato un errore, ritorna un errore con lo stato corrispondente
+		throw new Error(`Errore nel recupero dell'utente con ID ${userId}`);
+	} else {
+		const user = await outUser.json();
+		console.log(user[0].username);
+		// Ritorna il nome dell'utente
+		return user[0].username;
 	}
 }
 
