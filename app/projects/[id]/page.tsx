@@ -11,7 +11,7 @@ import { GlobalSideBar } from "@/app/components/GlobalSideBar";
  *
  * */
 import Image from "next/image";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { PiBroom } from "react-icons/pi";
 import * as CONST from "./constants";
 import "./styles.css";
@@ -28,138 +28,29 @@ declare global {
 	}
 }
 
-const testData = {
-	id: 1,
-	summary: "Fase 1",
-	subPhases: [
-		{
-			id: 2,
-			summary: "Sottofase 1",
-			activities: [
-				{
-					id: 81401873948,
-					summary: "Attività 1",
-					status: "WAITING",
-					dtStart: "2024-03-17T00:00:00",
-					dtEnd: "2024-03-19T00:00:00"
-				},
-				{
-					id: 81401873949,
-					summary: "Attività 1",
-					status: "ACTIVABLE",
-					dtStart: "2024-03-17T00:00:00",
-					dtEnd: "2024-03-19T00:00:00"
-				},
-				{
-					id: 81401873950,
-					summary: "Attività 1",
-					status: "ACTIVE",
-					dtStart: "2024-03-17T00:00:00",
-					dtEnd: "2024-03-19T00:00:00"
-				},
-				{
-					id: 81401873951,
-					summary: "Attività 1",
-					status: "SUBMITTED",
-					dtStart: "2024-03-17T00:00:00",
-					dtEnd: "2024-03-19T00:00:00"
-				},
-				{
-					id: 81401873952,
-					summary: "Attività 1",
-					status: "COMPLETED",
-					dtStart: "2024-03-17T00:00:00",
-					dtEnd: "2024-03-19T00:00:00"
-				},
-				{
-					id: 81401873953,
-					summary: "Attività 1",
-					status: "REACTIVATED",
-					dtStart: "2024-03-17T00:00:00",
-					dtEnd: "2024-03-19T00:00:00"
-				},
-				{
-					id: 81401873954,
-					summary: "Attività 1",
-					status: "OVERDUE",
-					dtStart: "2024-03-17T00:00:00",
-					dtEnd: "2024-03-19T00:00:00"
-				},
-				{
-					id: 81401873955,
-					summary: "Attività 1",
-					status: "DROPPED",
-					dtStart: "2024-03-17T00:00:00",
-					dtEnd: "2024-03-19T00:00:00"
-				}
-			]
-		},
-		{
-			id: 3,
-			summary: "Sottofase 1",
-			activities: [
-				{
-					id: 81401873948,
-					summary: "Attività 1",
-					status: "WAITING",
-					dtStart: "2024-03-17T00:00:00",
-					dtEnd: "2024-03-19T00:00:00"
-				},
-				{
-					id: 81401873949,
-					summary: "Attività 1",
-					status: "ACTIVABLE",
-					dtStart: "2024-03-17T00:00:00",
-					dtEnd: "2024-03-19T00:00:00"
-				},
-				{
-					id: 81401873950,
-					summary: "Attività 1",
-					status: "ACTIVE",
-					dtStart: "2024-03-17T00:00:00",
-					dtEnd: "2024-03-19T00:00:00"
-				},
-				{
-					id: 81401873951,
-					summary: "Attività 1",
-					status: "SUBMITTED",
-					dtStart: "2024-03-17T00:00:00",
-					dtEnd: "2024-03-19T00:00:00"
-				},
-				{
-					id: 81401873952,
-					summary: "Attività 1",
-					status: "COMPLETED",
-					dtStart: "2024-03-17T00:00:00",
-					dtEnd: "2024-03-19T00:00:00"
-				},
-				{
-					id: 81401873953,
-					summary: "Attività 1",
-					status: "REACTIVATED",
-					dtStart: "2024-03-17T00:00:00",
-					dtEnd: "2024-03-19T00:00:00"
-				},
-				{
-					id: 81401873954,
-					summary: "Attività 1",
-					status: "OVERDUE",
-					dtStart: "2024-03-17T00:00:00",
-					dtEnd: "2024-03-19T00:00:00"
-				},
-				{
-					id: 81401873955,
-					summary: "Attività 1",
-					status: "DROPPED",
-					dtStart: "2024-03-17T00:00:00",
-					dtEnd: "2024-03-19T00:00:00"
-				}
-			]
-		}
-	]
-};
-
 export default function Projects() {
+
+	async function getData() {
+		try {
+			const projectID = window.location.pathname.split("/")[2];
+			const res = await fetch(`/api/project/${projectID}`);
+			const data = await res.json();
+
+			if (!res.ok) {
+				throw new Error("Failed to get data");
+			}
+
+			return data
+		}
+		catch (error) {
+			console.error(error);
+			alert("Failed to get data, please try again");
+			return null;
+		}
+	}
+
+	const [projectData, setProjectData] = useState<any>(null);
+
 	useEffect(() => {
 		if (typeof window !== "undefined") {
 			import("./ProjectPhase");
@@ -167,6 +58,11 @@ export default function Projects() {
 			import("./TimeLine");
 			import("./OnLoadFunctions");
 			import("./Form");
+			const fetchData = async () => {
+				const data = await getData();
+				setProjectData(data);
+			};
+			fetchData();
 		}
 	}, []);
 
@@ -225,7 +121,7 @@ export default function Projects() {
 							</div>
 						</div>
 						<project-phase
-							data={JSON.stringify(testData)}
+							data={JSON.stringify(projectData?.phases || [])}
 						></project-phase>
 					</div>
 					<div
@@ -234,11 +130,11 @@ export default function Projects() {
 					>
 						<time-line date={new Date().toString()}></time-line>
 						<project-phase-row
-							data={JSON.stringify(testData)}
+							data={JSON.stringify(projectData?.phases || [])}
 						></project-phase-row>
 					</div>
 				</div>
-			</div>
+			</div >
 			<onload-functions></onload-functions>
 		</>
 	);

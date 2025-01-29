@@ -7,6 +7,7 @@ class TimeLine extends HTMLElement {
 	private lastDate: Date;
 	private centerDate: Date;
 	private scrollTimeout: NodeJS.Timeout | null;
+	private scrollListenerAdded: boolean;
 
 	constructor() {
 		super();
@@ -16,6 +17,7 @@ class TimeLine extends HTMLElement {
 		this.lastDate = new Date();
 		this.centerDate = new Date();
 		this.scrollTimeout = null;
+		this.scrollListenerAdded = false;
 	}
 
 	static get observedAttributes() {
@@ -196,7 +198,10 @@ class TimeLine extends HTMLElement {
 	}
 
 	render(dateString: string) {
-		let date = new Date(dateString);
+		const date = new Date(dateString);
+
+		// Pulizia del contenuto
+		this.timeline.innerHTML = "";
 
 		// Timeline
 		this.appendChild(this.handleTimeline(date));
@@ -204,11 +209,10 @@ class TimeLine extends HTMLElement {
 
 		const ganttView = document.getElementById("ganttView");
 
-		if (!ganttView) {
-			return;
-		}
-
-		ganttView.addEventListener("scroll", this.handleScroll);
+		if (ganttView && !this.scrollListenerAdded) {
+			ganttView.addEventListener("scroll", this.handleScroll);
+			this.scrollListenerAdded = true;
+		  }
 	}
 }
 

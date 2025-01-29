@@ -3,21 +3,52 @@ import { createRoot } from "react-dom/client";
 import { RxReset } from "react-icons/rx";
 
 class Form extends HTMLElement {
+	projectID: string;
+
 	constructor() {
 		super();
+		this.projectID = "";
 	}
 
 	connectedCallback() {
+		this.projectID = window.location.pathname.split("/")[2];
 		this.render();
 	}
 
-	handlePhaseSubmit(event: Event, ref: HTMLFormElement[]) {
+	async handlePhaseSubmit(event: Event, ref: HTMLFormElement[]) {
 		event.preventDefault();
 		const form = event.target as HTMLFormElement;
 		const formData = new FormData(form);
 		const data = Object.fromEntries(formData.entries());
-		console.log(data);
-		ref.forEach((form) => form.reset());
+
+		try{
+			const result = await fetch("/api/project/phase/add", {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					summary: data.Title,
+					projectId: this.projectID,
+					parentId: this.projectID,
+					dtStart: data.Start,
+					due: data.Due
+				})
+			})
+
+			if (result.ok) {
+				alert("Phase added successfully");
+				ref.forEach((form) => form.reset());
+			} else {
+				console.error(result);
+				throw new Error("Failed to add phase");
+			}
+		} 
+		catch (error) {
+			console.error(error);
+			alert("Failed to add phase");
+		}
+		
 	}
 
 	handleSubPhaseSubmit(event: Event, ref: HTMLFormElement[]) {
@@ -25,7 +56,6 @@ class Form extends HTMLElement {
 		const form = event.target as HTMLFormElement;
 		const formData = new FormData(form);
 		const data = Object.fromEntries(formData.entries());
-		console.log(data);
 		ref.forEach((form) => form.reset());
 	}
 
@@ -34,7 +64,6 @@ class Form extends HTMLElement {
 		const form = event.target as HTMLFormElement;
 		const formData = new FormData(form);
 		const data = Object.fromEntries(formData.entries());
-		console.log(data);
 		ref.forEach((form) => form.reset());
 	}
 

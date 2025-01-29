@@ -58,35 +58,48 @@ class ProjectPhaseRow extends HTMLElement {
 		return row;
 	}
 
-	render(data: any) {
+	renderPhaseRow(data: any) {
 		// Row per la fase
 		const phaseRow = this.handleRow(data.summary);
 
 		// Contenitore per il collapse con lo stesso id per fare il toggle di tutti
 		const collapse = document.createElement("div");
-		collapse.id = `collapse${data.id}`;
+		collapse.id = `collapse${data._id}`;
 		collapse.className = "collapse";
 		collapse.style.width = CONST.CELL_WIDTH * CONST.COL_NUM + "px";
 
 		// Gestione delle sottofasi
-		if (data.subPhases) {
+		if (data.subPhases && data.subPhases.length > 0) {
 			for (const subPhase of data.subPhases) {
-				const subPhaseElement =
-					document.createElement("project-phase-row");
-				subPhaseElement.setAttribute("data", JSON.stringify(subPhase));
-				collapse.appendChild(subPhaseElement);
+				collapse.innerHTML += this.renderPhaseRow(subPhase);
 			}
 		}
 
 		//Gestione delle attività
-		if (data.activities) {
+		if (data.activities && data.activities.length > 0) {
 			for (const activity of data.activities) {
 				const activityElement = this.handleRow(activity.summary);
+				console.log("Funziona: ", activity.summary);
 				collapse.appendChild(activityElement);
 			}
 		}
 
-		this.innerHTML = phaseRow.outerHTML + collapse.outerHTML;
+		return phaseRow.outerHTML + collapse.outerHTML;
+	}
+
+	render(data: any){
+		const container = document.createElement("div");
+		container.className = "container";
+
+		for (const phase of data) {
+			const phaseElement = document.createElement("div");
+			phaseElement.className = "row";
+			phaseElement.innerHTML = this.renderPhaseRow(phase);
+			container.appendChild(phaseElement);
+		}
+
+		this.innerHTML = "";
+		this.appendChild(container);
 	}
 }
 

@@ -87,12 +87,12 @@ class ProjectPhase extends HTMLElement {
 				${this.getStatusIcon(activity.status)} ${activity.summary}
 			</div>
 			<div class="col">
-				${new Date(activity.dtStart).toLocaleDateString()} - ${new Date(activity.dtEnd).toLocaleDateString()}
+				${new Date(activity.dtStart).toLocaleDateString()} - ${new Date(activity.due).toLocaleDateString()}
 			</div>`;
 		return activityElement;
 	}
 
-	render(data: any) {
+	renderPhase(data: any) {
 		// Creiamo il toggler per la fase
 		const toggler = document.createElement("div");
 		toggler.className = "row p-3";
@@ -101,7 +101,7 @@ class ProjectPhase extends HTMLElement {
         <button class="btn btn-primary"
           	type="button"
           	data-bs-toggle="collapse"
-          	data-bs-target="#collapse${data.id}" 
+          	data-bs-target="#collapse${data._id}" 
           	aria-expanded="false"
           	aria-controls="collapse">
           	${data.summary}
@@ -110,29 +110,42 @@ class ProjectPhase extends HTMLElement {
 
 		// Contenitore per il collapse
 		const collapse = document.createElement("div");
-		collapse.id = `collapse${data.id}`;
+		collapse.id = `collapse${data._id}`;
 		collapse.className = "collapse";
 
 		// Gestione delle sottofasi
-		if (data.subPhases) {
+		if (data.subPhases && data.subPhases.length > 0) {
 			for (const subPhase of data.subPhases) {
-				const subPhaseElement = document.createElement("project-phase");
-				subPhaseElement.setAttribute("data", JSON.stringify(subPhase));
-				collapse.appendChild(subPhaseElement);
+				collapse.innerHTML += this.renderPhase(subPhase);
 			}
 		}
 
 		//Gestione delle attività
-		if (data.activities) {
+		if (data.activities && data.activities.length > 0) {
 			for (const activity of data.activities) {
 				const activityElement = this.handleItem(activity);
 				collapse.appendChild(activityElement);
 			}
 		}
 
-		this.innerHTML = toggler.outerHTML + collapse.outerHTML;
+		return toggler.outerHTML + collapse.outerHTML;
 	}
-}
+
+	render(data: any) {
+		const container = document.createElement("div");
+		container.className = "container";
+
+		for (const phase of data) {
+			const phaseElement = document.createElement("div");
+			phaseElement.className = "row";
+			phaseElement.innerHTML = this.renderPhase(phase);
+			container.appendChild(phaseElement);
+		}
+
+		this.innerHTML = "";
+		this.appendChild(container);
+	}
+ }
 
 customElements.define("project-phase", ProjectPhase);
 
