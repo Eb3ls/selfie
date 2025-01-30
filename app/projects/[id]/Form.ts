@@ -25,84 +25,92 @@ class Form extends HTMLElement {
 		}
 	}
 
+	async fetcher(url: string, body: any, type: "phase" | "subphase" | "activity") {
+		try {
+			const result = await fetch(url, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify(body)
+			});
+
+			if (result.ok) {
+				window.location.reload();
+			} else {
+				console.error(result);
+				throw new Error("Failed to add " + type);
+			}
+		} 
+		catch (error) {
+			console.error(error);
+			alert("Failed to add " + type);
+		}
+	}
+
+	// Funzione per gestire la submit del form per l'aggiunta di una fase
 	async handlePhaseSubmit(event: Event, ref: HTMLFormElement[]) {
 		event.preventDefault();
 		const form = event.target as HTMLFormElement;
 		const formData = new FormData(form);
 		const data = Object.fromEntries(formData.entries());
 
-		try{
-			const result = await fetch("/api/project/phase/add", {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					summary: data.Title,
-					projectId: this.projectID,
-					parentId: this.projectID,
-					dtStart: data.Start,
-					due: data.Due
-				})
-			})
+		const url = "/api/project/phase/add";
 
-			if (result.ok) {
-				window.location.reload();
-			} else {
-				console.error(result);
-				throw new Error("Failed to add phase");
-			}
-		} 
-		catch (error) {
-			console.error(error);
-			alert("Failed to add phase");
-		}
+		const body = JSON.stringify({
+			summary: data.Title,
+			projectId: this.projectID,
+			parentId: this.projectID,
+			dtStart: data.Start,
+			due: data.Due
+		})
+
+		await this.fetcher(url, body, "phase");
 		
 	}
 
+	// Funzione per gestire la submit del form per l'aggiunta di una sottofase
 	async handleSubPhaseSubmit(event: Event, ref: HTMLFormElement[]) {
 		event.preventDefault();
 		const form = event.target as HTMLFormElement;
 		const formData = new FormData(form);
 		const data = Object.fromEntries(formData.entries());
 
-		try{
-			const result = await fetch("/api/project/phase/add", {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					summary: data.Title,
-					projectId: this.projectID,
-					parentId: data.MainPhase,
-					dtStart: data.Start,
-					due: data.Due
-				})
-			})
+		const url = "/api/project/phase/add";
 
-			if (result.ok) {
-				alert("SubPhase added successfully");
-				window.location.reload();
-			} else {
-				console.error(result);
-				throw new Error("Failed to add subphase");
-			}
-		}
-		catch (error) {
-			console.error(error);
-			alert("Failed to add subphase");
-		}
-			
-		ref.forEach((form) => form.reset());
+		const body = JSON.stringify({
+			summary: data.Title,
+			projectId: this.projectID,
+			parentId: data.MainPhase,
+			dtStart: data.Start,
+			due: data.Due
+		})
+
+		await this.fetcher(url, body, "subphase");
 	}
 
-	handleActivitySubmit(event: Event, ref: HTMLFormElement[]) {
+	// Funzione per gestire la submit del form per le attività
+	async handleActivitySubmit(event: Event, ref: HTMLFormElement[]) {
 		event.preventDefault();
 		const form = event.target as HTMLFormElement;
 		const formData = new FormData(form);
 		const data = Object.fromEntries(formData.entries());
-		ref.forEach((form) => form.reset());
+
+		const url = "/api/project/activity/add";
+
+		const body = JSON.stringify({
+			summary: data.Title,
+			description: data.Description,
+			dtStart: data.Start,
+			due: data.Due,
+			isMilestone: data.isMilestone === "on",
+			phaseId: data.SubPhase,
+			usernameList: []
+		})
+
+		console.log(body);
+
+		await this.fetcher(url, body, "activity");
 	}
 
 	private formatDate(date: string): string{
@@ -113,6 +121,7 @@ class Form extends HTMLElement {
 	handleDateSelection(event: Event) {
         const select = event.target as HTMLSelectElement;
         const selectedOption = select.selectedOptions[0];
+		if(selectedOption.value === '') return;
         const startDate = this.formatDate(selectedOption.dataset.start as string);
         const dueDate = this.formatDate(selectedOption.dataset.due as string);
         
@@ -133,30 +142,53 @@ class Form extends HTMLElement {
         }
     }
 
-    createOption(phaseIndex: number = -1): string {
-        let option = "<option value=''>Select a phase...</option>";
-		if(this.projectData.length === 0) return option;
+	handleMainPhaseSelection(event: Event) {
+		const select = event.target as HTMLSelectElement;
+		const selectedOption = select.selectedOptions[0];
+		const phaseIndex = this.projectData.findIndex((phase: any) => phase._id === selectedOption.value);
+		const subPhaseSelect = document.querySelector('#activity-pane select[name="SubPhase"]') as HTMLSelectElement;
+		if(subPhaseSelect) {
+			subPhaseSelect.innerHTML = this.createOption(phaseIndex);
+		}
+	}
 
-		if(phaseIndex === -1) {
-        	this.projectData.forEach((phase: any) => {
-        	    option += `<option value="${phase._id}" 
-        	                      data-start="${this.formatDate(phase.dtStart)}" 
-        	                      data-due="${this.formatDate(phase.due)}">
-        	                ${phase.summary}
-        	              </option>`;
-        	});
+	// Funzione per mostrare title e date solo dopo che si seleziona una fase
+	showBlock(event: Event, id: string) {
+		const select = event.target as HTMLSelectElement;
+		const ref = document.getElementById(id);
+		
+		if (select.value && ref) {
+			ref.style.display = 'block';
+		}
+		else if (ref) {
+			ref.style.display = 'none';
+		}
+	}
+
+	createOption(phaseIndex: number = -1): string {
+		let option = "<option value=''>Select a phase...</option>";
+		if (this.projectData.length === 0) return option;
+
+		if (phaseIndex === -1) {
+			this.projectData.forEach((phase: any) => {
+				option += `<option value="${phase._id}" 
+					data-start="${this.formatDate(phase.dtStart)}" 
+					data-due="${this.formatDate(phase.due)}">
+					${phase.summary}
+				</option>`;
+			});
 		} else {
 			const subPhases = this.projectData[phaseIndex].subPhases;
 			subPhases.forEach((subPhase: any) => {
 				option += `<option value="${subPhase._id}" 
-				                      data-start="${this.formatDate(subPhase.dtStart)}" 
-				                      data-due="${this.formatDate(subPhase.due)}">
-				                ${subPhase.summary}
-				              </option>`;
+					data-start="${this.formatDate(subPhase.dtStart)}" 
+					data-due="${this.formatDate(subPhase.due)}">
+					${subPhase.summary}
+				</option>`;
 			});
 		}
-        return option;
-    };
+		return option;
+	}
 
 	render() {
 		const Title = `
@@ -197,60 +229,47 @@ class Form extends HTMLElement {
 		// Secondo form
 		const subphaseHTML = `
 			${mainPhase}
-			${Title}
-			<div class="mb-3 d-flex justify-content-between">
-				${StartDue}
+			<div id="subPhaseFields" style="display: none;">
+				${Title}
+				<div class="mb-3 d-flex justify-content-between">
+					${StartDue}
+				</div>
 			</div>
 		`;
 
 		const groupListHTML = `
-			<label for="Category" class="form-label">Category</label>
-			<div class="input-group mb-3">
-				<input type="text" name="Category" class="form-control" id="Category" aria-describedby="Category">
-				<button class="btn btn-outline-secondary" type="button" id="button-category">Add</button>
-			</div>
 			<label for="Users" class="form-label">Assigned Users</label>
 			<div class="input-group mb-3">
 				<input type="text" name="Users" class="form-control" id="Users" aria-describedby="Users">
 				<button class="btn btn-outline-secondary" type="button" id="button-user">Add</button>
-			</div>
-			<label for="InputActivity" class="form-label">Input</label>
-			<div class="input-group mb-3">
-				<input type="text" name="OutputActivity" class="form-control" id="InputActivity" aria-describedby="Users">
-				<button class="btn btn-outline-secondary" type="button" id="button-input">Add</button>
-			</div>
-			<label for="OutputActivity" class="form-label">Output</label>
-			<div class="input-group mb-3">
-				<input type="text" name="OutputActivity" class="form-control" id="OutputActivity" aria-describedby="Users">
-				<button class="btn btn-outline-secondary" type="button" id="button-output">Add</button>
 			</div>
 		`;
 
 		// Terzo form
 		const activityHTML = `
 			${mainPhase}
-			<div class="mb-3">
-				<label for="SubPhase" class="form-label">Sub Phase</label>
-				<select required name="SubPhase" class="form-select" id="MainPhase">
-					<option selected>Choose...</option>
-					<option value="1">SubPhase 1</option>
-					<option value="2">SubPhase 2</option>
-					<option value="3">SubPhase 3</option>
-				</select>
+			<div id="subPhaseSelectFields" style="display: none;">
+				<div class="mb-3">
+					<label for="SubPhase" class="form-label">Sub Phase</label>
+					<select required name="SubPhase" class="form-select" id="MainPhase">
+					</select>
+				</div>
+				<div id="activityFields" style="display: none;">
+					${Title}
+					<div class="mb-3">
+						<label for="Description" class="form-label">Description</label>
+						<textarea id="Description" name="Description" class="form-control" aria-describedby="Description" cols="30" row="10"></textarea>
+					</div>
+					<div class="mb-5 d-flex justify-content-between">
+						${StartDue}
+					</div>
+					<div class="mb-3 d-flex justify-content-center">
+						<label for="MilestoneCheck" class="form-label me-3">Is Milestone?</label>
+						<input type="checkbox" name="isMilestone" class="form-check" id="MilestoneCheck">
+					</div>
+					${groupListHTML}
+				</div>
 			</div>
-			${Title}
-			<div class="mb-3">
-				<label for="Summary" class="form-label">Summary</label>
-				<textarea id="Summary" name="Summary" class="form-control" aria-describedby="Summary" cols="30" row="10"></textarea>
-			</div>
-			<div class="mb-5 d-flex justify-content-between">
-				${StartDue}
-			</div>
-			<div class="mb-5 d-flex justify-content-center">
-				<label for="MilestoneCheck" class="form-label me-3">Is Milestone?</label>
-				<input type="checkbox" name="isMilestone" class="form-check" id="MilestoneCheck">
-			</div>
-			${groupListHTML}
 		`;
 
 		this.innerHTML = `
@@ -345,13 +364,32 @@ class Form extends HTMLElement {
 
 		clearBtn!.innerHTML = '<i class="bi bi-arrow-counterclockwise" style="font-size: 30px;"></i>';
 
-		const subphaseSelect = this.querySelector('#subphase-pane select[name="MainPhase"]');
-		if (subphaseSelect) {
-			subphaseSelect.addEventListener('change', (e) => this.handleDateSelection(e));
+		const subPhaseSelect = this.querySelector('#subphase-pane select[name="MainPhase"]');
+		if (subPhaseSelect) {
+			subPhaseSelect.addEventListener('change', (e) => 
+				{
+					this.handleDateSelection(e);
+					this.showBlock(e, 'subPhaseFields');
+				}
+			);
 		}
 		const activitySelect = this.querySelector('#activity-pane select[name="SubPhase"]');
 		if (activitySelect) {
-			activitySelect.addEventListener('change', (e) => this.handleDateSelection(e));
+			activitySelect.addEventListener('change', (e) => 
+				{
+					this.handleDateSelection(e)
+					this.showBlock(e, 'activityFields');
+				});
+		}
+
+		// Event listener per inserire la select delle subphase per le activity
+		const activityMainPhase = this.querySelector('#activity-pane select[name="MainPhase"]');
+		if(activityMainPhase){
+			activityMainPhase.addEventListener('change', (e) => 
+				{
+					this.handleMainPhaseSelection(e)
+					this.showBlock(e, 'subPhaseSelectFields');
+				});
 		}
 	}
 }
