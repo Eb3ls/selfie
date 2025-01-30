@@ -13,8 +13,6 @@ import {
 	Note,
 	PROJECT_COLLECTION,
 	Project,
-	USER_COLLECTION,
-	User,
 	findCollectionWrapper,
 	getCollection
 } from "@/utils/db/db";
