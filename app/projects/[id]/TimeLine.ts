@@ -123,15 +123,13 @@ class TimeLine extends HTMLElement {
 		if (this.scrollTimeout) {
 			clearTimeout(this.scrollTimeout);
 		}
+
 		this.scrollTimeout = setTimeout(() => {
 			const target = event.target as HTMLElement;
 			const scroll = target.scrollLeft - this.startScroll;
 			const cellScrolled = Math.floor(
 				Math.abs(scroll) / CONST.CELL_WIDTH
 			);
-			console.log(cellScrolled);
-			console.log(scroll);
-
 			if (cellScrolled !== 0) {
 				const prevCenterDate = new Date(this.centerDate);
 
@@ -153,7 +151,7 @@ class TimeLine extends HTMLElement {
 					this.updateYear();
 				}
 			}
-		}, 1000);
+		}, 300);
 	};
 
 	scrollToCenter() {

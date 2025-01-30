@@ -1,18 +1,28 @@
-import React from "react";
-import { createRoot } from "react-dom/client";
-import { RxReset } from "react-icons/rx";
-
 class Form extends HTMLElement {
 	projectID: string;
+	projectData: any[];
 
 	constructor() {
 		super();
 		this.projectID = "";
+		this.projectData = [];	
+	}
+	
+	static get observedAttributes() {
+		return ["data"];
 	}
 
-	connectedCallback() {
-		this.projectID = window.location.pathname.split("/")[2];
-		this.render();
+	attributeChangedCallback(name: string, oldValue: string, newValue: string) {
+		if (name === "data") {
+			try {
+				const data = JSON.parse(newValue);
+				this.projectID = data._id;
+				this.projectData = data.phases;
+				this.render();
+			} catch (error) {
+				console.error("Errore nel parsing dei dati:", error);
+			}
+		}
 	}
 
 	async handlePhaseSubmit(event: Event, ref: HTMLFormElement[]) {
@@ -37,8 +47,7 @@ class Form extends HTMLElement {
 			})
 
 			if (result.ok) {
-				alert("Phase added successfully");
-				ref.forEach((form) => form.reset());
+				window.location.reload();
 			} else {
 				console.error(result);
 				throw new Error("Failed to add phase");
@@ -51,11 +60,40 @@ class Form extends HTMLElement {
 		
 	}
 
-	handleSubPhaseSubmit(event: Event, ref: HTMLFormElement[]) {
+	async handleSubPhaseSubmit(event: Event, ref: HTMLFormElement[]) {
 		event.preventDefault();
 		const form = event.target as HTMLFormElement;
 		const formData = new FormData(form);
 		const data = Object.fromEntries(formData.entries());
+
+		try{
+			const result = await fetch("/api/project/phase/add", {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					summary: data.Title,
+					projectId: this.projectID,
+					parentId: data.MainPhase,
+					dtStart: data.Start,
+					due: data.Due
+				})
+			})
+
+			if (result.ok) {
+				alert("SubPhase added successfully");
+				window.location.reload();
+			} else {
+				console.error(result);
+				throw new Error("Failed to add subphase");
+			}
+		}
+		catch (error) {
+			console.error(error);
+			alert("Failed to add subphase");
+		}
+			
 		ref.forEach((form) => form.reset());
 	}
 
@@ -66,6 +104,59 @@ class Form extends HTMLElement {
 		const data = Object.fromEntries(formData.entries());
 		ref.forEach((form) => form.reset());
 	}
+
+	private formatDate(date: string): string{
+		return date.split('T')[0];
+	}
+
+	// Imposta il min e max per gli input date in base ai limiti della fase/sottofase
+	handleDateSelection(event: Event) {
+        const select = event.target as HTMLSelectElement;
+        const selectedOption = select.selectedOptions[0];
+        const startDate = this.formatDate(selectedOption.dataset.start as string);
+        const dueDate = this.formatDate(selectedOption.dataset.due as string);
+        
+        // Trova gli input date nel form corrente
+        const form = select.closest('form');
+        const startInput = form?.querySelector('input[name="Start"]') as HTMLInputElement;
+        const dueInput = form?.querySelector('input[name="Due"]') as HTMLInputElement;
+        
+        if (startInput && dueInput && startDate && dueDate) {
+            startInput.min = startDate;
+            startInput.max = dueDate;
+            dueInput.min = startDate;
+            dueInput.max = dueDate;
+            
+            // Reset dei valori se fuori range
+            if (startInput.value < startDate) startInput.value = startDate;
+            if (dueInput.value > dueDate) dueInput.value = dueDate;
+        }
+    }
+
+    createOption(phaseIndex: number = -1): string {
+        let option = "<option value=''>Select a phase...</option>";
+		if(this.projectData.length === 0) return option;
+
+		if(phaseIndex === -1) {
+        	this.projectData.forEach((phase: any) => {
+        	    option += `<option value="${phase._id}" 
+        	                      data-start="${this.formatDate(phase.dtStart)}" 
+        	                      data-due="${this.formatDate(phase.due)}">
+        	                ${phase.summary}
+        	              </option>`;
+        	});
+		} else {
+			const subPhases = this.projectData[phaseIndex].subPhases;
+			subPhases.forEach((subPhase: any) => {
+				option += `<option value="${subPhase._id}" 
+				                      data-start="${this.formatDate(subPhase.dtStart)}" 
+				                      data-due="${this.formatDate(subPhase.due)}">
+				                ${subPhase.summary}
+				              </option>`;
+			});
+		}
+        return option;
+    };
 
 	render() {
 		const Title = `
@@ -97,22 +188,19 @@ class Form extends HTMLElement {
 		const mainPhase = `
 			<div class="mb-3">
 				<label for="MainPhase" class="form-label">Main Phase</label>
-				<select required name="MainPhase" class="form-select" id="MainPhase">
-					<option selected>Choose...</option>
-					<option value="1">Phase 1</option>
-					<option value="2">Phase 2</option>
-					<option value="3">Phase 3</option>
+				<select name="MainPhase" class="form-select" id="MainPhase" required>
+					${this.createOption()}
 				</select>
 			</div>
 		`;
 
 		// Secondo form
 		const subphaseHTML = `
+			${mainPhase}
 			${Title}
 			<div class="mb-3 d-flex justify-content-between">
 				${StartDue}
 			</div>
-			${mainPhase}
 		`;
 
 		const groupListHTML = `
@@ -196,7 +284,7 @@ class Form extends HTMLElement {
 									</div>
 									<div class="modal-footer">
 										<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-										<button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Add</button>
+										<button type="submit" class="btn btn-primary">Add</button>
 									</div>
 								</form >
 							</div>
@@ -207,7 +295,7 @@ class Form extends HTMLElement {
 									</div>
 									<div class="modal-footer">
 										<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-										<button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Add</button>
+										<button type="submit" class="btn btn-primary">Add</button>
 									</div>
 								</form >
 							</div>
@@ -218,7 +306,7 @@ class Form extends HTMLElement {
 									</div>
 									<div class="modal-footer">
 										<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-										<button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Add</button>
+										<button type="submit" class="btn btn-primary">Add</button>
 									</div>
 								</form >
 							</div>
@@ -255,8 +343,16 @@ class Form extends HTMLElement {
 			ref.forEach((form) => form.reset());
 		});
 
-		const root = createRoot(clearBtn!);
-		root.render(React.createElement(RxReset, { size: 30 }));
+		clearBtn!.innerHTML = '<i class="bi bi-arrow-counterclockwise" style="font-size: 30px;"></i>';
+
+		const subphaseSelect = this.querySelector('#subphase-pane select[name="MainPhase"]');
+		if (subphaseSelect) {
+			subphaseSelect.addEventListener('change', (e) => this.handleDateSelection(e));
+		}
+		const activitySelect = this.querySelector('#activity-pane select[name="SubPhase"]');
+		if (activitySelect) {
+			activitySelect.addEventListener('change', (e) => this.handleDateSelection(e));
+		}
 	}
 }
 

@@ -79,7 +79,6 @@ class ProjectPhaseRow extends HTMLElement {
 		if (data.activities && data.activities.length > 0) {
 			for (const activity of data.activities) {
 				const activityElement = this.handleRow(activity.summary);
-				console.log("Funziona: ", activity.summary);
 				collapse.appendChild(activityElement);
 			}
 		}

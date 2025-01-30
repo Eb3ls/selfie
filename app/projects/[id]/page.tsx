@@ -19,11 +19,11 @@ import "./styles.css";
 declare global {
 	namespace JSX {
 		interface IntrinsicElements {
-			"project-phase": { data: any };
-			"project-phase-row": { data: any };
-			"time-line": { date: string };
+			"project-phase": { data: Object };
+			"project-phase-row": { data: Object };
+			"time-line": { date: Date };
 			"onload-functions": {};
-			"form-component": {};
+			"form-component": { data: Object };
 		}
 	}
 }
@@ -82,7 +82,7 @@ export default function Projects() {
 						<div className="ms-1">Progetto di prova</div>
 					</div>
 					<div className="col d-flex justify-content-end align-items-center">
-						<form-component></form-component>
+						<form-component data={JSON.stringify(projectData || [])}></form-component>
 						<button className="btn btn-primary rounded-pill">
 							<div>Settings</div>
 						</button>
@@ -128,7 +128,7 @@ export default function Projects() {
 						id="ganttView"
 						className="col-9 hide-scrll mh-100 overflow-auto p-0"
 					>
-						<time-line date={new Date().toString()}></time-line>
+						<time-line date={new Date()}></time-line>
 						<project-phase-row
 							data={JSON.stringify(projectData?.phases || [])}
 						></project-phase-row>

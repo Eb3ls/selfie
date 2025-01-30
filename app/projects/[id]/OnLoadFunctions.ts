@@ -7,13 +7,27 @@ class OnLoadFunctions extends HTMLElement {
 		const ganttView = document.getElementById("ganttView");
 		const listView = document.getElementById("listView");
 
+		let isSyncingScroll = false;
+
 		if (ganttView && listView) {
 			ganttView.addEventListener("scroll", () => {
-				listView.scrollTop = ganttView.scrollTop;
+				if (!isSyncingScroll) {
+					isSyncingScroll = true;
+					listView.scrollTop = ganttView.scrollTop;
+					requestAnimationFrame(() => {
+						isSyncingScroll = false;
+					});
+				}
 			});
-
+	
 			listView.addEventListener("scroll", () => {
-				ganttView.scrollTop = listView.scrollTop;
+				if (!isSyncingScroll) {
+					isSyncingScroll = true;
+					ganttView.scrollTop = listView.scrollTop;
+					requestAnimationFrame(() => {
+						isSyncingScroll = false;
+					});
+				}
 			});
 		} else {
 			console.error("Elementi per sincronizzare lo scroll non trovati");
