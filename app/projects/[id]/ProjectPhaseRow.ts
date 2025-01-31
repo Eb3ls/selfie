@@ -9,9 +9,12 @@ class ProjectPhaseRow extends HTMLElement {
 		return ["data"];
 	}
 
-	attributeChangedCallback(name: string, oldValue: string, newValue: string) {
+	attributeChangedCallback(name: string, _oldValue: any, newValue: any) {
 		if (name === "data") {
 			try {
+				if (!newValue || newValue === "[]") {
+					return;
+				}
 				const data = JSON.parse(newValue);
 				this.render(data);
 			} catch (error) {

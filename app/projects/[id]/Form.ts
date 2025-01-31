@@ -12,15 +12,21 @@ class Form extends HTMLElement {
 		return ["data"];
 	}
 
-	attributeChangedCallback(name: string, oldValue: string, newValue: string) {
+	attributeChangedCallback(name: string, _oldValue: any, newValue: any) {
 		if (name === "data") {
 			try {
+				if(!newValue || newValue === "[]") {
+					return;
+				}
 				const data = JSON.parse(newValue);
+				if (!data._id || !Array.isArray(data.phases)) {
+					throw new Error("Invalid data structure");
+				}
 				this.projectID = data._id;
 				this.projectData = data.phases;
 				this.render();
 			} catch (error) {
-				console.error("Errore nel parsing dei dati:", error);
+				console.error("Error parsing data:", error);
 			}
 		}
 	}
@@ -65,8 +71,6 @@ class Form extends HTMLElement {
 			due: new Date(data.Due + 'T23:59:59.999Z').toISOString()
 		}
 
-		console.log(body);
-
 		await this.fetcher(url, body, "phase");
 		
 	}
@@ -109,8 +113,6 @@ class Form extends HTMLElement {
 			phaseId: data.SubPhase,
 			usernameList: ["prova"]
 		}
-
-		console.log(body);
 
 		await this.fetcher(url, body, "activity");
 	}

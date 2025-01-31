@@ -1,27 +1,3 @@
-/* Passiamo una struttura dati cosí composta:
- * {
- *	id: UUID
- * 	summary: "Fase 1",
- * 	dtStart: "2021-01-01",
- * 	dtEnd: "2021-01-31",
- * 	subPhases: [
- * 	{
- * 		id: UUID,
- * 		summary: "Sottofase 1",
- * 		dtStart: "2021-01-01",
- * 		dtEnd: "2021-01-15",
- * 		activities: [
- * 			{
- * 			id: UUID,
- * 			summary: "Attivitá 1",
- * 			status: "In corso",
- * 			dtStart: "2021-01-01",
- * 			dtEnd: "2021-01-05",
- * 			}
- * 		]
- * 	}]
- * }
- * */
 import * as CONST from "./constants";
 
 class ProjectPhase extends HTMLElement {
@@ -33,9 +9,13 @@ class ProjectPhase extends HTMLElement {
 		return ["data"];
 	}
 
-	attributeChangedCallback(name: string, oldValue: string, newValue: string) {
+	// Funzione chiamata quando l'attributo "data" cambia
+	attributeChangedCallback(name: string, _oldValue: any, newValue: any) {
 		if (name === "data") {
 			try {
+				if(!newValue || newValue === "[]") {
+					return;
+				}
 				const data = JSON.parse(newValue);
 				this.render(data);
 			} catch (error) {
@@ -44,9 +24,10 @@ class ProjectPhase extends HTMLElement {
 		}
 	}
 
+	// Funzione per ottenere l'icona dello stato
 	getStatusIcon(status: string) {
 		const icon = document.createElement("i");
-		icon.className = "bi bi-circle-fill fs-5";
+		icon.className = "bi bi-circle-fill fs-5 me-3";
 		switch (status) {
 			case "WAITING":
 				icon.style.color = CONST.waiting_color;
@@ -83,7 +64,7 @@ class ProjectPhase extends HTMLElement {
 		activityElement.className = "row p-3";
 		activityElement.style.height = `${CONST.ROW_HEIGHT_PX}`;
 		activityElement.innerHTML = `
-			<div class="col">
+			<div class="col ms-5">
 				${this.getStatusIcon(activity.status)} ${activity.summary}
 			</div>
 			<div class="col">
@@ -98,15 +79,18 @@ class ProjectPhase extends HTMLElement {
 		toggler.className = "row p-3";
 		toggler.style.height = `${CONST.ROW_HEIGHT_PX}`;
 		toggler.innerHTML = `
-        <button class="btn btn-primary"
-          	type="button"
-          	data-bs-toggle="collapse"
-          	data-bs-target="#collapse${data._id}" 
-          	aria-expanded="false"
-          	aria-controls="collapse">
-          	${data.summary}
-        </button>
-      	`;
+			<div class="d-flex align-items-center w-100">
+				<i class="bi bi-caret-right-fill me-3 fs-5" 
+					style="cursor: pointer; transition: transform 0.2s;"
+					data-bs-toggle="collapse"
+					data-bs-target="#collapse${data._id}"
+					onclick="this.style.transform = this.style.transform === 'rotate(90deg)' ? 'rotate(0)' : 'rotate(90deg)';"
+				></i>
+				<button class="btn btn-primary rounded-3 px-4 py-2 flex-grow-1 text-start">
+					${data.summary}
+				</button>
+			</div>
+		`;
 
 		// Contenitore per il collapse
 		const collapse = document.createElement("div");
