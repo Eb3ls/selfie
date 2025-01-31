@@ -57,13 +57,15 @@ class Form extends HTMLElement {
 
 		const url = "/api/project/phase/add";
 
-		const body = JSON.stringify({
+		const body = {
 			summary: data.Title,
 			projectId: this.projectID,
 			parentId: this.projectID,
-			dtStart: data.Start,
-			due: data.Due
-		})
+			dtStart: new Date(data.Start + 'T00:00:00.000Z').toISOString(),
+			due: new Date(data.Due + 'T23:59:59.999Z').toISOString()
+		}
+
+		console.log(body);
 
 		await this.fetcher(url, body, "phase");
 		
@@ -78,13 +80,13 @@ class Form extends HTMLElement {
 
 		const url = "/api/project/phase/add";
 
-		const body = JSON.stringify({
+		const body = {
 			summary: data.Title,
 			projectId: this.projectID,
 			parentId: data.MainPhase,
-			dtStart: data.Start,
-			due: data.Due
-		})
+			dtStart: new Date(data.Start + 'T00:00:00.000Z').toISOString(),
+			due: new Date(data.Due + 'T23:59:59.999Z').toISOString()
+		}
 
 		await this.fetcher(url, body, "subphase");
 	}
@@ -98,21 +100,20 @@ class Form extends HTMLElement {
 
 		const url = "/api/project/activity/add";
 
-		const body = JSON.stringify({
+		const body = {
 			summary: data.Title,
 			description: data.Description,
-			dtStart: data.Start,
-			due: data.Due,
+			dtStart: new Date(data.Start+"T00:00:00.000Z").toISOString(),
+			due: new Date(data.Due+"T23:59:59.999Z").toISOString(),
 			isMilestone: data.isMilestone === "on",
 			phaseId: data.SubPhase,
-			usernameList: []
-		})
-
-		console.log(body);
+			usernameList: ["prova"]
+		}
 
 		await this.fetcher(url, body, "activity");
 	}
 
+	// Elimina la parte finale dell'ISO stringa perché non è supportata da input date per min/max
 	private formatDate(date: string): string{
 		return date.split('T')[0];
 	}
@@ -142,18 +143,19 @@ class Form extends HTMLElement {
         }
     }
 
+	// Funzione per mostrare le sottofasi in base alla fase selezionata
 	handleMainPhaseSelection(event: Event) {
 		const select = event.target as HTMLSelectElement;
 		const selectedOption = select.selectedOptions[0];
 		const phaseIndex = this.projectData.findIndex((phase: any) => phase._id === selectedOption.value);
 		const subPhaseSelect = document.querySelector('#activity-pane select[name="SubPhase"]') as HTMLSelectElement;
 		if(subPhaseSelect) {
-			subPhaseSelect.innerHTML = this.createOption(phaseIndex);
+			subPhaseSelect.innerHTML = this.createOption(phaseIndex, true);
 		}
 	}
 
 	// Funzione per mostrare title e date solo dopo che si seleziona una fase
-	showBlock(event: Event, id: string) {
+	showBlock(event: Event, id: string, id2?: string) {
 		const select = event.target as HTMLSelectElement;
 		const ref = document.getElementById(id);
 		
@@ -162,15 +164,29 @@ class Form extends HTMLElement {
 		}
 		else if (ref) {
 			ref.style.display = 'none';
+			// Nascondi i blocchi figli se presenti
+			if (id2) {
+				const ref2 = document.getElementById(id2);
+				if (ref2) {
+					ref2.style.display = 'none';
+				}
+			}
 		}
 	}
 
-	createOption(phaseIndex: number = -1): string {
-		let option = "<option value=''>Select a phase...</option>";
+	// Mostra la lista di fasi o sottofasi (index !== -1)
+	createOption(phaseIndex: number, forAddingSubPhase: boolean): string {
+		const name = phaseIndex === -1 ? "phase" : "sub phase";
+		let option = `<option value=''>Select a ${name}...</option>`;
 		if (this.projectData.length === 0) return option;
 
 		if (phaseIndex === -1) {
 			this.projectData.forEach((phase: any) => {
+				// Se ci sono attivitá e dobbiamo aggiungere una sottofase, salta
+				if (forAddingSubPhase && phase.activities.length > 0) return;
+				// Se la fase è scaduta, salta
+				if (new Date(phase.due) < new Date()) return;
+
 				option += `<option value="${phase._id}" 
 					data-start="${this.formatDate(phase.dtStart)}" 
 					data-due="${this.formatDate(phase.due)}">
@@ -180,6 +196,9 @@ class Form extends HTMLElement {
 		} else {
 			const subPhases = this.projectData[phaseIndex].subPhases;
 			subPhases.forEach((subPhase: any) => {
+				// Se la sottofase è scaduta, salta
+				if (new Date(subPhase.due) < new Date()) return;
+
 				option += `<option value="${subPhase._id}" 
 					data-start="${this.formatDate(subPhase.dtStart)}" 
 					data-due="${this.formatDate(subPhase.due)}">
@@ -190,30 +209,30 @@ class Form extends HTMLElement {
 		return option;
 	}
 
+	Title = `
+		<div class="mb-3">
+			<label for="Title" class="form-label">Title</label>
+			<input type="text" required name="Title" class="form-control" id="Title">
+		</div>
+	`;
+
+	StartDue = `
+		<div>
+			<label for="Start" class="form-label">Start</label>
+			<input type="date" required name="Start" class="form-control" id="Start">
+		</div>
+		<div>
+			<label for="Due" class="form-label">Due</label>
+			<input type="date" required name="Due" class="form-control" id="Due">
+		</div>
+	`;
+
 	render() {
-		const Title = `
-			<div class="mb-3">
-				<label for="Title" class="form-label">Title</label>
-				<input type="text" required name="Title" class="form-control" id="Title">
-			</div>
-		`;
-
-		const StartDue = `
-			<div>
-				<label for="Start" class="form-label">Start</label>
-				<input type="date" required name="Start" class="form-control" id="Start">
-			</div>
-			<div>
-				<label for="Due" class="form-label">Due</label>
-				<input type="date" required name="Due" class="form-control" id="Due">
-			</div>
-		`;
-
 		// Primo form
 		const phaseHTML = `
-			${Title}
+			${this.Title}
 			<div class="mb-3 d-flex justify-content-between">
-				${StartDue}
+				${this.StartDue}
 			</div>
 		`;
 
@@ -221,7 +240,7 @@ class Form extends HTMLElement {
 			<div class="mb-3">
 				<label for="MainPhase" class="form-label">Main Phase</label>
 				<select name="MainPhase" class="form-select" id="MainPhase" required>
-					${this.createOption()}
+					${this.createOption(-1, false)}
 				</select>
 			</div>
 		`;
@@ -230,9 +249,9 @@ class Form extends HTMLElement {
 		const subphaseHTML = `
 			${mainPhase}
 			<div id="subPhaseFields" style="display: none;">
-				${Title}
+				${this.Title}
 				<div class="mb-3 d-flex justify-content-between">
-					${StartDue}
+					${this.StartDue}
 				</div>
 			</div>
 		`;
@@ -245,7 +264,6 @@ class Form extends HTMLElement {
 			</div>
 		`;
 
-		// Terzo form
 		const activityHTML = `
 			${mainPhase}
 			<div id="subPhaseSelectFields" style="display: none;">
@@ -255,13 +273,13 @@ class Form extends HTMLElement {
 					</select>
 				</div>
 				<div id="activityFields" style="display: none;">
-					${Title}
+					${this.Title}
 					<div class="mb-3">
 						<label for="Description" class="form-label">Description</label>
 						<textarea id="Description" name="Description" class="form-control" aria-describedby="Description" cols="30" row="10"></textarea>
 					</div>
 					<div class="mb-5 d-flex justify-content-between">
-						${StartDue}
+						${this.StartDue}
 					</div>
 					<div class="mb-3 d-flex justify-content-center">
 						<label for="MilestoneCheck" class="form-label me-3">Is Milestone?</label>
@@ -335,17 +353,10 @@ class Form extends HTMLElement {
 			</div>
 		`;
 
-		const phaseForm: HTMLFormElement | null =
-			this.querySelector("#phaseForm");
-		const subphaseForm: HTMLFormElement | null =
-			this.querySelector("#subphaseForm");
-		const activityForm: HTMLFormElement | null =
-			this.querySelector("#activityForm");
-
-		const ref = new Array<HTMLFormElement>();
-		ref.push(phaseForm!);
-		ref.push(subphaseForm!);
-		ref.push(activityForm!);
+		const phaseForm = this.querySelector("#phaseForm");
+		const subphaseForm = this.querySelector("#subphaseForm");
+		const activityForm = this.querySelector("#activityForm");
+		const ref = [phaseForm, subphaseForm, activityForm].filter((form): form is HTMLFormElement => form !== null);
 
 		phaseForm!.addEventListener("submit", (event) => {
 			this.handlePhaseSubmit(event, ref);
@@ -357,13 +368,21 @@ class Form extends HTMLElement {
 			this.handleActivitySubmit(event, ref);
 		});
 
+		const subPhaseFields = this.querySelector("#subPhaseFields");
+		const activityFields = this.querySelector("#activityFields");
+		const subPhaseSelectFields = this.querySelector("#subPhaseSelectFields");
+		// Array per nascondere i campi con il reset
+		const forms = [subPhaseFields, activityFields, subPhaseSelectFields];
+
 		const clearBtn = this.querySelector("#ClearBtn");
 		clearBtn!.addEventListener("click", () => {
 			ref.forEach((form) => form.reset());
+			forms.forEach((form) => (form as HTMLElement)!.style.display = 'none');
 		});
 
 		clearBtn!.innerHTML = '<i class="bi bi-arrow-counterclockwise" style="font-size: 30px;"></i>';
 
+		// Event listener per mostrare i campi del form solo dopo aver selezionato una fase e inserire min/max per le date
 		const subPhaseSelect = this.querySelector('#subphase-pane select[name="MainPhase"]');
 		if (subPhaseSelect) {
 			subPhaseSelect.addEventListener('change', (e) => 
@@ -373,16 +392,16 @@ class Form extends HTMLElement {
 				}
 			);
 		}
+
 		const activitySelect = this.querySelector('#activity-pane select[name="SubPhase"]');
 		if (activitySelect) {
 			activitySelect.addEventListener('change', (e) => 
 				{
 					this.handleDateSelection(e)
-					this.showBlock(e, 'activityFields');
+					this.showBlock(e, 'activityFields', 'subPhaseSelectFields');
 				});
 		}
 
-		// Event listener per inserire la select delle subphase per le activity
 		const activityMainPhase = this.querySelector('#activity-pane select[name="MainPhase"]');
 		if(activityMainPhase){
 			activityMainPhase.addEventListener('change', (e) => 

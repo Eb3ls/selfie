@@ -1,3 +1,27 @@
+/* Passiamo una struttura dati cosí composta:
+ * {
+ *	id: UUID
+ * 	summary: "Fase 1",
+ * 	dtStart: "2021-01-01",
+ * 	dtEnd: "2021-01-31",
+ * 	subPhases: [
+ * 	{
+ * 		id: UUID,
+ * 		summary: "Sottofase 1",
+ * 		dtStart: "2021-01-01",
+ * 		dtEnd: "2021-01-15",
+ * 		activities: [
+ * 			{
+ * 			id: UUID,
+ * 			summary: "Attivitá 1",
+ * 			status: "In corso",
+ * 			dtStart: "2021-01-01",
+ * 			dtEnd: "2021-01-05",
+ * 			}
+ * 		]
+ * 	}]
+ * }
+ * */
 import * as CONST from "./constants";
 
 class ProjectPhase extends HTMLElement {
