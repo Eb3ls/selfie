@@ -22,7 +22,7 @@ const requestTemplate = {
 	status: "",
 	dtStart: "",
 	due: "",
-	categories: [""],
+	categories: "",
 	location: "",
 	geo: "",
 	parentActivityId: "",

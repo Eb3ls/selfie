@@ -9,10 +9,8 @@ export function AddActivityModal({ children }: any) {
 	const [form, setForm] = useState({
 		summary: "",
 		description: "",
-		status: "",
-		dtStart: "",
 		due: "",
-		categories: [],
+		categories: "",
 		location: "",
 		geo: "",
 		parentActivityId: "",
@@ -20,10 +18,13 @@ export function AddActivityModal({ children }: any) {
 		alarms: []
 	});
 
-	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+	const handleChange = (
+		e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+	) => {
+		const { name, value } = e.target;
 		setForm({
 			...form,
-			[e.target.name]: e.target.value
+			[name]: value
 		});
 	};
 
@@ -31,21 +32,23 @@ export function AddActivityModal({ children }: any) {
 	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 
-		// Converti le date in formato ISO
-		form.dtStart = new Date(form.dtStart).toISOString();
+		// Converti la data di consegna in formato ISO
 		form.due = new Date(form.due).toISOString();
+
+		// Imposta la data di inizio (dtStart) come la data di creazione (dtStamp)
+		const dtStart = new Date().toISOString();
 
 		// TODO: Implementare la selezione delle attività genitore
 		form.parentActivityId = null as any;
 
-		console.log("Form inviato:", { ...form });
+		console.log("Form inviato:", { ...form, dtStart });
 
 		const response = await fetch("/api/calendar/activity/add", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json"
 			},
-			body: JSON.stringify({ ...form })
+			body: JSON.stringify({ ...form, dtStart, status: "NEEDS-ACTION" }) // Includi dtStart e lo stato di default
 		});
 
 		if (response.status === 200) {
@@ -86,7 +89,7 @@ export function AddActivityModal({ children }: any) {
 				</Modal.Header>
 				<Form onSubmit={handleSubmit} className="custom-form">
 					<Modal.Body>
-						<Form.Group className="mb-3" controlId="formFirstName">
+						<Form.Group className="mb-3" controlId="formSummary">
 							<Form.Label>Titolo</Form.Label>
 							<Form.Control
 								type="text"
@@ -97,9 +100,15 @@ export function AddActivityModal({ children }: any) {
 								className="input-field"
 								required
 							/>
+						</Form.Group>
+
+						<Form.Group
+							className="mb-3"
+							controlId="formDescription"
+						>
 							<Form.Label>Descrizione</Form.Label>
 							<Form.Control
-								type="text"
+								as="textarea"
 								name="description"
 								value={form.description}
 								onChange={handleChange}
@@ -107,35 +116,55 @@ export function AddActivityModal({ children }: any) {
 								className="input-field"
 								required
 							/>
-							<Form.Label>Stato</Form.Label>
-							<Form.Control
-								type="text"
-								name="status"
-								value={form.status}
-								onChange={handleChange}
-								placeholder="Inserisci stato"
-								className="input-field"
-								required
-							/>
-							<Form.Label>Data di inizio?</Form.Label>
-							<Form.Control
-								type="datetime-local"
-								name="dtStart"
-								value={form.dtStart}
-								onChange={handleChange}
-								placeholder="Inserisci data di inizio"
-								className="input-field"
-								required
-							/>
-							<Form.Label>Data di fine</Form.Label>
+						</Form.Group>
+
+						<Form.Group className="mb-3" controlId="formDue">
+							<Form.Label>Consegna</Form.Label>
 							<Form.Control
 								type="datetime-local"
 								name="due"
 								value={form.due}
 								onChange={handleChange}
-								placeholder="Inserisci data di fine"
 								className="input-field"
 								required
+							/>
+						</Form.Group>
+
+						<Form.Group className="mb-3" controlId="formCategories">
+							<Form.Label>
+								Categorie (separate da virgola)
+							</Form.Label>
+							<Form.Control
+								type="text"
+								name="categories"
+								value={form.categories}
+								onChange={handleChange}
+								placeholder="Inserisci categorie"
+								className="input-field"
+							/>
+						</Form.Group>
+
+						<Form.Group className="mb-3" controlId="formLocation">
+							<Form.Label>Luogo</Form.Label>
+							<Form.Control
+								type="text"
+								name="location"
+								value={form.location}
+								onChange={handleChange}
+								placeholder="Inserisci luogo"
+								className="input-field"
+							/>
+						</Form.Group>
+
+						<Form.Group className="mb-3" controlId="formGeo">
+							<Form.Label>Geolocalizzazione</Form.Label>
+							<Form.Control
+								type="text"
+								name="geo"
+								value={form.geo}
+								onChange={handleChange}
+								placeholder="Inserisci geolocalizzazione"
+								className="input-field"
 							/>
 						</Form.Group>
 					</Modal.Body>

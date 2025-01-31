@@ -15,9 +15,6 @@ export function ModifyActivityModal({
 	setShow: (show: boolean) => void;
 }) {
 	const newActivity: StringActivity = { ...activity };
-	newActivity.dtStart = new Date(newActivity.dtStart)
-		.toISOString()
-		.slice(0, 16);
 	newActivity.due = new Date(newActivity.due).toISOString().slice(0, 16);
 	const [form, setForm] = useState(newActivity);
 
@@ -35,7 +32,6 @@ export function ModifyActivityModal({
 		event.preventDefault();
 
 		// Converti le date in formato ISO
-		form.dtStart = new Date(form.dtStart).toISOString();
 		form.due = new Date(form.due).toISOString();
 
 		const newForm = {
@@ -136,16 +132,6 @@ export function ModifyActivityModal({
 								value={form.status}
 								onChange={handleChange}
 								placeholder="Inserisci stato"
-								className="input-field"
-								required
-							/>
-							<Form.Label>Data di inizio?</Form.Label>
-							<Form.Control
-								type="datetime-local"
-								name="dtStart"
-								value={form.dtStart}
-								onChange={handleChange}
-								placeholder="Inserisci data di inizio"
 								className="input-field"
 								required
 							/>

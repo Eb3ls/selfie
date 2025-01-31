@@ -12,9 +12,9 @@ import { useEffect, useState } from "react";
 import { Calendar, View, momentLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { Button, Container } from "react-bootstrap";
+import { RRule, rrulestr } from "rrule";
 import useSWR from "swr";
 import { GlobalSideBar } from "../components/GlobalSideBar";
-// Importa il file CSS per lo stile del calendario
 import "./calendar.css";
 
 const localizer = momentLocalizer(moment);
@@ -25,6 +25,8 @@ type CalendarEvent = {
 	start: Date;
 	end: Date;
 	typology: "activity" | "event" | "session";
+	originalEvent?: StringEvent | StringActivity | StringSession; // Usa un tipo union
+	isRecurring?: boolean;
 };
 
 interface CalendarResponse {
@@ -35,73 +37,103 @@ interface CalendarResponse {
 
 async function fetcher(url: string) {
 	const response = await fetch(url);
-	if (!response.ok) {
-		alert("Errore durante il fetch delle note!");
-	}
+	if (!response.ok)
+		throw new Error("Errore durante il fetch degli elementi!");
 	return response.json();
+}
+
+function generateRecurringEvents(
+	event: StringEvent,
+	range: { start: Date; end: Date }
+): CalendarEvent[] {
+	const events: CalendarEvent[] = [];
+
+	try {
+		if (event.rrule) {
+			const rule = rrulestr(event.rrule, {
+				dtstart: new Date(event.dtStart),
+				forceset: true
+			});
+
+			const dates = rule.between(range.start, range.end, true);
+
+			dates.forEach((date) => {
+				const start = moment(date).toDate();
+				// Imposta l'evento ricorrente per durare solo un giorno
+				const end = moment(date).endOf("day").toDate(); // L'evento dura fino a mezzanotte
+
+				events.push({
+					id: event._id!,
+					title: event.summary,
+					start,
+					end,
+					typology: "event",
+					originalEvent: event,
+					isRecurring: true
+				});
+			});
+		}
+	} catch (e) {
+		console.error("Errore nel parsing della RRULE:", e);
+	}
+
+	return events;
 }
 
 export default function CalendarPage() {
 	const [events, setEvents] = useState<CalendarEvent[]>([]);
-
-	const [rawActivities, setRawActivities] = useState<StringActivity[]>([]);
 	const [rawEvents, setRawEvents] = useState<StringEvent[]>([]);
+	const [rawActivities, setRawActivities] = useState<StringActivity[]>([]);
 	const [rawSessions, setRawSessions] = useState<StringSession[]>([]);
-
+	const [currentView, setCurrentView] = useState<View>("month"); // Usa il tipo View dalla libreria
+	const [currentDate, setCurrentDate] = useState(new Date());
+	const [range, setRange] = useState<{ start: Date; end: Date }>({
+		start: moment().startOf("month").toDate(),
+		end: moment().endOf("month").toDate()
+	});
 	const [showModal, setShowModal] = useState(false);
-
 	const [selectedCalendarEvent, setSelectedCalendarEvent] =
 		useState<CalendarEvent | null>(null);
 
-	// Fetch della lista di elementi
-	const {
-		data: raw_elements_list,
-		error: error_elements_list,
-		mutate: mutate
-	} = useSWR("/api/calendar/getCalendar", fetcher, {
-		// refreshInterval: 2000, // Ricarica i dati ogni 2 secondi
-		revalidateOnFocus: false // Disabilita il refetch quando si torna alla finestra
-	}) as { data: CalendarResponse; error: any; mutate: () => void };
+	const { data: raw_elements_list } = useSWR<CalendarResponse>(
+		"/api/calendar/getCalendar",
+		fetcher
+	);
 
-	// Aggiorna events quando i dati vengono recuperati
 	useEffect(() => {
 		if (raw_elements_list) {
-			// Trasformazione dei dati grezzi in eventi
-			const pulledActivities = raw_elements_list.activities;
-			const pulledEvents = raw_elements_list.events;
-			const pulledSessions = raw_elements_list.sessions;
+			const newEvents: CalendarEvent[] = [];
 
-			setRawActivities(pulledActivities);
-			setRawEvents(pulledEvents);
-			setRawSessions(pulledSessions);
-
-			const events: CalendarEvent[] = [];
-
-			// Aggiungi le attività come eventi
-			pulledActivities.forEach((activity: StringActivity) => {
-				events.push({
+			// Gestione attività
+			raw_elements_list.activities.forEach((activity) => {
+				newEvents.push({
 					id: activity._id!,
 					title: activity.summary,
-					start: moment(activity.dtStart).toDate(),
-					end: moment(activity.dtStart).toDate(),
+					start: moment(activity.due).toDate(),
+					end: moment(activity.due).toDate(),
 					typology: "activity"
 				});
 			});
 
-			// Aggiungi gli eventi come eventi
-			pulledEvents.forEach((event: StringEvent) => {
-				events.push({
-					id: event._id!,
-					title: event.summary,
-					start: moment(event.dtStart).toDate(),
-					end: moment(event.dtEnd).toDate(),
-					typology: "event"
-				});
+			// Gestione eventi
+			raw_elements_list.events.forEach((event) => {
+				if (event.rrule) {
+					newEvents.push(...generateRecurringEvents(event, range));
+				} else {
+					newEvents.push({
+						id: event._id!,
+						title: event.summary,
+						start: moment(event.dtStart).toDate(),
+						end: moment(event.dtEnd).toDate(),
+						typology: "event",
+						originalEvent: event
+					});
+				}
 			});
 
-			// Aggiungi le sessioni come eventi
-			pulledSessions.forEach((session: StringSession) => {
-				events.push({
+			// Gestione sessioni
+			raw_elements_list.sessions.forEach((session) => {
+				newEvents.push({
 					id: session._id!,
 					title: session.summary,
 					start: moment(session.dtStart).toDate(),
@@ -110,104 +142,204 @@ export default function CalendarPage() {
 				});
 			});
 
-			console.log("Raw elements list:", raw_elements_list);
-			console.log("Eventi:", events);
-
-			setEvents(events);
+			setEvents(newEvents);
+			setRawEvents(raw_elements_list.events);
+			setRawActivities(raw_elements_list.activities);
+			setRawSessions(raw_elements_list.sessions);
 		}
-	}, [raw_elements_list]);
+	}, [raw_elements_list, range]);
 
-	// Stato per la vista attuale (month, week, day)
-	const [currentView, setCurrentView] = useState<View>("month");
+	const handleSelectEvent = (event: CalendarEvent) => {
+		console.log("Event selected:", event);
+		if (event.typology === "activity") {
+			console.log("Raw Activities:", rawActivities);
+			const activity = rawActivities.find((a) => a._id === event.id);
+			if (activity) {
+				setSelectedCalendarEvent({
+					...event,
+					originalEvent: activity // Passa l'attività come originalEvent
+				});
+				setShowModal(true);
+			} else {
+				alert("Attività non trovata!");
+			}
+		} else if (event.typology === "event") {
+			console.log("Raw Events:", rawEvents);
+			const originalEvent =
+				event.originalEvent ||
+				rawEvents.find((e) => e._id === event.id);
+			if (originalEvent) {
+				setSelectedCalendarEvent({
+					...event,
+					originalEvent: originalEvent as StringEvent
+				});
+				setShowModal(true);
+			} else {
+				alert("Evento non trovato!");
+			}
+		} else if (event.typology === "session") {
+			console.log("Raw Sessions:", rawSessions);
+			const session = rawSessions.find((s) => s._id === event.id);
+			if (session) {
+				setSelectedCalendarEvent({
+					...event,
+					originalEvent: session // Passa la sessione come originalEvent
+				});
+				setShowModal(true);
+			} else {
+				alert("Sessione non trovata!");
+			}
+		}
+	};
 
-	// Stato per la data corrente visualizzata nel calendario
-	const [currentDate, setCurrentDate] = useState(new Date());
+	const handleNavigate = (newDate: Date) => {
+		setCurrentDate(newDate);
+		updateRange(newDate, currentView);
+	};
 
-	// Funzione per gestire il cambiamento di vista
-	function handleViewChange(newView: View) {
+	const handleView = (newView: View) => {
+		// Usa il tipo View dalla libreria
 		setCurrentView(newView);
-	}
+		updateRange(currentDate, newView);
+	};
 
-	// Funzione per gestire la navigazione (Today, Back, Next)
-	function handleNavigate(newDate: Date) {
-		setCurrentDate(newDate); // Aggiorna la data corrente
-	}
+	const viewToStartOfMap: { [key in View]: moment.unitOfTime.StartOf } = {
+		day: "day",
+		week: "isoWeek",
+		month: "month",
+		work_week: null,
+		agenda: null
+	};
 
-	// Funzione per gestire la selezione di un evento
-	function handleSelectEvent(event: CalendarEvent) {
-		console.log("Evento selezionato:", event);
-		setSelectedCalendarEvent(event);
-		setShowModal(true);
-	}
+	const updateRange = (date: Date, view: View) => {
+		const startOf = viewToStartOfMap[view];
+		const start = moment(date).startOf(startOf).toDate();
+		const end = moment(date).endOf(startOf).toDate();
+		setRange({ start, end });
+	};
 
 	return (
 		<>
 			<GlobalSideBar />
-			<Container style={{ height: "80vh" }}>
-				<h1 className="calendar-title">Calendario Eventi</h1>
-				<p className="calendar-description">
-					Gestisci i tuoi eventi quotidiani
-				</p>
+			<Container style={{ height: "90vh", paddingTop: "20px" }}>
 				<Calendar
 					localizer={localizer}
 					events={events}
-					popup={true}
+					view={currentView}
+					date={currentDate}
+					onNavigate={handleNavigate}
+					onView={handleView} // Passa la funzione corretta
+					onSelectEvent={handleSelectEvent}
 					startAccessor="start"
 					endAccessor="end"
-					views={["month", "week", "day"]}
-					view={currentView} // Stato attuale della vista
-					onView={handleViewChange} // Cambia la vista quando l'utente preme un bottone
-					date={currentDate} // Imposta la data corrente
-					onNavigate={handleNavigate} // Cambia la data quando l'utente preme i bottoni (Today, Back, Next)
-					onSelectEvent={handleSelectEvent} // Gestisce la selezione di un evento
-					className="custom-calendar" // Classe per lo stile
+					style={{ height: "100%" }}
+					eventPropGetter={(event) => ({
+						style: {
+							backgroundColor:
+								event.typology === "activity"
+									? "#ffcccb"
+									: event.typology === "event"
+										? "#90EE90"
+										: "#87CEEB",
+							borderRadius: "4px",
+							padding: "2px 5px"
+						}
+					})}
+					components={{
+						month: {
+							dateHeader: ({ date }) => (
+								<div style={{ textAlign: "center" }}>
+									{moment(date).format("D")}
+								</div>
+							)
+						}
+					}}
 				/>
-				<AddActivityModal>
-					<Button>Aggiungi Attività</Button>
-				</AddActivityModal>
-				<AddEventModal>
-					<Button>Aggiungi Evento</Button>
-				</AddEventModal>
-				<AddSessionModal>
-					<Button>Aggiungi Sessione</Button>
-				</AddSessionModal>
 
-				{/* Se l'evento selezionato è una attività*/}
+				{/* Bottoni e modali */}
+				<div style={{ marginTop: "20px" }}>
+					<AddActivityModal>
+						<Button variant="outline-primary" className="me-2">
+							Aggiungi Attività
+						</Button>
+					</AddActivityModal>
+					<AddEventModal>
+						<Button variant="outline-success" className="me-2">
+							Aggiungi Evento
+						</Button>
+					</AddEventModal>
+					<AddSessionModal>
+						<Button variant="outline-info">
+							Aggiungi Sessione
+						</Button>
+					</AddSessionModal>
+				</div>
+
+				{/* Modali di modifica */}
 				{selectedCalendarEvent?.typology === "activity" && (
 					<ModifyActivityModal
 						show={showModal}
 						setShow={setShowModal}
 						activity={
 							rawActivities.find(
-								(activity) =>
-									activity._id === selectedCalendarEvent.id
+								(a) => a._id === selectedCalendarEvent.id
 							) as StringActivity
 						}
 					/>
 				)}
 
-				{/* Se l'evento selezionato è un evento*/}
 				{selectedCalendarEvent?.typology === "event" && (
 					<ModifyEventModal
 						show={showModal}
 						setShow={setShowModal}
 						event={
-							rawEvents.find(
-								(event) => event._id === selectedCalendarEvent.id
-							) as StringEvent
+							selectedCalendarEvent.originalEvent as StringEvent
 						}
 					/>
 				)}
 
-				{/* Se l'evento selezionato è una sessione*/}
 				{selectedCalendarEvent?.typology === "session" && (
 					<ModifySessionModal
 						show={showModal}
 						setShow={setShowModal}
 						session={
 							rawSessions.find(
-								(session) =>
-									session._id === selectedCalendarEvent.id
+								(s) => s._id === selectedCalendarEvent.id
+							) as StringSession
+						}
+					/>
+				)}
+
+				{/* Modali di modifica */}
+				{selectedCalendarEvent?.typology === "activity" && (
+					<ModifyActivityModal
+						show={showModal}
+						setShow={setShowModal}
+						activity={
+							rawActivities.find(
+								(a) => a._id === selectedCalendarEvent.id
+							) as StringActivity
+						}
+					/>
+				)}
+
+				{selectedCalendarEvent?.typology === "event" && (
+					<ModifyEventModal
+						show={showModal}
+						setShow={setShowModal}
+						event={
+							selectedCalendarEvent.originalEvent as StringEvent
+						}
+					/>
+				)}
+
+				{selectedCalendarEvent?.typology === "session" && (
+					<ModifySessionModal
+						show={showModal}
+						setShow={setShowModal}
+						session={
+							rawSessions.find(
+								(s) => s._id === selectedCalendarEvent.id
 							) as StringSession
 						}
 					/>
