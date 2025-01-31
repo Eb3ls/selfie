@@ -23,7 +23,7 @@ const requestTemplate = {
 	rrule: "",
 	dtStart: "",
 	dtEnd: "",
-	categories: [""],
+	categories: "",
 	location: "",
 	geo: "",
 	userIdList: [""],

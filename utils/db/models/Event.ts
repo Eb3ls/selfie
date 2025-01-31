@@ -11,12 +11,15 @@ export interface Event {
 	ownerId: ObjectId;						// ID dell'utente che ha creato l'evento
 	summary: string;						// Titolo dell'evento
 	description: string;					// Descrizione
-	status: string;							// TENTATIVE, CONFIRMED, CANCELLED
+	status: 
+		| "TENTATIVE" 
+		| "CONFIRMED" 
+		| "CANCELLED";
 	rrule: string;							// regola di ripetizione dell'Evento. Es. FREQ=WEEKLY;BYDAY=MO (Ogni lunedì), RRULE:FREQ=DAILY;UNTIL=20240831T235959Z (ogni giorno fino a una data specifica)
 	dtStart: Date;							// Data inizio dell'Evento. Es. DTSTART:20240810T150000Z: l'evento si svolge il 10 agosto 2024 alle 15
 	dtEnd: Date;							// Data fine dell'evento
 	dtStamp: Date;							// Data di creazione dell'evento
-	categories: string[];					// Categorie dell'evento
+	categories: string;						// Categorie dell'evento
 	location: string;						// Luogo dell'evento
 	geo: string;							// Geolocalizzazione dell'evento
 	userIdList: ObjectId[];					// Lista degli utenti a cui appartiene
@@ -29,12 +32,12 @@ export function createEvent({
 	ownerId = new ObjectId(),
 	summary = "",
 	description = "",
-	status = "",
+	status = "TENTATIVE",
 	rrule = "",
 	dtStart = new Date(new Date().toISOString()),
 	dtEnd = new Date(new Date().toISOString()),
 	dtStamp = new Date(new Date().toISOString()),
-	categories = [],
+	categories = "",
 	location = "",
 	geo = "",
 	userIdList = [],
