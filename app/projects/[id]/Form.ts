@@ -110,12 +110,26 @@ class Form extends HTMLElement {
 			usernameList: ["prova"]
 		}
 
+		console.log(body);
+
 		await this.fetcher(url, body, "activity");
 	}
 
 	// Elimina la parte finale dell'ISO stringa perché non è supportata da input date per min/max
 	private formatDate(date: string): string{
 		return date.split('T')[0];
+	}
+
+	// Controlliamo se la data é dentro i limiti della fase/sottofase
+	private checkDate(date: string, start: string, due: string): boolean {
+		const newDate = new Date(date);
+		const startDate = new Date(start);
+		const dueDate = new Date(due);
+
+		if (newDate >= startDate && newDate <= dueDate) {
+			return true;
+		}
+		return false;
 	}
 
 	// Imposta il min e max per gli input date in base ai limiti della fase/sottofase
@@ -136,10 +150,13 @@ class Form extends HTMLElement {
             startInput.max = dueDate;
             dueInput.min = startDate;
             dueInput.max = dueDate;
-            
-            // Reset dei valori se fuori range
-            if (startInput.value < startDate) startInput.value = startDate;
-            if (dueInput.value > dueDate) dueInput.value = dueDate;
+			// Reset dei valori se fuori range o vuoti
+			if (!this.checkDate(startInput.value, startDate, dueDate)) {
+				startInput.value = startDate;
+			}
+			if (!this.checkDate(dueInput.value, startDate, dueDate)) {
+				dueInput.value = startDate;
+			}
         }
     }
 
@@ -147,15 +164,49 @@ class Form extends HTMLElement {
 	handleMainPhaseSelection(event: Event) {
 		const select = event.target as HTMLSelectElement;
 		const selectedOption = select.selectedOptions[0];
+		if (selectedOption.value === '') return;
+		
 		const phaseIndex = this.projectData.findIndex((phase: any) => phase._id === selectedOption.value);
-		const subPhaseSelect = document.querySelector('#activity-pane select[name="SubPhase"]') as HTMLSelectElement;
-		if(subPhaseSelect) {
-			subPhaseSelect.innerHTML = this.createOption(phaseIndex, true);
+		const activityPane = document.querySelector('#activity-pane');
+		
+		if (!activityPane) return;
+	
+		const subPhaseSelect = activityPane.querySelector('select[name="SubPhase"]') as HTMLSelectElement;
+		const subPhaseFields = activityPane.querySelector('#subPhaseSelectFields') as HTMLElement;
+		const activityFields = activityPane.querySelector('#activityFields') as HTMLElement;
+	
+		if (this.projectData[phaseIndex].subPhases?.length > 0) {
+			// Se ha sottofasi - mostra selettore sottofasi, nascondi campi attività
+			if (subPhaseSelect) {
+				subPhaseSelect.innerHTML = this.createOption(phaseIndex, true);
+				if (!subPhaseSelect.parentElement) return;
+				subPhaseSelect.parentElement.style.display = 'block';
+			}
+			if (activityFields) {
+				activityFields.style.display = 'none';
+			}
+		} else {
+			// Se non ha sottofasi - nascondi selettore sottofasi, mostra campi attività
+			if (subPhaseSelect) {
+				// Seleziona la fase come sottofase nascondendo il selettore
+				subPhaseSelect.value = this.projectData[phaseIndex]._id;
+				subPhaseSelect.innerHTML = `<option value="${this.projectData[phaseIndex]._id}">${this.projectData[phaseIndex].summary}</option>`;
+				// Nascondi il selettore
+				if(subPhaseSelect.parentElement){
+					subPhaseSelect.parentElement.style.display = 'none';
+				}
+			}
+			if (subPhaseFields) {
+				subPhaseFields.style.display = 'block';
+			}
+			if (activityFields) {
+				activityFields.style.display = 'block';
+			}
 		}
 	}
 
 	// Funzione per mostrare title e date solo dopo che si seleziona una fase
-	showBlock(event: Event, id: string, id2?: string) {
+	showBlock(event: Event, id: string) {
 		const select = event.target as HTMLSelectElement;
 		const ref = document.getElementById(id);
 		
@@ -164,13 +215,6 @@ class Form extends HTMLElement {
 		}
 		else if (ref) {
 			ref.style.display = 'none';
-			// Nascondi i blocchi figli se presenti
-			if (id2) {
-				const ref2 = document.getElementById(id2);
-				if (ref2) {
-					ref2.style.display = 'none';
-				}
-			}
 		}
 	}
 
@@ -267,9 +311,9 @@ class Form extends HTMLElement {
 		const activityHTML = `
 			${mainPhase}
 			<div id="subPhaseSelectFields" style="display: none;">
-				<div class="mb-3">
+				<div class="mb-3" style="display: block;">
 					<label for="SubPhase" class="form-label">Sub Phase</label>
-					<select required name="SubPhase" class="form-select" id="MainPhase">
+					<select required name="SubPhase" class="form-select" id="SubPhase">
 					</select>
 				</div>
 				<div id="activityFields" style="display: none;">
@@ -393,21 +437,22 @@ class Form extends HTMLElement {
 			);
 		}
 
-		const activitySelect = this.querySelector('#activity-pane select[name="SubPhase"]');
-		if (activitySelect) {
-			activitySelect.addEventListener('change', (e) => 
+		const firstActivitySelect = this.querySelector('#activity-pane select[name="MainPhase"]');
+		if(firstActivitySelect){
+			firstActivitySelect.addEventListener('change', (e) => 
 				{
+					this.handleMainPhaseSelection(e)
 					this.handleDateSelection(e)
-					this.showBlock(e, 'activityFields', 'subPhaseSelectFields');
+					this.showBlock(e, 'subPhaseSelectFields');
 				});
 		}
 
-		const activityMainPhase = this.querySelector('#activity-pane select[name="MainPhase"]');
-		if(activityMainPhase){
-			activityMainPhase.addEventListener('change', (e) => 
+		const secondActivitySelect = this.querySelector('#SubPhase');
+		if (secondActivitySelect) {
+			secondActivitySelect.addEventListener('change', (e) => 
 				{
-					this.handleMainPhaseSelection(e)
-					this.showBlock(e, 'subPhaseSelectFields');
+					this.handleDateSelection(e)
+					this.showBlock(e, 'activityFields');
 				});
 		}
 	}
