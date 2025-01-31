@@ -105,7 +105,14 @@ export const POST = async (request: NextRequest) => {
 
 	// Creiamo una nuova fase con quei campi
 	const newPhase: StringPhase = generateStringModel<StringPhase>(
-		newBody,
+		{
+			summary: newBody.summary,
+			ownerId: userId,
+			projectId: projectId,
+			parentId: parentId,
+			dtStart: new Date(newBody.dtStart).toISOString(),
+			due: new Date(newBody.due).toISOString()
+		},
 		"Phase"
 	);
 

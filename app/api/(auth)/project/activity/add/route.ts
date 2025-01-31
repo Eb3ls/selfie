@@ -166,8 +166,8 @@ export const POST = async (request: NextRequest) => {
 			{
 				summary: newBody.summary,
 				description: newBody.description,
-				dtStart: newBody.dtStart,
-				due: newBody.due,
+				dtStart: new Date(newBody.dtStart).toISOString(),
+				due: new Date(newBody.due).toISOString(),
 				ownerId: userId,
 				phaseId: newBody.phaseId,
 				isMilestone: newBody.isMilestone,
