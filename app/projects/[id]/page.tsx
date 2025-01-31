@@ -10,7 +10,6 @@ import { GlobalSideBar } from "@/app/components/GlobalSideBar";
  * Poter scorrere in verticale il gantt
  *
  * */
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { PiBroom } from "react-icons/pi";
 import * as CONST from "./constants";
@@ -24,6 +23,7 @@ declare global {
 			"time-line": { date: Date };
 			"onload-functions": {};
 			"form-component": { data: Object };
+			"project-settings": { users: Object; title: string };
 		}
 	}
 }
@@ -58,6 +58,7 @@ export default function Projects() {
 			import("./TimeLine");
 			import("./OnLoadFunctions");
 			import("./Form");
+			import("./ProjectSettings");
 			const fetchData = async () => {
 				const data = await getData();
 				setProjectData(data);
@@ -82,10 +83,13 @@ export default function Projects() {
 						<div className="ms-1">Progetto di prova</div>
 					</div>
 					<div className="col d-flex justify-content-end align-items-center">
-						<form-component data={JSON.stringify(projectData || [])}></form-component>
-						<button className="btn btn-primary rounded-pill">
-							<div>Settings</div>
-						</button>
+						<form-component
+							data={projectData ? JSON.stringify(projectData) : JSON.stringify([])}
+						></form-component>
+						<project-settings
+							title={projectData ? projectData.summary : ""}
+							users={projectData ? JSON.stringify(projectData.users) : []}
+						></project-settings>
 					</div>
 				</div>
 				<div className="row p-3 border-bottom border-secondary">
