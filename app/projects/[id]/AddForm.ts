@@ -1,4 +1,4 @@
-class Form extends HTMLElement {
+class AddForm extends HTMLElement {
 	projectID: string;
 	projectData: any[];
 
@@ -338,11 +338,11 @@ class Form extends HTMLElement {
 		`;
 
 		this.innerHTML = `
-			<button type="button rounded-pill" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#Form">
+			<button type="button rounded-pill" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#AddForm">
 				Add new
 			</button>
 			
-			<div class="modal fade" id="Form" aria-labelledby="FormLabel" aria-hidden="true">
+			<div class="modal fade" id="AddForm" aria-labelledby="FormLabel" aria-hidden="true">
 				<div class="modal-dialog">
 					<div class="modal-content">
 						<div class="modal-header">
@@ -461,5 +461,5 @@ class Form extends HTMLElement {
 	}
 }
 
-customElements.define("form-component", Form);
-export default Form;
+customElements.define("add-form-component", AddForm);
+export default AddForm;

@@ -22,8 +22,9 @@ declare global {
 			"project-phase-row": { data: Object };
 			"time-line": { date: Date };
 			"onload-functions": {};
-			"form-component": { data: Object };
+			"add-form-component": { data: Object };
 			"project-settings": { users: Object; title: string };
+			"modify-activity": {};
 		}
 	}
 }
@@ -57,13 +58,15 @@ export default function Projects() {
 			import("./ProjectPhaseRow");
 			import("./TimeLine");
 			import("./OnLoadFunctions");
-			import("./Form");
+			import("./AddForm");
 			import("./ProjectSettings");
+			import("./ModifyActivity")
 			const fetchData = async () => {
 				const data = await getData();
 				setProjectData(data);
 			};
 			fetchData();
+			// TODO - Sorting per data
 		}
 	}, []);
 
@@ -83,9 +86,9 @@ export default function Projects() {
 						<div className="ms-1">Progetto di prova</div>
 					</div>
 					<div className="col d-flex justify-content-end align-items-center">
-						<form-component
+						<add-form-component
 							data={projectData ? JSON.stringify(projectData) : JSON.stringify([])}
-						></form-component>
+						></add-form-component>
 						<project-settings
 							title={projectData ? projectData.summary : ""}
 							users={projectData ? JSON.stringify(projectData.users) : []}
@@ -139,6 +142,7 @@ export default function Projects() {
 					</div>
 				</div>
 			</div >
+			<modify-activity></modify-activity>
 			<onload-functions></onload-functions>
 		</>
 	);
