@@ -282,18 +282,14 @@ class Form extends HTMLElement {
 			</div>
 		`;
 
-		const mainPhase = `
+		// Secondo form
+		const subphaseHTML = `
 			<div class="mb-3">
 				<label for="MainPhase" class="form-label">Main Phase</label>
 				<select name="MainPhase" class="form-select" id="MainPhase" required>
-					${this.createOption(-1, false)}
+					${this.createOption(-1, true)}
 				</select>
 			</div>
-		`;
-
-		// Secondo form
-		const subphaseHTML = `
-			${mainPhase}
 			<div id="subPhaseFields" style="display: none;">
 				${this.Title}
 				<div class="mb-3 d-flex justify-content-between">
@@ -311,7 +307,12 @@ class Form extends HTMLElement {
 		`;
 
 		const activityHTML = `
-			${mainPhase}
+			<div class="mb-3">
+				<label for="MainPhase" class="form-label">Main Phase</label>
+				<select name="MainPhase" class="form-select" id="MainPhase" required>
+					${this.createOption(-1, false)}
+				</select>
+			</div>
 			<div id="subPhaseSelectFields" style="display: none;">
 				<div class="mb-3" style="display: block;">
 					<label for="SubPhase" class="form-label">Sub Phase</label>

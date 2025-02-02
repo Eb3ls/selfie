@@ -97,8 +97,11 @@ class ProjectPhase extends HTMLElement {
 		collapse.id = `collapse${data._id}`;
 		collapse.className = "collapse";
 
+		let noInsideData = true
+
 		// Gestione delle sottofasi
 		if (data.subPhases && data.subPhases.length > 0) {
+			noInsideData = false
 			for (const subPhase of data.subPhases) {
 				collapse.innerHTML += this.renderPhase(subPhase);
 			}
@@ -106,10 +109,24 @@ class ProjectPhase extends HTMLElement {
 
 		//Gestione delle attività
 		if (data.activities && data.activities.length > 0) {
+			noInsideData = false
 			for (const activity of data.activities) {
 				const activityElement = this.handleItem(activity);
 				collapse.appendChild(activityElement);
 			}
+		}
+
+		// Se non ci sono dati togliamo il collapse mantenendo lo spazio per il bottone
+		if (noInsideData) {
+			toggler.innerHTML = `
+			<div class="d-flex align-items-center w-100">
+				<i class="bi bi-caret-right-fill me-3 fs-5 invisible"></i> 
+				<div class="btn btn-primary rounded-3 px-4 py-2 flex-grow-1 text-start">
+					${data.summary}
+				</div>
+			</div>
+			`;
+			return toggler.outerHTML;
 		}
 
 		return toggler.outerHTML + collapse.outerHTML;

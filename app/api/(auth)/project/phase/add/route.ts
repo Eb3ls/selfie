@@ -4,6 +4,8 @@ import {
 	validate
 } from "@/utils/api/api";
 import {
+	ACTIVITY_COLLECTION,
+	Activity,
 	PHASE_COLLECTION,
 	PROJECT_COLLECTION,
 	Phase,
@@ -100,6 +102,19 @@ export const POST = async (request: NextRequest) => {
 				"Date range is not included in parent range",
 				400
 			);
+		}
+
+		// Controlliamo che la fase padre non abbia giá delle activity
+		const activitiesClient: Collection<Activity> =
+			await getCollection<Activity>(ACTIVITY_COLLECTION);
+		
+		const activitiesOut = await findCollectionWrapper<Activity>(
+			{ parentActivityId: parentId },
+			activitiesClient
+		)
+
+		if (activitiesOut.status !== 400) {
+			return generateMessageResponse("Parent phase has activities", 400);
 		}
 	}
 
