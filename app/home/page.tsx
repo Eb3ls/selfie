@@ -12,11 +12,17 @@ import {
 	Row,
 	Stack
 } from "react-bootstrap";
-import { FaStickyNote } from "react-icons/fa";
+import {
+	FaBook,
+	FaCoffee,
+	FaRedoAlt,
+	FaRegClock,
+	FaStickyNote
+} from "react-icons/fa";
 import { GlobalSideBar } from "../components/GlobalSideBar";
+import { useUser } from "../components/UserContext";
 
-// Importa l'icona
-
+// Tipi esistenti per Note, Progetti e Chat
 interface ReducedNote {
 	_id: string;
 	summary: string;
@@ -38,19 +44,50 @@ interface ReducedChat {
 	lastMessageAt: string;
 }
 
+// Nuovi tipi per la preview del Calendario
+interface ReducedActivity {
+	_id: string;
+	summary: string;
+	description: string;
+	data: string; // formato ISO
+	ownerName: string;
+}
+
+interface ReducedEvent {
+	_id: string;
+	summary: string;
+	description: string;
+	data: string; // occorrenza (se ricorrente) oppure dtStart
+	ownerName: string;
+}
+
+interface ReducedSession {
+	_id: string;
+	summary: string;
+	description: string;
+	data: string; // occorrenza calcolata dalla rrule
+	ownerName: string;
+}
+
+interface ReducedCalendar {
+	activities: ReducedActivity[];
+	events: ReducedEvent[];
+	sessions: ReducedSession[];
+}
+
+// Risposta finale che ora include anche il ReducedCalendar
 interface PreviewsResponse {
 	notes: ReducedNote[];
 	projects: ReducedProject[];
 	chats: ReducedChat[];
+	calendar: ReducedCalendar;
 }
 
 // Funzione per formattare le date in un formato leggibile
 function formatDate(dateString: string): string {
 	const date = new Date(dateString);
-
-	// Formato: "GG/MM/AAAA HH:mm"
 	const day = date.getDate().toString().padStart(2, "0");
-	const month = (date.getMonth() + 1).toString().padStart(2, "0"); // I mesi partono da 0
+	const month = (date.getMonth() + 1).toString().padStart(2, "0");
 	const year = date.getFullYear();
 	const hours = date.getHours().toString().padStart(2, "0");
 	const minutes = date.getMinutes().toString().padStart(2, "0");
@@ -231,8 +268,113 @@ function PreviewList({
 	);
 }
 
+// Nuovo componente per la preview del Calendario
+function PreviewCalendar({ calendar }: { calendar: ReducedCalendar }) {
+	// Funzione per generare il layout degli elementi con badge colorati
+	const renderItems = (
+		title: string,
+		items: (ReducedActivity | ReducedEvent | ReducedSession)[],
+		badgeColor: string
+	) => (
+		<div className="mb-3">
+			<h6 className="fw-bold">
+				<Badge bg={badgeColor} className="me-2">
+					{title}
+				</Badge>
+			</h6>
+			{items.length === 0 ? (
+				<p className="text-muted ms-4">Nessun {title.toLowerCase()}</p>
+			) : (
+				<Stack gap={2} className="ms-4">
+					{items.map((item) => (
+						<div
+							key={item._id}
+							className="border rounded-3 p-2"
+							style={{ backgroundColor: "#fff" }}
+						>
+							<h6 className="mb-1">{item.summary}</h6>
+							<p
+								className="mb-1 text-muted"
+								style={{ fontSize: "0.9rem" }}
+							>
+								{item.description}
+							</p>
+							<p
+								className="mb-0 text-secondary"
+								style={{ fontSize: "0.8rem" }}
+							>
+								{formatDate(item.data)} - {item.ownerName}
+							</p>
+						</div>
+					))}
+				</Stack>
+			)}
+		</div>
+	);
+
+	return (
+		<div>
+			{renderItems("Attività", calendar.activities, "primary")}
+			{renderItems("Eventi", calendar.events, "warning")}
+			{renderItems("Sessione Pomodoro", calendar.sessions, "success")}
+		</div>
+	);
+}
+
+// Nuovo componente per la preview del Pomodoro
+function PreviewPomodoro({
+	pomodoro
+}: {
+	pomodoro: {
+		modificationDate: string;
+		cycles: number;
+		studyTime: number;
+		breakTime: number;
+	};
+}) {
+	return (
+		<Stack gap={3}>
+			<div className="d-flex align-items-center">
+				<FaRedoAlt className="text-danger me-2" size={20} />
+				<div>
+					<h6 className="mb-0 fw-bold">Cicli</h6>
+					<small className="text-muted">{pomodoro.cycles}</small>
+				</div>
+			</div>
+			<div className="d-flex align-items-center">
+				<FaBook className="text-primary me-2" size={20} />
+				<div>
+					<h6 className="mb-0 fw-bold">Tempo di studio</h6>
+					<small className="text-muted">
+						{pomodoro.studyTime} minuti
+					</small>
+				</div>
+			</div>
+			<div className="d-flex align-items-center">
+				<FaCoffee className="text-warning me-2" size={20} />
+				<div>
+					<h6 className="mb-0 fw-bold">Tempo di pausa</h6>
+					<small className="text-muted">
+						{pomodoro.breakTime} minuti
+					</small>
+				</div>
+			</div>
+			<div className="d-flex align-items-center">
+				<FaRegClock className="text-secondary me-2" size={20} />
+				<div>
+					<h6 className="mb-0 fw-bold">Ultima modifica</h6>
+					<small className="text-muted">
+						{formatDate(pomodoro.modificationDate)}
+					</small>
+				</div>
+			</div>
+		</Stack>
+	);
+}
+
 export default function Home() {
 	const [previews, setPreviews] = useState<PreviewsResponse | null>(null);
+	const { user } = useUser();
 
 	useEffect(() => {
 		fetch("/api/preview")
@@ -267,7 +409,13 @@ export default function Home() {
 							<Col xs={12} md={6} className="mb-3">
 								<PreviewBox
 									title="Calendario"
-									content={null}
+									content={
+										previews && (
+											<PreviewCalendar
+												calendar={previews.calendar}
+											/>
+										)
+									}
 									link="/calendar"
 								/>
 							</Col>
@@ -302,7 +450,37 @@ export default function Home() {
 							<Col xs={12} md={6} className="mb-3">
 								<PreviewBox
 									title="Pomodoro"
-									content={null}
+									content={
+										user?.pomodoro ? (
+											<PreviewPomodoro
+												pomodoro={{
+													modificationDate:
+														typeof user.pomodoro
+															.modificationDate ===
+														"string"
+															? formatDate(
+																	user
+																		.pomodoro
+																		.modificationDate
+																)
+															: formatDate(
+																	user.pomodoro.modificationDate.toISOString()
+																),
+													cycles: user.pomodoro
+														.cycles,
+													studyTime:
+														user.pomodoro.studyTime,
+													breakTime:
+														user.pomodoro.breakTime
+												}}
+											/>
+										) : (
+											<p className="text-muted">
+												Non sono disponibili
+												informazioni sul Pomodoro.
+											</p>
+										)
+									}
 									link="/pomodoro"
 								/>
 							</Col>
