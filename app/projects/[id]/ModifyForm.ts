@@ -19,18 +19,23 @@ interface user{
     id: string;
 }
 
+interface activity{
+    name: string;
+    id: string;
+}
+
 class ModifyActivity extends HTMLElement {
     phaseData: any;
     activityData: any;
-    modifiedUsers: user[];
-    isEditMode: boolean;
+    modifiedUserlist: user[];
+    modifiedLinklist: activity[];
 
     constructor() {
         super();
         this.phaseData = [];
         this.activityData = [];
-        this.modifiedUsers = [];
-        this.isEditMode = false;
+        this.modifiedUserlist = [];
+        this.modifiedLinklist = [];
     }
 
     async handleSubmit(event: Event) {
@@ -161,76 +166,130 @@ class ModifyActivity extends HTMLElement {
     }
 
     // Aggiunge un utente alla lista
-    private addUser(username: user) {
-        const userList = this.querySelector('#userList');
-        if (!userList) return;
+    private addItem(isUser: boolean, item: {name: string, id: string}) {
+        const itemName = isUser ? 'user' : 'link';
+        const list = this.querySelector(`#${itemName}List`);
+        if (!list) return;
 
-        const userItem = document.createElement('div');
-        userItem.className = 'user-item d-flex justify-content-between align-items-center bg-light';
-        userItem.setAttribute('data-user', username.id);
+        const itemBlock = document.createElement('div');
+        itemBlock.className = 'user-item d-flex justify-content-between align-items-center bg-light';
+        itemBlock.setAttribute(`data-${itemName}`, item.id);
         
-        userItem.innerHTML = `
-            <span class="user-name">
-                <i class="bi bi-person-fill me-2"></i>
-                ${username.name}
+        itemBlock.innerHTML = `
+            <span class="${itemName}-name">
+                <i class="bi bi-${itemName === "user" ? "person-fill" : "link-45deg"} me-2"></i>
+                ${item.name}
             </span>
             <button type="button" class="btn btn-danger btn-sm">
                 <i class="bi bi-trash"></i>
             </button>
         `;
 
-        userItem.querySelector('button')?.addEventListener('click', () => {
-            this.modifiedUsers = this.modifiedUsers.filter(user => user.id !== username.id);
-            userItem.remove();
+        itemBlock.querySelector('button')?.addEventListener('click', () => {
+            if (isUser) {
+                this.modifiedUserlist = this.modifiedUserlist.filter(user => user.id !== item.id);
+            } else {
+                this.modifiedLinklist = this.modifiedLinklist.filter(link => link.id !== item.id);
+            }
+            itemBlock.remove();
         });
 
-        userList.appendChild(userItem);
+        list.appendChild(itemBlock);
     }
 
     // Funzione per l'aggiunta e l'eliminazione degli utenti
-    private setupUserManagement() {
-        const addUserBtn = this.querySelector('#addUserBtn');
-        const newUserInput = this.querySelector('#newUser') as HTMLInputElement;
+    private setupItemManagement(isEdit: boolean) {
+        const type = isEdit ? 'User' : 'Link';
+        const btn = this.querySelector(` #add${type}Btn`);
+        const newInput = this.querySelector(`#new${type}`) as HTMLInputElement;
 
-        for (const user of this.modifiedUsers) {
-            this.addUser(user);
+        if(isEdit){
+            for (const user of this.modifiedUserlist) {
+                this.addItem(true, user);
+            }
+        }
+        else{
+            for (const link of this.modifiedLinklist) {
+                this.addItem(false, link);
+            }
+
         }
 
-        addUserBtn?.addEventListener('click', () => {
-            const username = newUserInput.value.trim();
+        btn?.addEventListener('click', () => {
+            let value = "";
+
+            if(isEdit){
+                value = newInput.value.trim();
+            }
+            else{
+                value = newInput.value;
+            }
             
-            if (!username) {
+            if (!value) {
                 return;
             }
 
-            this.clearError(newUserInput);
+            if(isEdit){
+                this.clearError(newInput);
 
-            if (!this.validateUsername(username)) {
-                this.showError(newUserInput, 'Invalid username (3-20 characters, only letters, numbers, - and _)');
-                return;
+                if (!this.validateUsername(value)) {
+                    this.showError(newInput, 'Invalid username (3-20 characters, only letters, numbers, - and _)');
+                    return;
+                }
             }
 
-            // Aggiungiamo l'utente alla lista TODO - Implementare gestione utenti
-            const user = { name: username, id: username };
-            this.modifiedUsers.push(user);
-            this.addUser(user);
-            newUserInput.value = '';
+            const newItem = {name: value, id: value};
+
+            if (isEdit){
+                // Aggiungiamo l'utente alla lista TODO - Implementare gestione utenti
+                this.modifiedUserlist.push(newItem);
+                this.addItem(true, newItem);
+            }
+            else{
+                this.modifiedLinklist.push(newItem);
+                this.addItem(false, newItem);
+            }
+
+            newInput.value = '';
         });
+    }
 
+    private createLinkTemplate() {
+        return `
+            <div class="modal-body">
+                <div class="mb-4">
+                    <h4 class="mb-3">${this.activityData.summary}</h4>
+                    <label class="form-label fw-bold">Link with other Activities</label>
+                    <div class="add-link-form">
+                        <div class="input-group mb-3">
+                            <select class="form-select" id="newLink">
+                                <option value="" disabled selected>Select an activity...</option>
+                                <option value="1">Activity 1</option>
+                                <option value="2">Activity 2</option>
+                                <option value="3">Activity 3</option>
+                            </select>
+                            <button class="btn btn-primary" type="button" id="addLinkBtn">
+                                <i class="bi bi-plus-lg"></i> Add
+                            </button>
+                        </div>
+                    </div>
+                    <div class="link-list mt-2" id="linkList">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        `;
     }
 
     // Funzione da chiamare per popolare il form con i dati
     public setData(activityData: any, phaseData: any) {
         this.activityData = activityData;
         this.phaseData = phaseData;
-        this.isEditMode = false;
-        this.modifiedUsers = [...this.activityData.users];
-        this.updateModalContent();
-    }
-
-    private toggleEditMode() {
-        this.isEditMode = !this.isEditMode;
-        this.updateModalContent();
+        this.modifiedUserlist = [...this.activityData.users];
+        this.modifiedLinklist = this.activityData.links || [];
+        this.updateModalContent("VIEW");
     }
 
     private createViewTemplate() {
@@ -289,37 +348,97 @@ class ModifyActivity extends HTMLElement {
         `;
     }
 
-    private updateModalContent() {
+    private updateModalContent(mode: "VIEW" | "EDIT" | "LINK") {
         const modalContent = this.querySelector('.modal-content');
-        if (modalContent) {
+        if (!modalContent) return;
+
+        if (mode === "EDIT") {
+            const header = `
+                <i class="bi bi-pencil-fill"></i>
+                <span>Modify Activity</span>
+            `;
             modalContent.innerHTML = `
                 <div class="modal-header d-flex align-items-center">
                     <h5 class="modal-title d-flex align-items-center gap-2">
-                        <i class="bi bi-${this.isEditMode ? 'pencil-fill' : 'info-circle'}"></i>
-                        <span>${this.isEditMode ? 'Modify' : ''} Activity</span>
+                        ${header}
                     </h5>
                     <div class="ms-auto">
-                        <button type="button" class="btn btn-sm ${this.isEditMode ? 'btn-warning' : 'btn-light'} me-2" id="toggleEditBtn">
-                            <i class="bi bi-${this.isEditMode ? 'x' : 'pencil'}"></i>
-                            ${this.isEditMode ? 'Cancel' : 'Modify'}
+                        <button type="button" class="btn btn-sm btn-warning me-2" id="toggleEditBtn">
+                            <i class="bi bi-x"></i>
+                            Cancel
                         </button>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                 </div>
-                ${this.isEditMode 
-                    ? `<form id="modifyActivityForm">${this.createFormTemplate()}</form>` 
-                    : this.createViewTemplate()
-                }
+                <form id="modifyActivityForm">${this.createFormTemplate()}</form>
             `;
 
-            if (this.isEditMode) {
-                const form = modalContent.querySelector('#modifyActivityForm');
-                form?.addEventListener('submit', (e) => this.handleSubmit(e));
-                this.setupUserManagement();
-            }
+            const form = modalContent.querySelector('#modifyActivityForm');
+            form?.addEventListener('submit', (e) => this.handleSubmit(e));
+            this.setupItemManagement(true);
 
             const toggleBtn = modalContent.querySelector('#toggleEditBtn');
-            toggleBtn?.addEventListener('click', () => this.toggleEditMode());
+            toggleBtn?.addEventListener('click', () => this.updateModalContent("VIEW"));
+
+        } else if (mode === "LINK") {
+            const header = `
+                <i class="bi bi-link"></i>
+                <span>Link Activities</span>
+            `;
+            modalContent.innerHTML = `
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        ${header}
+                    </h5>
+                    <div class="ms-auto">
+                        <button type="button" class="btn btn-sm btn-warning me-2" id="toggleEditBtn">
+                            <i class="bi bi-x"></i>
+                            Cancel
+                        </button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                </div>
+                <form id="modifyActivityForm">${this.createLinkTemplate()}</form>
+            `;
+
+            const form = modalContent.querySelector('#modifyActivityForm');
+            form?.addEventListener('submit', (e) => this.handleSubmit(e));
+            this.setupItemManagement(false);
+
+            const toggleBtn = modalContent.querySelector('#toggleEditBtn');
+            toggleBtn?.addEventListener('click', () => this.updateModalContent("VIEW"));
+
+        } else {
+            const header = `
+                <i class="bi bi-info-circle"></i>
+                <span>Activity</span>
+            `;
+            // Modalitá view
+            modalContent.innerHTML = `
+                <div class="modal-header d-flex align-items-center">
+                    <h5 class="modal-title d-flex align-items-center gap-2">
+                        ${header}
+                    </h5>
+                    <div class="ms-auto">
+                        <button type="button" class="btn btn-sm btn-outline-primary me-2" id="linkBtn">
+                            <i class="bi bi-link"></i>
+                            Links
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-primary me-2" id="editBtn">
+                            <i class="bi bi-pencil"></i>
+                            Modify
+                        </button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                </div>
+                ${this.createViewTemplate()}
+            `;
+
+            const linkBtn = modalContent.querySelector('#linkBtn');
+            linkBtn?.addEventListener('click', () => this.updateModalContent("LINK"));
+
+            const editBtn = modalContent.querySelector('#editBtn');
+            editBtn?.addEventListener('click', () => this.updateModalContent("EDIT"));
         }
     }
 }
