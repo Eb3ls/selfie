@@ -1,5 +1,9 @@
 import { act } from "react";
 
+// Formatta la data ISO per l'input date
+function formatDate(date: string): string {
+    return date.split('T')[0];
+}
 interface ActivityData {
     _id: string;
     summary: string;
@@ -11,7 +15,6 @@ interface ActivityData {
 }
 
 class ModifyActivity extends HTMLElement {
-    private modal: HTMLDivElement | null = null;
     phaseData: any;
     activityData: any;
 
@@ -19,15 +22,6 @@ class ModifyActivity extends HTMLElement {
         super();
         this.phaseData = [];
         this.activityData = [];
-    }
-
-    static get observedAttributes() {
-        return ['activity-data', 'phase-data'];
-    }
-
-    // Formatta la data ISO per l'input date
-    private formatDate(date: string): string {
-        return date.split('T')[0];
     }
 
     async handleSubmit(event: Event) {
@@ -116,16 +110,16 @@ class ModifyActivity extends HTMLElement {
                     <div class="flex-grow-1">
                         <label for="dtStart" class="form-label fw-bold">Start Date</label>
                         <input type="date" class="form-control" id="dtStart" name="dtStart" 
-                           required value="${this.formatDate(this.activityData.dtStart)}"
-                           min="${this.formatDate(this.phaseData.dtStart)}" 
-                           max="${this.formatDate(this.phaseData.due)}">
+                           required value="${formatDate(this.activityData.dtStart)}"
+                           min="${formatDate(this.phaseData.dtStart)}" 
+                           max="${formatDate(this.phaseData.due)}">
                     </div>
                     <div class="flex-grow-1">
                         <label for="due" class="form-label fw-bold">Due Date</label>
                         <input type="date" class="form-control" id="due" name="due" 
-                           required value="${this.formatDate(this.activityData.due)}"
-                           min="${this.formatDate(this.phaseData.dtStart)}" 
-                           max="${this.formatDate(this.phaseData.due)}">
+                           required value="${formatDate(this.activityData.due)}"
+                           min="${formatDate(this.phaseData.dtStart)}" 
+                           max="${formatDate(this.phaseData.due)}">
                     </div>
                 </div>
 
@@ -246,4 +240,208 @@ class ModifyActivity extends HTMLElement {
 
 customElements.define('modify-activity', ModifyActivity);
 
-export default ModifyActivity;
+export { ModifyActivity };
+
+class ModifyPhase extends HTMLElement {
+    parentData: any;
+    phaseData: any;
+    minInner: string;
+    maxInner: string;
+    minOuter: string;
+    maxOuter: string;
+
+    constructor() {
+        super();
+        this.parentData = [];
+        this.phaseData = [];
+        this.minInner = '';
+        this.maxInner = '';
+        this.minOuter = '';
+        this.maxOuter = '';
+    }
+
+    async handleSubmit(event: Event) {
+        event.preventDefault();
+        const form = event.target as HTMLFormElement;
+        const formData = new FormData(form);
+
+        const data = {
+            _id: this.phaseData._id,
+            summary: formData.get('summary') as string,
+            dtStart: new Date(formData.get('dtStart') as string + 'T00:00:00.000Z').toISOString(),
+            due: new Date(formData.get('due') as string + 'T23:59:59.999Z').toISOString(),
+        };
+
+        try {
+            const response = await fetch(`/api/project/phase/modify`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                throw new Error('Failed to update activity');
+            }
+        } catch (error) {
+            console.error('Error updating activity:', error);
+            alert('Failed to update activity');
+        }
+    }
+
+    // Renderizziamo il componente senza contenuto
+    connectedCallback() {
+        this.innerHTML = `
+            <div class="modal fade" id="ModifyPhase" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                    </div>
+                </div>
+            </div>
+        `;
+        this.id = 'ModifyPhaseComponent';
+    }
+
+    private createFormTemplate() {
+        return `
+            <div class="modal-body">
+                <div class="mb-4">
+                    <label for="summary" class="form-label fw-bold">Title</label>
+                    <input type="text" class="form-control" id="summary" name="summary" 
+                           required value="${this.phaseData.summary}">
+                </div>
+                
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between gap-3">
+                        <div class="flex-grow-1">
+                            <label for="dtStart" class="form-label fw-bold">Start Date</label>
+                            ${this.minInner ? `
+                            <div class="small text-muted mb-1">
+                                <i class="bi bi-info-circle"></i>
+                                Max: ${this.minInner}
+                            </div>
+                            ` : ''}
+                            <input type="date" class="form-control ${this.minInner ? 'border-bottom border-danger border-bottom-2' : ''}" 
+                                   id="dtStart" name="dtStart" 
+                                   required value="${formatDate(this.phaseData.dtStart)}"
+                                   min="${this.minOuter}" 
+                                   max="${this.maxOuter}">
+                        </div>
+                        <div class="flex-grow-1">
+                            <label for="due" class="form-label fw-bold">Due Date</label>
+                            ${this.maxInner ? `
+                            <div class="small text-muted mb-1">
+                                <i class="bi bi-info-circle"></i>
+                                Min: ${this.maxInner}
+                            </div>
+                            ` : ''}
+                            <input type="date" class="form-control ${this.maxInner ? 'border-bottom border-danger border-bottom-2' : ''}" 
+                                   id="due" name="due" 
+                                   required value="${formatDate(this.phaseData.due)}"
+                                   min="${this.minOuter}" 
+                                   max="${this.maxOuter}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+        `;
+    }
+
+    // Funzione per trovare gli estremi delle date
+    private getInnerDataRange(){ 
+        this.minInner = "";
+        this.maxInner = "";
+        this.minOuter = "";
+        this.maxOuter = "";
+
+        if(this.parentData){
+            this.minOuter = formatDate(this.parentData.dtStart);
+            
+            this.maxOuter = formatDate(this.parentData.due);
+
+        }
+
+        const finder = (data: any[]) => {
+            for (const child of data){
+                if (child.dtStart < this.minInner){
+                    this.minInner = child.dtStart;
+                }
+                if (child.due > this.maxInner){
+                    this.maxInner = child.due;
+                }
+                if (child.activities){
+                    finder(child.activities);
+                }
+            }
+        }
+
+        // Se ha sottofasi troviamo min/max tra le sottofasi e i figli di queste
+        if (this.phaseData.subPhases?.length > 0){
+            this.minInner = this.phaseData.subPhases[0].dtStart;
+            this.maxInner = this.phaseData.subPhases[0].due;
+            finder(this.phaseData.subPhases);
+        }
+        else if (this.phaseData.activities?.length > 0){
+            this.minInner = this.phaseData.activities[0].dtStart;
+            this.maxInner = this.phaseData.activities[0].due;
+            finder(this.phaseData.activities);
+        }
+
+        if (this.minInner !== "") {
+            this.minInner = new Date(this.minInner).toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+            });
+        }
+        if (this.maxInner !== "") {
+            this.maxInner = new Date(this.maxInner).toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+            });
+        }
+    }
+
+    // Funzione da chiamare per popolare il form con i dati
+    public setData(phaseData: any, parentData: any) {
+        this.phaseData = phaseData;
+        this.parentData = parentData;
+        console.log(this.phaseData, this.parentData);
+
+        this.getInnerDataRange();
+        console.log(this.phaseData, this.parentData);
+        console.log(this.minInner, this.maxInner);
+        console.log(this.minOuter, this.maxOuter);
+        
+        const modalContent = this.querySelector('.modal-content');
+        if (modalContent) {
+            modalContent.innerHTML = `
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-pencil-fill me-2"></i>
+                        Modify Phase
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="modifyPhaseForm">
+                    ${this.createFormTemplate()}
+                </form>
+            `;
+
+            const form = modalContent.querySelector('#modifyPhaseForm');
+            form?.addEventListener('submit', (e) => this.handleSubmit(e));
+        }
+    }
+}
+
+customElements.define('modify-phase', ModifyPhase);
+
+export { ModifyPhase };

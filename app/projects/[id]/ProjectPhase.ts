@@ -51,18 +51,17 @@ class ProjectPhase extends HTMLElement {
 		return icon;
 	}
 
-	// Funzione per aggiungere i dati dell'attivitá al modale
-	openModifyActivityModal(activity: any, phaseData: any) {
-		console.log("Tentativo di apertura modale...");
-		const modifyActivityModal = document.getElementById("ModifyActivityComponent") as any;
+	// Funzione per aggiungere i dati al modale
+	openModify(data: any, parentData: any, isPhase: boolean) {
+		const name = isPhase ? "Phase" : "Activity";
+		const modifyModal = document.getElementById(`Modify${name}Component`) as any;
 
-		if (!modifyActivityModal) {
-			console.error("Errore: modale per modifica delle activity non trovato");
+		if (!modifyModal) {
+			console.error(`Errore: modale per modifica delle ${name.toLocaleLowerCase()} non trovato`);
 			return;
 		}
 
-		modifyActivityModal.setData(activity, phaseData);
-		console.log("Apertura del modale per la modifica dell'attivitá");
+		modifyModal.setData(data, parentData);
 	}
 
 	// Funzione per creare una attivitá
@@ -94,13 +93,13 @@ class ProjectPhase extends HTMLElement {
 
 		// Aggiungiamo il listener per aprire il modale
 		activityElement.addEventListener("click", () => {
-			this.openModifyActivityModal(activity, phaseData);
+			this.openModify(activity, phaseData, false);
 		});
 
 		return activityElement;
 	}
 
-	renderPhase(data: any): HTMLElement {
+	renderPhase(data: any, parentData: any): HTMLElement {
 		const container = document.createElement("div");
 
 		// Creiamo il toggler per la fase
@@ -124,6 +123,10 @@ class ProjectPhase extends HTMLElement {
 		const button = document.createElement("button");
 		button.className = "btn btn-primary rounded-3 px-4 py-2 flex-grow-1 text-start";
 		button.textContent = data.summary;
+		// Impostiamo data-bs-toggle e data-bs-target per il modale
+		button.setAttribute("data-bs-toggle", "modal");
+		button.setAttribute("data-bs-target", "#ModifyPhase");
+		button.onclick = () => { this.openModify(data, parentData, true); };
 
 		togglerContent.appendChild(caretIcon);
 		togglerContent.appendChild(button);
@@ -139,16 +142,17 @@ class ProjectPhase extends HTMLElement {
 
 		if (data.subPhases?.length > 0) {
 			noInsideData = false;
+			const dataForModify = { ...data, subPhases: [] };
 			data.subPhases.forEach((subPhase: any) => {
-				collapse.appendChild(this.renderPhase(subPhase));
+				collapse.appendChild(this.renderPhase(subPhase, dataForModify));
 			});
 		}
 
 		if (data.activities?.length > 0) {
 			noInsideData = false;
 			data.activities.forEach((activity: any) => {
-				const dataForActivityModal = { ...data, activities: [] };
-				const activityElement = this.handleItem(activity, dataForActivityModal);
+				const dataForModify = { ...data, activities: [] };
+				const activityElement = this.handleItem(activity, dataForModify);
 				collapse.appendChild(activityElement);
 			});
 		}
@@ -168,7 +172,7 @@ class ProjectPhase extends HTMLElement {
 
 		// Per ogni fase, appendiamo il suo contenuto
 		data.forEach((phase: any) => {
-			container.appendChild(this.renderPhase(phase));
+			container.appendChild(this.renderPhase(phase, null));
 		});
 
 		this.innerHTML = "";

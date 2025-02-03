@@ -56,12 +56,14 @@ export const PATCH = async (request: NextRequest) => {
 		{ _id: phaseId },
 		phaseClient
 	);
+	console.log(phaseOut);
 
 	if (phaseOut.status !== 200) {
 		return phaseOut;
 	}
 
 	const phase: StringPhase[] = await phaseOut.json();
+	console.log(phase);
 
 	// Controlliamo che l'owner sia l'utente corrispondente
 	if (phase[0].ownerId !== userId) {
@@ -116,10 +118,16 @@ export const PATCH = async (request: NextRequest) => {
 		}
 	}
 
+	const newFields: Partial<StringPhase> = {
+		summary: newBody.summary,
+		dtStart: newBody.dtStart,
+		due: newBody.due
+	};
+
 	// Modifichiamo la fase
 	const updateOut = await updateCollectionWrapper<Phase>(
 		{ _id: phaseId },
-		newBody,
+		{ $set: newFields } as any,	
 		phaseClient
 	);
 

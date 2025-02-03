@@ -25,6 +25,7 @@ declare global {
 			"add-form-component": { data: Object };
 			"project-settings": { users: Object; title: string };
 			"modify-activity": {};
+			"modify-phase": {};
 		}
 	}
 }
@@ -60,7 +61,7 @@ export default function Projects() {
 			import("./OnLoadFunctions");
 			import("./AddForm");
 			import("./ProjectSettings");
-			import("./ModifyActivity")
+			import("./ModifyForm")
 			const fetchData = async () => {
 				const data = await getData();
 				setProjectData(data);
@@ -143,6 +144,7 @@ export default function Projects() {
 				</div>
 			</div >
 			<modify-activity></modify-activity>
+			<modify-phase></modify-phase>
 			<onload-functions></onload-functions>
 		</>
 	);
