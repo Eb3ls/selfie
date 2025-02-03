@@ -14,14 +14,23 @@ interface ActivityData {
     usernameList: string[];
 }
 
+interface user{
+    name: string;
+    id: string;
+}
+
 class ModifyActivity extends HTMLElement {
     phaseData: any;
     activityData: any;
+    modifiedUsers: user[];
+    isEditMode: boolean;
 
     constructor() {
         super();
         this.phaseData = [];
         this.activityData = [];
+        this.modifiedUsers = [];
+        this.isEditMode = false;
     }
 
     async handleSubmit(event: Event) {
@@ -152,7 +161,7 @@ class ModifyActivity extends HTMLElement {
     }
 
     // Aggiunge un utente alla lista
-    private addUser(username: { name: string; id: string }) {
+    private addUser(username: user) {
         const userList = this.querySelector('#userList');
         if (!userList) return;
 
@@ -171,6 +180,7 @@ class ModifyActivity extends HTMLElement {
         `;
 
         userItem.querySelector('button')?.addEventListener('click', () => {
+            this.modifiedUsers = this.modifiedUsers.filter(user => user.id !== username.id);
             userItem.remove();
         });
 
@@ -182,7 +192,7 @@ class ModifyActivity extends HTMLElement {
         const addUserBtn = this.querySelector('#addUserBtn');
         const newUserInput = this.querySelector('#newUser') as HTMLInputElement;
 
-        for (const user of this.activityData.users) {
+        for (const user of this.modifiedUsers) {
             this.addUser(user);
         }
 
@@ -202,7 +212,7 @@ class ModifyActivity extends HTMLElement {
 
             // Aggiungiamo l'utente alla lista TODO - Implementare gestione utenti
             const user = { name: username, id: username };
-            this.activityData.users.push(user);
+            this.modifiedUsers.push(user);
             this.addUser(user);
             newUserInput.value = '';
         });
@@ -212,28 +222,104 @@ class ModifyActivity extends HTMLElement {
     // Funzione da chiamare per popolare il form con i dati
     public setData(activityData: any, phaseData: any) {
         this.activityData = activityData;
-        // Necessario per la validazione delle date
         this.phaseData = phaseData;
-        
+        this.isEditMode = false;
+        this.modifiedUsers = [...this.activityData.users];
+        this.updateModalContent();
+    }
+
+    private toggleEditMode() {
+        this.isEditMode = !this.isEditMode;
+        this.updateModalContent();
+    }
+
+    private createViewTemplate() {
+        return `
+            <div class="modal-body">
+                <div class="mb-4">
+                    <label class="form-label text-muted small">Title</label>
+                    <h4>${this.activityData.summary}</h4>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="form-label text-muted small">Description</label>
+                    <p class="fs-5">${this.activityData.description || 'No description provided.'}</p>
+                </div>
+
+                <div class="mb-4">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small">Start Date</label>
+                            <h5>${new Date(this.activityData.dtStart).toLocaleDateString()}</h5>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small">Due Date</label>
+                            <h5>${new Date(this.activityData.due).toLocaleDateString()}</h5>
+                        </div>
+                    </div>
+                </div>
+
+                ${this.activityData.isMilestone ? `
+                <div class="mb-4">
+                    <span class="badge bg-primary">
+                        <i class="bi bi-flag-fill me-1"></i>
+                        Milestone
+                    </span>
+                </div>
+                ` : ''}
+
+                <div class="mb-4">
+                    <label class="form-label text-muted small">Assigned Users</label>
+                    <div class="user-list">
+                        ${this.activityData.users?.length > 0 
+                            ? this.activityData.users.map((user: user) => `
+                                <div class="user-item d-flex align-items-center mb-2">
+                                    <i class="bi bi-person-fill me-2"></i>
+                                    ${user.name}
+                                </div>
+                            `).join('')
+                            : '<p class="text-muted">No users assigned</p>'
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        `;
+    }
+
+    private updateModalContent() {
         const modalContent = this.querySelector('.modal-content');
         if (modalContent) {
             modalContent.innerHTML = `
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="bi bi-pencil-fill me-2"></i>
-                        Modify Activity
+                <div class="modal-header d-flex align-items-center">
+                    <h5 class="modal-title d-flex align-items-center gap-2">
+                        <i class="bi bi-${this.isEditMode ? 'pencil-fill' : 'info-circle'}"></i>
+                        <span>${this.isEditMode ? 'Modify' : ''} Activity</span>
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <div class="ms-auto">
+                        <button type="button" class="btn btn-sm ${this.isEditMode ? 'btn-warning' : 'btn-light'} me-2" id="toggleEditBtn">
+                            <i class="bi bi-${this.isEditMode ? 'x' : 'pencil'}"></i>
+                            ${this.isEditMode ? 'Cancel' : 'Modify'}
+                        </button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
                 </div>
-                <form id="modifyActivityForm">
-                    ${this.createFormTemplate()}
-                </form>
+                ${this.isEditMode 
+                    ? `<form id="modifyActivityForm">${this.createFormTemplate()}</form>` 
+                    : this.createViewTemplate()
+                }
             `;
 
-            const form = modalContent.querySelector('#modifyActivityForm');
-            form?.addEventListener('submit', (e) => this.handleSubmit(e));
-            
-            this.setupUserManagement();
+            if (this.isEditMode) {
+                const form = modalContent.querySelector('#modifyActivityForm');
+                form?.addEventListener('submit', (e) => this.handleSubmit(e));
+                this.setupUserManagement();
+            }
+
+            const toggleBtn = modalContent.querySelector('#toggleEditBtn');
+            toggleBtn?.addEventListener('click', () => this.toggleEditMode());
         }
     }
 }
@@ -249,6 +335,7 @@ class ModifyPhase extends HTMLElement {
     maxInner: string;
     minOuter: string;
     maxOuter: string;
+    isEditMode: boolean;
 
     constructor() {
         super();
@@ -258,6 +345,72 @@ class ModifyPhase extends HTMLElement {
         this.maxInner = '';
         this.minOuter = '';
         this.maxOuter = '';
+        this.isEditMode = false;
+    }
+
+    private toggleEditMode() {
+        this.isEditMode = !this.isEditMode;
+        this.updateModalContent();
+    }
+
+    private createViewTemplate() {
+        return `
+            <div class="modal-body">
+                <div class="mb-4">
+                    <label class="form-label text-muted small">Title</label>
+                    <h4>${this.phaseData.summary}</h4>
+                </div>
+                
+                <div class="mb-4">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small">Start Date</label>
+                            <h5>${new Date(this.phaseData.dtStart).toLocaleDateString()}</h5>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small">Due Date</label>
+                            <h5>${new Date(this.phaseData.due).toLocaleDateString()}</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        `;
+    }
+
+    private updateModalContent() {
+        const modalContent = this.querySelector('.modal-content');
+        if (modalContent) {
+            modalContent.innerHTML = `
+                <div class="modal-header d-flex align-items-center">
+                    <h5 class="modal-title d-flex align-items-center gap-2">
+                        <i class="bi bi-${this.isEditMode ? 'pencil-fill' : 'info-circle'}"></i>
+                        <span>${this.isEditMode ? 'Modify' : ''} Phase</span>
+                    </h5>
+                    <div class="ms-auto">
+                        <button type="button" class="btn btn-sm ${this.isEditMode ? 'btn-warning' : 'btn-light'} me-2" id="toggleEditBtn">
+                            <i class="bi bi-${this.isEditMode ? 'x' : 'pencil'}"></i>
+                            ${this.isEditMode ? 'Cancel' : 'Modify'}
+                        </button>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                </div>
+                ${this.isEditMode 
+                    ? `<form id="modifyPhaseForm">${this.createFormTemplate()}</form>` 
+                    : this.createViewTemplate()
+                }
+            `;
+
+            if (this.isEditMode) {
+                const form = modalContent.querySelector('#modifyPhaseForm');
+                form?.addEventListener('submit', (e) => this.handleSubmit(e));
+            }
+
+            const toggleBtn = modalContent.querySelector('#toggleEditBtn');
+            toggleBtn?.addEventListener('click', () => this.toggleEditMode());
+        }
     }
 
     async handleSubmit(event: Event) {
@@ -414,31 +567,9 @@ class ModifyPhase extends HTMLElement {
     public setData(phaseData: any, parentData: any) {
         this.phaseData = phaseData;
         this.parentData = parentData;
-        console.log(this.phaseData, this.parentData);
-
+        this.isEditMode = false;
         this.getInnerDataRange();
-        console.log(this.phaseData, this.parentData);
-        console.log(this.minInner, this.maxInner);
-        console.log(this.minOuter, this.maxOuter);
-        
-        const modalContent = this.querySelector('.modal-content');
-        if (modalContent) {
-            modalContent.innerHTML = `
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="bi bi-pencil-fill me-2"></i>
-                        Modify Phase
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <form id="modifyPhaseForm">
-                    ${this.createFormTemplate()}
-                </form>
-            `;
-
-            const form = modalContent.querySelector('#modifyPhaseForm');
-            form?.addEventListener('submit', (e) => this.handleSubmit(e));
-        }
+        this.updateModalContent();
     }
 }
 
