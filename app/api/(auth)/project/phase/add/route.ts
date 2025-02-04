@@ -112,8 +112,9 @@ export const POST = async (request: NextRequest) => {
 			{ parentActivityId: parentId },
 			activitiesClient
 		)
+		console.log(activitiesOut);
 
-		if (activitiesOut.status !== 400) {
+		if (activitiesOut.status !== 404) {
 			return generateMessageResponse("Parent phase has activities", 400);
 		}
 	}

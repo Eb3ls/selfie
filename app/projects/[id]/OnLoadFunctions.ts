@@ -63,7 +63,7 @@ class OnLoadFunctions extends HTMLElement {
 			const projectPhaseRow = document.querySelector("project-phase-row") as any;
 
 			if (projectSettings && typeof projectSettings.loadProjectData === 'function') {
-				projectSettings.loadProjectData(data.summary, data.users);
+				projectSettings.loadProjectData(data.summary, data._id, data.users);
 			}
 			if (addFormComponent && typeof addFormComponent.loadProjectData === 'function') {
 				addFormComponent.loadProjectData(data._id, data.phases);

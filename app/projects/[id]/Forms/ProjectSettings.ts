@@ -2,12 +2,14 @@ import {user, validateUsername, validateLenght} from "../Utils";
 
 class ProjectSettings extends HTMLElement {
     title: string;
+    id: string;
     users: user[];
     modifiedUsers: user[];
 
     constructor() {
         super();
         this.title = '';
+        this.id = '';
         this.users = [];
         this.modifiedUsers = [];
     }
@@ -27,15 +29,12 @@ class ProjectSettings extends HTMLElement {
         `;
     }
 
-    public loadProjectData(title: string, users: any) {
-        if(!title || !users) return;
-        console.log("Loading settings for project:");
+    public loadProjectData(title: string, id: string, users: any) {
+        if(!title || !users || !id) return;
         this.title = title;
+        this.id = id;
         this.users = [...users];
         this.modifiedUsers = [...users];
-        console.log("1 Title:", this.title);
-        console.log("2 Users:", this.users);
-        console.log("3 Modified Users:", this.modifiedUsers);
         this.updateModalContent("VIEW");
     }
 
@@ -262,7 +261,9 @@ class ProjectSettings extends HTMLElement {
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ projectId: this.getAttribute('projectId') })
+                    body: JSON.stringify({
+                        _id: this.id
+                    })
                 });
 
                 if (response.ok) {

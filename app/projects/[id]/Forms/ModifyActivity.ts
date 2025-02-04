@@ -290,7 +290,7 @@ class ModifyActivity extends HTMLElement {
                         </div>
                         <div class="col-md-6">
                             <label class="form-label text-muted small">Due Date</label>
-                            <h5>${new Date(this.activityData.due).toLocaleDateString()}</h5>
+                            <h5>${new Date(formatDate(this.activityData.due)).toLocaleDateString()}</h5>
                         </div>
                     </div>
                 </div>

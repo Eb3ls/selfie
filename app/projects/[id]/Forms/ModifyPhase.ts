@@ -1,4 +1,3 @@
-
 import { formatDate } from "../Utils";
 
 class ModifyPhase extends HTMLElement {
@@ -21,11 +20,6 @@ class ModifyPhase extends HTMLElement {
         this.isEditMode = false;
     }
 
-    private toggleEditMode() {
-        this.isEditMode = !this.isEditMode;
-        this.updateModalContent();
-    }
-
     private createViewTemplate() {
         return `
             <div class="modal-body">
@@ -42,7 +36,7 @@ class ModifyPhase extends HTMLElement {
                         </div>
                         <div class="col-md-6">
                             <label class="form-label text-muted small">Due Date</label>
-                            <h5>${new Date(this.phaseData.due).toLocaleDateString()}</h5>
+                            <h5>${new Date(formatDate(this.phaseData.due)).toLocaleDateString()}</h5>
                         </div>
                     </div>
                 </div>
@@ -53,41 +47,151 @@ class ModifyPhase extends HTMLElement {
         `;
     }
 
-    private updateModalContent() {
-        const modalContent = this.querySelector('.modal-content');
-
-        if (!modalContent) return;
-
-        modalContent.innerHTML = `
+    private createModalContent(mode: "VIEW" | "EDIT" | "DELETE") {
+        if (mode === "DELETE") {
+            return `
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        Delete Phase
+                    </h5>
+                    <div class="ms-auto">
+                        <button type="button" class="btn btn-sm btn-outline-primary me-2" id="toggleEditBtn">
+                            <i class="bi bi-x"></i>
+                            Cancel
+                        </button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <p class="fs-5">Are you sure you want to delete this phase?</p>
+                    <p class="text-danger">This action cannot be undone! All activities and sub-phases will be deleted.</p>
+                    <div class="alert alert-warning">
+                        <h6 class="alert-heading">
+                            <i class="bi bi-info-circle me-2"></i>
+                            Phase Details:
+                        </h6>
+                        <p class="mb-0">Title: ${this.phaseData.summary}</p>
+                        <p class="mb-0">Start Date: ${new Date(this.phaseData.dtStart).toLocaleDateString()}</p>
+                        <p class="mb-0">Due Date: ${new Date(formatDate(this.phaseData.due)).toLocaleDateString()}</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete Phase</button>
+                </div>
+            `;
+        }
+        if (mode === "EDIT") {
+            return `
             <div class="modal-header d-flex align-items-center">
                 <h5 class="modal-title d-flex align-items-center gap-2">
-                    <i class="bi bi-${this.isEditMode ? 'pencil-fill' : 'info-circle'}"></i>
-                    <span>${this.isEditMode ? 'Modify' : ''} Phase</span>
+                <i class="bi bi-pencil-fill"></i>
+                <span>Modify Phase</span>
                 </h5>
                 <div class="ms-auto">
-                    <button type="button" class="btn btn-sm ${this.isEditMode ? 'btn-warning' : 'btn-light'} me-2" id="toggleEditBtn">
-                        <i class="bi bi-${this.isEditMode ? 'x' : 'pencil'}"></i>
-                        ${this.isEditMode ? 'Cancel' : 'Modify'}
-                    </button>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn btn-sm btn-outline-primary me-2" id="toggleEditBtn">
+                    <i class="bi bi-x"></i>
+                    Cancel
+                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
             </div>
-            ${this.isEditMode 
-                ? `<form id="modifyPhaseForm">${this.createFormTemplate()}</form>` 
-                : this.createViewTemplate()
-            }
-        `;
-
-        if (this.isEditMode) {
-            const form = modalContent.querySelector('#modifyPhaseForm');
-            form?.addEventListener('submit', (e) => this.handleSubmit(e));
+            <form id="modifyPhaseForm">${this.createFormTemplate()}</form>
+            `;
+        } else {
+            return `
+            <div class="modal-header d-flex align-items-center">
+                <h5 class="modal-title d-flex align-items-center gap-2">
+                <i class="bi bi-info-circle"></i>
+                <span>Phase</span>
+                </h5>
+                <div class="ms-auto">
+                <button type="button" class="btn btn-sm btn-danger me-2" id="deleteBtn">
+                    <i class="bi bi-trash"></i>
+                    Delete
+                </button>
+                <button type="button" class="btn btn-sm btn-warning me-2" id="toggleEditBtn">
+                    <i class="bi bi-pencil"></i>
+                    Modify
+                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+            </div>
+            ${this.createViewTemplate()}
+            `;
         }
-
-        const toggleBtn = modalContent.querySelector('#toggleEditBtn');
-        toggleBtn?.addEventListener('click', () => this.toggleEditMode());
     }
 
-    async handleSubmit(event: Event) {
+    private updateModalContent(mode: "VIEW" | "EDIT" | "DELETE") {
+        const modalContent = this.querySelector('.modal-content');
+        if (!modalContent) return;
+
+        modalContent.innerHTML = this.createModalContent(mode);
+        if(mode === "VIEW"){
+            this.setupViewEventListeners();
+        }
+        else if (mode === "EDIT") {
+            this.setupModifyEventListeners();
+        }
+        else if (mode === "DELETE") {
+            this.setupDeleteEventListeners();
+        }
+    }
+
+    private setupViewEventListeners() {
+        const editBtn = this.querySelector('#toggleEditBtn');
+        editBtn?.addEventListener('click', () => {
+            this.updateModalContent("EDIT");
+        });
+
+        const deleteBtn = this.querySelector('#deleteBtn');
+        deleteBtn?.addEventListener('click', () => {
+            this.updateModalContent("DELETE");
+        });
+    }
+
+    private setupModifyEventListeners() {
+        const form = this.querySelector('#modifyPhaseForm');
+        form?.addEventListener('submit', this.handleModifySubmit.bind(this));
+
+        const cancelBtn = this.querySelector('#toggleEditBtn');
+        cancelBtn?.addEventListener('click', () => {
+            this.updateModalContent("VIEW");
+        });
+    }
+
+    private setupDeleteEventListeners() {
+        const cancelBtn = this.querySelector('#toggleEditBtn');
+        cancelBtn?.addEventListener('click', () => {
+            this.updateModalContent("VIEW");
+        });
+
+        const confirmBtn = this.querySelector('#confirmDeleteBtn');
+        confirmBtn?.addEventListener('click', async () => {
+            try {
+                const response = await fetch(`/api/project/phase/delete`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        _id: this.phaseData._id
+                    })
+                });
+
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    throw new Error('Failed to delete phase');
+                }
+            } catch (error) {
+                console.error('Error deleting phase:', error);
+                alert('Failed to delete phase');
+            }
+        });
+    }
+
+    async handleModifySubmit(event: Event) {
         event.preventDefault();
         const form = event.target as HTMLFormElement;
         const formData = new FormData(form);
@@ -175,7 +279,6 @@ class ModifyPhase extends HTMLElement {
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="submit" class="btn btn-primary">Save Changes</button>
             </div>
         `;
@@ -221,15 +324,16 @@ class ModifyPhase extends HTMLElement {
             finder(this.phaseData.activities);
         }
 
+        // NB: Necessario formattarlo prima perché 23:59:59.999Z lo considera il giorno dopo
         if (this.minInner !== "") {
-            this.minInner = new Date(this.minInner).toLocaleDateString("en-GB", {
+            this.minInner = new Date(formatDate(this.minInner)).toLocaleDateString("en-GB", {
                 day: "2-digit",
                 month: "2-digit",
                 year: "numeric",
             });
         }
         if (this.maxInner !== "") {
-            this.maxInner = new Date(this.maxInner).toLocaleDateString("en-GB", {
+            this.maxInner = new Date(formatDate(this.maxInner)).toLocaleDateString("en-GB", {
                 day: "2-digit",
                 month: "2-digit",
                 year: "numeric",
@@ -243,7 +347,7 @@ class ModifyPhase extends HTMLElement {
         this.parentData = parentData;
         this.isEditMode = false;
         this.getInnerDataRange();
-        this.updateModalContent();
+        this.updateModalContent("VIEW");
     }
 }
 

@@ -1,4 +1,4 @@
-import {statusConfig, ROW_HEIGHT_PX} from "../Utils";
+import {statusConfig, ROW_HEIGHT_PX, formatDate} from "../Utils";
 
 class SideGanttList extends HTMLElement {
 	constructor() {
@@ -141,7 +141,11 @@ class SideGanttList extends HTMLElement {
 		// Seconda colonna con le date
 		const secondCol = document.createElement("div");
 		secondCol.className = "col";
-		secondCol.textContent = `${new Date(activity.dtStart).toLocaleDateString()} - ${new Date(activity.due).toLocaleDateString()}`;
+		secondCol.textContent = `
+			${new Date(formatDate(activity.dtStart)).toLocaleDateString()}
+			-
+			${new Date(formatDate(activity.due)).toLocaleDateString()}
+		`;
 
 		columnsContainer.appendChild(firstCol);
 		columnsContainer.appendChild(secondCol);
