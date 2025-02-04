@@ -15,7 +15,7 @@ import {
 	findCollectionWrapper,
 	getCollection
 } from "@/utils/db/db";
-import { Collection } from "mongodb";
+import { Collection, ObjectId } from "mongodb";
 import { NextRequest } from "next/server";
 
 interface ProjectResponse {
@@ -46,6 +46,12 @@ interface SubPhaseResponse {
 	activities: ProjectActivityResponse[];
 }
 
+interface Link {
+	_id: string;
+	summary: string;
+	date: string;
+}
+
 interface ProjectActivityResponse {
 	_id: string;
 	summary: string;
@@ -56,6 +62,10 @@ interface ProjectActivityResponse {
 	isMilestone: boolean;
 	owner: { id: string; name: string };
 	users: { id: string; name: string }[];
+	prevLinks: Link[];
+	prevMaxDue: string;
+	nextLinks: Link[];
+	nextMinStart: string;
 	alarms: Alarm[];
 	noteId?: string;
 	noteLink: string | null;
@@ -145,6 +155,9 @@ export const GET = async (
 	// Otteniamo le attività delle sottofasi
 	const activityClient: Collection<ProjectActivity> =
 		await getCollection<ProjectActivity>(PROJECT_ACTIVITY_COLLECTION);
+
+	// Mappa per tutte le attività
+	const allActivitiesMap = new Map<string, ProjectActivityResponse>();
 
 	if (outPhases.status === 200) {
 		const phases: Phase[] = await outPhases.json();
@@ -261,11 +274,29 @@ export const GET = async (
 										index
 									]
 								})),
+								prevLinks:
+									activity.prevIdList?.map((id) => ({
+										_id: id.toString(),
+										summary: "", // Temporaneo, verrà popolato dopo
+										date: "" // Temporaneo, verrà popolato dopo
+									})) || [],
+								prevMaxDue: "",
+								nextLinks:
+									activity.nextIdList?.map((id) => ({
+										_id: id.toString(),
+										summary: "", // Temporaneo, verrà popolato dopo
+										date: "" // Temporaneo, verrà popolato dopo
+									})) || [],
+								nextMinStart: "",
 								alarms: activity.alarms,
 								noteId: activity.noteId?.toString(),
 								noteLink: activity.noteLink
 							};
 
+							allActivitiesMap.set(
+								activityResponse._id,
+								activityResponse
+							);
 							subPhaseResponse.activities.push(activityResponse);
 						}
 					}
@@ -321,17 +352,113 @@ export const GET = async (
 							id: id.toString(),
 							name: activityUsersConversion.userNameList![index]
 						})),
+						prevLinks:
+							activity.prevIdList?.map((id) => ({
+								_id: id.toString(),
+								summary: "", // Temporaneo, verrà popolato dopo
+								date: "" // Temporaneo, verrà popolato dopo
+							})) || [],
+						prevMaxDue: "",
+						nextLinks:
+							activity.nextIdList?.map((id) => ({
+								_id: id.toString(),
+								summary: "", // Temporaneo, verrà popolato dopo
+								date: "" // Temporaneo, verrà popolato dopo
+							})) || [],
+						nextMinStart: "",
 						alarms: activity.alarms,
 						noteId: activity.noteId?.toString(),
 						noteLink: activity.noteLink
 					};
 
+					allActivitiesMap.set(
+						activityResponse._id,
+						activityResponse
+					);
 					phaseResponse.activities.push(activityResponse);
 				}
 			}
 
 			projectResponse.phases.push(phaseResponse);
 		}
+
+		// Seconda passata: popola i link
+		for (const activity of allActivitiesMap.values()) {
+			// Popola prevLinks
+			activity.prevLinks = activity.prevLinks
+				.map((link: any) => {
+					const linkedActivity = allActivitiesMap.get(link._id);
+					return linkedActivity
+						? {
+								_id: link._id,
+								summary: linkedActivity.summary,
+								date: linkedActivity.due
+							}
+						: null;
+				})
+				.filter(Boolean) as Link[];
+
+			// Popola nextLinks
+			activity.nextLinks = activity.nextLinks
+				.map((link: any) => {
+					const linkedActivity = allActivitiesMap.get(link._id);
+					return linkedActivity
+						? {
+								_id: link._id,
+								summary: linkedActivity.summary,
+								date: linkedActivity.dtStart
+							}
+						: null;
+				})
+				.filter(Boolean) as Link[];
+
+			// Calcola le date
+			if (activity.prevLinks.length > 0) {
+				activity.prevMaxDue = new Date(
+					Math.max(
+						...activity.prevLinks.map((l: any) =>
+							new Date(l.date).getTime()
+						)
+					)
+				).toISOString();
+			} else {
+				activity.prevMaxDue = "";
+			}
+
+			if (activity.nextLinks.length > 0) {
+				activity.nextMinStart = new Date(
+					Math.min(
+						...activity.nextLinks.map((l: any) =>
+							new Date(l.date).getTime()
+						)
+					)
+				).toISOString();
+			} else {
+				activity.nextMinStart = "";
+			}
+		}
+
+		// Ordina tutto
+		const sortByStartDate = (
+			a: { dtStart: string },
+			b: { dtStart: string }
+		) => new Date(a.dtStart).getTime() - new Date(b.dtStart).getTime();
+
+		const sortByDueDate = (a: { due: string }, b: { due: string }) =>
+			new Date(a.due).getTime() - new Date(b.due).getTime();
+
+		// Ordina fasi
+		projectResponse.phases.sort(sortByStartDate);
+
+		// Ordina sottofasi e attività
+		projectResponse.phases.forEach((phase) => {
+			phase.subPhases.sort(sortByStartDate);
+			phase.activities.sort(sortByDueDate);
+
+			phase.subPhases.forEach((subPhase) => {
+				subPhase.activities.sort(sortByDueDate);
+			});
+		});
 	}
 
 	return generateObjectResponse(projectResponse, 200);
