@@ -249,4 +249,4 @@ class ModifyPhase extends HTMLElement {
 
 customElements.define('modify-phase', ModifyPhase);
 
-export { ModifyPhase };
+export default ModifyPhase;

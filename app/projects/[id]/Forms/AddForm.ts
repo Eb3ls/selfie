@@ -11,6 +11,7 @@ class AddForm extends HTMLElement {
 	}
 
 	public loadProjectData(id: string, phases: any) {
+		if(!id || !phases) return;
 		this.projectID = id;
 		this.projectData = phases;
 		this.render();
@@ -442,4 +443,5 @@ class AddForm extends HTMLElement {
 }
 
 customElements.define("add-form-component", AddForm);
+
 export default AddForm;

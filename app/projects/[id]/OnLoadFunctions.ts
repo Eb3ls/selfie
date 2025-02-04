@@ -34,12 +34,55 @@ class OnLoadFunctions extends HTMLElement {
 		}
 	}
 
-	async connectedCallback() {
-		await customElements.whenDefined("project-phase");
-		await customElements.whenDefined("project-phase-row");
-		await customElements.whenDefined("time-line");
+	async getData() {
+		try {
+			const projectID = window.location.pathname.split("/")[2];
+			const res = await fetch(`/api/project/${projectID}`);
+			const data = await res.json();
 
-		this.syncGanttScroll();
+			if (!res.ok) {
+				throw new Error("Failed to get data");
+			}
+
+			return data;
+		} catch (error) {
+			console.error(error);
+			alert("Failed to get data, please try again");
+			return null;
+		}
+	}
+
+	async connectedCallback() {
+		try {
+			const data = await this.getData();
+			if (!data) return;
+
+			const projectSettings = document.querySelector("project-settings") as any;
+			const addFormComponent = document.querySelector("add-form-component") as any;
+			const sideGanttList = document.querySelector("side-gantt-list") as any;
+			const projectPhaseRow = document.querySelector("project-phase-row") as any;
+
+			if (projectSettings && typeof projectSettings.loadProjectData === 'function') {
+				projectSettings.loadProjectData(data.summary, data.users);
+			}
+			if (addFormComponent && typeof addFormComponent.loadProjectData === 'function') {
+				addFormComponent.loadProjectData(data._id, data.phases);
+			}
+			if (sideGanttList && typeof sideGanttList.loadProjectData === 'function') {
+				sideGanttList.loadProjectData(data.phases);
+			}
+			if (projectPhaseRow && typeof projectPhaseRow.loadProjectData === 'function') {
+				projectPhaseRow.loadProjectData(data.phases);
+			}
+			console.log("Data:", data);
+
+			const mainTitle = document.getElementById("mainTitle");
+			if (mainTitle) mainTitle.textContent = data.summary;
+
+			this.syncGanttScroll();
+		} catch (error) {
+			console.error("Error in connectedCallback:", error);
+		}
 	}
 }
 

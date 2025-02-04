@@ -1,8 +1,4 @@
 import {user, validateUsername, validateLenght} from "../Utils";
-interface ProjectSettingsData {
-    title: string;
-    users: string[];
-}
 
 class ProjectSettings extends HTMLElement {
     title: string;
@@ -31,11 +27,15 @@ class ProjectSettings extends HTMLElement {
         `;
     }
 
-    public loadProjectData(title: string, users: user[]) {
+    public loadProjectData(title: string, users: any) {
         if(!title || !users) return;
+        console.log("Loading settings for project:");
         this.title = title;
         this.users = [...users];
         this.modifiedUsers = [...users];
+        console.log("1 Title:", this.title);
+        console.log("2 Users:", this.users);
+        console.log("3 Modified Users:", this.modifiedUsers);
         this.updateModalContent("VIEW");
     }
 
@@ -197,7 +197,7 @@ class ProjectSettings extends HTMLElement {
                 .map(item => item.getAttribute('data-user'))
                 .filter((user): user is string => user !== null);
 
-            const settingsData: ProjectSettingsData = {
+            const settingsData: any = {
                 title: projectTitle,
                 users
             };

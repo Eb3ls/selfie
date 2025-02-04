@@ -1,19 +1,8 @@
 "use client";
 import { GlobalSideBar } from "@/app/components/GlobalSideBar";
-
-/*
- * Bottone per scorrere avanti e indietro di 12 giorni (non il massimo, magari temporaneo)
- * Associare il toggle delle fasi al toggle visivo del gantt
- * Definire la lunghezza delle attivitá in base alle colonne che dovrebbero occupare
- * Capire come avere una griglia sotto alle colonne
- * Partire dalla data corrente (da integrare poi con la time machine)
- * Poter scorrere in verticale il gantt
- *
- * */
-import { useEffect, useState } from "react";
 import * as CONST from "./Utils";
 import "./styles.css";
-import { title } from "process";
+import { useEffect } from "react";
 
 declare global {
 	namespace JSX {
@@ -32,48 +21,17 @@ declare global {
 
 export default function Projects() {
 
-	async function getData() {
-		try {
-			const projectID = window.location.pathname.split("/")[2];
-			const res = await fetch(`/api/project/${projectID}`);
-			const data = await res.json();
-
-			if (!res.ok) {
-				throw new Error("Failed to get data");
-			}
-
-			return data
-		}
-		catch (error) {
-			console.error(error);
-			alert("Failed to get data, please try again");
-			return null;
-		}
-	}
-
+	// Necessario in quanto con il ssr HTMLElement non é definito => non possiamo definire i custom elements
 	useEffect(() => {
 		if (typeof window !== "undefined") {
-			import("./GanttBody/SideGanttList");
-			import("./GanttBody/ProjectPhaseRow");
-			import("./GanttBody/TimeLine");
-			import("./OnLoadFunctions");
-			import("./Forms/ProjectSettings");
-			import("./Forms/AddForm");
-			import("./Forms/ModifyActivity")
-			import("./Forms/ModifyPhase")
-			const fetchData = async () => {
-				const data = await getData();
-				const ProjectSettings = document.querySelector("project-settings") as any;
-				ProjectSettings?.loadProjectData(data.summary, data.users);
-				const AddFormComponent = document.querySelector("add-form-component") as any;
-				AddFormComponent?.loadProjectData(data._id, data.phases);
-				const SideGanttList = document.querySelector("side-gantt-list") as any;
-				SideGanttList?.loadProjectData(data.phases);
-				const ProjectPhaseRow = document.querySelector("project-phase-row") as any;
-				ProjectPhaseRow?.loadProjectData(data.phases);
-			};
-			fetchData();
-			// TODO - Sorting per data
+			import('./Forms/AddForm');
+			import('./Forms/ProjectSettings');
+			import('./Forms/ModifyActivity');
+			import('./Forms/ModifyPhase');
+			import('./GanttBody/SideGanttList');
+			import('./GanttBody/ProjectPhaseRow');
+			import('./GanttBody/TimeLine');
+			import('./OnLoadFunctions')
 		}
 	}, []);
 
@@ -90,7 +48,7 @@ export default function Projects() {
 							Dashboard
 						</a>
 						<div>/</div>
-						<div className="ms-1">Progetto di prova</div>
+						<div className="ms-1" id="mainTitle"></div>
 					</div>
 					<div className="col d-flex justify-content-end align-items-center">
 						<add-form-component></add-form-component>

@@ -421,4 +421,4 @@ class ModifyActivity extends HTMLElement {
 
 customElements.define('modify-activity', ModifyActivity);
 
-export { ModifyActivity };
+export default ModifyActivity;
