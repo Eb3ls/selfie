@@ -1,3 +1,5 @@
+import { formatDate } from "../Utils";
+
 class AddForm extends HTMLElement {
 	projectID: string;
 	projectData: any[];
@@ -117,11 +119,6 @@ class AddForm extends HTMLElement {
 		await this.fetcher(url, body, "activity");
 	}
 
-	// Elimina la parte finale dell'ISO stringa perché non è supportata da input date per min/max
-	private formatDate(date: string): string{
-		return date.split('T')[0];
-	}
-
 	// Controlliamo se la data é dentro i limiti della fase/sottofase
 	private checkDate(date: string, start: string, due: string): boolean {
 		const newDate = new Date(date);
@@ -139,8 +136,8 @@ class AddForm extends HTMLElement {
         const select = event.target as HTMLSelectElement;
         const selectedOption = select.selectedOptions[0];
 		if(selectedOption.value === '') return;
-        const startDate = this.formatDate(selectedOption.dataset.start as string);
-        const dueDate = this.formatDate(selectedOption.dataset.due as string);
+        const startDate = formatDate(selectedOption.dataset.start as string);
+        const dueDate = formatDate(selectedOption.dataset.due as string);
         
         // Trova gli input date nel form corrente
         const form = select.closest('form');
@@ -234,8 +231,8 @@ class AddForm extends HTMLElement {
 				if (new Date(phase.due) < new Date()) return;
 
 				option += `<option value="${phase._id}" 
-					data-start="${this.formatDate(phase.dtStart)}" 
-					data-due="${this.formatDate(phase.due)}">
+					data-start="${formatDate(phase.dtStart)}" 
+					data-due="${formatDate(phase.due)}">
 					${phase.summary}
 				</option>`;
 			});
@@ -246,8 +243,8 @@ class AddForm extends HTMLElement {
 				if (new Date(subPhase.due) < new Date()) return;
 
 				option += `<option value="${subPhase._id}" 
-					data-start="${this.formatDate(subPhase.dtStart)}" 
-					data-due="${this.formatDate(subPhase.due)}">
+					data-start="${formatDate(subPhase.dtStart)}" 
+					data-due="${formatDate(subPhase.due)}">
 					${subPhase.summary}
 				</option>`;
 			});

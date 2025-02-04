@@ -1,4 +1,4 @@
-import * as CONST from "./constants";
+import * as CONST from "../Utils";
 
 class ProjectPhaseRow extends HTMLElement {
 	constructor() {

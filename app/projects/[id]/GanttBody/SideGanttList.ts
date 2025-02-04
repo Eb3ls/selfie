@@ -1,6 +1,6 @@
-import * as CONST from "./constants";
+import {statusConfig, ROW_HEIGHT_PX} from "../Utils";
 
-class ProjectPhase extends HTMLElement {
+class SideGanttList extends HTMLElement {
 	constructor() {
 		super();
 	}
@@ -24,23 +24,11 @@ class ProjectPhase extends HTMLElement {
 		}
 	}
 
-	statusConfig = {
-		WAITING: { color: CONST.waiting_color, text: "In attesa" },
-		ACTIVABLE: { color: CONST.activable_color, text: "Attivabile" },
-		ACTIVE: { color: CONST.active_color, text: "Attivo" },
-		SUBMITTED: { color: CONST.submitted_color, text: "Consegnato" },
-		COMPLETED: { color: CONST.completed_color, text: "Completato" },
-		REACTIVATED: { color: CONST.reactivated_color, text: "Riattivato" },
-		OVERDUE: { color: CONST.overdue_color, text: "Scaduto" },
-		DROPPED: { color: CONST.dropped_color, text: "Abbandonato" }
-	};
-
-	
 	// Funzione per creare una singola entry per la lista di stati
-	private createStatusEntry(status: keyof typeof this.statusConfig, iconBlock: HTMLElement): HTMLElement {
+	private createStatusEntry(status: keyof typeof statusConfig, iconBlock: HTMLElement): HTMLElement {
 		const item = document.createElement("li");
 		const link = document.createElement("a");
-		const value = this.statusConfig[status as keyof typeof this.statusConfig];
+		const value = statusConfig[status as keyof typeof statusConfig];
 		link.className = "dropdown-item d-flex align-items-center py-2";
 
 		const statusDot = document.createElement("i");
@@ -64,8 +52,8 @@ class ProjectPhase extends HTMLElement {
 	}
 
 	// Funzione per creare la lista di stati coerenti con l'attuale
-	private createStatusList(currentStatus: keyof typeof this.statusConfig, iconBlock: HTMLElement): HTMLElement[] {
-		let statusList: (keyof typeof this.statusConfig)[] = []
+	private createStatusList(currentStatus: keyof typeof statusConfig, iconBlock: HTMLElement): HTMLElement[] {
+		let statusList: (keyof typeof statusConfig)[] = []
 		if(currentStatus === "WAITING"){
 			statusList = ["ACTIVABLE", "DROPPED"]
 		}
@@ -93,7 +81,7 @@ class ProjectPhase extends HTMLElement {
 	}
 
 	// Funzione per ottenere l'icona dello stato
-	private createStatusIcon(status: keyof typeof this.statusConfig): HTMLElement {
+	private createStatusIcon(status: keyof typeof statusConfig): HTMLElement {
 	
 		const wrapper = document.createElement("div");
 		wrapper.className = "dropdown d-inline-block";
@@ -104,7 +92,7 @@ class ProjectPhase extends HTMLElement {
 		const icon = document.createElement("i");
 		icon.className = "bi bi-circle-fill fs-5 me-3";
 		
-		const currentStatus = this.statusConfig[status as keyof typeof this.statusConfig];
+		const currentStatus = statusConfig[status as keyof typeof statusConfig];
 		if (currentStatus) {
 			icon.style.color = currentStatus.color;
 			icon.setAttribute("title", currentStatus.text);
@@ -149,7 +137,7 @@ class ProjectPhase extends HTMLElement {
 	handleItem(activity: any, phaseData: any): HTMLElement {
 		const activityElement = document.createElement("div");
 		activityElement.className = "d-flex align-items-center ms-5";
-		activityElement.style.height = `${CONST.ROW_HEIGHT_PX}`;
+		activityElement.style.height = `${ROW_HEIGHT_PX}`;
 
 		// Icona
 		const statusIcon = this.createStatusIcon(activity.status);
@@ -192,7 +180,7 @@ class ProjectPhase extends HTMLElement {
 		// Creiamo il toggler per la fase
 		const toggler = document.createElement("div");
 		toggler.className = "row p-3";
-		toggler.style.height = `${CONST.ROW_HEIGHT_PX}`;
+		toggler.style.height = `${ROW_HEIGHT_PX}`;
 
 		const togglerContent = document.createElement("div");
 		togglerContent.className = "d-flex align-items-center";
@@ -267,6 +255,6 @@ class ProjectPhase extends HTMLElement {
 	}
  }
 
-customElements.define("project-phase", ProjectPhase);
+customElements.define("side-gantt-list", SideGanttList);
 
-export default ProjectPhase;
+export default SideGanttList;

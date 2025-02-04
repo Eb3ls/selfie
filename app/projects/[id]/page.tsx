@@ -11,14 +11,13 @@ import { GlobalSideBar } from "@/app/components/GlobalSideBar";
  *
  * */
 import { useEffect, useState } from "react";
-import { PiBroom } from "react-icons/pi";
-import * as CONST from "./constants";
+import * as CONST from "./Utils";
 import "./styles.css";
 
 declare global {
 	namespace JSX {
 		interface IntrinsicElements {
-			"project-phase": { data: Object };
+			"side-gantt-list": { data: Object };
 			"project-phase-row": { data: Object };
 			"time-line": { date: Date };
 			"onload-functions": {};
@@ -55,13 +54,14 @@ export default function Projects() {
 
 	useEffect(() => {
 		if (typeof window !== "undefined") {
-			import("./ProjectPhase");
-			import("./ProjectPhaseRow");
-			import("./TimeLine");
+			import("./GanttBody/SideGanttList");
+			import("./GanttBody/ProjectPhaseRow");
+			import("./GanttBody/TimeLine");
 			import("./OnLoadFunctions");
-			import("./AddForm");
-			import("./ProjectSettings");
-			import("./ModifyForm")
+			import("./Forms/ProjectSettings");
+			import("./Forms/AddForm");
+			import("./Forms/ModifyActivity")
+			import("./Forms/ModifyPhase")
 			const fetchData = async () => {
 				const data = await getData();
 				setProjectData(data);
@@ -128,9 +128,9 @@ export default function Projects() {
 								Range
 							</div>
 						</div>
-						<project-phase
+						<side-gantt-list
 							data={JSON.stringify(projectData?.phases || [])}
-						></project-phase>
+						></side-gantt-list>
 					</div>
 					<div
 						id="ganttView"
