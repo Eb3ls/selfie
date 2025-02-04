@@ -24,31 +24,112 @@ class ProjectPhase extends HTMLElement {
 		}
 	}
 
-	// Funzione per ottenere l'icona dello stato
-	private createStatusIcon(status: string): HTMLElement {
-		const statusConfig = {
-			WAITING: { color: CONST.waiting_color, text: "In attesa" },
-			ACTIVABLE: { color: CONST.activable_color, text: "Attivabile" },
-			ACTIVE: { color: CONST.active_color, text: "Attivo" },
-			SUBMITTED: { color: CONST.submitted_color, text: "Consegnato" },
-			COMPLETED: { color: CONST.completed_color, text: "Completato" },
-			REACTIVATED: { color: CONST.reactivated_color, text: "Riattivato" },
-			OVERDUE: { color: CONST.overdue_color, text: "Scaduto" },
-			DROPPED: { color: CONST.dropped_color, text: "Abbandonato" }
+	statusConfig = {
+		WAITING: { color: CONST.waiting_color, text: "In attesa" },
+		ACTIVABLE: { color: CONST.activable_color, text: "Attivabile" },
+		ACTIVE: { color: CONST.active_color, text: "Attivo" },
+		SUBMITTED: { color: CONST.submitted_color, text: "Consegnato" },
+		COMPLETED: { color: CONST.completed_color, text: "Completato" },
+		REACTIVATED: { color: CONST.reactivated_color, text: "Riattivato" },
+		OVERDUE: { color: CONST.overdue_color, text: "Scaduto" },
+		DROPPED: { color: CONST.dropped_color, text: "Abbandonato" }
+	};
+
+	
+	// Funzione per creare una singola entry per la lista di stati
+	private createStatusEntry(status: keyof typeof this.statusConfig, iconBlock: HTMLElement): HTMLElement {
+		const item = document.createElement("li");
+		const link = document.createElement("a");
+		const value = this.statusConfig[status as keyof typeof this.statusConfig];
+		link.className = "dropdown-item d-flex align-items-center py-2";
+
+		const statusDot = document.createElement("i");
+		statusDot.className = "bi bi-circle-fill me-2";
+		statusDot.style.color = value.color;
+		
+		const text = document.createElement("span");
+		text.textContent = value.text;
+		
+		link.appendChild(statusDot);
+		link.appendChild(text);
+		
+		link.onclick = (e) => {
+			e.preventDefault();
+			console.log("Status changed to", value.text);
+			iconBlock.replaceWith(this.createStatusIcon(status));
 		};
 
+		item.appendChild(link);
+		return item;
+	}
+
+	// Funzione per creare la lista di stati coerenti con l'attuale
+	private createStatusList(currentStatus: keyof typeof this.statusConfig, iconBlock: HTMLElement): HTMLElement[] {
+		let statusList: (keyof typeof this.statusConfig)[] = []
+		if(currentStatus === "WAITING"){
+			statusList = ["ACTIVABLE", "DROPPED"]
+		}
+		else if(currentStatus === "ACTIVABLE"){
+			statusList = ["ACTIVE", "DROPPED"]
+		}
+		else if(currentStatus === "ACTIVE"){
+			statusList = ["SUBMITTED", "DROPPED"]
+		}
+		else if(currentStatus === "SUBMITTED"){
+			statusList = ["REACTIVATED", "COMPLETED", "DROPPED"]
+		}
+		else if(currentStatus === "REACTIVATED"){
+			statusList = ["COMPLETED", "DROPPED"]
+		}
+		else if(currentStatus === "OVERDUE"){
+			statusList = ["COMPLETED", "DROPPED"]
+		}
+
+		const list = [];
+		for (const status of statusList) {
+			list.push(this.createStatusEntry(status, iconBlock));
+		}
+		return list;
+	}
+
+	// Funzione per ottenere l'icona dello stato
+	private createStatusIcon(status: keyof typeof this.statusConfig): HTMLElement {
+	
+		const wrapper = document.createElement("div");
+		wrapper.className = "dropdown d-inline-block";
+	
+		const dropdownButton = document.createElement("button");
+		dropdownButton.className = "btn btn-link p-0 border-0";
+	
 		const icon = document.createElement("i");
 		icon.className = "bi bi-circle-fill fs-5 me-3";
 		
-		const currentStatus = statusConfig[status as keyof typeof statusConfig];
+		const currentStatus = this.statusConfig[status as keyof typeof this.statusConfig];
 		if (currentStatus) {
 			icon.style.color = currentStatus.color;
-			icon.setAttribute("data-bs-toggle", "tooltip");
-			icon.setAttribute("data-bs-placement", "top");
 			icon.setAttribute("title", currentStatus.text);
 		}
+	
+		dropdownButton.appendChild(icon);
+		wrapper.appendChild(dropdownButton);
+		if(status !== "COMPLETED" && status !== "DROPPED"){
+			// Creiamo il dropdown menu
+			dropdownButton.setAttribute("data-bs-toggle", "dropdown");
+			dropdownButton.setAttribute("aria-expanded", "false");
 
-		return icon;
+			const menu = document.createElement("ul");
+			menu.className = "dropdown-menu p-0 shadow";
+			
+			// Creiamo gli elementi coerenti con lo stato attuale
+			const statusEntries = this.createStatusList(status, wrapper);
+			for (const entry of statusEntries) {
+				menu.appendChild(entry);
+			}
+			
+			wrapper.appendChild(menu);
+		}
+	
+		return wrapper;
 	}
 
 	// Funzione per aggiungere i dati al modale
@@ -67,20 +148,20 @@ class ProjectPhase extends HTMLElement {
 	// Funzione per creare una attivitá
 	handleItem(activity: any, phaseData: any): HTMLElement {
 		const activityElement = document.createElement("div");
-		activityElement.className = "row p-3";
+		activityElement.className = "d-flex align-items-center ms-5";
 		activityElement.style.height = `${CONST.ROW_HEIGHT_PX}`;
-		// Impostiamo data-bs-toggle e data-bs-target per il modale
-		activityElement.setAttribute("data-bs-toggle", "modal");
-		activityElement.setAttribute("data-bs-target", "#ModifyActivity");
 
-		// Prima colonna con icona e testo
-		const firstCol = document.createElement("div");
-		firstCol.className = "col ms-5 d-flex align-items-center";
-		
+		// Icona
 		const statusIcon = this.createStatusIcon(activity.status);
+
+		// Container per le due colonne con titolo e date
+		const columnsContainer = document.createElement("div");
+		columnsContainer.className = "d-flex flex-grow-1 justify-content-between";
+
+		// Prima colonna con il titolo
+		const firstCol = document.createElement("div");
+		firstCol.className = "col d-flex align-items-center";
 		const summaryText = document.createTextNode(activity.summary);
-		
-		firstCol.appendChild(statusIcon);
 		firstCol.appendChild(summaryText);
 
 		// Seconda colonna con le date
@@ -88,8 +169,14 @@ class ProjectPhase extends HTMLElement {
 		secondCol.className = "col";
 		secondCol.textContent = `${new Date(activity.dtStart).toLocaleDateString()} - ${new Date(activity.due).toLocaleDateString()}`;
 
-		activityElement.appendChild(firstCol);
-		activityElement.appendChild(secondCol);
+		columnsContainer.appendChild(firstCol);
+		columnsContainer.appendChild(secondCol);
+		// Impostiamo data-bs-toggle e data-bs-target per il modale
+		columnsContainer.setAttribute("data-bs-toggle", "modal");
+		columnsContainer.setAttribute("data-bs-target", "#ModifyActivity");
+
+		activityElement.appendChild(statusIcon);
+		activityElement.appendChild(columnsContainer);
 
 		// Aggiungiamo il listener per aprire il modale
 		activityElement.addEventListener("click", () => {

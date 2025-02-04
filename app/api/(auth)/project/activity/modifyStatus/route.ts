@@ -72,8 +72,8 @@ export const PATCH = async (request: NextRequest) => {
 		return generateMessageResponse("User not authorized", 400);
 	}
 
-	// Verifichiamo che l'activity non sia già stata completata
-	if (activityStatus === "COMPLETED") {
+	// Verifichiamo che l'activity non sia già stata completata o droppata
+	if (activityStatus === "COMPLETED" && newStatus !== "DROPPED") {
 		return generateMessageResponse("Activity already completed", 400);
 	}
 
