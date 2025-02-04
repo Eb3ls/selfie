@@ -9,28 +9,11 @@ class AddForm extends HTMLElement {
 		this.projectID = "";
 		this.projectData = [];	
 	}
-	
-	static get observedAttributes() {
-		return ["data"];
-	}
 
-	attributeChangedCallback(name: string, _oldValue: any, newValue: any) {
-		if (name === "data") {
-			try {
-				if(!newValue || newValue === "[]") {
-					return;
-				}
-				const data = JSON.parse(newValue);
-				if (!data._id || !Array.isArray(data.phases)) {
-					throw new Error("Invalid data structure");
-				}
-				this.projectID = data._id;
-				this.projectData = data.phases;
-				this.render();
-			} catch (error) {
-				console.error("Error parsing data:", error);
-			}
-		}
+	public loadProjectData(id: string, phases: any) {
+		this.projectID = id;
+		this.projectData = phases;
+		this.render();
 	}
 
 	async fetcher(url: string, body: any, type: "phase" | "subphase" | "activity") {

@@ -5,22 +5,9 @@ class ProjectPhaseRow extends HTMLElement {
 		super();
 	}
 
-	static get observedAttributes() {
-		return ["data"];
-	}
-
-	attributeChangedCallback(name: string, _oldValue: any, newValue: any) {
-		if (name === "data") {
-			try {
-				if (!newValue || newValue === "[]") {
-					return;
-				}
-				const data = JSON.parse(newValue);
-				this.render(data);
-			} catch (error) {
-				console.error("Errore nel parsing dei dati:", error);
-			}
-		}
+	loadProjectData(data: any) {
+		if (!data) return;
+		this.render(data);
 	}
 
 	handleRow(summary: string) {

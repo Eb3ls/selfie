@@ -39,6 +39,14 @@ export interface activity{
 export function formatDate(date: string): string {
     return date.split('T')[0];
 }
+export function validateUsername(username: string): boolean {
+    const usernameRegex = /^[a-zA-Z0-9_-]{3,20}$/;
+    return usernameRegex.test(username);
+}
+
+export function validateLenght(str: string, min: number, max: number): boolean {
+    return str.length >= min && str.length <= max;
+}
 
 export const statusConfig = {
 	WAITING: { color: waiting_color, text: "In attesa" },

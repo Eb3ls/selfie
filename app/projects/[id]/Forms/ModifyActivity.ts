@@ -308,13 +308,13 @@ class ModifyActivity extends HTMLElement {
                     <label class="form-label text-muted small">Assigned Users</label>
                     <div class="user-list">
                         ${this.activityData.users?.length > 0
-                ? this.activityData.users.map((user: user) => `
-                                <div class="user-item d-flex align-items-center mb-2">
-                                    <i class="bi bi-person-fill me-2"></i>
-                                    ${user.name}
-                                </div>
-                            `).join('')
-                : '<p class="text-muted">No users assigned</p>'}
+                        ? this.activityData.users.map((user: user) => `
+                                        <div class="user-item d-flex align-items-center mb-2">
+                                            <i class="bi bi-person-fill me-2"></i>
+                                            ${user.name}
+                                        </div>
+                                    `).join('')
+                        : '<p class="text-muted">No users assigned</p>'}
                     </div>
                 </div>
             </div>

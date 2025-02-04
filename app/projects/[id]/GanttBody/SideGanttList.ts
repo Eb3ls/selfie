@@ -5,23 +5,9 @@ class SideGanttList extends HTMLElement {
 		super();
 	}
 
-	static get observedAttributes() {
-		return ["data"];
-	}
-
-	// Funzione chiamata quando l'attributo "data" cambia
-	attributeChangedCallback(name: string, _oldValue: any, newValue: any) {
-		if (name === "data") {
-			try {
-				if(!newValue || newValue === "[]") {
-					return;
-				}
-				const data = JSON.parse(newValue);
-				this.render(data);
-			} catch (error) {
-				console.error("Errore nel parsing dei dati:", error);
-			}
-		}
+	public loadProjectData(phases: any) {
+		if (!phases) return;
+		this.render(phases);
 	}
 
 	// Funzione per creare una singola entry per la lista di stati

@@ -55,35 +55,36 @@ class ModifyPhase extends HTMLElement {
 
     private updateModalContent() {
         const modalContent = this.querySelector('.modal-content');
-        if (modalContent) {
-            modalContent.innerHTML = `
-                <div class="modal-header d-flex align-items-center">
-                    <h5 class="modal-title d-flex align-items-center gap-2">
-                        <i class="bi bi-${this.isEditMode ? 'pencil-fill' : 'info-circle'}"></i>
-                        <span>${this.isEditMode ? 'Modify' : ''} Phase</span>
-                    </h5>
-                    <div class="ms-auto">
-                        <button type="button" class="btn btn-sm ${this.isEditMode ? 'btn-warning' : 'btn-light'} me-2" id="toggleEditBtn">
-                            <i class="bi bi-${this.isEditMode ? 'x' : 'pencil'}"></i>
-                            ${this.isEditMode ? 'Cancel' : 'Modify'}
-                        </button>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                    </div>
+
+        if (!modalContent) return;
+
+        modalContent.innerHTML = `
+            <div class="modal-header d-flex align-items-center">
+                <h5 class="modal-title d-flex align-items-center gap-2">
+                    <i class="bi bi-${this.isEditMode ? 'pencil-fill' : 'info-circle'}"></i>
+                    <span>${this.isEditMode ? 'Modify' : ''} Phase</span>
+                </h5>
+                <div class="ms-auto">
+                    <button type="button" class="btn btn-sm ${this.isEditMode ? 'btn-warning' : 'btn-light'} me-2" id="toggleEditBtn">
+                        <i class="bi bi-${this.isEditMode ? 'x' : 'pencil'}"></i>
+                        ${this.isEditMode ? 'Cancel' : 'Modify'}
+                    </button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                ${this.isEditMode 
-                    ? `<form id="modifyPhaseForm">${this.createFormTemplate()}</form>` 
-                    : this.createViewTemplate()
-                }
-            `;
-
-            if (this.isEditMode) {
-                const form = modalContent.querySelector('#modifyPhaseForm');
-                form?.addEventListener('submit', (e) => this.handleSubmit(e));
+            </div>
+            ${this.isEditMode 
+                ? `<form id="modifyPhaseForm">${this.createFormTemplate()}</form>` 
+                : this.createViewTemplate()
             }
+        `;
 
-            const toggleBtn = modalContent.querySelector('#toggleEditBtn');
-            toggleBtn?.addEventListener('click', () => this.toggleEditMode());
+        if (this.isEditMode) {
+            const form = modalContent.querySelector('#modifyPhaseForm');
+            form?.addEventListener('submit', (e) => this.handleSubmit(e));
         }
+
+        const toggleBtn = modalContent.querySelector('#toggleEditBtn');
+        toggleBtn?.addEventListener('click', () => this.toggleEditMode());
     }
 
     async handleSubmit(event: Event) {

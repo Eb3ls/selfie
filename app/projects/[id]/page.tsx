@@ -13,16 +13,17 @@ import { GlobalSideBar } from "@/app/components/GlobalSideBar";
 import { useEffect, useState } from "react";
 import * as CONST from "./Utils";
 import "./styles.css";
+import { title } from "process";
 
 declare global {
 	namespace JSX {
 		interface IntrinsicElements {
-			"side-gantt-list": { data: Object };
-			"project-phase-row": { data: Object };
+			"side-gantt-list": {};
+			"project-phase-row": {};
 			"time-line": { date: Date };
 			"onload-functions": {};
-			"add-form-component": { data: Object };
-			"project-settings": { users: Object; title: string };
+			"add-form-component": {};
+			"project-settings": {};
 			"modify-activity": {};
 			"modify-phase": {};
 		}
@@ -50,8 +51,6 @@ export default function Projects() {
 		}
 	}
 
-	const [projectData, setProjectData] = useState<any>(null);
-
 	useEffect(() => {
 		if (typeof window !== "undefined") {
 			import("./GanttBody/SideGanttList");
@@ -64,7 +63,14 @@ export default function Projects() {
 			import("./Forms/ModifyPhase")
 			const fetchData = async () => {
 				const data = await getData();
-				setProjectData(data);
+				const ProjectSettings = document.querySelector("project-settings") as any;
+				ProjectSettings?.loadProjectData(data.summary, data.users);
+				const AddFormComponent = document.querySelector("add-form-component") as any;
+				AddFormComponent?.loadProjectData(data._id, data.phases);
+				const SideGanttList = document.querySelector("side-gantt-list") as any;
+				SideGanttList?.loadProjectData(data.phases);
+				const ProjectPhaseRow = document.querySelector("project-phase-row") as any;
+				ProjectPhaseRow?.loadProjectData(data.phases);
 			};
 			fetchData();
 			// TODO - Sorting per data
@@ -87,13 +93,8 @@ export default function Projects() {
 						<div className="ms-1">Progetto di prova</div>
 					</div>
 					<div className="col d-flex justify-content-end align-items-center">
-						<add-form-component
-							data={projectData ? JSON.stringify(projectData) : JSON.stringify([])}
-						></add-form-component>
-						<project-settings
-							title={projectData ? projectData.summary : ""}
-							users={projectData ? JSON.stringify(projectData.users) : []}
-						></project-settings>
+						<add-form-component></add-form-component>
+						<project-settings></project-settings>
 					</div>
 				</div>
 				<div className="row p-3 border-bottom border-secondary">
@@ -128,18 +129,14 @@ export default function Projects() {
 								Range
 							</div>
 						</div>
-						<side-gantt-list
-							data={JSON.stringify(projectData?.phases || [])}
-						></side-gantt-list>
+						<side-gantt-list></side-gantt-list>
 					</div>
 					<div
 						id="ganttView"
 						className="col-9 hide-scrll mh-100 overflow-auto p-0"
 					>
 						<time-line date={new Date()}></time-line>
-						<project-phase-row
-							data={JSON.stringify(projectData?.phases || [])}
-						></project-phase-row>
+						<project-phase-row></project-phase-row>
 					</div>
 				</div>
 			</div >
