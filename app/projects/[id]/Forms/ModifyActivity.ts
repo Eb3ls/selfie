@@ -136,7 +136,6 @@ class ModifyActivity extends HTMLElement {
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="submit" class="btn btn-primary">Save Changes</button>
             </div>
         `;
@@ -324,11 +323,75 @@ class ModifyActivity extends HTMLElement {
         `;
     }
 
-    private updateModalContent(mode: "VIEW" | "EDIT" | "LINK") {
+    private updateModalContent(mode: "VIEW" | "EDIT" | "LINK" | "DELETE") {
         const modalContent = this.querySelector('.modal-content');
         if (!modalContent) return;
 
-        if (mode === "EDIT") {
+        if (mode === "DELETE") {
+            const header = `
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span>Delete Activity</span>
+            `;
+            modalContent.innerHTML = `
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger d-flex align-items-center gap-2">
+                        ${header}
+                    </h5>
+                    <div class="ms-auto">
+                        <button type="button" class="btn btn-sm btn-warning me-2" id="toggleEditBtn">
+                            <i class="bi bi-x"></i>
+                            Cancel
+                        </button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <p class="fs-5">Are you sure you want to delete this activity?</p>
+                    <p class="text-danger">This action cannot be undone!</p>
+                    <div class="alert alert-warning">
+                        <h6 class="alert-heading">
+                            <i class="bi bi-info-circle me-2"></i>
+                            Activity Details:
+                        </h6>
+                        <p class="mb-0">Title: ${this.activityData.summary}</p>
+                        <p class="mb-0">Start Date: ${new Date(this.activityData.dtStart).toLocaleDateString()}</p>
+                        <p class="mb-0">Due Date: ${new Date(formatDate(this.activityData.due)).toLocaleDateString()}</p>
+                        ${this.activityData.isMilestone ? '<p class="mb-0 text-primary"><i class="bi bi-flag-fill"></i> Milestone</p>' : ''}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete Activity</button>
+                </div>
+            `;
+
+            const toggleBtn = modalContent.querySelector('#toggleEditBtn');
+            toggleBtn?.addEventListener('click', () => this.updateModalContent("VIEW"));
+
+            const confirmBtn = modalContent.querySelector('#confirmDeleteBtn');
+            confirmBtn?.addEventListener('click', async () => {
+                try {
+                    const response = await fetch(`/api/project/activity/delete`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            _id: this.activityData._id
+                        })
+                    });
+
+                    if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        throw new Error('Failed to delete activity');
+                    }
+                } catch (error) {
+                    console.error('Error deleting activity:', error);
+                    alert('Failed to delete activity');
+                }
+            });
+
+        } else if (mode === "EDIT") {
             const header = `
                 <i class="bi bi-pencil-fill"></i>
                 <span>Modify Activity</span>
@@ -396,6 +459,10 @@ class ModifyActivity extends HTMLElement {
                         ${header}
                     </h5>
                     <div class="ms-auto">
+                        <button type="button" class="btn btn-sm btn-danger me-2" id="deleteBtn">
+                            <i class="bi bi-trash"></i>
+                            Delete
+                        </button>
                         <button type="button" class="btn btn-sm btn-outline-primary me-2" id="linkBtn">
                             <i class="bi bi-link"></i>
                             Links
@@ -409,6 +476,9 @@ class ModifyActivity extends HTMLElement {
                 </div>
                 ${this.createViewTemplate()}
             `;
+
+            const deleteBtn = modalContent.querySelector('#deleteBtn');
+            deleteBtn?.addEventListener('click', () => this.updateModalContent("DELETE"));
 
             const linkBtn = modalContent.querySelector('#linkBtn');
             linkBtn?.addEventListener('click', () => this.updateModalContent("LINK"));
