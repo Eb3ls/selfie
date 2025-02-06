@@ -20,16 +20,6 @@ class TimeLine extends HTMLElement {
 		this.scrollListenerAdded = false;
 	}
 
-	static get observedAttributes() {
-		return ["date"];
-	}
-
-	attributeChangedCallback(name: string, oldValue: string, newValue: string) {
-		if (name === "date") {
-			this.render(newValue);
-		}
-	}
-
 	updateMonth() {
 		const month = this.centerDate.toLocaleDateString(CONST.timeFormat, {
 			month: "long"
@@ -195,8 +185,7 @@ class TimeLine extends HTMLElement {
 		return fragment;
 	}
 
-	render(dateString: string) {
-		const date = new Date(dateString);
+	public render(date: Date) {
 
 		// Pulizia del contenuto
 		this.timeline.innerHTML = "";
