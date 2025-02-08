@@ -1,4 +1,11 @@
+import { Time } from "rrule/dist/esm/datetime";
 import { ROW_HEIGHT_PX } from "./Utils";
+import TimeList from "./listBody/TimeList";
+import ProjectSettings from "./Forms/ProjectSettings";
+import AddForm from "./Forms/AddForm";
+import SideGanttList from "./GanttBody/SideGanttList";
+import ProjectPhaseRow from "./GanttBody/ProjectPhaseRow";
+import TimeLine from "./GanttBody/TimeLine";
 
 class ViewToggler extends HTMLElement{
     isGanttView: "GANTT" | "LIST";
@@ -22,38 +29,51 @@ class ViewToggler extends HTMLElement{
         this.isGanttView = viewMode;
 
         if(viewMode === "GANTT"){
-            this.innerHTML = this.getGanttTemplate();
+            this.innerHTML = `
+                ${this.getHeaderTemplate("GANTT")}
+                ${this.getGanntBody()}
+            `;
             this.addEventListeners();
             this.loadData();
         }else{
-            this.innerHTML = this.getHeaderTemplate();
+            this.innerHTML = `
+                ${this.getHeaderTemplate("LIST")}
+                ${this.getListBody("TIME")}
+            `
             this.addEventListeners();
         }
     }
 
-    getGanttTemplate() {
-        return `
-            ${this.getHeaderTemplate()}
-            ${this.getBodyTemplate()}
-        `;
-    }
-
-    getHeaderTemplate() {
-        return `
+    getHeaderTemplate(type: "GANTT" | "LIST") {
+        let block;
+        if (type === "GANTT"){
+            block = `
+                <div class="col-9 d-flex flex-column align-items-center">
+                    <div class="fs-4" id="yearDiv"></div>
+                    <div class="fs-5" id="monthDiv"></div>
+                </div>
+            `;
+        } else{
+            block = `
+                <div class="col-9 d-flex justify-content-end">
+                    <button class="btn" id="userSort">Attore</button>
+                    <button class="btn" id="timeSort">Temporalmente</button>
+                </div>
+            `;
+        }
+            
+        return`
             <div class="row p-3 border-bottom border-secondary">
                 <div class="col-3 d-flex align-items-center">
                     <button class="btn me-2 p-0" id="renderGantt">Gantt</button>
                     <button class="btn ms-2 p-0" id="renderList">List</button>
                 </div>
-                <div class="col-9 d-flex flex-column align-items-center">
-                    <div class="fs-4" id="yearDiv"></div>
-                    <div class="fs-5" id="monthDiv"></div>
-                </div>
+                ${block}
             </div>
         `; 
     }
 
-    getBodyTemplate() {
+    getGanntBody() {
         return `
             <div class="row border-bottom border-secondary" style="height: 500px;">
             <div id="listView"
@@ -71,6 +91,12 @@ class ViewToggler extends HTMLElement{
             </div>
             </div>
         `;
+    }
+
+    getListBody(type: "USER" | "TIME") {
+        const listBlock = document.createElement("time-list") as TimeList;
+        listBlock.loadData(this.data.phases);
+        return listBlock.innerHTML;
     }
 
     addEventListeners() {
@@ -107,11 +133,11 @@ class ViewToggler extends HTMLElement{
     loadData() {
         if (!this.data) return;
 
-        const projectSettings = document.querySelector("project-settings") as any;
-        const addFormComponent = document.querySelector("add-form-component") as any;
-        const sideGanttList = document.querySelector("side-gantt-list") as any;
-        const projectPhaseRow = document.querySelector("project-phase-row") as any;
-        const timeLine = document.querySelector("time-line") as any;
+        const projectSettings = document.querySelector("project-settings") as ProjectSettings
+        const addFormComponent = document.querySelector("add-form-component") as AddForm;
+        const sideGanttList = document.querySelector("side-gantt-list") as SideGanttList;
+        const projectPhaseRow = document.querySelector("project-phase-row") as ProjectPhaseRow;
+        const timeLine = document.querySelector("time-line") as TimeLine;
 
         if (projectSettings && typeof projectSettings.loadProjectData === 'function') {
             projectSettings.loadProjectData(this.data.summary, this.data._id, this.data.users);

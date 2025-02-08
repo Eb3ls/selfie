@@ -58,3 +58,100 @@ export const statusConfig = {
 	OVERDUE: { color: overdue_color, text: "Scaduto" },
 	DROPPED: { color: dropped_color, text: "Abbandonato" }
 };
+
+// Status icon
+
+// Funzione per creare una singola entry per la lista di stati
+function createStatusEntry(status: keyof typeof statusConfig, iconBlock: HTMLElement): HTMLElement {
+    const item = document.createElement("li");
+    const link = document.createElement("a");
+    const value = statusConfig[status as keyof typeof statusConfig];
+    link.className = "dropdown-item d-flex align-items-center py-2";
+
+    const statusDot = document.createElement("i");
+    statusDot.className = "bi bi-circle-fill me-2";
+    statusDot.style.color = value.color;
+    
+    const text = document.createElement("span");
+    text.textContent = value.text;
+    
+    link.appendChild(statusDot);
+    link.appendChild(text);
+    
+    link.onclick = (e) => {
+        e.preventDefault();
+        console.log("Status changed to", value.text);
+        iconBlock.replaceWith(createStatusIcon(status));
+    };
+
+    item.appendChild(link);
+    return item;
+}
+
+// Funzione per creare la lista di stati coerenti con l'attuale
+function createStatusList(currentStatus: keyof typeof statusConfig, iconBlock: HTMLElement): HTMLElement[] {
+    let statusList: (keyof typeof statusConfig)[] = []
+    if(currentStatus === "WAITING"){
+        statusList = ["ACTIVABLE", "DROPPED"]
+    }
+    else if(currentStatus === "ACTIVABLE"){
+        statusList = ["ACTIVE", "DROPPED"]
+    }
+    else if(currentStatus === "ACTIVE"){
+        statusList = ["SUBMITTED", "DROPPED"]
+    }
+    else if(currentStatus === "SUBMITTED"){
+        statusList = ["REACTIVATED", "COMPLETED", "DROPPED"]
+    }
+    else if(currentStatus === "REACTIVATED"){
+        statusList = ["COMPLETED", "DROPPED"]
+    }
+    else if(currentStatus === "OVERDUE"){
+        statusList = ["COMPLETED", "DROPPED"]
+    }
+
+    const list = [];
+    for (const status of statusList) {
+        list.push(createStatusEntry(status, iconBlock));
+    }
+    return list;
+}
+
+// Funzione per ottenere l'icona dello stato
+export function createStatusIcon(status: keyof typeof statusConfig): HTMLElement {
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "dropdown d-inline-block";
+
+    const dropdownButton = document.createElement("button");
+    dropdownButton.className = "btn btn-link p-0 border-0";
+
+    const icon = document.createElement("i");
+    icon.className = "bi bi-circle-fill fs-5 me-3";
+    
+    const currentStatus = statusConfig[status as keyof typeof statusConfig];
+    if (currentStatus) {
+        icon.style.color = currentStatus.color;
+        icon.setAttribute("title", currentStatus.text);
+    }
+
+    dropdownButton.appendChild(icon);
+    wrapper.appendChild(dropdownButton);
+    if(status !== "COMPLETED" && status !== "DROPPED"){
+        // Creiamo il dropdown menu
+        dropdownButton.setAttribute("data-bs-toggle", "dropdown");
+        dropdownButton.setAttribute("aria-expanded", "false");
+
+        const menu = document.createElement("ul");
+        menu.className = "dropdown-menu p-0 shadow";
+        
+        // Creiamo gli elementi coerenti con lo stato attuale
+        const statusEntries = createStatusList(status, wrapper);
+        for (const entry of statusEntries) {
+            menu.appendChild(entry);
+        }
+        wrapper.appendChild(menu);
+    }
+
+    return wrapper;
+}

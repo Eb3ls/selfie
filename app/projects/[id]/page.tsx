@@ -30,6 +30,7 @@ export default function Projects() {
 			import('./GanttBody/ProjectPhaseRow');
 			import('./GanttBody/TimeLine');
 			import('./OnLoadFunctions')
+			import('./listBody/TimeList');
 		}
 	}, []);
 
