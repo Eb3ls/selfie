@@ -11,10 +11,18 @@ class TimeList extends HTMLElement{
         this.sortedData = null;
     }
 
-    loadData(phases: any){
+    loadData(phases: any, userView: boolean){
         if (!phases) return;
-        this.data = phases;
-        this.sortedData = this.sortData();
+
+        // Se siamo nella view a lista per utente passiamo direttamente le activities
+        if(userView){
+            this.data = phases;
+            this.sortedData = phases;
+        }
+        else{
+            this.data = phases;
+            this.sortedData = this.sortData();
+        }
         this.render();
     }
 
@@ -44,23 +52,36 @@ class TimeList extends HTMLElement{
         const block = document.createElement("div");
         block.className = "row p-2 border rounded mt-3";
         block.style.backgroundColor = "#f8f9fa";
+
         const start = new Date(formatDate(item.dtStart)).toLocaleDateString();
         const end = new Date(formatDate(item.due)).toLocaleDateString();
-        const statusBlock = createStatusIcon(item.status)
-        
-        block.innerHTML = `
-            <div class="col-3 fw-bold">${item.summary}</div>
-            <div class="col-3 text-muted">
-                Start: ${start}
-            </div>
-            <div class="col-3 text-muted">
-                Due: ${end}
-            </div>
-            <div class="col-3">
-                ${statusBlock.innerHTML}
-                ${item.status}
-            </div>
-        `;
+
+        // Create columns using DOM methods instead of innerHTML
+        const summaryCol = document.createElement("div");
+        summaryCol.className = "col-3 fw-bold";
+        summaryCol.textContent = item.summary;
+
+        const startCol = document.createElement("div");
+        startCol.className = "col-3 text-muted";
+        startCol.textContent = `Start: ${start}`;
+
+        const dueCol = document.createElement("div");
+        dueCol.className = "col-3 text-muted";
+        dueCol.textContent = `Due: ${end}`;
+
+        const statusCol = document.createElement("div");
+        statusCol.className = "col-3";
+
+        // Create status elements
+        const statusBlock = createStatusIcon(item.status);
+        statusCol.appendChild(statusBlock);
+        statusCol.appendChild(document.createTextNode(item.status));
+
+        // Append all columns to the block
+        block.appendChild(summaryCol);
+        block.appendChild(startCol);
+        block.appendChild(dueCol);
+        block.appendChild(statusCol);
 
         return block;
     }

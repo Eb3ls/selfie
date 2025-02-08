@@ -1,20 +1,23 @@
 import { Time } from "rrule/dist/esm/datetime";
 import { ROW_HEIGHT_PX } from "./Utils";
-import TimeList from "./listBody/TimeList";
+import TimeList from "./ListBody/TimeList";
 import ProjectSettings from "./Forms/ProjectSettings";
 import AddForm from "./Forms/AddForm";
 import SideGanttList from "./GanttBody/SideGanttList";
 import ProjectPhaseRow from "./GanttBody/ProjectPhaseRow";
 import TimeLine from "./GanttBody/TimeLine";
+import UsersList from "./ListBody/UserList";
 
 class ViewToggler extends HTMLElement{
-    isGanttView: "GANTT" | "LIST";
+    viewType: "GANTT" | "LIST";
+    listViewType: "USER" | "TIME";
     data: any; 
 
     constructor(){
         super();
         // Inizializziamo la vista sbagliata per forzare il render
-        this.isGanttView = "LIST";
+        this.viewType = "LIST";
+        this.listViewType = "USER";
         this.data = null;
     }
 
@@ -25,28 +28,29 @@ class ViewToggler extends HTMLElement{
 
     render(viewMode: "GANTT" | "LIST"){
 
-        if (this.isGanttView === viewMode) return;
-        this.isGanttView = viewMode;
+        if (this.viewType === viewMode) return;
+        this.viewType = viewMode;
 
         if(viewMode === "GANTT"){
             this.innerHTML = `
-                ${this.getHeaderTemplate("GANTT")}
+                ${this.getHeaderTemplate()}
                 ${this.getGanntBody()}
             `;
             this.addEventListeners();
             this.loadData();
         }else{
             this.innerHTML = `
-                ${this.getHeaderTemplate("LIST")}
-                ${this.getListBody("TIME")}
+                ${this.getHeaderTemplate()}
             `
+            const body = this.getListBody(this.listViewType);
+            this.appendChild(body);
             this.addEventListeners();
         }
     }
 
-    getHeaderTemplate(type: "GANTT" | "LIST") {
+    getHeaderTemplate() {
         let block;
-        if (type === "GANTT"){
+        if (this.viewType === "GANTT"){
             block = `
                 <div class="col-9 d-flex flex-column align-items-center">
                     <div class="fs-4" id="yearDiv"></div>
@@ -93,10 +97,20 @@ class ViewToggler extends HTMLElement{
         `;
     }
 
-    getListBody(type: "USER" | "TIME") {
-        const listBlock = document.createElement("time-list") as TimeList;
-        listBlock.loadData(this.data.phases);
-        return listBlock.innerHTML;
+    getListBody(view: "USER" | "TIME") {
+        // Invertiamo la visualizzazione
+        this.listViewType = view;
+
+        if (this.listViewType === "USER"){
+            const listBlock = document.createElement("users-list") as UsersList;
+            listBlock.loadData(this.data.phases);
+            return listBlock;
+        }
+        else {
+            const listBlock = document.createElement("time-list") as TimeList;
+            listBlock.loadData(this.data.phases, false);
+            return listBlock;
+        }
     }
 
     addEventListeners() {
@@ -110,6 +124,25 @@ class ViewToggler extends HTMLElement{
         listBtn.addEventListener("click", () => {
             this.render("LIST");
         });
+
+        if(this.viewType === "LIST"){
+            const userSortBtn = this.querySelector("#userSort") as HTMLButtonElement;
+            const timeSortBtn = this.querySelector("#timeSort") as HTMLButtonElement;
+
+            userSortBtn.addEventListener("click", () => {
+                if(this.listViewType === "USER") return
+                const body = this.querySelector("time-list");
+                if(!body) return;
+                body.replaceWith(this.getListBody("USER"));
+            });
+
+            timeSortBtn.addEventListener("click", () => {
+                if(this.listViewType === "TIME") return
+                const body = this.querySelector("users-list");
+                if(!body) return;
+                body.replaceWith(this.getListBody("TIME"));
+            });
+        }
     }
 
 	async getData() {

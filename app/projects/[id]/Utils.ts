@@ -81,6 +81,7 @@ function createStatusEntry(status: keyof typeof statusConfig, iconBlock: HTMLEle
     link.onclick = (e) => {
         e.preventDefault();
         console.log("Status changed to", value.text);
+        // Necesario per aggiornare l'icona dello stato con le possibilitá corrette
         iconBlock.replaceWith(createStatusIcon(status));
     };
 
