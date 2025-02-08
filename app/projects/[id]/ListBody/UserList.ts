@@ -35,16 +35,42 @@ class UsersList extends HTMLElement {
     }
 
     render() {
-        for(const user in this.data){
+        for(const user in this.data) {
+            const container = document.createElement("div");
+            container.className = "mt-3";
+
+            // Creiamo il toggler
+            const toggler = document.createElement("div");
+            toggler.className = "d-flex align-items-center";
+
+            // Creiamo l'icona del caret
+            const caretIcon = document.createElement("i");
+            caretIcon.className = "bi bi-caret-right-fill me-3 fs-5";
+            caretIcon.style.transition = "transform 0.2s";
+            caretIcon.setAttribute("data-bs-toggle", "collapse");
+            caretIcon.setAttribute("data-bs-target", `#collapse${user}`);
+            caretIcon.onclick = () => {
+                caretIcon.style.transform = caretIcon.style.transform === "rotate(90deg)" ? "rotate(0)" : "rotate(90deg)";
+            };
+            toggler.appendChild(caretIcon);
+
+            // Creiamo il div con il nome dell'utente
+            const button = document.createElement("button");
+            button.className = "btn btn-primary rounded-3 px-4 py-2 flex-grow-1 text-start";
+            button.textContent = user;
+            toggler.appendChild(button);
+
+            // Creiamo il blocco collasabile
             const userActivitiesBlock = document.createElement("time-list") as TimeList;
             userActivitiesBlock.loadData(this.data[user], true);
+            userActivitiesBlock.id = `collapse${user}`;
+            userActivitiesBlock.className = "collapse";
 
-            const userBlock = document.createElement("div");
-            userBlock.className = "mt-3";
-            userBlock.textContent = user;
-
-            this.appendChild(userBlock); 
-            this.appendChild(userActivitiesBlock);
+            
+            container.appendChild(toggler);
+            container.appendChild(userActivitiesBlock);
+            
+            this.appendChild(container);
         }
     }
 

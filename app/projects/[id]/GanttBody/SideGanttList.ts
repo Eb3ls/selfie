@@ -82,7 +82,6 @@ class SideGanttList extends HTMLElement {
 
 		const caretIcon = document.createElement("i");
 		caretIcon.className = "bi bi-caret-right-fill me-3 fs-5";
-		caretIcon.style.cursor = "pointer";
 		caretIcon.style.transition = "transform 0.2s";
 		caretIcon.setAttribute("data-bs-toggle", "collapse");
 		caretIcon.setAttribute("data-bs-target", `#collapse${data._id}`);
