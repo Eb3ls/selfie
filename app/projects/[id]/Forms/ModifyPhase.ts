@@ -342,7 +342,7 @@ class ModifyPhase extends HTMLElement {
     }
 
     // Funzione da chiamare per popolare il form con i dati
-    public setData(phaseData: any, parentData: any) {
+    public updateData(phaseData: any, parentData: any) {
         this.phaseData = phaseData;
         this.parentData = parentData;
         this.isEditMode = false;

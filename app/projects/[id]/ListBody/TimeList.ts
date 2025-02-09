@@ -60,7 +60,7 @@ class TimeList extends HTMLElement{
 			return;
 		}
 
-		modifyModal.setData(activity, phase);
+		modifyModal.updateData(activity, phase);
 	}
 
     createItem(item: any){

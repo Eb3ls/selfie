@@ -7,6 +7,7 @@ import SideGanttList from "./GanttBody/SideGanttList";
 import ProjectPhaseRow from "./GanttBody/ProjectPhaseRow";
 import TimeLine from "./GanttBody/TimeLine";
 import UsersList from "./ListBody/UserList";
+import ModifyActivity from "./Forms/ModifyActivity";
 
 class ViewToggler extends HTMLElement{
     viewType: "GANTT" | "LIST";
@@ -163,28 +164,53 @@ class ViewToggler extends HTMLElement{
 		}
 	}
 
+    createActivityList(){
+        const list: any = [];
+        function appendActivities(phase: any){
+            for (const activity of phase.activities){
+                list.push(activity);
+            }
+
+            if (!phase.subPhases) return;
+            for (const subPhase of phase.subPhases){
+                appendActivities(subPhase);
+            }
+        }
+
+        for (const phase of this.data.phases){
+            appendActivities(phase);
+        }
+
+        return list;
+
+    }
+
     loadData() {
         if (!this.data) return;
 
         const projectSettings = document.querySelector("project-settings") as ProjectSettings
-        const addFormComponent = document.querySelector("add-form-component") as AddForm;
-        const sideGanttList = document.querySelector("side-gantt-list") as SideGanttList;
-        const projectPhaseRow = document.querySelector("project-phase-row") as ProjectPhaseRow;
-        const timeLine = document.querySelector("time-line") as TimeLine;
 
-        if (projectSettings && typeof projectSettings.loadProjectData === 'function') {
+        if (projectSettings) {
             projectSettings.loadProjectData(this.data.summary, this.data._id, this.data.users);
         }
-        if (addFormComponent && typeof addFormComponent.loadProjectData === 'function') {
+        const addFormComponent = document.querySelector("add-form-component") as AddForm;
+        if (addFormComponent) {
             addFormComponent.loadProjectData(this.data._id, this.data.phases);
         }
-        if (sideGanttList && typeof sideGanttList.loadProjectData === 'function') {
+        const ModifyActivity = document.querySelector("modify-activity") as ModifyActivity;
+        if (ModifyActivity) {
+            ModifyActivity.loadData(this.createActivityList());
+        }
+        const sideGanttList = document.querySelector("side-gantt-list") as SideGanttList;
+        if (sideGanttList) {
             sideGanttList.loadProjectData(this.data.phases);
         }
-        if (projectPhaseRow && typeof projectPhaseRow.loadProjectData === 'function') {
+        const projectPhaseRow = document.querySelector("project-phase-row") as ProjectPhaseRow;
+        if (projectPhaseRow) {
             projectPhaseRow.loadProjectData(this.data.phases);
         }
-        if (timeLine && typeof timeLine.render === 'function') {
+        const timeLine = document.querySelector("time-line") as TimeLine;
+        if (timeLine) {
             timeLine.render(new Date());
         }
 

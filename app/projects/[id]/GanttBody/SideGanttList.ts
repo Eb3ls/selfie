@@ -1,3 +1,5 @@
+import ModifyActivity from "../Forms/ModifyActivity";
+import ModifyPhase from "../Forms/ModifyPhase";
 import {ROW_HEIGHT_PX, formatDate, createStatusIcon} from "../Utils";
 
 class SideGanttList extends HTMLElement {
@@ -14,14 +16,14 @@ class SideGanttList extends HTMLElement {
 	// Funzione per aggiungere i dati al modale
 	openModify(data: any, parentData: any, isPhase: boolean) {
 		const name = isPhase ? "Phase" : "Activity";
-		const modifyModal = document.getElementById(`Modify${name}Component`) as any;
+		const modifyModal = document.getElementById(`Modify${name}Component`) as ModifyPhase | ModifyActivity;
 
 		if (!modifyModal) {
 			console.error(`Errore: modale per modifica delle ${name.toLocaleLowerCase()} non trovato`);
 			return;
 		}
 
-		modifyModal.setData(data, parentData);
+		modifyModal.updateData(data, parentData);
 	}
 
 	// Funzione per creare una attivitá

@@ -3,6 +3,7 @@ import { user, activity, activityData, formatDate } from "../Utils";
 class ModifyActivity extends HTMLElement {
     phaseData: any;
     activityData: any;
+    activitiesList: any;
     modifiedUserlist: user[];
     modifiedLinklist: activity[];
 
@@ -10,6 +11,7 @@ class ModifyActivity extends HTMLElement {
         super();
         this.phaseData = [];
         this.activityData = [];
+        this.activitiesList = [];
         this.modifiedUserlist = [];
         this.modifiedLinklist = [];
     }
@@ -174,60 +176,97 @@ class ModifyActivity extends HTMLElement {
     }
 
     // Funzione per l'aggiunta e l'eliminazione degli utenti
-    private setupItemManagement(isEdit: boolean) {
-        const type = isEdit ? 'User' : 'Link';
-        const btn = this.querySelector(` #add${type}Btn`);
-        const newInput = this.querySelector(`#new${type}`) as HTMLInputElement;
+    private setupItemManagement(isUserBtn: boolean) {
 
-        if (isEdit) {
+        if (isUserBtn) {
+            const btn = this.querySelector('#addUserBtn');
+            const newUser = this.querySelector('#newUser') as HTMLInputElement;
+
             for (const user of this.modifiedUserlist) {
                 this.addItem(true, user);
             }
-        }
-        else {
+            
+            // User management logic
+            btn?.addEventListener('click', () => {
+                const value = newUser.value;
+                this.clearError(newUser);
+
+                if (!this.validateUsername(value)) {
+                    this.showError(newUser, 'Invalid username (3-20 characters, only letters, numbers, - and _)');
+                    return;
+                }
+
+                const newItem = { name: value, id: value };
+                this.modifiedUserlist.push(newItem);
+                this.addItem(true, newItem);
+                newUser.value = '';
+            });
+        } else {
+            const btn = this.querySelector('#addLinkBtn');
+            const newLink = this.querySelector('#newLink') as HTMLSelectElement;
+
             for (const link of this.modifiedLinklist) {
                 this.addItem(false, link);
             }
 
-        }
+            // Link management logic 
+            btn?.addEventListener('click', () => {
+                const selectedOption = newLink.options[newLink.selectedIndex];
+                const value = selectedOption?.value;
+                const name = selectedOption?.textContent;
+                
+                if (!value) return;
 
-        btn?.addEventListener('click', () => {
-            let value = "";
-
-            if (isEdit) {
-                value = newInput.value.trim();
-            }
-            else {
-                value = newInput.value;
-            }
-
-            if (!value) {
-                return;
-            }
-
-            if (isEdit) {
-                this.clearError(newInput);
-
-                if (!this.validateUsername(value)) {
-                    this.showError(newInput, 'Invalid username (3-20 characters, only letters, numbers, - and _)');
-                    return;
-                }
-            }
-
-            const newItem = { name: value, id: value };
-
-            if (isEdit) {
-                // Aggiungiamo l'utente alla lista TODO - Implementare gestione utenti
-                this.modifiedUserlist.push(newItem);
-                this.addItem(true, newItem);
-            }
-            else {
+                const newItem = { name: name || value, id: value };
                 this.modifiedLinklist.push(newItem);
                 this.addItem(false, newItem);
+                
+                newLink.innerHTML = this.createLinkItems();
+                newLink.selectedIndex = 0;
+            });
+        }
+    }
+
+    // Funzione per ottenere le attivitá disponibili per il linking
+    // Supponiamo che la lista di activies é giá ordinata per data di fine
+    private getAvailableActivities() {
+        const availableActivities = [];
+
+        const startDate = new Date(this.activityData.dtStart);
+        for (const activity of this.activitiesList) {
+            // Se siamo arrivati all'attivitá corrente, interrompiamo, quelle successive hanno una due data maggiore
+            if (activity._id === this.activityData._id) {
+                break;
             }
 
-            newInput.value = '';
-        });
+            // Se l'attivitá é giá collegata o é giá stata selezionata, la saltiamo
+            if(this.activityData.prevLinks.includes(activity._id) || 
+               this.modifiedLinklist.some(link => link.id === activity._id)) {
+                continue;
+            }
+
+            const activityDue = new Date(formatDate(activity.due));
+            if (activityDue >= startDate) {
+                continue;
+            }
+
+            availableActivities.push(activity);
+        }
+
+        return availableActivities;
+    }
+
+    private createLinkItems() {
+        const availableActivities = this.getAvailableActivities();
+        const text = availableActivities.length > 0 ? 'Select an activity...' : 'No available activities';
+
+        let block = `<option value="" disabled selected>${text}</option>`;
+        for (const activity of availableActivities) {
+            block += `
+                <option value="${activity._id}">${activity.summary}</option>
+            `;
+        }
+        return block;
     }
 
     private createLinkTemplate() {
@@ -239,10 +278,7 @@ class ModifyActivity extends HTMLElement {
                     <div class="add-link-form">
                         <div class="input-group mb-3">
                             <select class="form-select" id="newLink">
-                                <option value="" disabled selected>Select an activity...</option>
-                                <option value="1">Activity 1</option>
-                                <option value="2">Activity 2</option>
-                                <option value="3">Activity 3</option>
+                                ${this.createLinkItems()}
                             </select>
                             <button class="btn btn-primary" type="button" id="addLinkBtn">
                                 <i class="bi bi-plus-lg"></i> Add
@@ -254,17 +290,26 @@ class ModifyActivity extends HTMLElement {
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Save Links</button>
             </div>
         `;
     }
 
+    // Funzione chiamata per fornire i dati generali, chimata da viewToggler
+    public loadData(activitiesList: any) {
+        this.activitiesList = activitiesList;
+        console.log(this.activitiesList);
+    }
+
     // Funzione da chiamare per popolare il form con i dati
-    public setData(activityData: any, phaseData: any) {
+    public updateData(activityData: any, phaseData: any) {
         this.activityData = activityData;
         this.phaseData = phaseData;
         this.modifiedUserlist = [...this.activityData.users];
-        this.modifiedLinklist = this.activityData.links || [];
+        for (const link of this.activityData.prevLinks) {
+            this.modifiedLinklist.push({ name: link.summary, id: link._id });
+        }
+        console.log(this.modifiedLinklist);
         this.updateModalContent("VIEW");
     }
 
@@ -437,15 +482,47 @@ class ModifyActivity extends HTMLElement {
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                 </div>
-                <form id="modifyActivityForm">${this.createLinkTemplate()}</form>
+                <form id="modifyLinkForm">${this.createLinkTemplate()}</form>
             `;
 
-            const form = modalContent.querySelector('#modifyActivityForm');
-            form?.addEventListener('submit', (e) => this.handleSubmit(e));
             this.setupItemManagement(false);
 
             const toggleBtn = modalContent.querySelector('#toggleEditBtn');
             toggleBtn?.addEventListener('click', () => this.updateModalContent("VIEW"));
+
+            const form = modalContent.querySelector('#modifyLinkForm');
+            form?.addEventListener('submit', async (e: Event) => {
+                e.preventDefault();
+                const url = "/api/project/activity/link";
+
+                for (const link of this.modifiedLinklist) {
+                    const body = {
+                        "prevId": link.id,
+                        "nextId": this.activityData._id,
+                    }
+
+                    try {
+                        const response = await fetch(url, {
+                            method: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(body)
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Failed to link activity ' + link.name);
+                        }
+
+                    } catch (error) {
+                        console.error('Error linking activities:', error);
+                        alert('Failed to link activities');
+                    }
+                }
+
+                window.location.reload();
+            });
+
 
         } else {
             const header = `
