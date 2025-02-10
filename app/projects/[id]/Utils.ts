@@ -1,54 +1,95 @@
-export const ROW_HEIGHT_PX = "70px";
-export const CELL_WIDTH_PX = "200px";
-export const ROW_HEIGHT = parseInt(ROW_HEIGHT_PX, 10);
-export const CELL_WIDTH = parseInt(CELL_WIDTH_PX, 10);
-export const COL_NUM = 25;
+import { Alarm } from "@/utils/db/models/Alarm";
 
-export const waiting_color = "#6c757d";
-export const activable_color = "#ffc107";
-export const active_color = "#007bff";
-export const submitted_color = "#28a745";
-export const completed_color = "#17a2b8";
-export const reactivated_color = "#6610f2";
-export const overdue_color = "#dc3545";
-export const dropped_color = "#343a40";
+const ROW_HEIGHT_PX = "70px";
+const CELL_WIDTH_PX = "200px";
+const ROW_HEIGHT = parseInt(ROW_HEIGHT_PX, 10);
+const CELL_WIDTH = parseInt(CELL_WIDTH_PX, 10);
+const COL_NUM = 25;
 
-export const timeFormat = "en-US";
+const waiting_color = "#6c757d";
+const activable_color = "#ffc107";
+const active_color = "#007bff";
+const submitted_color = "#28a745";
+const completed_color = "#17a2b8";
+const reactivated_color = "#6610f2";
+const overdue_color = "#dc3545";
+const dropped_color = "#343a40";
 
-export interface activityData {
-    _id: string;
-    summary: string;
-    description: string;
-    dtStart: string;
-    due: string;
-    isMilestone: boolean;
-    usernameList: string[];
+const timeFormat = "en-US";
+
+// TODO sono copiati dalla risposta del server, vanno spostati in un file comune
+
+interface User {
+    id: string;
+    name: string;
+}
+interface ProjectResponse {
+	_id: string;
+	summary: string;
+	owner: User;
+	users: User[];
+	noteId: string;
+	phases: PhaseResponse[];
 }
 
-export interface user{
-    name: string;
-    id: string;
+interface PhaseResponse {
+	_id: string;
+	summary: string;
+	owner: { id: string; name: string };
+	dtStart: string;
+	due: string;
+	subPhases: SubPhaseResponse[];
+	activities: ProjectActivityResponse[];
 }
 
-export interface activity{
-    name: string;
-    id: string;
+interface SubPhaseResponse {
+	_id: string;
+	summary: string;
+	owner: User;
+	dtStart: string;
+	due: string;
+	activities: ProjectActivityResponse[];
+}
+
+interface Link {
+	_id: string;
+	summary: string;
+	date: string;
+}
+
+interface ProjectActivityResponse {
+	_id: string;
+	summary: string;
+	description: string;
+	status: string;
+	dtStart: string;
+	due: string;
+	isMilestone: boolean;
+	owner: User;
+	users: User[];
+	prevLinks: Link[];
+	prevMaxDue: string;
+	nextLinks: Link[];
+	nextMinStart: string;
+	alarms: Alarm[];
+	noteId?: string;
+	noteLink: string | null;
 }
 
 // Formatta la data ISO per l'input date (yyyy-mm-dd unico formato supportato per min-max)
-export function formatDate(date: string): string {
+function formatDate(date: string): string {
     return date.split('T')[0];
 }
-export function validateUsername(username: string): boolean {
+function validateUsername(username: string): boolean {
     const usernameRegex = /^[a-zA-Z0-9_-]{3,20}$/;
     return usernameRegex.test(username);
 }
 
-export function validateLenght(str: string, min: number, max: number): boolean {
+function validateLenght(str: string, min: number, max: number): boolean {
     return str.length >= min && str.length <= max;
 }
 
-export const statusConfig = {
+const statusConfig = {
 	WAITING: { color: waiting_color, text: "In attesa" },
 	ACTIVABLE: { color: activable_color, text: "Attivabile" },
 	ACTIVE: { color: active_color, text: "Attivo" },
@@ -119,7 +160,7 @@ function createStatusList(currentStatus: keyof typeof statusConfig, iconBlock: H
 }
 
 // Funzione per ottenere l'icona dello stato
-export function createStatusIcon(status: keyof typeof statusConfig): HTMLElement {
+function createStatusIcon(status: keyof typeof statusConfig): HTMLElement {
 
     const wrapper = document.createElement("div");
     wrapper.className = "dropdown d-inline-block";
@@ -156,3 +197,43 @@ export function createStatusIcon(status: keyof typeof statusConfig): HTMLElement
 
     return wrapper;
 }
+
+async function fetcher(method: "GET" | "POST" | "PATCH" | "DELETE", url: string, data?: any): Promise<any> {
+    const response = await fetch(url, {
+        method: method,
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: data ? JSON.stringify(data) : undefined,
+    });
+
+    if (response.ok) {
+        return response.json();
+    } else {
+        throw new Error(response.statusText);
+    }
+}
+
+export type {
+    User,
+    ProjectResponse,
+    PhaseResponse,
+    SubPhaseResponse,
+    ProjectActivityResponse,
+    Link,
+}
+
+export {
+    ROW_HEIGHT_PX,
+    CELL_WIDTH_PX,
+    ROW_HEIGHT,
+    CELL_WIDTH,
+    COL_NUM,
+    timeFormat,
+    formatDate,
+    validateUsername,
+    validateLenght,
+    statusConfig,
+    createStatusIcon,
+    fetcher
+};

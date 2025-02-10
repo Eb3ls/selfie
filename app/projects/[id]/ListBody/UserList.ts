@@ -17,6 +17,8 @@ class UsersList extends HTMLElement {
             for (const activity of phase.activities){
                 for(const user of activity.users){
                     if (!userData[user.name]) userData[user.name] = [];
+                    console.log("User:", user);
+                    console.log("Activity:", activity.summary);
                     userData[user.name].push(activity);
                 }
             }
@@ -35,6 +37,15 @@ class UsersList extends HTMLElement {
     }
 
     render() {
+
+        if(Object.keys(this.data).length === 0) {
+            const noActivities = document.createElement('div');
+            noActivities.className = 'alert alert-info text-center m-3';
+            noActivities.innerHTML = '<i class="bi bi-info-circle me-2"></i>Nessuna attività assegnata';
+            this.appendChild(noActivities);
+            return;
+        }
+
         for(const user in this.data) {
             const container = document.createElement("div");
             container.className = "mt-3";
