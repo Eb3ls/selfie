@@ -1,10 +1,10 @@
-import {user, validateUsername, validateLenght} from "../Utils";
+import {User, validateUsername, validateLenght} from "../Utils";
 
 class ProjectSettings extends HTMLElement {
     title: string;
     id: string;
-    users: user[];
-    modifiedUsers: user[];
+    users: User[];
+    modifiedUsers: User[];
 
     constructor() {
         super();
@@ -29,7 +29,7 @@ class ProjectSettings extends HTMLElement {
         `;
     }
 
-    public loadProjectData(title: string, id: string, users: any) {
+    public loadData(title: string, id: string, users: User[]) {
         if(!title || !users || !id) return;
         this.title = title;
         this.id = id;

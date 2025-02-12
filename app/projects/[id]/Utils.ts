@@ -89,6 +89,20 @@ function validateLenght(str: string, min: number, max: number): boolean {
     return str.length >= min && str.length <= max;
 }
 
+function showError(inputElement: HTMLElement, message: string) {
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'invalid-feedback d-block';
+    errorDiv.textContent = message;
+    inputElement.classList.add('is-invalid');
+    inputElement.parentElement?.appendChild(errorDiv);
+}
+
+function clearError(inputElement: HTMLElement) {
+    inputElement.classList.remove('is-invalid');
+    const errorDiv = inputElement.parentElement?.querySelector('.invalid-feedback');
+    if (errorDiv) errorDiv.remove();
+}
+
 const statusConfig = {
 	WAITING: { color: waiting_color, text: "In attesa" },
 	ACTIVABLE: { color: activable_color, text: "Attivabile" },
@@ -233,6 +247,8 @@ export {
     formatDate,
     validateUsername,
     validateLenght,
+    showError,
+    clearError,
     statusConfig,
     createStatusIcon,
     fetcher

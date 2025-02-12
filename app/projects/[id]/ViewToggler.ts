@@ -1,13 +1,12 @@
-import { Time } from "rrule/dist/esm/datetime";
 import { ROW_HEIGHT_PX } from "./Utils";
 import TimeList from "./ListBody/TimeList";
 import ProjectSettings from "./Forms/ProjectSettings";
 import AddForm from "./Forms/AddForm";
+import ActivityForm from "./Forms/ActivityForm";
 import SideGanttList from "./GanttBody/SideGanttList";
 import ProjectPhaseRow from "./GanttBody/ProjectPhaseRow";
 import TimeLine from "./GanttBody/TimeLine";
 import UsersList from "./ListBody/UserList";
-import ModifyActivity from "./Forms/ModifyActivity";
 
 class ViewToggler extends HTMLElement{
     viewType: "GANTT" | "LIST";
@@ -189,17 +188,16 @@ class ViewToggler extends HTMLElement{
         if (!this.data) return;
 
         const projectSettings = document.querySelector("project-settings") as ProjectSettings
-
         if (projectSettings) {
-            projectSettings.loadProjectData(this.data.summary, this.data._id, this.data.users);
+            projectSettings.loadData(this.data.summary, this.data._id, this.data.users);
         }
         const addFormComponent = document.querySelector("add-form-component") as AddForm;
         if (addFormComponent) {
             addFormComponent.loadProjectData(this.data._id, this.data.phases);
         }
-        const ModifyActivity = document.querySelector("modify-activity") as ModifyActivity;
-        if (ModifyActivity) {
-            ModifyActivity.loadData(this.createActivityList());
+        const activityForm = document.querySelector("activity-form") as ActivityForm;
+        if (activityForm) {
+            activityForm.loadData(this.createActivityList());
         }
         const sideGanttList = document.querySelector("side-gantt-list") as SideGanttList;
         if (sideGanttList) {

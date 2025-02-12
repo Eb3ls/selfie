@@ -1,11 +1,11 @@
-import { act } from "react";
-import { fetcher, formatDate, Link, PhaseResponse, ProjectActivityResponse, User, validateUsername } from "../Utils";
+import { clearError, fetcher, formatDate, PhaseResponse, ProjectActivityResponse, showError, User, validateUsername } from "../Utils";
 
 interface PartialLink {
     name: string;
     _id: string;
 }
-class ModifyActivity extends HTMLElement {
+
+class ActivityForm extends HTMLElement {
     phaseData: PhaseResponse;
     activityData: ProjectActivityResponse;
     activitiesList: ProjectActivityResponse[];
@@ -19,41 +19,6 @@ class ModifyActivity extends HTMLElement {
         this.activitiesList = [];
         this.modifiedUserlist = [];
         this.modifiedLinklist = [];
-    }
-
-    async handleSubmit(event: Event) {
-        event.preventDefault();
-        const form = event.target as HTMLFormElement;
-        const formData = new FormData(form);
-
-        const data: any = {
-            _id: this.activityData._id,
-            summary: formData.get('summary') as string,
-            description: formData.get('description') as string,
-            dtStart: new Date((formData.get('dtStart') as string) + 'T00:00:00.000Z').toISOString(),
-            due: new Date((formData.get('due') as string) + 'T23:59:59.999Z').toISOString(),
-            isMilestone: formData.get('isMilestone') === 'on',
-            usernameList: [] // TODO: Implementare gestione utenti
-        };
-
-        try {
-            const response = await fetch(`/api/project/activity/modify`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data)
-            });
-
-            if (response.ok) {
-                window.location.reload();
-            } else {
-                throw new Error('Failed to update activity');
-            }
-        } catch (error) {
-            console.error('Error updating activity:', error);
-            alert('Failed to update activity');
-        }
     }
 
     // Renderizziamo il componente senza contenuto
@@ -70,138 +35,12 @@ class ModifyActivity extends HTMLElement {
         this.id = 'ModifyActivityComponent';
     }
 
-    private showError(inputElement: HTMLElement, message: string) {
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'invalid-feedback d-block';
-        errorDiv.textContent = message;
-        inputElement.classList.add('is-invalid');
-        inputElement.parentElement?.appendChild(errorDiv);
-    }
-
-    private clearError(inputElement: HTMLElement) {
-        inputElement.classList.remove('is-invalid');
-        const errorDiv = inputElement.parentElement?.querySelector('.invalid-feedback');
-        if (errorDiv) errorDiv.remove();
-    }
-
-    private createFormTemplate() {
-        return `
-            <div class="modal-body">
-                <div class="mb-4">
-                    <label for="summary" class="form-label fw-bold">Title</label>
-                    <input type="text" class="form-control" id="summary" name="summary" 
-                           required value="${this.activityData.summary}">
-                </div>
-                
-                <div class="mb-4">
-                    <label for="description" class="form-label fw-bold">Description</label>
-                    <textarea class="form-control" id="description" name="description" 
-                          rows="3">${this.activityData.description || ''}</textarea>
-                </div>
-
-                <div class="mb-4 d-flex justify-content-between gap-3">
-                    <div class="flex-grow-1">
-                        <label for="dtStart" class="form-label fw-bold">Start Date</label>
-                        <input type="date" class="form-control" id="dtStart" name="dtStart" 
-                           required value="${formatDate(this.activityData.dtStart)}"
-                           min="${formatDate(this.phaseData.dtStart)}" 
-                           max="${formatDate(this.phaseData.due)}">
-                    </div>
-                    <div class="flex-grow-1">
-                        <label for="due" class="form-label fw-bold">Due Date</label>
-                        <input type="date" class="form-control" id="due" name="due" 
-                           required value="${formatDate(this.activityData.due)}"
-                           min="${formatDate(this.phaseData.dtStart)}" 
-                           max="${formatDate(this.phaseData.due)}">
-                    </div>
-                </div>
-
-                <div class="mb-4 form-check">
-                    <input type="checkbox" class="form-check-input" id="isMilestone" 
-                           name="isMilestone" ${this.activityData.isMilestone ? 'checked' : ''}>
-                    <label class="form-check-label" for="isMilestone">Is Milestone</label>
-                </div>
-
-                <div class="mb-4">
-                    <label class="form-label fw-bold">Assigned Users</label>
-                    <div class="add-user-form">
-                        <div class="input-group">
-                            <input type="text" class="form-control" id="newUser" 
-                                   placeholder="Add new user">
-                            <button class="btn btn-primary" type="button" id="addUserBtn">
-                                <i class="bi bi-plus-lg"></i> Add
-                            </button>
-                        </div>
-                    </div>
-                    <div class="user-list mt-2" id="userList">
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="submit" class="btn btn-primary">Save Changes</button>
-            </div>
-        `;
-    }
-
-    // Aggiunge un utente alla lista
-    private addUser(item: User) {
-        const list = this.querySelector('#userList');
-        if (!list) return;
-
-        const itemBlock = document.createElement('div');
-        itemBlock.className = 'user-item d-flex justify-content-between align-items-center bg-light';
-        itemBlock.setAttribute('data-user', item.id);
-
-        itemBlock.innerHTML = `
-        <span class="user-name">
-            <i class="bi bi-person-fill me-2"></i>
-            ${item.name}
-        </span>
-        <button type="button" class="btn btn-danger btn-sm">
-            <i class="bi bi-trash"></i>
-        </button>
-        `;
-
-        itemBlock.querySelector('button')?.addEventListener('click', () => {
-        this.modifiedUserlist = this.modifiedUserlist.filter(user => user.id !== item.id);
-        itemBlock.remove();
-        });
-
-        list.appendChild(itemBlock);
-    }
-
-    // Funzione per l'aggiunta e l'eliminazione degli utenti
-    private setupItemManagement() {
-        const btn = this.querySelector('#addUserBtn');
-        const newUser = this.querySelector('#newUser') as HTMLInputElement;
-
-        for (const user of this.modifiedUserlist) {
-            this.addUser(user);
-        }
-        
-        // User management logic
-        btn?.addEventListener('click', () => {
-            const value = newUser.value;
-            this.clearError(newUser);
-
-            if (!validateUsername(value)) {
-                this.showError(newUser, 'Invalid username (3-20 characters, only letters, numbers, - and _)');
-                return;
-            }
-
-            const newItem = { name: value, id: value };
-            this.modifiedUserlist.push(newItem);
-            this.addUser(newItem);
-            newUser.value = '';
-        });
-    }
-
     // Funzione chiamata per fornire i dati generali, chimata da viewToggler
     public loadData(activitiesList: ProjectActivityResponse[]) {
         this.activitiesList = [...activitiesList];
     }
 
-    // Funzione da chiamare per popolare il form con i dati
+    // Funzione da fornire i dati dell'activity specifica con i dati
     public updateData(activityData: ProjectActivityResponse, phaseData: PhaseResponse) {
         this.activityData = activityData;
         this.phaseData = phaseData;
@@ -271,8 +110,8 @@ class ModifyActivity extends HTMLElement {
         const modalContent = this.querySelector('.modal-content');
         if (!modalContent) return;
 
+        modalContent.innerHTML = "";
         if (mode === "DELETE") {
-            modalContent.innerHTML = "";
             const body = new ActivityDeleteForm();
             body.initialize(this.activityData);
             modalContent.appendChild(body);
@@ -282,35 +121,14 @@ class ModifyActivity extends HTMLElement {
 
 
         } else if (mode === "EDIT") {
-            const header = `
-                <i class="bi bi-pencil-fill"></i>
-                <span>Modify Activity</span>
-            `;
-            modalContent.innerHTML = `
-                <div class="modal-header d-flex align-items-center">
-                    <h5 class="modal-title d-flex align-items-center gap-2">
-                        ${header}
-                    </h5>
-                    <div class="ms-auto">
-                        <button type="button" class="btn btn-sm btn-warning me-2" id="toggleEditBtn">
-                            <i class="bi bi-x"></i>
-                            Cancel
-                        </button>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                </div>
-                <form id="modifyActivityForm">${this.createFormTemplate()}</form>
-            `;
-
-            const form = modalContent.querySelector('#modifyActivityForm');
-            form?.addEventListener('submit', (e) => this.handleSubmit(e));
-            this.setupItemManagement();
+            const body = new ActivityModifyForm();
+            body.initialize(this.activityData, this.phaseData);
+            modalContent.appendChild(body);
 
             const toggleBtn = modalContent.querySelector('#toggleEditBtn');
             toggleBtn?.addEventListener('click', () => this.updateModalContent("VIEW"));
 
         } else if (mode === "LINK") {
-            modalContent.innerHTML = "";
             const body = new ActivityLinkForm();
             body.initialize(this.activityData, this.activitiesList, this.modifiedLinklist);
             modalContent.appendChild(body);
@@ -318,15 +136,11 @@ class ModifyActivity extends HTMLElement {
             const toggleBtn = modalContent.querySelector('#toggleEditBtn');
             toggleBtn?.addEventListener('click', () => this.updateModalContent("VIEW"));
         } else {
-            const header = `
-                <i class="bi bi-info-circle"></i>
-                <span>Activity</span>
-            `;
-            // Modalitá view
             modalContent.innerHTML = `
                 <div class="modal-header d-flex align-items-center">
                     <h5 class="modal-title d-flex align-items-center gap-2">
-                        ${header}
+                        <i class="bi bi-info-circle"></i>
+                        <span>Activity</span>
                     </h5>
                     <div class="ms-auto">
                         <button type="button" class="btn btn-sm btn-danger me-2" id="deleteBtn">
@@ -359,9 +173,9 @@ class ModifyActivity extends HTMLElement {
     }
 }
 
-customElements.define('modify-activity', ModifyActivity);
+customElements.define('activity-form', ActivityForm);
 
-export default ModifyActivity;
+export default ActivityForm;
 
 class ActivityLinkForm extends HTMLElement{
 
@@ -539,8 +353,6 @@ class ActivityLinkForm extends HTMLElement{
             </div>
             <form id="modifyLinkForm">${this.createForm()}</form>
         `;
-
-        this.setupEventListeners();
     }
 
     public initialize(
@@ -552,6 +364,7 @@ class ActivityLinkForm extends HTMLElement{
         this.activitiesList = activitiesList;
         this.modifiedLinklist = modifiedLinklist;
         this.render();
+        this.setupEventListeners();
     }
 }
 
@@ -585,6 +398,7 @@ class ActivityDeleteForm extends HTMLElement{
 
 
     }
+
     private setUpEventListeners(){
         const confirmBtn = this.querySelector('#confirmDeleteBtn');
 
@@ -624,14 +438,204 @@ class ActivityDeleteForm extends HTMLElement{
                 <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete Activity</button>
             </div>
         `;
-        this.setUpEventListeners();
     }
 
     public initialize(activityData: ProjectActivityResponse){
         this.activityData = activityData;
         this.render();
+        this.setUpEventListeners();
     }
 }
 
 customElements.define('activity-delete-form', ActivityDeleteForm);
 export {ActivityDeleteForm};
+
+class ActivityModifyForm extends HTMLElement {
+    activityData: ProjectActivityResponse;
+    phaseData: PhaseResponse;
+    modifiedUserlist: User[];
+
+    constructor() {
+        super();
+        this.activityData = {} as ProjectActivityResponse;
+        this.phaseData = {} as PhaseResponse;
+        this.modifiedUserlist = [];
+    }
+
+    private async handleSubmit(event: Event) {
+        event.preventDefault();
+        const form = event.target as HTMLFormElement;
+        const formData = new FormData(form);
+
+        const data: any = {
+            _id: this.activityData._id,
+            summary: formData.get('summary') as string,
+            description: formData.get('description') as string,
+            dtStart: new Date((formData.get('dtStart') as string) + 'T00:00:00.000Z').toISOString(),
+            due: new Date((formData.get('due') as string) + 'T23:59:59.999Z').toISOString(),
+            isMilestone: formData.get('isMilestone') === 'on',
+            usernameList: [] // TODO: Implementare gestione utenti
+        };
+
+        const url = `/api/project/activity/modify`;
+        const method = 'PATCH';
+
+        try {
+            const response = await fetcher(method, url, data);
+            if(!response.ok) throw new Error('Failed to modify activity');
+            window.location.reload();
+        } catch (error) {
+            console.error('Error modifying activity:', error);
+            alert('Failed to modify activity'
+
+            )
+            ;
+        }
+
+    }
+
+    private createForm() {
+        return `
+            <div class="modal-body">
+                <div class="mb-4">
+                    <label for="summary" class="form-label fw-bold">Title</label>
+                    <input type="text" class="form-control" id="summary" name="summary" 
+                           required value="${this.activityData.summary}">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="description" class="form-label fw-bold">Description</label>
+                    <textarea class="form-control" id="description" name="description" 
+                          rows="3">${this.activityData.description || ''}</textarea>
+                </div>
+
+                <div class="mb-4 d-flex justify-content-between gap-3">
+                    <div class="flex-grow-1">
+                        <label for="dtStart" class="form-label fw-bold">Start Date</label>
+                        <input type="date" class="form-control" id="dtStart" name="dtStart" 
+                           required value="${formatDate(this.activityData.dtStart)}"
+                           min="${formatDate(this.phaseData.dtStart)}" 
+                           max="${formatDate(this.phaseData.due)}">
+                    </div>
+                    <div class="flex-grow-1">
+                        <label for="due" class="form-label fw-bold">Due Date</label>
+                        <input type="date" class="form-control" id="due" name="due" 
+                           required value="${formatDate(this.activityData.due)}"
+                           min="${formatDate(this.phaseData.dtStart)}" 
+                           max="${formatDate(this.phaseData.due)}">
+                    </div>
+                </div>
+
+                <div class="mb-4 form-check">
+                    <input type="checkbox" class="form-check-input" id="isMilestone" 
+                           name="isMilestone" ${this.activityData.isMilestone ? 'checked' : ''}>
+                    <label class="form-check-label" for="isMilestone">Is Milestone</label>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Assigned Users</label>
+                    <div class="add-user-form">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="newUser" 
+                                   placeholder="Add new user">
+                            <button class="btn btn-primary" type="button" id="addUserBtn">
+                                <i class="bi bi-plus-lg"></i> Add
+                            </button>
+                        </div>
+                    </div>
+                    <div class="user-list mt-2" id="userList">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+        `;
+    }
+
+    // Aggiunge un utente alla lista
+    private addUser(item: User) {
+        const list = this.querySelector('#userList');
+        if (!list) return;
+
+        const itemBlock = document.createElement('div');
+        itemBlock.className = 'user-item d-flex justify-content-between align-items-center bg-light';
+        itemBlock.setAttribute('data-user', item.id);
+
+        itemBlock.innerHTML = `
+        <span class="user-name">
+            <i class="bi bi-person-fill me-2"></i>
+            ${item.name}
+        </span>
+        <button type="button" class="btn btn-danger btn-sm">
+            <i class="bi bi-trash"></i>
+        </button>
+        `;
+
+        itemBlock.querySelector('button')?.addEventListener('click', () => {
+        this.modifiedUserlist = this.modifiedUserlist.filter(user => user.id !== item.id);
+        itemBlock.remove();
+        });
+
+        list.appendChild(itemBlock);
+    }
+
+    // Funzione per l'aggiunta e l'eliminazione degli utenti
+    private setupItemManagement() {
+        const btn = this.querySelector('#addUserBtn');
+        const newUser = this.querySelector('#newUser') as HTMLInputElement;
+
+        for (const user of this.modifiedUserlist) {
+            this.addUser(user);
+        }
+        
+        // User management logic
+        btn?.addEventListener('click', () => {
+            const value = newUser.value;
+           clearError(newUser);
+
+            if (!validateUsername(value)) {
+                showError(newUser, 'Invalid username (3-20 characters, only letters, numbers, - and _)');
+                return;
+            }
+
+            const newItem = { name: value, id: value };
+            this.modifiedUserlist.push(newItem);
+            this.addUser(newItem);
+            newUser.value = '';
+        });
+
+        const form = this.querySelector('#modifyActivityForm');
+        form?.addEventListener('submit', (e) => this.handleSubmit(e));
+    }
+
+    render() {
+        this.innerHTML = `
+            <div class="modal-header d-flex align-items-center">
+                <h5 class="modal-title d-flex align-items-center gap-2">
+                    <i class="bi bi-pencil-fill"></i>
+                    <span>Modify Activity</span>
+                </h5>
+                <div class="ms-auto">
+                    <button type="button" class="btn btn-sm btn-warning me-2" id="toggleEditBtn">
+                        <i class="bi bi-x"></i>
+                        Cancel
+                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+            </div>
+            <form id="modifyActivityForm">${this.createForm()}</form>
+        `;
+    }
+
+    public initialize(activityData: ProjectActivityResponse, phaseData: PhaseResponse) {
+        this.activityData = activityData;
+        this.phaseData = phaseData;
+        this.render();
+        this.setupItemManagement();
+    }
+
+}
+
+customElements.define('activity-modify-form', ActivityModifyForm);
+export {ActivityModifyForm};

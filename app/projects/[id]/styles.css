@@ -150,3 +150,14 @@ html {
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
 }
+
+/* List styles */
+
+.list-item {
+    background-color: #f8f9fa;
+}
+
+.list-item:hover {
+    transform: translateY(-1px);
+    background-color: #eff1f3;
+}

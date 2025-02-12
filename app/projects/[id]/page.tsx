@@ -9,8 +9,8 @@ declare global {
 			"add-form-component": {};
 			"project-settings": {};
 			"view-toggler": {};
-			"modify-activity": {};
-			"modify-phase": {};
+			"activity-form": {};
+			"phase-form": {};
 			"onload-functions": {};
 		}
 	}
@@ -24,8 +24,8 @@ export default function Projects() {
 			import('./ViewToggler');
 			import('./Forms/AddForm');
 			import('./Forms/ProjectSettings');
-			import('./Forms/ModifyActivity');
-			import('./Forms/ModifyPhase');
+			import('./Forms/ActivityForm');
+			import('./Forms/PhaseForm');
 			import('./GanttBody/SideGanttList');
 			import('./GanttBody/ProjectPhaseRow');
 			import('./GanttBody/TimeLine');
@@ -57,8 +57,8 @@ export default function Projects() {
 				</div>
 				<view-toggler></view-toggler>
 			</div >
-			<modify-activity />
-			<modify-phase />
+			<activity-form />
+			<phase-form />
 			<onload-functions />
 		</>
 	);

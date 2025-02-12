@@ -1,6 +1,6 @@
 import { formatDate } from "../Utils";
 
-class ModifyPhase extends HTMLElement {
+class PhaseForm extends HTMLElement {
     parentData: any;
     phaseData: any;
     minInner: string;
@@ -351,6 +351,6 @@ class ModifyPhase extends HTMLElement {
     }
 }
 
-customElements.define('modify-phase', ModifyPhase);
+customElements.define('phase-form', PhaseForm);
 
-export default ModifyPhase;
+export default PhaseForm;

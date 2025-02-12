@@ -1,5 +1,5 @@
-import ModifyActivity from "../Forms/ModifyActivity";
-import ModifyPhase from "../Forms/ModifyPhase";
+import ModifyActivity from "../Forms/ActivityForm";
+import ModifyPhase from "../Forms/PhaseForm";
 import {ROW_HEIGHT_PX, formatDate, createStatusIcon} from "../Utils";
 
 class SideGanttList extends HTMLElement {

@@ -1,5 +1,5 @@
-import ModifyActivity from "../Forms/ModifyActivity";
-import ModifyPhase from "../Forms/ModifyPhase";
+import ModifyActivity from "../Forms/ActivityForm";
+import ModifyPhase from "../Forms/PhaseForm";
 import { createStatusIcon, formatDate } from "../Utils";
 
 class TimeList extends HTMLElement{
@@ -65,8 +65,7 @@ class TimeList extends HTMLElement{
 
     createItem(item: any){
         const block = document.createElement("div");
-        block.className = "row p-2 border rounded mt-3";
-        block.style.backgroundColor = "#f8f9fa";
+        block.className = "row rounded p-2 mt-3 border-bottom border-secondary list-item";
         block.addEventListener("click", () => {
             this.openModify(item, item.phase);
         });
@@ -106,36 +105,38 @@ class TimeList extends HTMLElement{
 
     render(){
         this.innerHTML = '';
+        const innerBlock = document.createElement("div");
+        innerBlock.className = "container-fluid mt-3 px-4";
+        this.appendChild(innerBlock);
+
         const header = document.createElement("div");
-        header.className = "row p-2 border rounded";
-        header.style.backgroundColor = "#e9ecef";
+        header.className = "row p-2 border-bottom border-secondary rounded";
+        innerBlock.appendChild(header);
 
         const summaryHeader = document.createElement("div");
         summaryHeader.className = "col-3 fw-bold";
-        summaryHeader.textContent = "Summary";
+        summaryHeader.textContent = "Titolo";
+        header.appendChild(summaryHeader);
 
         const startHeader = document.createElement("div");
         startHeader.className = "col-3 fw-bold";
         startHeader.textContent = "Start Date";
+        header.appendChild(startHeader);
 
         const dueHeader = document.createElement("div");
         dueHeader.className = "col-3 fw-bold";
         dueHeader.textContent = "Due Date";
+        header.appendChild(dueHeader);
 
         const statusHeader = document.createElement("div");
         statusHeader.className = "col-3 fw-bold";
         statusHeader.textContent = "Status";
-
-        header.appendChild(summaryHeader);
-        header.appendChild(startHeader);
-        header.appendChild(dueHeader);
         header.appendChild(statusHeader);
 
-        this.appendChild(header);
 
         for (const num in this.sortedData){
             const activity = this.sortedData[num]
-            this.appendChild(this.createItem(activity));
+            innerBlock.appendChild(this.createItem(activity));
         }
     }
 
