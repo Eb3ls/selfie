@@ -1,4 +1,4 @@
-import { formatDate } from "../Utils";
+import { fetcher, formatDate } from "../Utils";
 
 class AddForm extends HTMLElement {
 	projectID: string;
@@ -17,29 +17,6 @@ class AddForm extends HTMLElement {
 		this.render();
 	}
 
-	async fetcher(url: string, body: any, type: "phase" | "subphase" | "activity") {
-		try {
-			const result = await fetch(url, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json"
-				},
-				body: JSON.stringify(body)
-			});
-
-			if (result.ok) {
-				window.location.reload();
-			} else {
-				console.error(result);
-				throw new Error("Failed to add " + type);
-			}
-		} 
-		catch (error) {
-			console.error(error);
-			alert("Failed to add " + type);
-		}
-	}
-
 	// Funzione per gestire la submit del form per l'aggiunta di una fase
 	async handlePhaseSubmit(event: Event, ref: HTMLFormElement[]) {
 		event.preventDefault();
@@ -47,8 +24,8 @@ class AddForm extends HTMLElement {
 		const formData = new FormData(form);
 		const data = Object.fromEntries(formData.entries());
 
+		const method = "POST";
 		const url = "/api/project/phase/add";
-
 		const body = {
 			summary: data.Title,
 			projectId: this.projectID,
@@ -57,8 +34,12 @@ class AddForm extends HTMLElement {
 			due: new Date(data.Due + 'T23:59:59.999Z').toISOString()
 		}
 
-		await this.fetcher(url, body, "phase");
-		
+		try {
+			await fetcher(method, url, body);
+			window.location.reload();
+		} catch (error) {
+			console.error(error);
+		}
 	}
 
 	// Funzione per gestire la submit del form per l'aggiunta di una sottofase
@@ -68,8 +49,8 @@ class AddForm extends HTMLElement {
 		const formData = new FormData(form);
 		const data = Object.fromEntries(formData.entries());
 
+		const method = "POST";
 		const url = "/api/project/phase/add";
-
 		const body = {
 			summary: data.Title,
 			projectId: this.projectID,
@@ -78,7 +59,12 @@ class AddForm extends HTMLElement {
 			due: new Date(data.Due + 'T23:59:59.999Z').toISOString()
 		}
 
-		await this.fetcher(url, body, "subphase");
+		try {
+			await fetcher(method, url, body);
+			window.location.reload();
+		} catch (error) {
+			console.error(error);
+		}
 	}
 
 	// Funzione per gestire la submit del form per le attività
@@ -88,8 +74,8 @@ class AddForm extends HTMLElement {
 		const formData = new FormData(form);
 		const data = Object.fromEntries(formData.entries());
 
+		const method = "POST";
 		const url = "/api/project/activity/add";
-
 		const body = {
 			summary: data.Title,
 			description: data.Description,
@@ -100,7 +86,12 @@ class AddForm extends HTMLElement {
 			usernameList: ["prova"]
 		}
 
-		await this.fetcher(url, body, "activity");
+		try {
+			await fetcher(method, url, body);
+			window.location.reload();
+		} catch (error) {
+			console.error(error);
+		}
 	}
 
 	// Controlliamo se la data é dentro i limiti della fase/sottofase

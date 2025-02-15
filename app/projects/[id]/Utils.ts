@@ -81,12 +81,14 @@ function formatDate(date: string): string {
     return date.split('T')[0];
 }
 function validateUsername(username: string): boolean {
+    if (!username) return false;
     const usernameRegex = /^[a-zA-Z0-9_-]{3,20}$/;
     return usernameRegex.test(username);
 }
 
-function validateLenght(str: string, min: number, max: number): boolean {
-    return str.length >= min && str.length <= max;
+function validateLength(item: string, min: number, max: number): boolean {
+    if (!item) return false;
+    return item.length >= min && item.length <= max;
 }
 
 function showError(inputElement: HTMLElement, message: string) {
@@ -246,7 +248,7 @@ export {
     timeFormat,
     formatDate,
     validateUsername,
-    validateLenght,
+    validateLength,
     showError,
     clearError,
     statusConfig,

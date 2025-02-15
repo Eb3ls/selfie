@@ -118,8 +118,6 @@ class ActivityForm extends HTMLElement {
 
             const toggleBtn = modalContent.querySelector('#toggleEditBtn');
             toggleBtn?.addEventListener('click', () => this.updateModalContent("VIEW"));
-
-
         } else if (mode === "EDIT") {
             const body = new ActivityModifyForm();
             body.initialize(this.activityData, this.phaseData);
@@ -481,15 +479,11 @@ class ActivityModifyForm extends HTMLElement {
         const method = 'PATCH';
 
         try {
-            const response = await fetcher(method, url, data);
-            if(!response.ok) throw new Error('Failed to modify activity');
+            await fetcher(method, url, data);
             window.location.reload();
         } catch (error) {
             console.error('Error modifying activity:', error);
-            alert('Failed to modify activity'
-
-            )
-            ;
+            alert('Failed to modify activity');
         }
 
     }

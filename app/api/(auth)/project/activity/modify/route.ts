@@ -20,7 +20,6 @@ import {
 } from "@/utils/db/db";
 import { Collection } from "mongodb";
 import { NextRequest } from "next/server";
-import { use } from "vue/types/umd";
 
 const requestTemplate = {
 	_id: "",
