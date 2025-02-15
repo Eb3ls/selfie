@@ -7,9 +7,12 @@ import {
 import {
 	PHASE_COLLECTION,
 	PROJECT_ACTIVITY_COLLECTION,
+	PROJECT_COLLECTION,
 	Phase,
+	Project,
 	ProjectActivity,
 	StringPhase,
+	StringProject,
 	StringProjectActivity,
 	findCollectionWrapper,
 	getCollection,
@@ -17,6 +20,7 @@ import {
 } from "@/utils/db/db";
 import { Collection } from "mongodb";
 import { NextRequest } from "next/server";
+import { use } from "vue/types/umd";
 
 const requestTemplate = {
 	_id: "",
@@ -93,12 +97,20 @@ export const PATCH = async (request: NextRequest) => {
 		);
 	}
 
+	// Prendiamo il progetto
+	const projectOut = await findCollectionWrapper<Project>(
+		{ _id: projectActivity[0].projectId },
+		await getCollection<Project>(PROJECT_COLLECTION)
+	);
+
+	if (projectOut.status !== 200) {
+		return projectOut;
+	}
+
+	const project: StringProject = (await projectOut.json())[0];
+
 	// Controlliamo che gli username passati siano un sottoinsieme di quelli del progetto
-	if (
-		!userIdList.every((userId) =>
-			projectActivity[0].userIdList.includes(userId)
-		)
-	) {
+	if (!userIdList.every((userId) => project.userIdList.includes(userId))) {
 		return generateMessageResponse(
 			"UsernameList is not a subset of the project users",
 			400
