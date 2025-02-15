@@ -464,7 +464,12 @@ export default function Home() {
 																		.modificationDate
 																)
 															: formatDate(
-																	user.pomodoro.modificationDate.toISOString()
+																	user
+																		.pomodoro
+																		.modificationDate !==
+																		undefined
+																		? user.pomodoro.modificationDate.toISOString()
+																		: ""
 																),
 													cycles: user.pomodoro
 														.cycles,

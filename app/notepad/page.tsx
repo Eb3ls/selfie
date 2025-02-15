@@ -1,17 +1,15 @@
 "use client";
 
 import { GlobalSideBar } from "@/app/components/GlobalSideBar";
+import { useUser } from "@/app/components/UserContext";
 import { StringNote } from "@/utils/db/db";
 import React, { useEffect, useState } from "react";
 import { Button, Card, Col, Container, Row } from "react-bootstrap";
 import { FaLock, FaTrash, FaUser, FaUserShield } from "react-icons/fa";
 import { MdPublic } from "react-icons/md";
 import useSWR from "swr";
+import styles from "./Notepad.module.css";
 import { SearchBar } from "./SearchBar";
-
-// Variabile provvisoria per simulare l'utente corrente
-// TODO: utente da cookie
-const currentUser = "provvisoryUserId";
 
 async function fetcher(url: string) {
 	const response = await fetch(url);
@@ -22,6 +20,8 @@ async function fetcher(url: string) {
 }
 
 export default function Notepad() {
+	const { user } = useUser();
+
 	const [notes, setNotes] = useState<StringNote[]>([]);
 	const [oldNotes, setOldNotes] = useState<StringNote[]>([]);
 
@@ -185,7 +185,7 @@ export default function Notepad() {
 
 	// Funzione per verificare se l'utente è il proprietario della nota
 	function isOwner(ownerId: string) {
-		return ownerId === currentUser;
+		return ownerId === user?._id;
 	}
 
 	function handleNoteClick(note: any) {
@@ -196,83 +196,123 @@ export default function Notepad() {
 	return (
 		<>
 			<GlobalSideBar />
-			<Container fluid="sm" className="mt-5 text-center px-5">
-				<h1 className="mb-5">Notepad</h1>
-				<SearchBar
-					handleFilters={handleFilters}
-					handleSort={handleSort}
-					handleSearch={handleSearch}
-					handleAdd={handleAdd}
-				/>
-				<Row className="mt-5 gx-5 text-center">
-					{error && <div>Failed to load</div>}
-					{!data && <div>Loading...</div>}
-					{data && notes.length === 0 ? (
-						<p>Non ci sono note</p>
-					) : (
-						notes.map((note: StringNote) => (
-							<Col
-								key={note._id}
-								className="col-12 col-md-6 col-lg-4 mb-3"
-							>
-								<Card>
-									<Card.Body>
-										{/* Icone access e owner in alto a sinistra */}
-										<div className="d-flex justify-content-start align-items-center p-2 rounded">
-											{getAccessIcon(note.access)}
+			<Container className={styles.container}>
+				<div className={styles.header}>
+					<h1 className={styles.title}>Notepad</h1>
+					<SearchBar
+						handleFilters={handleFilters}
+						handleSort={handleSort}
+						handleSearch={handleSearch}
+						handleAdd={handleAdd}
+					/>
+				</div>
+
+				{error && <div>Failed to load</div>}
+				{!data ? (
+					<div className={styles.loadingState}>Loading notes...</div>
+				) : (
+					<div className={styles.notesGrid}>
+						{notes.length === 0 ? (
+							<div className={styles.emptyState}>
+								<p>
+									No notes found. Start by creating a new one!
+								</p>
+							</div>
+						) : (
+							notes.map((note: StringNote) => (
+								<Card
+									key={note._id}
+									className={styles.noteCard}
+								>
+									<div className={styles.cardHeader}>
+										<div className={styles.iconsContainer}>
+											<span
+												className={`${styles.icon} ${
+													note.access === "PRIVATE"
+														? styles.privateIcon
+														: note.access ===
+															  "PUBLIC"
+															? styles.publicIcon
+															: styles.invitedIcon
+												}`}
+											>
+												{getAccessIcon(note.access)}
+											</span>
 											{isOwner(note.ownerId) && (
 												<FaUserShield
-													className="ms-2"
+													className={`${styles.icon} ${styles.ownerIcon}`}
 													title="Owner"
 												/>
 											)}
-											<Button
-												variant="danger"
-												className="ms-2 p-0"
-												onClick={() =>
-													handleDelete(note._id!)
-												}
-												style={{
-													border: "none",
-													backgroundColor:
-														"transparent",
-													color: "inherit" // Assicurati che il colore dell'icona sia visibile
-												}}
-											>
-												<FaTrash title="Delete" />
-											</Button>
 										</div>
-										<hr />
-										<div
+										<Button
+											variant="link"
+											className={styles.deleteBtn}
 											onClick={() =>
-												handleNoteClick(note)
+												handleDelete(note._id!)
 											}
-											style={{ cursor: "pointer" }}
 										>
-											<div className="d-flex justify-content-between align-items-center">
-												<Card.Title>
-													{note.summary}
-												</Card.Title>
-											</div>
-											<div className="d-flex justify-content-between align-items-center">
-												<Card.Subtitle className="mb-2 text-muted">
-													{note.categories}
-												</Card.Subtitle>
-											</div>
+											<FaTrash />
+										</Button>
+									</div>
+
+									<Card.Body
+										className={styles.cardBody}
+										onClick={() => handleNoteClick(note)}
+									>
+										<div className={styles.noteHeader}>
+											<Card.Title
+												className={styles.noteTitle}
+											>
+												{note.summary ||
+													"Untitled Note"}
+											</Card.Title>
 										</div>
-										<hr />
-										<Card.Text>
-											{note.text.length < 200
-												? note.text
-												: note.text.substring(0, 200) +
-												"..."}
-										</Card.Text>
+
+										{note.categories && (
+											<div
+												className={styles.noteCategory}
+											>
+												{note.categories}
+											</div>
+										)}
+
+										<div className={styles.noteContent}>
+											{note.text ? (
+												<Card.Text
+													className={styles.noteText}
+												>
+													{note.text.length < 200
+														? note.text
+														: note.text.substring(
+																0,
+																200
+															) + "..."}
+												</Card.Text>
+											) : (
+												<div
+													className={styles.emptyText}
+												>
+													<span
+														className={
+															styles.emptyIcon
+														}
+													>
+														✏️
+													</span>
+													<p>
+														This note is empty.
+														Click to start writing!
+													</p>
+												</div>
+											)}
+										</div>
 									</Card.Body>
 								</Card>
-							</Col>
-						))
-					)}
-				</Row>
+							))
+						)}
+					</div>
+				)}
 			</Container>
 		</>
 	);

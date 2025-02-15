@@ -1,10 +1,14 @@
+// SearchBar.tsx
 "use client";
 
 import { Button, Form, InputGroup } from "react-bootstrap";
 import { FaFilter, FaPlus, FaSort } from "react-icons/fa";
 import { AddNoteModal } from "./AddNoteModal";
 import { FilterModal } from "./FilterModal";
+import styles from "./Notepad.module.css";
 import { SortModal } from "./SortModal";
+
+// SearchBar.tsx
 
 export function SearchBar({
 	handleFilters,
@@ -13,32 +17,40 @@ export function SearchBar({
 	handleAdd
 }: any) {
 	return (
-		<InputGroup className="mb-3">
-			<Form.Control
-				type="text"
-				placeholder="Search..."
-				aria-label="Search"
-				name="searchBar"
-				onChange={handleSearch}
-			/>
+		<div className={styles.searchContainer}>
+			<div className={styles.searchGroup}>
+				<Form.Control
+					className={styles.searchInput}
+					type="text"
+					placeholder="Search notes..."
+					aria-label="Search"
+					name="searchBar"
+					onChange={handleSearch}
+				/>
 
-			<FilterModal handleFilters={handleFilters}>
-				<Button variant="secondary">
-					<FaFilter /> {/* Icona del filtro */}
-				</Button>
-			</FilterModal>
+				<div className={styles.actionsGroup}>
+					<FilterModal handleFilters={handleFilters}>
+						<Button variant="outline" className={styles.actionBtn}>
+							<FaFilter className={styles.btnIcon} />
+							<span className={styles.btnText}>Filters</span>
+						</Button>
+					</FilterModal>
 
-			<SortModal handleSort={handleSort}>
-				<Button variant="secondary">
-					<FaSort /> {/* Icona del sort */}
-				</Button>
-			</SortModal>
+					<SortModal handleSort={handleSort}>
+						<Button variant="outline" className={styles.actionBtn}>
+							<FaSort className={styles.btnIcon} />
+							<span className={styles.btnText}>Sort</span>
+						</Button>
+					</SortModal>
 
-			<AddNoteModal handleAdd={handleAdd}>
-				<Button variant="primary">
-					<FaPlus /> {/* Icona del '+' */}
-				</Button>
-			</AddNoteModal>
-		</InputGroup>
+					<AddNoteModal handleAdd={handleAdd}>
+						<Button variant="primary" className={styles.addBtn}>
+							<FaPlus className={styles.btnIcon} />
+							<span className={styles.btnText}>New Note</span>
+						</Button>
+					</AddNoteModal>
+				</div>
+			</div>
+		</div>
 	);
 }

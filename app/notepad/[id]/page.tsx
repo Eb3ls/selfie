@@ -10,8 +10,8 @@ import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import { FaEdit } from "react-icons/fa";
 import useSWR from "swr";
 import { EditNoteModal } from "./EditNoteModal";
+import styles from "./Note.module.css";
 
-// Funzione fetcher per SWR
 async function fetcher(url: string) {
 	const response = await fetch(url);
 	if (!response.ok) {
@@ -20,9 +20,30 @@ async function fetcher(url: string) {
 	return response.json();
 }
 
-export default function Note() {
-	const { user } = useUser();
+const useWindowSize = () => {
+	const [windowSize, setWindowSize] = useState({
+		width: typeof window !== "undefined" ? window.innerWidth : 0
+	});
 
+	useEffect(() => {
+		const handleResize = () => {
+			setWindowSize({
+				width: window.innerWidth
+			});
+		};
+
+		window.addEventListener("resize", handleResize);
+		return () => window.removeEventListener("resize", handleResize);
+	}, []);
+
+	return windowSize;
+};
+
+export default function Note() {
+	const { width } = useWindowSize();
+	const isMobile = width <= 768;
+
+	const { user } = useUser();
 	const params = useParams();
 	const id = params.id;
 
@@ -32,7 +53,7 @@ export default function Note() {
 		mutate
 	} = useSWR(() => (id ? `/api/notepad/getNote?id=${id}` : null), fetcher);
 
-	const [noteText, setNoteText] = useState(""); // Inizializza con stringa vuota
+	const [noteText, setNoteText] = useState("");
 	const [showMarkdown, setShowMarkdown] = useState(false);
 
 	useEffect(() => {
@@ -58,7 +79,7 @@ export default function Note() {
 				})
 			});
 			if (response.ok) {
-				await mutate(); // Refetch dei dati per aggiornare la visualizzazione
+				await mutate();
 				alert("Nota salvata con successo!");
 			} else {
 				alert("Errore durante il salvataggio della nota.");
@@ -68,7 +89,6 @@ export default function Note() {
 		}
 	};
 
-	// Funzione per modificare i permessi della nota
 	const handleEdit = async (body: {
 		_id: string;
 		summary: string;
@@ -85,7 +105,7 @@ export default function Note() {
 				body: JSON.stringify(body)
 			});
 			if (response.ok) {
-				await mutate(); // Refetch dei dati per aggiornare la visualizzazione
+				await mutate();
 				alert("Permessi aggiornati con successo!");
 			} else {
 				alert("Errore durante l'aggiornamento dei permessi.");
@@ -95,127 +115,92 @@ export default function Note() {
 		}
 	};
 
-	// Se c'è un errore durante il fetch o i dati non sono ancora caricati, mostra messaggio appropriato
 	if (error) return <div>Errore durante il caricamento della nota.</div>;
-	if (!note) return <div>Loading...</div>;
+	if (!note) return <div className={styles.loading}>Loading...</div>;
 
-	// Sanifica il contenuto markdown
 	const sanitizedMarkdown = DOMPurify.sanitize(
 		marked(noteText, { async: false })
 	);
 
 	return (
-		<Container>
+		<div className={styles.container}>
 			<GlobalSideBar />
-			<Row className="my-5">
-				<Col md={10} className="mt-0 mt-4 mt-sm-2">
-					<h1
-						style={{
-							display: "inline-block",
-							marginRight: "10px",
-							verticalAlign: "middle"
-						}}
-					>
-						{note.summary}
-					</h1>
-					<EditNoteModal
-						note={note}
-						currentUserId={user?._id}
-						handleEdit={handleEdit}
-					>
-						<Button
-							variant="light"
-							className="align-self-center"
-							onClick={() => {
-								/* Apertura modale gestione in futuro */
-							}}
-						>
-							<FaEdit />
-						</Button>
-					</EditNoteModal>
-					{/* Categorie sotto il titolo */}
-					<div className="categories" style={{ marginTop: "10px" }}>
-						<strong>Categorie: </strong>
-						{note.categories}
+			<Container className={`${styles.mainContainer} mt-3`}>
+				<div className={styles.header}>
+					<div className={styles.headerLeft}>
+						<h1 className={styles.title}>{note.summary}</h1>
+						{note.categories && (
+							<div className={styles.categories}>
+								<span className={styles.categoryBadge}>
+									{note.categories}
+								</span>
+							</div>
+						)}
 					</div>
-				</Col>
-			</Row>
 
-			<Row className="d-flex">
-				<Button
-					variant="link"
-					onClick={handleToggleView}
-					className="d-block d-md-none mt-0"
-				>
-					{showMarkdown ? "Visualizza Input" : "Visualizza Nota"}
-				</Button>
-				<Col md={6} className="d-none d-md-block">
-					<Form.Control
-						as="textarea"
-						rows={10}
-						value={noteText}
-						onChange={(e) => setNoteText(e.target.value)}
-						placeholder="Scrivi qui la tua nota..."
-						style={{
-							resize: "none",
-							height: "100%"
-						}}
-					/>
-				</Col>
+					<div className={styles.headerRight}>
+						<div className={styles.buttonGroup}>
+							<EditNoteModal
+								note={note}
+								currentUserId={user?._id}
+								handleEdit={handleEdit}
+							>
+								<button className={styles.editButton}>
+									<FaEdit size={24} />
+								</button>
+							</EditNoteModal>
+							<Button
+								variant="primary"
+								onClick={handleSave}
+								className={styles.saveButton}
+							>
+								Salva Modifiche
+							</Button>
+						</div>
+					</div>
+				</div>
 
-				<Col md={6} className="d-none d-md-block d-flex">
-					<div
-						className="preview"
-						dangerouslySetInnerHTML={{ __html: sanitizedMarkdown }}
-						style={{
-							border: "1px solid #ccc",
-							padding: "10px",
-							borderRadius: "5px",
-							height: "100%",
-							overflowY: "auto",
-							flexGrow: 1
-						}}
-					/>
-				</Col>
+				{isMobile && (
+					<Row className={styles.toggleRow}>
+						<Col>
+							<Button
+								variant="outline-primary"
+								onClick={handleToggleView}
+								className={styles.toggleButton}
+							>
+								{showMarkdown
+									? "Mostra Editor"
+									: "Mostra Anteprima"}
+							</Button>
+						</Col>
+					</Row>
+				)}
 
-				<Col sm={12} className="d-block d-md-none">
-					{showMarkdown ? (
-						<div
-							className="preview"
-							dangerouslySetInnerHTML={{
-								__html: sanitizedMarkdown
-							}}
-							style={{
-								border: "1px solid #ccc",
-								padding: "10px",
-								borderRadius: "5px",
-								height: "100%",
-								overflowY: "auto"
-							}}
-						/>
-					) : (
-						<Form.Control
-							as="textarea"
-							rows={10}
-							value={noteText}
-							onChange={(e) => setNoteText(e.target.value)}
-							placeholder="Scrivi qui la tua nota..."
-							style={{
-								resize: "none",
-								height: "100%"
-							}}
-						/>
+				<div className={styles.editorContainer}>
+					{(!isMobile || !showMarkdown) && (
+						<div className={styles.editorPane}>
+							<Form.Control
+								as="textarea"
+								value={noteText}
+								onChange={(e) => setNoteText(e.target.value)}
+								placeholder="Scrivi qui la tua nota..."
+								className={styles.textarea}
+							/>
+						</div>
 					)}
-				</Col>
-			</Row>
 
-			<Row className="mt-3">
-				<Col>
-					<Button variant="primary" onClick={handleSave}>
-						Save
-					</Button>
-				</Col>
-			</Row>
-		</Container>
+					{(!isMobile || showMarkdown) && (
+						<div className={styles.previewPane}>
+							<div
+								className={styles.previewContent}
+								dangerouslySetInnerHTML={{
+									__html: sanitizedMarkdown
+								}}
+							/>
+						</div>
+					)}
+				</div>
+			</Container>
+		</div>
 	);
 }

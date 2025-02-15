@@ -1,0 +1,308 @@
+/* Notepad.module.css */
+.container {
+	padding: 2rem 1rem;
+	max-width: 1400px;
+	margin: 0 auto;
+}
+
+.header {
+	text-align: center;
+	margin-bottom: 3rem;
+	padding: 2rem 1rem;
+	background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+	border-radius: 20px;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.title {
+	font-size: 2.8rem;
+	font-weight: 800;
+	color: #2c3e50;
+	margin-bottom: 1.5rem;
+	letter-spacing: -0.5px;
+	font-family: "Inter", sans-serif;
+}
+
+.searchContainer {
+	max-width: 800px;
+	margin: 0 auto;
+}
+
+.searchGroup {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.searchInput {
+	padding: 1rem 1.5rem;
+	border-radius: 12px;
+	border: 2px solid #e0e0e0;
+	font-size: 1.1rem;
+	transition: all 0.3s ease;
+}
+
+.searchInput:focus {
+	border-color: #27ae60;
+	box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
+}
+
+.actionsGroup {
+	display: flex;
+	gap: 0.8rem;
+	justify-content: center;
+	flex-wrap: wrap;
+}
+
+.actionBtn {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	padding: 0.8rem 1.2rem;
+	border-radius: 10px;
+	border: 2px solid #e0e0e0;
+	background: white;
+	color: #2c3e50;
+	transition: all 0.3s ease;
+}
+
+.actionBtn:hover {
+	background: #f8f9fa;
+	border-color: #27ae60;
+	color: #27ae60;
+	transform: translateY(-1px);
+}
+
+.addBtn {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	padding: 0.8rem 1.5rem;
+	border-radius: 10px;
+	background: #27ae60;
+	border: none;
+	font-weight: 600;
+	transition: all 0.3s ease;
+}
+
+.addBtn:hover {
+	background: #219653;
+	transform: translateY(-1px);
+}
+
+.btnIcon {
+	font-size: 1.1rem;
+}
+
+.btnText {
+	font-weight: 500;
+}
+
+.notesGrid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+	gap: 2rem;
+	padding: 1rem 0;
+}
+
+.noteCard {
+	background: white;
+	border-radius: 18px;
+	box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05);
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	border: none;
+	overflow: hidden;
+	position: relative;
+}
+
+.noteCard:hover {
+	transform: translateY(-5px) scale(1.02);
+	box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
+}
+
+.cardHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 1rem 1.5rem;
+	background: #f8f9fa;
+	border-bottom: 1px solid #eee;
+}
+
+.iconsContainer {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+}
+
+.icon {
+	font-size: 1.3rem;
+	padding: 0.25rem;
+	transition: color 0.3s ease;
+}
+
+.invitedIcon,
+.privateIcon,
+.publicIcon {
+	color: #1e8047;
+}
+
+.ownerIcon {
+	color: #2980b9;
+}
+
+.deleteBtn {
+	color: #c0392b !important;
+	padding: 0.25rem;
+	transition: all 0.2s ease;
+	background: none !important;
+	border: none;
+}
+
+.deleteBtn:hover {
+	transform: scale(1.15);
+}
+
+.cardBody {
+	padding: 1.5rem;
+	cursor: pointer;
+}
+
+.noteTitle {
+	font-size: 1.6rem !important; /* Aumentato leggermente */
+	font-weight: 700;
+	color: #2c3e50;
+	margin-bottom: 0.5rem; /* Ridotto il margine inferiore */
+	line-height: 1.3;
+	letter-spacing: -0.3px; /* Aggiunto per migliorare la leggibilità */
+}
+
+.noteCategory {
+	color: #1f8f4d;
+	font-size: 0.75rem !important; /* Ridotto la dimensione */
+	font-weight: 500; /* Ridotto il peso */
+	text-transform: uppercase;
+	letter-spacing: 0.8px; /* Aumentato per migliorare la leggibilità */
+	background: rgba(39, 174, 96, 0.08); /* Sfondo più tenue */
+	padding: 0.3rem 0.7rem; /* Ridotto il padding */
+	border-radius: 12px; /* Bordi più arrotondati */
+	display: inline-block;
+	margin-bottom: 0.75rem; /* Ridotto il margine inferiore */
+	border: 1px solid rgba(39, 174, 96, 0.15); /* Aggiunto bordo sottile */
+}
+
+.noteText {
+	color: #555;
+	line-height: 1.7;
+	font-size: 0.95rem;
+	margin: 1rem 0;
+	display: -webkit-box;
+	-webkit-line-clamp: 4;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+
+.emptyState {
+	text-align: center;
+	padding: 4rem;
+	color: #95a5a6;
+	grid-column: 1 / -1;
+}
+
+.emptyState p {
+	font-size: 1.2rem;
+	margin-top: 1rem;
+}
+
+.loadingState {
+	text-align: center;
+	padding: 2rem;
+	font-size: 1.2rem;
+	color: #7f8c8d;
+	grid-column: 1 / -1;
+}
+
+.noteHeader {
+	margin-bottom: 1rem;
+}
+
+.categoryBadge {
+	display: inline-block;
+	background: rgba(39, 174, 96, 0.08);
+	color: #27ae60;
+	font-size: 0.75rem;
+	font-weight: 500;
+	padding: 0.3rem 0.7rem;
+	border-radius: 12px;
+	margin-right: 0.5rem;
+	margin-bottom: 0.5rem;
+	border: 1px solid rgba(39, 174, 96, 0.15);
+}
+
+.noteContent {
+	min-height: 120px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.emptyText {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	color: #95a5a6;
+	padding: 1.5rem;
+	flex-grow: 1;
+}
+
+.emptyIcon {
+	font-size: 2rem;
+	margin-bottom: 0.5rem;
+	opacity: 0.6;
+}
+
+.emptyText p {
+	margin: 0;
+	font-size: 0.95rem;
+	line-height: 1.5;
+}
+
+/* Stile per quando non ci sono categorie */
+.noteCategory:empty {
+	display: none;
+}
+
+/* Stile per il titolo quando non c'è testo */
+.noteTitle:empty::before {
+	content: "Untitled Note";
+	color: #bdc3c7;
+	font-style: italic;
+	font-weight: 400;
+}
+
+@media (max-width: 768px) {
+	.container {
+		padding: 1rem;
+	}
+
+	.title {
+		font-size: 2.2rem;
+	}
+
+	.searchInput {
+		padding: 0.8rem 1.2rem;
+	}
+
+	.actionBtn,
+	.addBtn {
+		padding: 0.6rem 1rem;
+		font-size: 0.95rem;
+	}
+
+	.notesGrid {
+		grid-template-columns: 1fr;
+		gap: 1.5rem;
+	}
+}

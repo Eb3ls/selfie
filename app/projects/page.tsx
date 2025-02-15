@@ -4,8 +4,10 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { Button, Card, Col, Container, Row } from "react-bootstrap";
 import { FaTrash, FaUserShield } from "react-icons/fa";
-import { SearchBar } from "./SearchBar";
 import { GlobalSideBar } from "../components/GlobalSideBar";
+import { useUser } from "../components/UserContext";
+import styles from "./Projects.module.css";
+import { SearchBar } from "./SearchBar";
 
 // Importa il router di Next.js
 
@@ -17,11 +19,9 @@ export interface Project {
 	noteId: string; // ID della nota associata (stringa)
 }
 
-// TODO: utente da cookie
-// Variabile provvisoria per simulare l'utente corrente
-const currentUser = "prova";
-
 export default function ProjectPage() {
+	const { user } = useUser();
+
 	const [projects, setProjects] = useState<Project[]>([]);
 	const [oldProjects, setOldProjects] = useState<Project[]>([]);
 	const router = useRouter(); // Inizializza il router
@@ -139,7 +139,7 @@ export default function ProjectPage() {
 
 	// Controlla se l'utente è il proprietario del progetto
 	function isOwner(ownerName: string) {
-		return ownerName === currentUser;
+		return ownerName === user?._id;
 	}
 
 	function handleProjectClick(project: Project) {
@@ -155,78 +155,87 @@ export default function ProjectPage() {
 	return (
 		<>
 			<GlobalSideBar />
-			<Container fluid="sm" className="mt-5 text-center px-5">
-				<h1 className="mb-5">Projects</h1>
-				<SearchBar
-					handleSort={handleSort}
-					handleSearch={handleSearch}
-					handleAdd={handleAdd}
-				/>
-				<Row className="mt-5 gx-5 text-center">
+			<Container className={styles.container}>
+				<div className={styles.header}>
+					<h1 className={styles.title}>Projects</h1>
+					<SearchBar
+						handleSort={handleSort}
+						handleSearch={handleSearch}
+						handleAdd={handleAdd}
+					/>
+				</div>
+
+				<div className={styles.projectsGrid}>
 					{projects.length === 0 ? (
-						<p>Non ci sono progetti</p>
+						<div className={styles.emptyState}>
+							<p>
+								No projects found. Start by creating a new one!
+							</p>
+						</div>
 					) : (
 						projects.map((project) => (
-							<Col
+							<Card
 								key={project._id}
-								className="col-12 col-md-6 col-lg-4 mb-3"
+								className={styles.projectCard}
 							>
-								<Card>
-									<Card.Body>
-										<div
+								<div className={styles.cardHeader}>
+									<div className={styles.iconsContainer}>
+										{isOwner(project.ownerName) && (
+											<FaUserShield
+												className={`${styles.icon} ${styles.ownerIcon}`}
+												title="Owner"
+											/>
+										)}
+									</div>
+									{isOwner(project.ownerName) && (
+										<Button
+											variant="link"
+											className={styles.deleteBtn}
 											onClick={() =>
-												handleProjectClick(project)
+												handleDelete(project._id)
 											}
-											style={{ cursor: "pointer" }}
 										>
-											<Card.Title>
-												{project.summary}
-											</Card.Title>
-											<Card.Subtitle className="mb-2 text-muted">
-												Proprietario:{" "}
-												{project.ownerName}
-											</Card.Subtitle>
+											<FaTrash />
+										</Button>
+									)}
+								</div>
+
+								<Card.Body
+									className={styles.cardBody}
+									onClick={() => handleProjectClick(project)}
+								>
+									<Card.Title className={styles.cardTitle}>
+										{project.summary}
+									</Card.Title>
+									<Card.Subtitle
+										className={styles.cardSubtitle}
+									>
+										Owner: {project.ownerName}
+									</Card.Subtitle>
+
+									{project.userNameList.length > 0 && (
+										<div className={styles.projectUsers}>
+											<span>Collaboratori: </span>
+											{project.userNameList.join(", ")}
 										</div>
-										<hr />
-										<Card.Text>
-											{/* Aggiungi l'emoji della nota con link */}
-											<span
-												style={{ cursor: "pointer" }}
-												onClick={() =>
-													handleNoteClick(
-														project.noteId
-													)
-												}
-											>
-												📝
-											</span>
-											{currentUser ==
-												project.ownerName && (
-													<Button
-														variant="danger"
-														className="ms-2 p-0"
-														onClick={() =>
-															handleDelete(
-																project._id
-															)
-														}
-														style={{
-															border: "none",
-															backgroundColor:
-																"transparent",
-															color: "inherit"
-														}}
-													>
-														<FaTrash title="Delete" />
-													</Button>
-												)}
-										</Card.Text>
-									</Card.Body>
-								</Card>
-							</Col>
+									)}
+
+									<div className={styles.actionBar}>
+										<span
+											className={styles.noteLink}
+											onClick={(e) => {
+												e.stopPropagation();
+												handleNoteClick(project.noteId);
+											}}
+										>
+											Open Note 📝
+										</span>
+									</div>
+								</Card.Body>
+							</Card>
 						))
 					)}
-				</Row>
+				</div>
 			</Container>
 		</>
 	);
