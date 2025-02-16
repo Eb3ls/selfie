@@ -157,7 +157,6 @@ export default function ProjectPage() {
 			<GlobalSideBar />
 			<Container className={styles.container}>
 				<div className={styles.header}>
-					<h1 className={styles.title}>Projects</h1>
 					<SearchBar
 						handleSort={handleSort}
 						handleSearch={handleSearch}

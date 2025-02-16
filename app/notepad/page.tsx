@@ -198,7 +198,6 @@ export default function Notepad() {
 			<GlobalSideBar />
 			<Container className={styles.container}>
 				<div className={styles.header}>
-					<h1 className={styles.title}>Notepad</h1>
 					<SearchBar
 						handleFilters={handleFilters}
 						handleSort={handleSort}
