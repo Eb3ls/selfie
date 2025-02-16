@@ -9,7 +9,8 @@ class ActivityForm extends HTMLElement {
     phaseData: PhaseResponse;
     activityData: ProjectActivityResponse;
     activitiesList: ProjectActivityResponse[];
-    modifiedUserlist: User[];
+    usersAvaiable: string[];
+    usersList: string[];
     modifiedLinklist: PartialLink[];
 
     constructor() {
@@ -17,7 +18,8 @@ class ActivityForm extends HTMLElement {
         this.phaseData = {} as PhaseResponse;
         this.activityData = {} as ProjectActivityResponse;
         this.activitiesList = [];
-        this.modifiedUserlist = [];
+        this.usersAvaiable = [];
+        this.usersList = [];
         this.modifiedLinklist = [];
     }
 
@@ -36,15 +38,16 @@ class ActivityForm extends HTMLElement {
     }
 
     // Funzione chiamata per fornire i dati generali, chimata da viewToggler
-    public loadData(activitiesList: ProjectActivityResponse[]) {
+    public loadData(activitiesList: ProjectActivityResponse[], usersAvaiable: string[]) {
         this.activitiesList = [...activitiesList];
+        this.usersAvaiable = [...usersAvaiable];
     }
 
-    // Funzione da fornire i dati dell'activity specifica con i dati
+    // Funzione per fornire i dati dell'activity specifica
     public updateData(activityData: ProjectActivityResponse, phaseData: PhaseResponse) {
         this.activityData = activityData;
         this.phaseData = phaseData;
-        this.modifiedUserlist = [...this.activityData.users];
+        this.usersList = activityData.users?.map(user => user.name) || [];
         for (const link of this.activityData.prevLinks) {
             this.modifiedLinklist.push({ name: link.summary, _id: link._id });
         }
@@ -120,7 +123,7 @@ class ActivityForm extends HTMLElement {
             toggleBtn?.addEventListener('click', () => this.updateModalContent("VIEW"));
         } else if (mode === "EDIT") {
             const body = new ActivityModifyForm();
-            body.initialize(this.activityData, this.phaseData);
+            body.initialize(this.activityData, this.phaseData, this.usersList, this.usersAvaiable);
             modalContent.appendChild(body);
 
             const toggleBtn = modalContent.querySelector('#toggleEditBtn');
@@ -451,12 +454,14 @@ export {ActivityDeleteForm};
 class ActivityModifyForm extends HTMLElement {
     activityData: ProjectActivityResponse;
     phaseData: PhaseResponse;
-    modifiedUserlist: User[];
+    usersAvailable: string[];
+    modifiedUserlist: string[];
 
     constructor() {
         super();
         this.activityData = {} as ProjectActivityResponse;
         this.phaseData = {} as PhaseResponse;
+        this.usersAvailable = [];
         this.modifiedUserlist = [];
     }
 
@@ -472,7 +477,7 @@ class ActivityModifyForm extends HTMLElement {
             dtStart: new Date((formData.get('dtStart') as string) + 'T00:00:00.000Z').toISOString(),
             due: new Date((formData.get('due') as string) + 'T23:59:59.999Z').toISOString(),
             isMilestone: formData.get('isMilestone') === 'on',
-            usernameList: [] // TODO: Implementare gestione utenti
+            usernameList: this.modifiedUserlist
         };
 
         const url = `/api/project/activity/modify`;
@@ -486,6 +491,41 @@ class ActivityModifyForm extends HTMLElement {
             alert('Failed to modify activity');
         }
 
+    }
+
+    private createUsersSelect() {
+        const availableUsers = this.usersAvailable.filter(user => !this.modifiedUserlist.includes(user));
+        const text = availableUsers.length > 0 ? 'Select a user...' : 'No available users';
+
+        let block = `<option value="" disabled selected>${text}</option>`;
+        for (const user of availableUsers) {
+            block += `
+                <option value="${user}">${user}</option>
+            `;
+        }
+        return block;
+    }
+
+    private updateUsersSelect(user: string, action: 'ADD' | 'REMOVE') {
+        const select = this.querySelector('#newUser') as HTMLSelectElement;
+        if (!select) return;
+
+        if (action === 'ADD') {
+            if (select.options.length === 1) {
+                select.innerHTML = "<option value='' disabled selected>Select a user...</option>";
+            }
+            select.innerHTML += `<option value="${user}">${user}</option>`;
+        } else {
+            select.querySelectorAll('option').forEach(option => {
+                if (option.value === user) {
+                    option.remove();
+                }
+            });
+
+            if (select.options.length === 1) {
+                select.innerHTML = '<option value="" disabled selected>No available users</option>';
+            }
+        }
     }
 
     private createForm() {
@@ -530,8 +570,9 @@ class ActivityModifyForm extends HTMLElement {
                     <label class="form-label fw-bold">Assigned Users</label>
                     <div class="add-user-form">
                         <div class="input-group">
-                            <input type="text" class="form-control" id="newUser" 
-                                   placeholder="Add new user">
+                            <select class="form-select" id="newUser">
+                                ${this.createUsersSelect()}
+                            </select>
                             <button class="btn btn-primary" type="button" id="addUserBtn">
                                 <i class="bi bi-plus-lg"></i> Add
                             </button>
@@ -548,18 +589,17 @@ class ActivityModifyForm extends HTMLElement {
     }
 
     // Aggiunge un utente alla lista
-    private addUser(item: User) {
+    private addUser(name: string) {
         const list = this.querySelector('#userList');
         if (!list) return;
 
         const itemBlock = document.createElement('div');
         itemBlock.className = 'user-item d-flex justify-content-between align-items-center bg-light';
-        itemBlock.setAttribute('data-user', item.id);
 
         itemBlock.innerHTML = `
         <span class="user-name">
             <i class="bi bi-person-fill me-2"></i>
-            ${item.name}
+            ${name}
         </span>
         <button type="button" class="btn btn-danger btn-sm">
             <i class="bi bi-trash"></i>
@@ -567,8 +607,13 @@ class ActivityModifyForm extends HTMLElement {
         `;
 
         itemBlock.querySelector('button')?.addEventListener('click', () => {
-        this.modifiedUserlist = this.modifiedUserlist.filter(user => user.id !== item.id);
-        itemBlock.remove();
+            itemBlock.remove();
+            this.modifiedUserlist = this.modifiedUserlist.filter(user => user !== name);
+            this.usersAvailable.push(name);
+            if (this.modifiedUserlist.length === 0) {
+                list.innerHTML = '<p class="text-muted">No users assigned</p>';
+            }
+            this.updateUsersSelect(name, 'ADD');
         });
 
         list.appendChild(itemBlock);
@@ -577,25 +622,34 @@ class ActivityModifyForm extends HTMLElement {
     // Funzione per l'aggiunta e l'eliminazione degli utenti
     private setupItemManagement() {
         const btn = this.querySelector('#addUserBtn');
-        const newUser = this.querySelector('#newUser') as HTMLInputElement;
+        const newUser = this.querySelector('#newUser') as HTMLSelectElement;
 
         for (const user of this.modifiedUserlist) {
             this.addUser(user);
         }
         
+        if (this.modifiedUserlist.length === 0) {
+            const userList = this.querySelector('#userList');
+            if (userList) {
+                userList.innerHTML = '<p class="text-muted">No users assigned</p>';
+            }
+        }
+
         // User management logic
         btn?.addEventListener('click', () => {
-            const value = newUser.value;
-           clearError(newUser);
+            const name = newUser.value;
+            if (!name) return;
 
-            if (!validateUsername(value)) {
-                showError(newUser, 'Invalid username (3-20 characters, only letters, numbers, - and _)');
-                return;
+            if (this.modifiedUserlist.length === 0) {
+                const userList = this.querySelector('#userList');
+                if (userList) {
+                    userList.innerHTML = '';
+                }
             }
 
-            const newItem = { name: value, id: value };
-            this.modifiedUserlist.push(newItem);
-            this.addUser(newItem);
+            this.updateUsersSelect(name, 'REMOVE');
+            this.modifiedUserlist.push(name);
+            this.addUser(name);
             newUser.value = '';
         });
 
@@ -622,9 +676,11 @@ class ActivityModifyForm extends HTMLElement {
         `;
     }
 
-    public initialize(activityData: ProjectActivityResponse, phaseData: PhaseResponse) {
+    public initialize(activityData: ProjectActivityResponse, phaseData: PhaseResponse, usersList: string[], usersAvailable: string[]) {
         this.activityData = activityData;
         this.phaseData = phaseData;
+        this.modifiedUserlist = [...usersList];
+        this.usersAvailable = [...usersAvailable];
         this.render();
         this.setupItemManagement();
     }

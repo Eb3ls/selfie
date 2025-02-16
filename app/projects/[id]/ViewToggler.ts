@@ -1,4 +1,4 @@
-import { ROW_HEIGHT_PX } from "./Utils";
+import { ProjectResponse, ROW_HEIGHT_PX, User } from "./Utils";
 import TimeList from "./ListBody/TimeList";
 import ProjectSettings from "./Forms/ProjectSettings";
 import AddForm from "./Forms/AddForm";
@@ -11,7 +11,7 @@ import UsersList from "./ListBody/UserList";
 class ViewToggler extends HTMLElement{
     viewType: "GANTT" | "LIST";
     listViewType: "USER" | "TIME";
-    data: any; 
+    data: ProjectResponse | null; 
 
     constructor(){
         super();
@@ -100,15 +100,18 @@ class ViewToggler extends HTMLElement{
     getListBody(view: "USER" | "TIME") {
         // Invertiamo la visualizzazione
         this.listViewType = view;
-
         if (this.listViewType === "USER"){
             const listBlock = document.createElement("users-list") as UsersList;
-            listBlock.loadData(this.data.phases);
+            if(this.data){
+                listBlock.loadData(this.data.phases);
+            }
             return listBlock;
         }
         else {
             const listBlock = document.createElement("time-list") as TimeList;
-            listBlock.loadData(this.data.phases, false);
+            if(this.data){
+                listBlock.loadData(this.data.phases, false);
+            }
             return listBlock;
         }
     }
@@ -176,6 +179,7 @@ class ViewToggler extends HTMLElement{
             }
         }
 
+        if (!this.data) return list;
         for (const phase of this.data.phases){
             appendActivities(phase);
         }
@@ -186,6 +190,7 @@ class ViewToggler extends HTMLElement{
 
     loadData() {
         if (!this.data) return;
+        const usersAvaiable = this.data.users.map((user: User) => user.name);
 
         const projectSettings = document.querySelector("project-settings") as ProjectSettings
         if (projectSettings) {
@@ -197,7 +202,7 @@ class ViewToggler extends HTMLElement{
         }
         const activityForm = document.querySelector("activity-form") as ActivityForm;
         if (activityForm) {
-            activityForm.loadData(this.createActivityList());
+            activityForm.loadData(this.createActivityList(), usersAvaiable);
         }
         const sideGanttList = document.querySelector("side-gantt-list") as SideGanttList;
         if (sideGanttList) {

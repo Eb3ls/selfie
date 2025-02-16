@@ -70,10 +70,11 @@ class ProjectSettings extends HTMLElement {
             if (this.users.length > 0) {
                 userListView.innerHTML = '';
                 this.users.forEach(user => {
-                    userListView.innerHTML += `<div class="user-item d-flex align-items-center mb-2">
-                            <i class="bi bi-person-fill me-2"></i>
-                            ${user}
-                        </div>`;
+                    userListView.innerHTML +=
+                    `<div class="user-item d-flex align-items-center mb-2">
+                        <i class="bi bi-person-fill me-2"></i>
+                        ${user}
+                    </div>`;
                 });
             } else {
                 userListView.innerHTML = '<p class="text-muted">No users assigned</p>';
@@ -167,6 +168,10 @@ class ProjectSettings extends HTMLElement {
 
         userItem.querySelector('button')?.addEventListener('click', () => {
             userItem.remove();
+            this.modifiedUsers = this.modifiedUsers.filter(user => user !== username);
+            if (this.modifiedUsers.length === 0) {
+                userList.innerHTML = '<p class="text-muted">No users assigned</p>';
+            }
         });
 
         userList.appendChild(userItem);
@@ -176,6 +181,13 @@ class ProjectSettings extends HTMLElement {
         // Aggiungiamo gli utenti già presenti
         for (const user of this.modifiedUsers) {
             this.addUser(user);
+        }
+
+        if (this.modifiedUsers.length === 0) {
+            const userList = this.querySelector('#userList');
+            if (userList) {
+                userList.innerHTML = '<p class="text-muted">No users assigned</p>';
+            }
         }
 
         const addUserBtn = this.querySelector('#addUserBtn');
@@ -198,6 +210,12 @@ class ProjectSettings extends HTMLElement {
             }
 
             if (validateUsername(username)) {
+                if (this.modifiedUsers.length === 0) {
+                    const userList = this.querySelector('#userList');
+                    if (userList) {
+                        userList.innerHTML = '';
+                    }
+                }
                 this.modifiedUsers.push(username);
                 this.addUser(username);
                 newUserInput.value = '';
@@ -232,7 +250,7 @@ class ProjectSettings extends HTMLElement {
                 <form id="projectForm">
                     <div class="mb-4">
                         <label class="form-label fw-bold">Titolo Progetto</label>
-                        <input type="text" class="form-control" id="projectTitle" value=${this.title} required>
+                        <input type="text" class="form-control" id="projectTitle" value="${this.title}" required>
                     </div>
                     
                     <div class="mb-4">

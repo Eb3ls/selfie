@@ -83,7 +83,7 @@ class AddForm extends HTMLElement {
 			due: new Date(data.Due+"T23:59:59.999Z").toISOString(),
 			isMilestone: data.isMilestone === "on",
 			phaseId: data.SubPhase,
-			usernameList: ["prova"]
+			usernameList: []
 		}
 
 		try {

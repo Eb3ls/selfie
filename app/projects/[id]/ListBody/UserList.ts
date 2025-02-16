@@ -1,3 +1,4 @@
+import { PhaseResponse } from "../Utils";
 import TimeList from "./TimeList";
 
 class UsersList extends HTMLElement {
@@ -85,7 +86,7 @@ class UsersList extends HTMLElement {
         }
     }
 
-    public loadData(phases: any) {
+    public loadData(phases: PhaseResponse[]) {
         if (!phases) return;
 
         this.phases = phases;
