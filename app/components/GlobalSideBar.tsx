@@ -1,15 +1,31 @@
 "use client";
 
-import React, { useState } from "react";
 import Image from "next/image";
-import { Button, Modal, Nav, Navbar, NavDropdown, Container, Offcanvas } from "react-bootstrap";
+import { usePathname } from "next/navigation";
+import React, { useState } from "react";
 import {
-	FaBars, FaCalendarAlt, FaCog, FaComments,
-	FaInbox, FaProjectDiagram,
-	FaStickyNote, FaStopwatch, FaUser
+	Button,
+	Container,
+	Modal,
+	Nav,
+	NavDropdown,
+	Navbar,
+	Offcanvas
+} from "react-bootstrap";
+import {
+	FaBars,
+	FaCalendarAlt,
+	FaCog,
+	FaComments,
+	FaInbox,
+	FaProjectDiagram,
+	FaStickyNote,
+	FaStopwatch,
+	FaUser
 } from "react-icons/fa";
-import { useUser } from "./UserContext";
+// Usa usePathname di Next.js
 import "./GlobalSideBar.css";
+import { useUser } from "./UserContext";
 
 // Riorganizzare i link principali
 const mainLinks = [
@@ -17,13 +33,13 @@ const mainLinks = [
 	{ name: "Progetti", link: "/projects" },
 	{ name: "Note", link: "/notepad" },
 	{ name: "Chat", link: "/chat" },
-	{ name: "Pomodoro", link: "/pomodoro" },
+	{ name: "Pomodoro", link: "/pomodoro" }
 ];
 
 // Link secondari raggruppati in "Altro"
 const otherLinks = [
 	{ name: "Impostazioni", icon: FaCog, link: "#impostazioni" },
-	{ name: "Inbox", icon: FaInbox, link: "#inbox" },
+	{ name: "Inbox", icon: FaInbox, link: "#inbox" }
 ];
 
 // Struttura del menu principale
@@ -32,7 +48,7 @@ const menuItems = [
 		title: "Sistema",
 		items: [
 			{ name: "Inbox", icon: FaInbox, link: "#inbox" },
-			{ name: "Impostazioni", icon: FaCog, link: "#impostazioni" },
+			{ name: "Impostazioni", icon: FaCog, link: "#impostazioni" }
 		]
 	},
 	{
@@ -42,22 +58,14 @@ const menuItems = [
 			{ name: "Progetti", icon: FaProjectDiagram, link: "/projects" },
 			{ name: "Note", icon: FaStickyNote, link: "/notepad" },
 			{ name: "Chat", icon: FaComments, link: "/chat" },
-			{ name: "Pomodoro", icon: FaStopwatch, link: "/pomodoro" },
+			{ name: "Pomodoro", icon: FaStopwatch, link: "/pomodoro" }
 		]
-	},
+	}
 ];
 
 // Nuovo componente per le info utente
 const UserInfo = ({ user }: { user: any }) => (
 	<div className="d-flex align-items-center gap-3">
-		{/* <div className="position-relative" style={{ width: '48px', height: '48px' }}>
-			<Image
-				src={user?.profilePic || "/default-avatar.png"}
-				alt="Profile"
-				fill
-				style={{ objectFit: 'cover', borderRadius: '50%' }}
-			/>
-		</div> */}
 		<i className="bi bi-person fs-1 me-2"></i>
 		<div className="d-flex flex-column">
 			<span className="fw-bold fs-3">{user?.username}</span>
@@ -70,6 +78,7 @@ export function GlobalSideBar() {
 	const [showSidebar, setShowSidebar] = useState(false);
 	const [showModal, setShowModal] = useState(false);
 	const { user, logOut } = useUser();
+	const pathname = usePathname(); // Ottieni il percorso corrente
 
 	const handleLogout = () => setShowModal(true);
 	const confirmLogout = () => {
@@ -80,7 +89,11 @@ export function GlobalSideBar() {
 	return (
 		<>
 			{/* Navbar per md+ */}
-			<Navbar bg="light" expand="md" className="d-none d-lg-flex border-bottom shadow-sm sticky-top">
+			<Navbar
+				bg="light"
+				expand="md"
+				className="d-none d-lg-flex border-bottom shadow-sm sticky-top"
+			>
 				<Container>
 					<Navbar.Brand href="/home" className="fw-bold">
 						<Image
@@ -102,7 +115,7 @@ export function GlobalSideBar() {
 							<Nav.Link
 								key={i}
 								href={item.link}
-								className="px-4 py-3 nav-link-hover text-black"
+								className={`px-4 py-3 nav-link-hover text-black ${pathname === item.link ? "active" : ""}`}
 							>
 								{item.name}
 							</Nav.Link>
@@ -134,12 +147,12 @@ export function GlobalSideBar() {
 				onClick={() => setShowSidebar(true)}
 				className="toggle_btn d-lg-none"
 				style={{
-					position: 'fixed',
-					top: '1rem',
-					left: '1rem',
+					position: "fixed",
+					top: "1rem",
+					left: "1rem",
 					zIndex: 1030,
-					padding: '0.5rem',
-					display: showSidebar ? 'none' : 'block'
+					padding: "0.5rem",
+					display: showSidebar ? "none" : "block"
 				}}
 			>
 				<FaBars />
@@ -151,8 +164,8 @@ export function GlobalSideBar() {
 				onHide={() => setShowSidebar(false)}
 				className="bg-light sidebar d-lg-none"
 				style={{
-					width: '250px',
-					boxShadow: '2px 0 5px rgba(0,0,0,0.1)'
+					width: "250px",
+					boxShadow: "2px 0 5px rgba(0,0,0,0.1)"
 				}}
 			>
 				<Offcanvas.Header closeButton>
@@ -175,17 +188,19 @@ export function GlobalSideBar() {
 					<div className="flex-grow-1">
 						{menuItems.map((section, idx) => (
 							<div key={idx} className="mb-4">
-								<h6 className="text-muted px-3 mb-2">{section.title}</h6>
+								<h6 className="text-muted px-3 mb-2">
+									{section.title}
+								</h6>
 								<Nav className="flex-column">
 									{section.items.map((item, i) => (
 										<Nav.Link
 											key={i}
 											href={item.link}
-											className="px-3 py-2 d-flex align-items-center"
+											className={`px-3 py-2 d-flex align-items-center ${pathname === item.link ? "active" : ""}`}
 											style={{
-												transition: 'all 0.2s',
-												borderRadius: '0.5rem',
-												margin: '0.2rem 0.5rem',
+												transition: "all 0.2s",
+												borderRadius: "0.5rem",
+												margin: "0.2rem 0.5rem"
 											}}
 										>
 											<item.icon className="me-3" />
@@ -217,7 +232,10 @@ export function GlobalSideBar() {
 					<p>Sei sicuro di voler effettuare il logout?</p>
 				</Modal.Body>
 				<Modal.Footer>
-					<Button variant="secondary" onClick={() => setShowModal(false)}>
+					<Button
+						variant="secondary"
+						onClick={() => setShowModal(false)}
+					>
 						Annulla
 					</Button>
 					<Button variant="danger" onClick={confirmLogout}>
