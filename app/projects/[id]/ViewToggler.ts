@@ -198,7 +198,7 @@ class ViewToggler extends HTMLElement{
         }
         const addFormComponent = document.querySelector("add-form-component") as AddForm;
         if (addFormComponent) {
-            addFormComponent.loadProjectData(this.data._id, this.data.phases);
+            addFormComponent.loadProjectData(this.data._id, this.data.phases, usersAvaiable);
         }
         const activityForm = document.querySelector("activity-form") as ActivityForm;
         if (activityForm) {

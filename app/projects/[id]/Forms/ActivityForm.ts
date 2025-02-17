@@ -1,4 +1,4 @@
-import { clearError, fetcher, formatDate, PhaseResponse, ProjectActivityResponse, showError, User, validateUsername } from "../Utils";
+import {fetcher, formatDate, PhaseResponse, ProjectActivityResponse, User} from "../Utils";
 
 interface PartialLink {
     name: string;
@@ -370,7 +370,6 @@ class ActivityLinkForm extends HTMLElement{
 }
 
 customElements.define('activity-link-form', ActivityLinkForm);
-export {ActivityLinkForm};
 
 class ActivityDeleteForm extends HTMLElement{
     activityData: ProjectActivityResponse
@@ -449,7 +448,6 @@ class ActivityDeleteForm extends HTMLElement{
 }
 
 customElements.define('activity-delete-form', ActivityDeleteForm);
-export {ActivityDeleteForm};
 
 class ActivityModifyForm extends HTMLElement {
     activityData: ProjectActivityResponse;
@@ -635,7 +633,6 @@ class ActivityModifyForm extends HTMLElement {
             }
         }
 
-        // User management logic
         btn?.addEventListener('click', () => {
             const name = newUser.value;
             if (!name) return;
@@ -688,4 +685,3 @@ class ActivityModifyForm extends HTMLElement {
 }
 
 customElements.define('activity-modify-form', ActivityModifyForm);
-export {ActivityModifyForm};

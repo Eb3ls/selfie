@@ -90,6 +90,17 @@ function validateLength(item: string, min: number, max: number): boolean {
     if (!item) return false;
     return item.length >= min && item.length <= max;
 }
+// Controlliamo se la data é dentro i limiti della fase/sottofase
+function checkDate(date: string, start: string, due: string): boolean {
+    const newDate = new Date(date);
+    const startDate = new Date(start);
+    const dueDate = new Date(due);
+
+    if (newDate >= startDate && newDate <= dueDate) {
+        return true;
+    }
+    return false;
+}
 
 function showError(inputElement: HTMLElement, message: string) {
     const errorDiv = document.createElement('div');
@@ -249,6 +260,7 @@ export {
     formatDate,
     validateUsername,
     validateLength,
+    checkDate,
     showError,
     clearError,
     statusConfig,
