@@ -1,30 +1,30 @@
-import { PhaseResponse } from "../Utils";
+import { PhaseResponse, SortedActivity, SubPhaseResponse } from "../Utils";
 import TimeList from "./TimeList";
 
 class UsersList extends HTMLElement {
-    phases: any;
-    data: any;
+    phases: PhaseResponse[];
+    data: { [username: string]: SortedActivity[] };
 
     constructor() {
         super();
-        this.phases = null;
-        this.data = null;
+        this.phases = [];
+        this.data = {};
     }
 
     sortData(){
-        const userData: any= {}
+        const userData: { [username: string]: SortedActivity[] } = {};
 
-        function appendUserActivities(phase: any){
+        function appendUserActivities(phase: PhaseResponse | SubPhaseResponse){
             for (const activity of phase.activities){
                 for(const user of activity.users){
                     if (!userData[user.name]) userData[user.name] = [];
-                    console.log("User:", user);
-                    console.log("Activity:", activity.summary);
-                    userData[user.name].push(activity);
+                    const act = activity as SortedActivity;
+                    act.parentPhase = phase as PhaseResponse;
+                    userData[user.name].push(act);
                 }
             }
 
-            if (!phase.subPhases) return;
+            if (!("subPhases" in phase)) return;
             for(const subPhase of phase.subPhases){
                 appendUserActivities(subPhase);
             }
@@ -32,6 +32,12 @@ class UsersList extends HTMLElement {
 
         for (const phase of this.phases){
             appendUserActivities(phase);
+        }
+
+        for (const user in userData){
+            userData[user].sort((a, b) => {
+                return a.due < b.due ? -1 : 1;
+            });
         }
 
         return userData;
@@ -74,7 +80,7 @@ class UsersList extends HTMLElement {
 
             // Creiamo il blocco collasabile
             const userActivitiesBlock = document.createElement("time-list") as TimeList;
-            userActivitiesBlock.loadData(this.data[user], true);
+            userActivitiesBlock.loadData(this.data[user]);
             userActivitiesBlock.id = `collapse${user}`;
             userActivitiesBlock.className = "collapse";
 

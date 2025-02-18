@@ -1,58 +1,26 @@
 import ModifyActivity from "../Forms/ActivityForm";
-import ModifyPhase from "../Forms/PhaseForm";
-import { createStatusIcon, formatDate } from "../Utils";
+import { createStatusIcon, formatDate, PhaseResponse, ProjectActivityResponse, SortedActivity, SubPhaseResponse } from "../Utils";
 
 class TimeList extends HTMLElement{
 
-    data: any;
-    sortedData: any;
+    sortedActivities: SortedActivity[];
 
     constructor(){
         super();
-        this.data = null;
-        this.sortedData = null;
+        this.sortedActivities = [];
     }
 
-    loadData(phases: any, userView: boolean){
-        if (!phases) return;
+    loadData(sortedActivities: SortedActivity[]){
+        if (!sortedActivities) return;
 
         // Se siamo nella view a lista per utente passiamo direttamente le activities
-        if(userView){
-            this.data = phases;
-            this.sortedData = phases;
-        }
-        else{
-            this.data = phases;
-            this.sortedData = this.sortData();
-        }
+        this.sortedActivities = sortedActivities;
         this.render();
     }
 
-    // TODO finire il sorting
-    sortData(){
-        const allActivities: any= [];
-
-        function apppendActivities(phase: any){
-            for (const activity of phase.activities){
-                activity.phase = phase;
-                allActivities.push(activity)
-            }
-
-            if (!phase.subPhases) return;
-            for(const subPhase of phase.subPhases){
-                apppendActivities(subPhase);
-            }
-        }
-
-        for (const phase of this.data){
-            apppendActivities(phase);
-        }
-
-        return allActivities;
-    }
 
 	// Funzione per aggiungere i dati al modale
-	openModify(activity: any, phase: any) {
+	openModify(activity: SortedActivity) {
 		const modifyModal = document.getElementById(`ModifyActivityComponent`) as ModifyActivity;
 
 		if (!modifyModal) {
@@ -60,24 +28,26 @@ class TimeList extends HTMLElement{
 			return;
 		}
 
-		modifyModal.updateData(activity, phase);
+        const activityData = activity as ProjectActivityResponse;
+        const parentPhase = activity.parentPhase;
+		modifyModal.updateData(activityData, parentPhase);
 	}
 
-    createItem(item: any){
+    createItem(act: SortedActivity){
         const block = document.createElement("div");
         block.className = "row rounded p-2 mt-3 border-bottom border-secondary list-item";
         block.addEventListener("click", () => {
-            this.openModify(item, item.phase);
+            this.openModify(act);
         });
         block.setAttribute("data-bs-toggle", "modal");
         block.setAttribute("data-bs-target", "#ModifyActivity");
 
-        const start = new Date(formatDate(item.dtStart)).toLocaleDateString();
-        const end = new Date(formatDate(item.due)).toLocaleDateString();
+        const start = new Date(formatDate(act.dtStart)).toLocaleDateString();
+        const end = new Date(formatDate(act.due)).toLocaleDateString();
 
         const summaryCol = document.createElement("div");
         summaryCol.className = "col-3 fw-bold";
-        summaryCol.textContent = item.summary;
+        summaryCol.textContent = act.summary;
 
         const startCol = document.createElement("div");
         startCol.className = "col-3 text-muted";
@@ -91,9 +61,9 @@ class TimeList extends HTMLElement{
         statusCol.className = "col-3";
 
         // Creiamo il blocco per lo status
-        const statusBlock = createStatusIcon(item.status);
+        const statusBlock = createStatusIcon(act.status as any);
         statusCol.appendChild(statusBlock);
-        statusCol.appendChild(document.createTextNode(item.status));
+        statusCol.appendChild(document.createTextNode(act.status));
 
         block.appendChild(summaryCol);
         block.appendChild(startCol);
@@ -134,8 +104,8 @@ class TimeList extends HTMLElement{
         header.appendChild(statusHeader);
 
 
-        for (const num in this.sortedData){
-            const activity = this.sortedData[num]
+        for (const num in this.sortedActivities){
+            const activity = this.sortedActivities[num]
             innerBlock.appendChild(this.createItem(activity));
         }
     }

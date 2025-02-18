@@ -6,8 +6,8 @@ interface PartialLink {
 }
 
 class ActivityForm extends HTMLElement {
-    phaseData: PhaseResponse;
-    activityData: ProjectActivityResponse;
+    parentPhase: PhaseResponse;
+    activity: ProjectActivityResponse;
     activitiesList: ProjectActivityResponse[];
     usersAvaiable: string[];
     usersList: string[];
@@ -15,8 +15,8 @@ class ActivityForm extends HTMLElement {
 
     constructor() {
         super();
-        this.phaseData = {} as PhaseResponse;
-        this.activityData = {} as ProjectActivityResponse;
+        this.parentPhase = {} as PhaseResponse;
+        this.activity = {} as ProjectActivityResponse;
         this.activitiesList = [];
         this.usersAvaiable = [];
         this.usersList = [];
@@ -44,11 +44,13 @@ class ActivityForm extends HTMLElement {
     }
 
     // Funzione per fornire i dati dell'activity specifica
-    public updateData(activityData: ProjectActivityResponse, phaseData: PhaseResponse) {
-        this.activityData = activityData;
-        this.phaseData = phaseData;
-        this.usersList = activityData.users?.map(user => user.name) || [];
-        for (const link of this.activityData.prevLinks) {
+    public updateData(activity: ProjectActivityResponse, parentPhase: PhaseResponse) {
+        if (!activity || !parentPhase) return;
+        this.activity = activity;
+        // Necessario per capire il range di date disponibili
+        this.parentPhase = parentPhase;
+        this.usersList = activity.users?.map(user => user.name) || [];
+        for (const link of this.activity.prevLinks) {
             this.modifiedLinklist.push({ name: link.summary, _id: link._id });
         }
         this.updateModalContent("VIEW");
@@ -59,28 +61,28 @@ class ActivityForm extends HTMLElement {
             <div class="modal-body">
                 <div class="mb-4">
                     <label class="form-label text-muted small">Title</label>
-                    <h4>${this.activityData.summary}</h4>
+                    <h4>${this.activity.summary}</h4>
                 </div>
                 
                 <div class="mb-4">
                     <label class="form-label text-muted small">Description</label>
-                    <p class="fs-5">${this.activityData.description || 'No description provided.'}</p>
+                    <p class="fs-5">${this.activity.description || 'No description provided.'}</p>
                 </div>
 
                 <div class="mb-4">
                     <div class="row">
                         <div class="col-md-6">
                             <label class="form-label text-muted small">Start Date</label>
-                            <h5>${new Date(this.activityData.dtStart).toLocaleDateString()}</h5>
+                            <h5>${new Date(this.activity.dtStart).toLocaleDateString()}</h5>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label text-muted small">Due Date</label>
-                            <h5>${new Date(formatDate(this.activityData.due)).toLocaleDateString()}</h5>
+                            <h5>${new Date(formatDate(this.activity.due)).toLocaleDateString()}</h5>
                         </div>
                     </div>
                 </div>
 
-                ${this.activityData.isMilestone ? `
+                ${this.activity.isMilestone ? `
                 <div class="mb-4">
                     <span class="badge bg-primary">
                         <i class="bi bi-flag-fill me-1"></i>
@@ -92,8 +94,8 @@ class ActivityForm extends HTMLElement {
                 <div class="mb-4">
                     <label class="form-label text-muted small">Assigned Users</label>
                     <div class="user-list">
-                        ${this.activityData.users?.length > 0
-                        ? this.activityData.users.map((user: User) => `
+                        ${this.activity.users?.length > 0
+                        ? this.activity.users.map((user: User) => `
                                         <div class="user-item d-flex align-items-center mb-2">
                                             <i class="bi bi-person-fill me-2"></i>
                                             ${user.name}
@@ -116,14 +118,14 @@ class ActivityForm extends HTMLElement {
         modalContent.innerHTML = "";
         if (mode === "DELETE") {
             const body = new ActivityDeleteForm();
-            body.initialize(this.activityData);
+            body.initialize(this.activity);
             modalContent.appendChild(body);
 
             const toggleBtn = modalContent.querySelector('#toggleEditBtn');
             toggleBtn?.addEventListener('click', () => this.updateModalContent("VIEW"));
         } else if (mode === "EDIT") {
             const body = new ActivityModifyForm();
-            body.initialize(this.activityData, this.phaseData, this.usersList, this.usersAvaiable);
+            body.initialize(this.activity, this.parentPhase, this.usersList, this.usersAvaiable);
             modalContent.appendChild(body);
 
             const toggleBtn = modalContent.querySelector('#toggleEditBtn');
@@ -131,7 +133,7 @@ class ActivityForm extends HTMLElement {
 
         } else if (mode === "LINK") {
             const body = new ActivityLinkForm();
-            body.initialize(this.activityData, this.activitiesList, this.modifiedLinklist);
+            body.initialize(this.activity, this.activitiesList, this.modifiedLinklist);
             modalContent.appendChild(body);
 
             const toggleBtn = modalContent.querySelector('#toggleEditBtn');
@@ -180,13 +182,13 @@ export default ActivityForm;
 
 class ActivityLinkForm extends HTMLElement{
 
-    activityData: ProjectActivityResponse;
+    activity: ProjectActivityResponse;
     activitiesList: ProjectActivityResponse[];
     modifiedLinklist: PartialLink[];
 
     constructor (){
         super();
-        this.activityData = {} as ProjectActivityResponse;
+        this.activity = {} as ProjectActivityResponse;
         this.activitiesList = [];
         this.modifiedLinklist = [];
     }
@@ -209,15 +211,15 @@ class ActivityLinkForm extends HTMLElement{
     private getAvailableActivities() {
         const availableActivities: ProjectActivityResponse[] = [];
 
-        const startDate = new Date(this.activityData.dtStart);
+        const startDate = new Date(this.activity.dtStart);
         for (const activity of this.activitiesList) {
             // Se siamo arrivati all'attivitá corrente, interrompiamo, quelle successive hanno una due data maggiore
-            if (activity._id === this.activityData._id) {
+            if (activity._id === this.activity._id) {
                 break;
             }
 
             // Se l'attivitá é giá collegata o é giá stata selezionata, la saltiamo
-            if(this.activityData.prevLinks.some(link => link._id === activity._id) || 
+            if(this.activity.prevLinks.some(link => link._id === activity._id) || 
                this.modifiedLinklist.some(link => link._id === activity._id)) {
                 continue;
             }
@@ -237,7 +239,7 @@ class ActivityLinkForm extends HTMLElement{
         return `
             <div class="modal-body">
                 <div class="mb-4">
-                    <h4 class="mb-3">${this.activityData.summary}</h4>
+                    <h4 class="mb-3">${this.activity.summary}</h4>
                     <label class="form-label fw-bold">Link with other Activities</label>
                     <div class="add-link-form">
                         <div class="input-group mb-3">
@@ -293,7 +295,7 @@ class ActivityLinkForm extends HTMLElement{
         for (const link of this.modifiedLinklist) {
             const body = {
                 "prevId": link._id,
-                "nextId": this.activityData._id,
+                "nextId": this.activity._id,
             }
 
             try{
@@ -357,11 +359,11 @@ class ActivityLinkForm extends HTMLElement{
     }
 
     public initialize(
-        activityData: ProjectActivityResponse,
+        activity: ProjectActivityResponse,
         activitiesList: ProjectActivityResponse[],
         modifiedLinklist: PartialLink[]
     ){
-        this.activityData = activityData;
+        this.activity = activity;
         this.activitiesList = activitiesList;
         this.modifiedLinklist = modifiedLinklist;
         this.render();
@@ -372,17 +374,17 @@ class ActivityLinkForm extends HTMLElement{
 customElements.define('activity-link-form', ActivityLinkForm);
 
 class ActivityDeleteForm extends HTMLElement{
-    activityData: ProjectActivityResponse
+    activity: ProjectActivityResponse
 
     constructor (){
         super();
-        this.activityData = {} as ProjectActivityResponse;
+        this.activity = {} as ProjectActivityResponse;
     }
 
     async handleDelete(e: Event){
         const url = "/api/project/activity/delete";
         const body = {
-            _id: this.activityData._id
+            _id: this.activity._id
         }
         const method = "DELETE";
 
@@ -428,10 +430,10 @@ class ActivityDeleteForm extends HTMLElement{
                         <i class="bi bi-info-circle me-2"></i>
                         Activity Details:
                     </h6>
-                    <p class="mb-0">Title: ${this.activityData.summary}</p>
-                    <p class="mb-0">Start Date: ${new Date(this.activityData.dtStart).toLocaleDateString()}</p>
-                    <p class="mb-0">Due Date: ${new Date(formatDate(this.activityData.due)).toLocaleDateString()}</p>
-                    ${this.activityData.isMilestone ? '<p class="mb-0 text-primary"><i class="bi bi-flag-fill"></i> Milestone</p>' : ''}
+                    <p class="mb-0">Title: ${this.activity.summary}</p>
+                    <p class="mb-0">Start Date: ${new Date(this.activity.dtStart).toLocaleDateString()}</p>
+                    <p class="mb-0">Due Date: ${new Date(formatDate(this.activity.due)).toLocaleDateString()}</p>
+                    ${this.activity.isMilestone ? '<p class="mb-0 text-primary"><i class="bi bi-flag-fill"></i> Milestone</p>' : ''}
                 </div>
             </div>
             <div class="modal-footer">
@@ -440,8 +442,8 @@ class ActivityDeleteForm extends HTMLElement{
         `;
     }
 
-    public initialize(activityData: ProjectActivityResponse){
-        this.activityData = activityData;
+    public initialize(activity: ProjectActivityResponse){
+        this.activity = activity;
         this.render();
         this.setUpEventListeners();
     }
@@ -450,15 +452,15 @@ class ActivityDeleteForm extends HTMLElement{
 customElements.define('activity-delete-form', ActivityDeleteForm);
 
 class ActivityModifyForm extends HTMLElement {
-    activityData: ProjectActivityResponse;
-    phaseData: PhaseResponse;
+    activity: ProjectActivityResponse;
+    parentPhase: PhaseResponse;
     usersAvailable: string[];
     modifiedUserlist: string[];
 
     constructor() {
         super();
-        this.activityData = {} as ProjectActivityResponse;
-        this.phaseData = {} as PhaseResponse;
+        this.activity = {} as ProjectActivityResponse;
+        this.parentPhase = {} as PhaseResponse;
         this.usersAvailable = [];
         this.modifiedUserlist = [];
     }
@@ -469,7 +471,7 @@ class ActivityModifyForm extends HTMLElement {
         const formData = new FormData(form);
 
         const data: any = {
-            _id: this.activityData._id,
+            _id: this.activity._id,
             summary: formData.get('summary') as string,
             description: formData.get('description') as string,
             dtStart: new Date((formData.get('dtStart') as string) + 'T00:00:00.000Z').toISOString(),
@@ -532,35 +534,35 @@ class ActivityModifyForm extends HTMLElement {
                 <div class="mb-4">
                     <label for="summary" class="form-label fw-bold">Title</label>
                     <input type="text" class="form-control" id="summary" name="summary" 
-                           required value="${this.activityData.summary}">
+                           required value="${this.activity.summary}">
                 </div>
                 
                 <div class="mb-4">
                     <label for="description" class="form-label fw-bold">Description</label>
                     <textarea class="form-control" id="description" name="description" 
-                          rows="3">${this.activityData.description || ''}</textarea>
+                          rows="3">${this.activity.description || ''}</textarea>
                 </div>
 
                 <div class="mb-4 d-flex justify-content-between gap-3">
                     <div class="flex-grow-1">
                         <label for="dtStart" class="form-label fw-bold">Start Date</label>
                         <input type="date" class="form-control" id="dtStart" name="dtStart" 
-                           required value="${formatDate(this.activityData.dtStart)}"
-                           min="${formatDate(this.phaseData.dtStart)}" 
-                           max="${formatDate(this.phaseData.due)}">
+                           required value="${formatDate(this.activity.dtStart)}"
+                           min="${formatDate(this.parentPhase.dtStart)}" 
+                           max="${formatDate(this.parentPhase.due)}">
                     </div>
                     <div class="flex-grow-1">
                         <label for="due" class="form-label fw-bold">Due Date</label>
                         <input type="date" class="form-control" id="due" name="due" 
-                           required value="${formatDate(this.activityData.due)}"
-                           min="${formatDate(this.phaseData.dtStart)}" 
-                           max="${formatDate(this.phaseData.due)}">
+                           required value="${formatDate(this.activity.due)}"
+                           min="${formatDate(this.parentPhase.dtStart)}" 
+                           max="${formatDate(this.parentPhase.due)}">
                     </div>
                 </div>
 
                 <div class="mb-4 form-check">
                     <input type="checkbox" class="form-check-input" id="isMilestone" 
-                           name="isMilestone" ${this.activityData.isMilestone ? 'checked' : ''}>
+                           name="isMilestone" ${this.activity.isMilestone ? 'checked' : ''}>
                     <label class="form-check-label" for="isMilestone">Is Milestone</label>
                 </div>
 
@@ -673,9 +675,9 @@ class ActivityModifyForm extends HTMLElement {
         `;
     }
 
-    public initialize(activityData: ProjectActivityResponse, phaseData: PhaseResponse, usersList: string[], usersAvailable: string[]) {
-        this.activityData = activityData;
-        this.phaseData = phaseData;
+    public initialize(activity: ProjectActivityResponse, parentPhase: PhaseResponse, usersList: string[], usersAvailable: string[]) {
+        this.activity = activity;
+        this.parentPhase = parentPhase;
         this.modifiedUserlist = [...usersList];
         this.usersAvailable = [...usersAvailable];
         this.render();

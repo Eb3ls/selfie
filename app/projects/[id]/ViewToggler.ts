@@ -1,4 +1,4 @@
-import { ProjectResponse, ROW_HEIGHT_PX, User } from "./Utils";
+import { PhaseResponse, ProjectResponse, ROW_HEIGHT_PX, SortedActivity, SubPhaseResponse, User } from "./Utils";
 import TimeList from "./ListBody/TimeList";
 import ProjectSettings from "./Forms/ProjectSettings";
 import AddForm from "./Forms/AddForm";
@@ -11,18 +11,22 @@ import UsersList from "./ListBody/UserList";
 class ViewToggler extends HTMLElement{
     viewType: "GANTT" | "LIST";
     listViewType: "USER" | "TIME";
-    data: ProjectResponse | null; 
+    projectData: ProjectResponse | null; 
+    sortedActivities: SortedActivity[];
 
     constructor(){
         super();
         // Inizializziamo la vista sbagliata per forzare il render
         this.viewType = "LIST";
         this.listViewType = "USER";
-        this.data = null;
+        this.projectData = null;
+        this.sortedActivities = [];
     }
 
     async connectedCallback(){
-        this.data = await this.getData();
+        this.projectData = await this.getData();
+        if (!this.projectData) return;
+        this.sortedActivities = this.sortActivies(this.projectData.phases);
         this.render("GANTT");
     }
 
@@ -102,15 +106,15 @@ class ViewToggler extends HTMLElement{
         this.listViewType = view;
         if (this.listViewType === "USER"){
             const listBlock = document.createElement("users-list") as UsersList;
-            if(this.data){
-                listBlock.loadData(this.data.phases);
+            if(this.projectData){
+                listBlock.loadData(this.projectData.phases);
             }
             return listBlock;
         }
         else {
             const listBlock = document.createElement("time-list") as TimeList;
-            if(this.data){
-                listBlock.loadData(this.data.phases, false);
+            if(this.projectData){
+                listBlock.loadData(this.sortedActivities);
             }
             return listBlock;
         }
@@ -148,7 +152,7 @@ class ViewToggler extends HTMLElement{
         }
     }
 
-	async getData() {
+	async getData(): Promise<ProjectResponse | null> {
 		try {
 			const projectID = window.location.pathname.split("/")[2];
 			const res = await fetch(`/api/project/${projectID}`);
@@ -166,61 +170,68 @@ class ViewToggler extends HTMLElement{
 		}
 	}
 
-    createActivityList(){
-        const list: any = [];
-        function appendActivities(phase: any){
+    // Funzione che dato un array di fasi ritorna un array ordinato sulla due di SortedActivity
+    sortActivies(phases: PhaseResponse[]): SortedActivity[] {
+        const allActivities: SortedActivity[] = [];
+
+        function apppendActivities(phase: PhaseResponse | SubPhaseResponse){
             for (const activity of phase.activities){
-                list.push(activity);
+                const act = activity as SortedActivity;
+                act.parentPhase = phase as PhaseResponse;
+                allActivities.push(act)
             }
 
-            if (!phase.subPhases) return;
-            for (const subPhase of phase.subPhases){
-                appendActivities(subPhase);
+            if (!("subPhases" in phase)) return;
+            for(const subPhase of phase.subPhases){
+                apppendActivities(subPhase);
             }
         }
 
-        if (!this.data) return list;
-        for (const phase of this.data.phases){
-            appendActivities(phase);
+        if (!this.projectData) return allActivities;
+        for (const phase of phases){
+            apppendActivities(phase);
         }
 
-        return list;
+        allActivities.sort((a, b) => {
+            return a.due < b.due ? -1 : 1;
+        });
 
+        return allActivities;
     }
 
     loadData() {
-        if (!this.data) return;
-        const usersAvaiable = this.data.users.map((user: User) => user.name);
+        if (!this.projectData) return;
+        const usersAvaiable = this.projectData.users.map((user: User) => user.name);
 
         const projectSettings = document.querySelector("project-settings") as ProjectSettings
         if (projectSettings) {
-            projectSettings.loadData(this.data.summary, this.data._id, this.data.users);
+            projectSettings.loadData(this.projectData.summary, this.projectData._id, this.projectData.users);
         }
         const addFormComponent = document.querySelector("add-form-component") as AddForm;
         if (addFormComponent) {
-            addFormComponent.loadProjectData(this.data._id, this.data.phases, usersAvaiable);
+            addFormComponent.loadProjectData(this.projectData._id, this.projectData.phases, usersAvaiable);
         }
         const activityForm = document.querySelector("activity-form") as ActivityForm;
         if (activityForm) {
-            activityForm.loadData(this.createActivityList(), usersAvaiable);
+            activityForm.loadData(this.sortedActivities, usersAvaiable);
         }
         const sideGanttList = document.querySelector("side-gantt-list") as SideGanttList;
         if (sideGanttList) {
-            sideGanttList.loadProjectData(this.data.phases);
+            sideGanttList.loadProjectData(this.projectData.phases);
         }
         const projectPhaseRow = document.querySelector("project-phase-row") as ProjectPhaseRow;
         if (projectPhaseRow) {
-            projectPhaseRow.loadProjectData(this.data.phases);
+            projectPhaseRow.loadProjectData(this.projectData.phases);
         }
         const timeLine = document.querySelector("time-line") as TimeLine;
         if (timeLine) {
             timeLine.render(new Date());
         }
 
-        console.log("Data:", this.data);
+        console.log("Data:", this.projectData);
 
         const mainTitle = document.getElementById("mainTitle");
-        if (mainTitle) mainTitle.textContent = this.data.summary;
+        if (mainTitle) mainTitle.textContent = this.projectData.summary;
     }
 }
 

@@ -75,6 +75,10 @@ interface ProjectActivityResponse {
 	noteId?: string;
 	noteLink: string | null;
 }
+// Interfaccia per le attivitá ordinate, aggiungiamo il riferimento alla fase genitore
+interface SortedActivity extends ProjectActivityResponse {
+    parentPhase: PhaseResponse;
+}
 
 // Formatta la data ISO per l'input date (yyyy-mm-dd unico formato supportato per min-max)
 function formatDate(date: string): string {
@@ -248,6 +252,7 @@ export type {
     SubPhaseResponse,
     ProjectActivityResponse,
     Link,
+    SortedActivity
 }
 
 export {
