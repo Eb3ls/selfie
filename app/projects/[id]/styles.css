@@ -23,141 +23,143 @@ html {
 /* Stili per le impostazioni generali */
 
 .settings-btn {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    display: inline-block;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	display: inline-block;
 }
 
 .settings-btn:hover {
-    transform: rotate(90deg);
-    color: #0d6efd;
+	transform: rotate(90deg);
+	color: #0d6efd;
 }
 
 .user-item {
-    transition: all 0.2s ease;
-    border-radius: 8px;
-    margin-bottom: 8px;
-    padding: 8px;
+	transition: all 0.2s ease;
+	border-radius: 8px;
+	margin-bottom: 8px;
+	padding: 8px;
 }
 
 .user-item:hover {
-    background-color: #f8f9fa;
+	background-color: #f8f9fa;
 }
 
 .user-list {
-    max-height: 300px;
-    overflow-y: auto;
+	max-height: 300px;
+	overflow-y: auto;
 }
 
 .add-user-form {
-    border-bottom: 2px solid #e9ecef;
-    padding-bottom: 1rem;
-    margin-bottom: 1rem;
+	border-bottom: 2px solid #e9ecef;
+	padding-bottom: 1rem;
+	margin-bottom: 1rem;
 }
 
 /* Form Styles */
 .nav-tabs .nav-link {
-    color: #6c757d;
-    border: none;
-    padding: 10px 20px;
-    position: relative;
-    transition: all 0.2s ease;
+	color: #6c757d;
+	border: none;
+	padding: 10px 20px;
+	position: relative;
+	transition: all 0.2s ease;
 }
 
 .nav-tabs .nav-link.active {
-    color: #0d6efd;
-    background: none;
-    border: none;
+	color: #0d6efd;
+	background: none;
+	border: none;
 }
 
 .nav-tabs .nav-link.active::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background: #0d6efd;
-    transition: all 0.2s ease;
+	content: "";
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	height: 2px;
+	background: #0d6efd;
+	transition: all 0.2s ease;
 }
 
 .modal-content {
-    border: none;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+	border: none;
+	border-radius: 12px;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
 .modal-header {
-    border-bottom: 1px solid rgba(0,0,0,0.1);
-    padding: 1.5rem;
+	border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+	padding: 1.5rem;
 }
 
 .modal-body {
-    padding: 1.5rem;
+	padding: 1.5rem;
 }
 
 .modal-footer {
-    border-top: 1px solid rgba(0,0,0,0.1);
-    padding: 1.5rem;
+	border-top: 1px solid rgba(0, 0, 0, 0.1);
+	padding: 1.5rem;
 }
 
-.form-control, .form-select {
-    border-radius: 8px;
-    border: 1px solid #dee2e6;
-    padding: 0.75rem 1rem;
-    transition: all 0.2s ease;
+.form-control,
+.form-select {
+	border-radius: 8px;
+	border: 1px solid #dee2e6;
+	padding: 0.75rem 1rem;
+	transition: all 0.2s ease;
 }
 
-.form-control:focus, .form-select:focus {
-    box-shadow: 0 0 0 3px rgba(13,110,253,0.15);
+.form-control:focus,
+.form-select:focus {
+	box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
 }
 
 .btn {
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    transition: all 0.2s ease;
+	padding: 0.75rem 1.5rem;
+	border-radius: 8px;
+	transition: all 0.2s ease;
 }
 
 .btn-primary {
-    box-shadow: 0 2px 4px rgba(13,110,253,0.3);
+	box-shadow: 0 2px 4px rgba(13, 110, 253, 0.3);
 }
 
 .btn-primary:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(13,110,253,0.4);
+	transform: translateY(-1px);
+	box-shadow: 0 4px 8px rgba(13, 110, 253, 0.4);
 }
 
 #Form .modal-dialog {
-    max-width: 500px;
+	max-width: 500px;
 }
 
 .form-label {
-    font-weight: 500;
-    margin-bottom: 0.5rem;
-    color: #495057;
+	font-weight: 500;
+	margin-bottom: 0.5rem;
+	color: #495057;
 }
 
 .input-group {
-    border-radius: 8px;
-    overflow: hidden;
+	border-radius: 8px;
+	overflow: hidden;
 }
 
 .input-group .form-control {
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
 }
 
 .input-group .btn {
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
 }
 
 /* List styles */
 
 .list-item {
-    background-color: #f8f9fa;
+	background-color: #f8f9fa;
 }
 
 .list-item:hover {
-    transform: translateY(-1px);
-    background-color: #eff1f3;
+	transform: translateY(-1px);
+	background-color: #eff1f3;
 }

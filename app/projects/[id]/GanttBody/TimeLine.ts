@@ -186,7 +186,6 @@ class TimeLine extends HTMLElement {
 	}
 
 	public render(date: Date) {
-
 		// Pulizia del contenuto
 		this.timeline.innerHTML = "";
 
@@ -199,7 +198,7 @@ class TimeLine extends HTMLElement {
 		if (ganttView && !this.scrollListenerAdded) {
 			ganttView.addEventListener("scroll", this.handleScroll);
 			this.scrollListenerAdded = true;
-		  }
+		}
 	}
 }
 

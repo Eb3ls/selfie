@@ -1,4 +1,10 @@
-import { checkDate, fetcher, formatDate, PhaseResponse, SubPhaseResponse } from "../Utils";
+import {
+	PhaseResponse,
+	SubPhaseResponse,
+	checkDate,
+	fetcher,
+	formatDate
+} from "../Utils";
 
 class AddForm extends HTMLElement {
 	projectId: string;
@@ -9,11 +15,15 @@ class AddForm extends HTMLElement {
 		super();
 		this.projectId = "";
 		this.avaiableUsers = [];
-		this.phaseList = [];	
+		this.phaseList = [];
 	}
 
-	public loadProjectData(id: string, phases: PhaseResponse[], avaiableUsers: string[]) {
-		if(!id || !phases) return;
+	public loadProjectData(
+		id: string,
+		phases: PhaseResponse[],
+		avaiableUsers: string[]
+	) {
+		if (!id || !phases) return;
 		this.projectId = id;
 		this.avaiableUsers = avaiableUsers;
 		this.phaseList = phases;
@@ -45,7 +55,7 @@ class AddForm extends HTMLElement {
 		`;
 	}
 
-	private render(type: "PHASE" | "SUBPHASE" | "ACTIVITY"){
+	private render(type: "PHASE" | "SUBPHASE" | "ACTIVITY") {
 		const modalTitle = this.querySelector(".modal-title") as HTMLElement;
 		const modalBody = this.querySelector(".modal-body") as HTMLElement;
 
@@ -74,8 +84,12 @@ class AddForm extends HTMLElement {
 
 	private setupEventListeners() {
 		const phaseBtn = this.querySelector("#phase-tab") as HTMLButtonElement;
-		const subphaseBtn = this.querySelector("#subphase-tab") as HTMLButtonElement;
-		const activityBtn = this.querySelector("#activity-tab") as HTMLButtonElement;
+		const subphaseBtn = this.querySelector(
+			"#subphase-tab"
+		) as HTMLButtonElement;
+		const activityBtn = this.querySelector(
+			"#activity-tab"
+		) as HTMLButtonElement;
 
 		if (!phaseBtn || !subphaseBtn || !activityBtn) return;
 
@@ -106,14 +120,13 @@ customElements.define("add-form-component", AddForm);
 
 export default AddForm;
 
-class AddPhaseForm extends HTMLElement{
+class AddPhaseForm extends HTMLElement {
 	projectId: string;
 
 	constructor() {
 		super();
 		this.projectId = "";
 	}
-
 
 	public initialize(id: string) {
 		if (!id) return;
@@ -135,9 +148,9 @@ class AddPhaseForm extends HTMLElement{
 			summary: data.Title,
 			projectId: this.projectId,
 			parentId: this.projectId,
-			dtStart: new Date(data.Start + 'T00:00:00.000Z').toISOString(),
-			due: new Date(data.Due + 'T23:59:59.999Z').toISOString()
-		}
+			dtStart: new Date(data.Start + "T00:00:00.000Z").toISOString(),
+			due: new Date(data.Due + "T23:59:59.999Z").toISOString()
+		};
 
 		try {
 			await fetcher(method, url, body);
@@ -178,12 +191,11 @@ class AddPhaseForm extends HTMLElement{
 		const form = this.querySelector("#phaseForm") as HTMLFormElement;
 		form.addEventListener("submit", (event) => this.handleSubmit(event));
 	}
-
 }
 
 customElements.define("add-phase-form", AddPhaseForm);
 
-class AddSubPhaseForm extends HTMLElement{
+class AddSubPhaseForm extends HTMLElement {
 	projectId: string;
 	phaseList: PhaseResponse[];
 
@@ -192,7 +204,6 @@ class AddSubPhaseForm extends HTMLElement{
 		this.projectId = "";
 		this.phaseList = [];
 	}
-
 
 	public initialize(projectId: string, phaseList: PhaseResponse[]) {
 		if (!projectId || !phaseList) return;
@@ -215,9 +226,9 @@ class AddSubPhaseForm extends HTMLElement{
 			summary: data.Title,
 			projectId: this.projectId,
 			parentId: data.Phase,
-			dtStart: new Date(data.Start + 'T00:00:00.000Z').toISOString(),
-			due: new Date(data.Due + 'T23:59:59.999Z').toISOString()
-		}
+			dtStart: new Date(data.Start + "T00:00:00.000Z").toISOString(),
+			due: new Date(data.Due + "T23:59:59.999Z").toISOString()
+		};
 
 		try {
 			await fetcher(method, url, body);
@@ -249,8 +260,7 @@ class AddSubPhaseForm extends HTMLElement{
 				</option>
 			`;
 			return option;
-		}
-		else {
+		} else {
 			option += `
 				<option value="" disabled selected>
 					Select a phase
@@ -273,18 +283,20 @@ class AddSubPhaseForm extends HTMLElement{
 	private handlePhaseSelection(event: Event) {
 		const select = event.target as HTMLSelectElement;
 		const selectedOption = select.selectedOptions[0];
-		if (selectedOption.value === '') return;
+		if (selectedOption.value === "") return;
 
-		const phase = this.phaseList.find((phase: any) => phase._id === selectedOption.value);
+		const phase = this.phaseList.find(
+			(phase: any) => phase._id === selectedOption.value
+		);
 		if (!phase) return;
 
 		const startDate = formatDate(phase.dtStart);
 		const dueDate = formatDate(phase.due);
 
-		const startInput = this.querySelector('#Start') as HTMLInputElement;
-		const dueInput = this.querySelector('#Due') as HTMLInputElement;
+		const startInput = this.querySelector("#Start") as HTMLInputElement;
+		const dueInput = this.querySelector("#Due") as HTMLInputElement;
 
-		if (startInput && dueInput){
+		if (startInput && dueInput) {
 			startInput.min = startDate;
 			startInput.max = dueDate;
 			dueInput.min = startDate;
@@ -298,7 +310,6 @@ class AddSubPhaseForm extends HTMLElement{
 			}
 		}
 	}
-
 
 	private render() {
 		this.innerHTML = `
@@ -337,21 +348,22 @@ class AddSubPhaseForm extends HTMLElement{
 
 	private setupEventListeners() {
 		const form = this.querySelector("#subphaseForm") as HTMLFormElement;
-		if (form){
-			form.addEventListener("submit", (event) => this.handleSubmit(event));
+		if (form) {
+			form.addEventListener("submit", (event) =>
+				this.handleSubmit(event)
+			);
 		}
 
 		const phaseSelect = this.querySelector("#Phase") as HTMLSelectElement;
 		const hiddenBody = this.querySelector("#hiddenBody") as HTMLElement;
 
-		if (phaseSelect && hiddenBody){
-			phaseSelect.addEventListener('change', (e) => {
+		if (phaseSelect && hiddenBody) {
+			phaseSelect.addEventListener("change", (e) => {
 				this.handlePhaseSelection(e);
 				if (phaseSelect.value) {
-					hiddenBody.style.display = 'block';
-				}
-				else {
-					hiddenBody.style.display = 'none';
+					hiddenBody.style.display = "block";
+				} else {
+					hiddenBody.style.display = "none";
 				}
 			});
 		}
@@ -360,7 +372,7 @@ class AddSubPhaseForm extends HTMLElement{
 
 customElements.define("add-subphase-form", AddSubPhaseForm);
 
-class AddActivityForm extends HTMLElement{
+class AddActivityForm extends HTMLElement {
 	phaseList: PhaseResponse[];
 	mainPhaseSelected: PhaseResponse | null;
 	users: string[];
@@ -394,12 +406,12 @@ class AddActivityForm extends HTMLElement{
 		const body = {
 			summary: data.Title,
 			description: data.Description,
-			dtStart: new Date(data.Start+"T00:00:00.000Z").toISOString(),
-			due: new Date(data.Due+"T23:59:59.999Z").toISOString(),
+			dtStart: new Date(data.Start + "T00:00:00.000Z").toISOString(),
+			due: new Date(data.Due + "T23:59:59.999Z").toISOString(),
 			isMilestone: data.isMilestone === "on",
-			phaseId:  data.SubPhase || data.MainPhase,
+			phaseId: data.SubPhase || data.MainPhase,
 			usernameList: this.users
-		}
+		};
 
 		try {
 			await fetcher(method, url, body);
@@ -430,8 +442,7 @@ class AddActivityForm extends HTMLElement{
 				</option>
 			`;
 			return option;
-		}
-		else {
+		} else {
 			option += `
 				<option value="" disabled selected>
 					Select a phase
@@ -440,7 +451,6 @@ class AddActivityForm extends HTMLElement{
 		}
 
 		phases.forEach((phase) => {
-
 			option += `
 				<option value="${phase._id}">
 					${phase.summary}
@@ -456,10 +466,10 @@ class AddActivityForm extends HTMLElement{
 		const startDate = formatDate(phase.dtStart);
 		const dueDate = formatDate(phase.due);
 
-		const startInput = this.querySelector('#Start') as HTMLInputElement;
-		const dueInput = this.querySelector('#Due') as HTMLInputElement;
+		const startInput = this.querySelector("#Start") as HTMLInputElement;
+		const dueInput = this.querySelector("#Due") as HTMLInputElement;
 
-		if (startInput && dueInput){
+		if (startInput && dueInput) {
 			startInput.min = startDate;
 			startInput.max = dueDate;
 			dueInput.min = startDate;
@@ -478,17 +488,21 @@ class AddActivityForm extends HTMLElement{
 	private handlePhaseSelection(event: Event) {
 		const select = event.target as HTMLSelectElement;
 		const selectedOption = select.selectedOptions[0];
-		const hiddenSubphase = this.querySelector("#hiddenSubphase") as HTMLElement;
+		const hiddenSubphase = this.querySelector(
+			"#hiddenSubphase"
+		) as HTMLElement;
 		const hiddenBody = this.querySelector("#hiddenBody") as HTMLElement;
 		if (!hiddenSubphase || !hiddenBody) return;
-		if (selectedOption.value === '') {
+		if (selectedOption.value === "") {
 			this.mainPhaseSelected = null;
-			hiddenSubphase.style.display = 'none';
-			hiddenBody.style.display = 'none';
+			hiddenSubphase.style.display = "none";
+			hiddenBody.style.display = "none";
 			return;
 		}
 
-		const phase = this.phaseList.find((phase) => phase._id === selectedOption.value);
+		const phase = this.phaseList.find(
+			(phase) => phase._id === selectedOption.value
+		);
 		if (!phase) return;
 		this.mainPhaseSelected = phase;
 
@@ -497,19 +511,21 @@ class AddActivityForm extends HTMLElement{
 			return new Date(subPhase.due) >= new Date();
 		});
 
-		const subPhaseSelect = this.querySelector('#SubPhase') as HTMLSelectElement;
+		const subPhaseSelect = this.querySelector(
+			"#SubPhase"
+		) as HTMLSelectElement;
 		if (!subPhaseSelect) return;
 		if (subPhases.length === 0 || phase.activities.length > 0) {
-			hiddenSubphase.style.display = 'none';
-			hiddenBody.style.display = 'block';
+			hiddenSubphase.style.display = "none";
+			hiddenBody.style.display = "block";
 			subPhaseSelect.required = false;
 			this.handleDateSelection(phase);
 			return;
 		}
 
-		// Altrimenti mostriamo il selettore sottofasi 
-		hiddenSubphase.style.display = 'block';
-		hiddenBody.style.display = 'none';
+		// Altrimenti mostriamo il selettore sottofasi
+		hiddenSubphase.style.display = "block";
+		hiddenBody.style.display = "none";
 		subPhaseSelect.required = true;
 		subPhaseSelect.innerHTML = this.createOptions(false);
 	}
@@ -518,14 +534,16 @@ class AddActivityForm extends HTMLElement{
 	private handleSubPhaseSelection(event: Event) {
 		const select = event.target as HTMLSelectElement;
 		const selectedOption = select.selectedOptions[0];
-		if (selectedOption.value === '' || !this.mainPhaseSelected) return;
+		if (selectedOption.value === "" || !this.mainPhaseSelected) return;
 
-		const phase = this.mainPhaseSelected?.subPhases.find((subPhase) => subPhase._id === selectedOption.value);
+		const phase = this.mainPhaseSelected?.subPhases.find(
+			(subPhase) => subPhase._id === selectedOption.value
+		);
 		if (!phase) return;
 
 		const hiddenBody = this.querySelector("#hiddenBody") as HTMLElement;
 		if (hiddenBody) {
-			hiddenBody.style.display = 'block';
+			hiddenBody.style.display = "block";
 		}
 
 		this.handleDateSelection(phase);
@@ -541,8 +559,7 @@ class AddActivityForm extends HTMLElement{
 				</option>
 			`;
 			return option;
-		}
-		else {
+		} else {
 			option += `
 				<option value="" disabled selected>
 					Select a user
@@ -562,37 +579,40 @@ class AddActivityForm extends HTMLElement{
 	}
 
 	// Funzione per aggiungere/rimuovere un utente alla lista
-    private updateUsersSelect(user: string, action: 'ADD' | 'REMOVE') {
-        const select = this.querySelector('#newUser') as HTMLSelectElement;
-        if (!select) return;
+	private updateUsersSelect(user: string, action: "ADD" | "REMOVE") {
+		const select = this.querySelector("#newUser") as HTMLSelectElement;
+		if (!select) return;
 
-        if (action === 'ADD') {
-            if (select.options.length === 1) {
-                select.innerHTML = "<option value='' disabled selected>Select a user...</option>";
-            }
-            select.innerHTML += `<option value="${user}">${user}</option>`;
-        } else {
-            select.querySelectorAll('option').forEach(option => {
-                if (option.value === user) {
-                    option.remove();
-                }
-            });
+		if (action === "ADD") {
+			if (select.options.length === 1) {
+				select.innerHTML =
+					"<option value='' disabled selected>Select a user...</option>";
+			}
+			select.innerHTML += `<option value="${user}">${user}</option>`;
+		} else {
+			select.querySelectorAll("option").forEach((option) => {
+				if (option.value === user) {
+					option.remove();
+				}
+			});
 
-            if (select.options.length === 1) {
-                select.innerHTML = '<option value="" disabled selected>No available users</option>';
-            }
-        }
-    }
+			if (select.options.length === 1) {
+				select.innerHTML =
+					'<option value="" disabled selected>No available users</option>';
+			}
+		}
+	}
 
-    // Aggiunge un utente alla lista
-    private addUser(name: string) {
-        const list = this.querySelector('#userList');
-        if (!list) return;
+	// Aggiunge un utente alla lista
+	private addUser(name: string) {
+		const list = this.querySelector("#userList");
+		if (!list) return;
 
-        const itemBlock = document.createElement('div');
-        itemBlock.className = 'user-item d-flex justify-content-between align-items-center bg-light';
+		const itemBlock = document.createElement("div");
+		itemBlock.className =
+			"user-item d-flex justify-content-between align-items-center bg-light";
 
-        itemBlock.innerHTML = `
+		itemBlock.innerHTML = `
         <span class="user-name">
             <i class="bi bi-person-fill me-2"></i>
             ${name}
@@ -602,18 +622,18 @@ class AddActivityForm extends HTMLElement{
         </button>
         `;
 
-        itemBlock.querySelector('button')?.addEventListener('click', () => {
-            itemBlock.remove();
-            this.users = this.users.filter(user => user !== name);
-            this.avaiableUsers.push(name);
-            if (this.users.length === 0) {
-                list.innerHTML = '<p class="text-muted">No users assigned</p>';
-            }
-            this.updateUsersSelect(name, 'ADD');
-        });
+		itemBlock.querySelector("button")?.addEventListener("click", () => {
+			itemBlock.remove();
+			this.users = this.users.filter((user) => user !== name);
+			this.avaiableUsers.push(name);
+			if (this.users.length === 0) {
+				list.innerHTML = '<p class="text-muted">No users assigned</p>';
+			}
+			this.updateUsersSelect(name, "ADD");
+		});
 
-        list.appendChild(itemBlock);
-    }
+		list.appendChild(itemBlock);
+	}
 
 	private render() {
 		this.innerHTML = `
@@ -674,45 +694,53 @@ class AddActivityForm extends HTMLElement{
 					<button type="submit" class="btn btn-primary">Add</button>
 				</div>
 			</form >
-		`
+		`;
 	}
 
 	private setupEventListeners() {
 		const form = this.querySelector("#activityForm") as HTMLFormElement;
 		form.addEventListener("submit", (event) => this.handleSubmit(event));
 
-		const mainPhaseSelect = this.querySelector("#MainPhase") as HTMLSelectElement;
+		const mainPhaseSelect = this.querySelector(
+			"#MainPhase"
+		) as HTMLSelectElement;
 		if (mainPhaseSelect) {
-			mainPhaseSelect.addEventListener('change', (e) => {
+			mainPhaseSelect.addEventListener("change", (e) => {
 				this.handlePhaseSelection(e);
 			});
 		}
 
-		const subPhaseSelect = this.querySelector("#SubPhase") as HTMLSelectElement;
+		const subPhaseSelect = this.querySelector(
+			"#SubPhase"
+		) as HTMLSelectElement;
 		if (subPhaseSelect) {
-			subPhaseSelect.addEventListener('change', (e) => {
+			subPhaseSelect.addEventListener("change", (e) => {
 				this.handleSubPhaseSelection(e);
 			});
 		}
 
-		const addUserBtn = this.querySelector("#addUserBtn") as HTMLButtonElement;
-		const newUserSelect = this.querySelector("#newUser") as HTMLSelectElement;
+		const addUserBtn = this.querySelector(
+			"#addUserBtn"
+		) as HTMLButtonElement;
+		const newUserSelect = this.querySelector(
+			"#newUser"
+		) as HTMLSelectElement;
 		if (addUserBtn && newUserSelect) {
-			addUserBtn.addEventListener('click', () => {
+			addUserBtn.addEventListener("click", () => {
 				const user = newUserSelect.value;
 				if (!user) return;
 
 				if (this.users.length === 0) {
-					const userList = this.querySelector('#userList');
+					const userList = this.querySelector("#userList");
 					if (userList) {
-						userList.innerHTML = '';
+						userList.innerHTML = "";
 					}
 				}
 
-				this.updateUsersSelect(user, 'REMOVE');
+				this.updateUsersSelect(user, "REMOVE");
 				this.users.push(user);
 				this.addUser(user);
-				newUserSelect.value = '';
+				newUserSelect.value = "";
 			});
 		}
 	}

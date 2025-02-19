@@ -1,6 +1,6 @@
 import ModifyActivity from "../Forms/ActivityForm";
 import ModifyPhase from "../Forms/PhaseForm";
-import {ROW_HEIGHT_PX, formatDate, createStatusIcon} from "../Utils";
+import { ROW_HEIGHT_PX, createStatusIcon, formatDate } from "../Utils";
 
 class SideGanttList extends HTMLElement {
 	constructor() {
@@ -12,14 +12,17 @@ class SideGanttList extends HTMLElement {
 		this.render(phases);
 	}
 
-
 	// Funzione per aggiungere i dati al modale
 	openModify(data: any, parentData: any, isPhase: boolean) {
 		const name = isPhase ? "Phase" : "Activity";
-		const modifyModal = document.getElementById(`Modify${name}Component`) as ModifyPhase | ModifyActivity;
+		const modifyModal = document.getElementById(
+			`Modify${name}Component`
+		) as ModifyPhase | ModifyActivity;
 
 		if (!modifyModal) {
-			console.error(`Errore: modale per modifica delle ${name.toLocaleLowerCase()} non trovato`);
+			console.error(
+				`Errore: modale per modifica delle ${name.toLocaleLowerCase()} non trovato`
+			);
 			return;
 		}
 
@@ -37,7 +40,8 @@ class SideGanttList extends HTMLElement {
 
 		// Container per le due colonne con titolo e date
 		const columnsContainer = document.createElement("div");
-		columnsContainer.className = "d-flex flex-grow-1 justify-content-between";
+		columnsContainer.className =
+			"d-flex flex-grow-1 justify-content-between";
 
 		// Prima colonna con il titolo
 		const firstCol = document.createElement("div");
@@ -88,16 +92,22 @@ class SideGanttList extends HTMLElement {
 		caretIcon.setAttribute("data-bs-toggle", "collapse");
 		caretIcon.setAttribute("data-bs-target", `#collapse${data._id}`);
 		caretIcon.onclick = () => {
-			caretIcon.style.transform = caretIcon.style.transform === "rotate(90deg)" ? "rotate(0)" : "rotate(90deg)";
+			caretIcon.style.transform =
+				caretIcon.style.transform === "rotate(90deg)"
+					? "rotate(0)"
+					: "rotate(90deg)";
 		};
 
 		const button = document.createElement("button");
-		button.className = "btn btn-primary rounded-3 px-4 py-2 flex-grow-1 text-start";
+		button.className =
+			"btn btn-primary rounded-3 px-4 py-2 flex-grow-1 text-start";
 		button.textContent = data.summary;
 		// Impostiamo data-bs-toggle e data-bs-target per il modale
 		button.setAttribute("data-bs-toggle", "modal");
 		button.setAttribute("data-bs-target", "#ModifyPhase");
-		button.onclick = () => { this.openModify(data, parentData, true); };
+		button.onclick = () => {
+			this.openModify(data, parentData, true);
+		};
 
 		togglerContent.appendChild(caretIcon);
 		togglerContent.appendChild(button);
@@ -123,7 +133,10 @@ class SideGanttList extends HTMLElement {
 			noInsideData = false;
 			data.activities.forEach((activity: any) => {
 				const dataForModify = { ...data, activities: [] };
-				const activityElement = this.handleItem(activity, dataForModify);
+				const activityElement = this.handleItem(
+					activity,
+					dataForModify
+				);
 				collapse.appendChild(activityElement);
 			});
 		}
@@ -149,7 +162,7 @@ class SideGanttList extends HTMLElement {
 		this.innerHTML = "";
 		this.appendChild(container);
 	}
- }
+}
 
 customElements.define("side-gantt-list", SideGanttList);
 

@@ -19,7 +19,7 @@ class OnLoadFunctions extends HTMLElement {
 					});
 				}
 			});
-	
+
 			listView.addEventListener("scroll", () => {
 				if (!isSyncingScroll) {
 					isSyncingScroll = true;
@@ -33,7 +33,6 @@ class OnLoadFunctions extends HTMLElement {
 			console.error("Elementi per sincronizzare lo scroll non trovati");
 		}
 	}
-
 
 	async connectedCallback() {
 		try {

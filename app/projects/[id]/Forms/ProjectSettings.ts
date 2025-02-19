@@ -1,23 +1,30 @@
-import {User, validateUsername, validateLength, fetcher, clearError, showError} from "../Utils";
+import {
+	User,
+	clearError,
+	fetcher,
+	showError,
+	validateLength,
+	validateUsername
+} from "../Utils";
 
 class ProjectSettings extends HTMLElement {
-    title: string;
-    id: string;
-    owner: string;
-    users: string[];
-    modifiedUsers: string[];
+	title: string;
+	id: string;
+	owner: string;
+	users: string[];
+	modifiedUsers: string[];
 
-    constructor() {
-        super();
-        this.title = '';
-        this.id = '';
-        this.owner = '';
-        this.users = [];
-        this.modifiedUsers = [];
-    }
+	constructor() {
+		super();
+		this.title = "";
+		this.id = "";
+		this.owner = "";
+		this.users = [];
+		this.modifiedUsers = [];
+	}
 
-    connectedCallback() {
-        this.innerHTML = `
+	connectedCallback() {
+		this.innerHTML = `
             <button class="btn-link btn p-2 rounded-circle" data-bs-toggle="modal" data-bs-target="#settingsModal">
                 <i class="bi bi-gear-fill fs-5 settings-btn"></i>
             </button>
@@ -29,61 +36,65 @@ class ProjectSettings extends HTMLElement {
                 </div>
             </div>
         `;
-    }
+	}
 
-    public loadData(title: string, id: string, users: User[]) {
-        if(!title || !users || !id) return;
-        this.title = title;
-        this.id = id;
-        this.users = users.map(user => user.name);
-        // Eliminiamo il primo utente che é sempre l'owner del progetto
-        this.owner = this.users.shift() || '';
-        this.updateModalContent("VIEW");
-    }
+	public loadData(title: string, id: string, users: User[]) {
+		if (!title || !users || !id) return;
+		this.title = title;
+		this.id = id;
+		this.users = users.map((user) => user.name);
+		// Eliminiamo il primo utente che é sempre l'owner del progetto
+		this.owner = this.users.shift() || "";
+		this.updateModalContent("VIEW");
+	}
 
-    private updateModalContent(type: "VIEW" | "EDIT" | "DELETE") {
-        const modalContent = this.querySelector('.modal-content');
-        if (!modalContent) return;
+	private updateModalContent(type: "VIEW" | "EDIT" | "DELETE") {
+		const modalContent = this.querySelector(".modal-content");
+		if (!modalContent) return;
 
-        if(type === "VIEW") {
-            modalContent.innerHTML = this.createViewTemplate();
-            this.setupViewEventListeners();
-        } else if(type === "EDIT") {
-            this.modifiedUsers = this.users;
-            modalContent.innerHTML = this.createModifyTemplate();
-            this.setupModifyEventListeners();
-        } else if(type === "DELETE") {
-            modalContent.innerHTML = this.createDeleteTemplate();
-            this.setupDeleteEventListeners();
-        }
-    }
+		if (type === "VIEW") {
+			modalContent.innerHTML = this.createViewTemplate();
+			this.setupViewEventListeners();
+		} else if (type === "EDIT") {
+			this.modifiedUsers = this.users;
+			modalContent.innerHTML = this.createModifyTemplate();
+			this.setupModifyEventListeners();
+		} else if (type === "DELETE") {
+			modalContent.innerHTML = this.createDeleteTemplate();
+			this.setupDeleteEventListeners();
+		}
+	}
 
-    private setupViewEventListeners() {
-        const editBtn = this.querySelector('#editBtn');
-        editBtn?.addEventListener('click', () => this.updateModalContent("EDIT"));
+	private setupViewEventListeners() {
+		const editBtn = this.querySelector("#editBtn");
+		editBtn?.addEventListener("click", () =>
+			this.updateModalContent("EDIT")
+		);
 
-        const deleteBtn = this.querySelector('#deleteBtn');
-        deleteBtn?.addEventListener('click', () => this.updateModalContent("DELETE"));
+		const deleteBtn = this.querySelector("#deleteBtn");
+		deleteBtn?.addEventListener("click", () =>
+			this.updateModalContent("DELETE")
+		);
 
-        const userListView = this.querySelector('#userListView');
-        if (userListView) {
-            if (this.users.length > 0) {
-                userListView.innerHTML = '';
-                this.users.forEach(user => {
-                    userListView.innerHTML +=
-                    `<div class="user-item d-flex align-items-center mb-2">
+		const userListView = this.querySelector("#userListView");
+		if (userListView) {
+			if (this.users.length > 0) {
+				userListView.innerHTML = "";
+				this.users.forEach((user) => {
+					userListView.innerHTML += `<div class="user-item d-flex align-items-center mb-2">
                         <i class="bi bi-person-fill me-2"></i>
                         ${user}
                     </div>`;
-                });
-            } else {
-                userListView.innerHTML = '<p class="text-muted">No users assigned</p>';
-            }
-        }
-    }
+				});
+			} else {
+				userListView.innerHTML =
+					'<p class="text-muted">No users assigned</p>';
+			}
+		}
+	}
 
-    private createViewTemplate() {
-        return `
+	private createViewTemplate() {
+		return `
             <div class="modal-header d-flex align-items-center">
                 <h5 class="modal-title d-flex align-items-center gap-2">
                     <i class="bi bi-info-circle"></i>
@@ -119,44 +130,50 @@ class ProjectSettings extends HTMLElement {
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         `;
-    }
+	}
 
-    private async handleModifySubmit(event: Event) {
-        event?.preventDefault();
-        const projectTitleInput = this.querySelector('#projectTitle') as HTMLInputElement;
-        const projectTitle = projectTitleInput.value.trim();
-        
-        if (!validateLength(projectTitle, 3, 100)) {
-            showError(projectTitleInput, 'Il titolo deve essere tra 3 e 100 caratteri');
-            return;
-        }
+	private async handleModifySubmit(event: Event) {
+		event?.preventDefault();
+		const projectTitleInput = this.querySelector(
+			"#projectTitle"
+		) as HTMLInputElement;
+		const projectTitle = projectTitleInput.value.trim();
 
-        const method = "PATCH";
-        const url = "/api/project/modify";
-        const body: any = {
-            _id: this.id,
-            summary: projectTitle,
-            usernameList: this.modifiedUsers
-        };
+		if (!validateLength(projectTitle, 3, 100)) {
+			showError(
+				projectTitleInput,
+				"Il titolo deve essere tra 3 e 100 caratteri"
+			);
+			return;
+		}
 
-        try {
-            await fetcher(method, url, body);
-            window.location.reload();
-        } catch (error) {
-            console.error('Error modifying project:', error);
-            alert('Failed to modify project');
-        }
-    }
+		const method = "PATCH";
+		const url = "/api/project/modify";
+		const body: any = {
+			_id: this.id,
+			summary: projectTitle,
+			usernameList: this.modifiedUsers
+		};
 
-    // Aggiunge un utente alla lista della modify
-    private addUser(username: string) {
-        const userList = this.querySelector('#userList');
-        if (!userList) return;
+		try {
+			await fetcher(method, url, body);
+			window.location.reload();
+		} catch (error) {
+			console.error("Error modifying project:", error);
+			alert("Failed to modify project");
+		}
+	}
 
-        const userItem = document.createElement('div');
-        userItem.className = 'user-item d-flex justify-content-between align-items-center bg-light';
-        
-        userItem.innerHTML = `
+	// Aggiunge un utente alla lista della modify
+	private addUser(username: string) {
+		const userList = this.querySelector("#userList");
+		if (!userList) return;
+
+		const userItem = document.createElement("div");
+		userItem.className =
+			"user-item d-flex justify-content-between align-items-center bg-light";
+
+		userItem.innerHTML = `
             <span class="user-name">
                 <i class="bi bi-person-fill me-2"></i>
                 ${username}
@@ -166,73 +183,85 @@ class ProjectSettings extends HTMLElement {
             </button>
         `;
 
-        userItem.querySelector('button')?.addEventListener('click', () => {
-            userItem.remove();
-            this.modifiedUsers = this.modifiedUsers.filter(user => user !== username);
-            if (this.modifiedUsers.length === 0) {
-                userList.innerHTML = '<p class="text-muted">No users assigned</p>';
-            }
-        });
+		userItem.querySelector("button")?.addEventListener("click", () => {
+			userItem.remove();
+			this.modifiedUsers = this.modifiedUsers.filter(
+				(user) => user !== username
+			);
+			if (this.modifiedUsers.length === 0) {
+				userList.innerHTML =
+					'<p class="text-muted">No users assigned</p>';
+			}
+		});
 
-        userList.appendChild(userItem);
-    }
+		userList.appendChild(userItem);
+	}
 
-    private setupModifyEventListeners() {
-        // Aggiungiamo gli utenti già presenti
-        for (const user of this.modifiedUsers) {
-            this.addUser(user);
-        }
+	private setupModifyEventListeners() {
+		// Aggiungiamo gli utenti già presenti
+		for (const user of this.modifiedUsers) {
+			this.addUser(user);
+		}
 
-        if (this.modifiedUsers.length === 0) {
-            const userList = this.querySelector('#userList');
-            if (userList) {
-                userList.innerHTML = '<p class="text-muted">No users assigned</p>';
-            }
-        }
+		if (this.modifiedUsers.length === 0) {
+			const userList = this.querySelector("#userList");
+			if (userList) {
+				userList.innerHTML =
+					'<p class="text-muted">No users assigned</p>';
+			}
+		}
 
-        const addUserBtn = this.querySelector('#addUserBtn');
-        const newUserInput = this.querySelector('#newUser') as HTMLInputElement;
+		const addUserBtn = this.querySelector("#addUserBtn");
+		const newUserInput = this.querySelector("#newUser") as HTMLInputElement;
 
-        // Aggiungiamo l'evento per l'aggiunta di un nuovo utente alla lista
-        addUserBtn?.addEventListener('click', () => {
-            const username = newUserInput?.value.trim();
-            if (!username) return
-            clearError(newUserInput);
+		// Aggiungiamo l'evento per l'aggiunta di un nuovo utente alla lista
+		addUserBtn?.addEventListener("click", () => {
+			const username = newUserInput?.value.trim();
+			if (!username) return;
+			clearError(newUserInput);
 
-            if (this.owner === username) {
-                showError(newUserInput, `L'utente è già il proprietario del progetto`);
-                return;
-            }
+			if (this.owner === username) {
+				showError(
+					newUserInput,
+					`L'utente è già il proprietario del progetto`
+				);
+				return;
+			}
 
-            if (this.modifiedUsers.includes(username)) {
-                showError(newUserInput, 'Utente già presente');
-                return;
-            }
+			if (this.modifiedUsers.includes(username)) {
+				showError(newUserInput, "Utente già presente");
+				return;
+			}
 
-            if (validateUsername(username)) {
-                if (this.modifiedUsers.length === 0) {
-                    const userList = this.querySelector('#userList');
-                    if (userList) {
-                        userList.innerHTML = '';
-                    }
-                }
-                this.modifiedUsers.push(username);
-                this.addUser(username);
-                newUserInput.value = '';
-            } else {
-                showError(newUserInput, 'Username non valido (3-20 caratteri, solo lettere, numeri, - e _)');
-            }
-        });
+			if (validateUsername(username)) {
+				if (this.modifiedUsers.length === 0) {
+					const userList = this.querySelector("#userList");
+					if (userList) {
+						userList.innerHTML = "";
+					}
+				}
+				this.modifiedUsers.push(username);
+				this.addUser(username);
+				newUserInput.value = "";
+			} else {
+				showError(
+					newUserInput,
+					"Username non valido (3-20 caratteri, solo lettere, numeri, - e _)"
+				);
+			}
+		});
 
-        const saveBtn = this.querySelector('#saveChanges');
-        saveBtn?.addEventListener('click', (e) => this.handleModifySubmit(e));
+		const saveBtn = this.querySelector("#saveChanges");
+		saveBtn?.addEventListener("click", (e) => this.handleModifySubmit(e));
 
-        const cancelBtn = this.querySelector('#toggleEditBtn');
-        cancelBtn?.addEventListener('click', () => this.updateModalContent("VIEW"));
-    }
+		const cancelBtn = this.querySelector("#toggleEditBtn");
+		cancelBtn?.addEventListener("click", () =>
+			this.updateModalContent("VIEW")
+		);
+	}
 
-    private createModifyTemplate() {
-        return `
+	private createModifyTemplate() {
+		return `
             <div class="modal-header">
                 <h5 class="modal-title d-flex align-items-center gap-2">
                     <i class="bi bi-pencil-fill"></i>
@@ -271,30 +300,32 @@ class ProjectSettings extends HTMLElement {
                 <button type="submit" class="btn btn-primary" id="saveChanges">Salva Modifiche</button>
             </div>
         `;
-    }
+	}
 
-    // Blocco per l'eliminazione del progetto
-    private setupDeleteEventListeners() {
-        const cancelBtn = this.querySelector('#toggleEditBtn');
-        cancelBtn?.addEventListener('click', () => this.updateModalContent("VIEW"));
+	// Blocco per l'eliminazione del progetto
+	private setupDeleteEventListeners() {
+		const cancelBtn = this.querySelector("#toggleEditBtn");
+		cancelBtn?.addEventListener("click", () =>
+			this.updateModalContent("VIEW")
+		);
 
-        const confirmBtn = this.querySelector('#confirmDeleteBtn');
-        confirmBtn?.addEventListener('click', async () => {
-            const url = `/api/project/delete/${this.id}`;
-            const method = 'DELETE';
-            const body = {_id: this.id};
-            try {
-                await fetcher(method, url, body);
-                window.location.href = '/projects';
-            } catch (error) {
-                console.error('Error deleting project:', error);
-                alert('Failed to delete project');
-            }
-        });
-    }
+		const confirmBtn = this.querySelector("#confirmDeleteBtn");
+		confirmBtn?.addEventListener("click", async () => {
+			const url = `/api/project/delete/${this.id}`;
+			const method = "DELETE";
+			const body = { _id: this.id };
+			try {
+				await fetcher(method, url, body);
+				window.location.href = "/projects";
+			} catch (error) {
+				console.error("Error deleting project:", error);
+				alert("Failed to delete project");
+			}
+		});
+	}
 
-    private createDeleteTemplate() {
-        return `
+	private createDeleteTemplate() {
+		return `
             <div class="modal-header">
                 <h5 class="modal-title text-danger d-flex align-items-center gap-2">
                     <i class="bi bi-exclamation-triangle-fill"></i>
@@ -316,9 +347,9 @@ class ProjectSettings extends HTMLElement {
                 <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete Project</button>
             </div>
         `;
-    }
+	}
 }
 
-customElements.define('project-settings', ProjectSettings);
+customElements.define("project-settings", ProjectSettings);
 
 export default ProjectSettings;

@@ -76,7 +76,7 @@ class ProjectPhaseRow extends HTMLElement {
 		return phaseRow.outerHTML + collapse.outerHTML;
 	}
 
-	render(data: any){
+	render(data: any) {
 		const container = document.createElement("div");
 		container.className = "container";
 

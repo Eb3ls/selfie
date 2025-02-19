@@ -1,31 +1,37 @@
-import {fetcher, formatDate, PhaseResponse, ProjectActivityResponse, User} from "../Utils";
+import {
+	PhaseResponse,
+	ProjectActivityResponse,
+	User,
+	fetcher,
+	formatDate
+} from "../Utils";
 
 interface PartialLink {
-    name: string;
-    _id: string;
+	name: string;
+	_id: string;
 }
 
 class ActivityForm extends HTMLElement {
-    parentPhase: PhaseResponse;
-    activity: ProjectActivityResponse;
-    activitiesList: ProjectActivityResponse[];
-    usersAvaiable: string[];
-    usersList: string[];
-    modifiedLinklist: PartialLink[];
+	parentPhase: PhaseResponse;
+	activity: ProjectActivityResponse;
+	activitiesList: ProjectActivityResponse[];
+	usersAvaiable: string[];
+	usersList: string[];
+	modifiedLinklist: PartialLink[];
 
-    constructor() {
-        super();
-        this.parentPhase = {} as PhaseResponse;
-        this.activity = {} as ProjectActivityResponse;
-        this.activitiesList = [];
-        this.usersAvaiable = [];
-        this.usersList = [];
-        this.modifiedLinklist = [];
-    }
+	constructor() {
+		super();
+		this.parentPhase = {} as PhaseResponse;
+		this.activity = {} as ProjectActivityResponse;
+		this.activitiesList = [];
+		this.usersAvaiable = [];
+		this.usersList = [];
+		this.modifiedLinklist = [];
+	}
 
-    // Renderizziamo il componente senza contenuto
-    connectedCallback() {
-        this.innerHTML = `
+	// Renderizziamo il componente senza contenuto
+	connectedCallback() {
+		this.innerHTML = `
             <div class="modal fade" id="ModifyActivity" tabindex="-1">
                 <div class="modal-dialog modal-lg">
                     <div class="modal-content">
@@ -34,30 +40,36 @@ class ActivityForm extends HTMLElement {
             </div>
         `;
 
-        this.id = 'ModifyActivityComponent';
-    }
+		this.id = "ModifyActivityComponent";
+	}
 
-    // Funzione chiamata per fornire i dati generali, chimata da viewToggler
-    public loadData(activitiesList: ProjectActivityResponse[], usersAvaiable: string[]) {
-        this.activitiesList = [...activitiesList];
-        this.usersAvaiable = [...usersAvaiable];
-    }
+	// Funzione chiamata per fornire i dati generali, chimata da viewToggler
+	public loadData(
+		activitiesList: ProjectActivityResponse[],
+		usersAvaiable: string[]
+	) {
+		this.activitiesList = [...activitiesList];
+		this.usersAvaiable = [...usersAvaiable];
+	}
 
-    // Funzione per fornire i dati dell'activity specifica
-    public updateData(activity: ProjectActivityResponse, parentPhase: PhaseResponse) {
-        if (!activity || !parentPhase) return;
-        this.activity = activity;
-        // Necessario per capire il range di date disponibili
-        this.parentPhase = parentPhase;
-        this.usersList = activity.users?.map(user => user.name) || [];
-        for (const link of this.activity.prevLinks) {
-            this.modifiedLinklist.push({ name: link.summary, _id: link._id });
-        }
-        this.updateModalContent("VIEW");
-    }
+	// Funzione per fornire i dati dell'activity specifica
+	public updateData(
+		activity: ProjectActivityResponse,
+		parentPhase: PhaseResponse
+	) {
+		if (!activity || !parentPhase) return;
+		this.activity = activity;
+		// Necessario per capire il range di date disponibili
+		this.parentPhase = parentPhase;
+		this.usersList = activity.users?.map((user) => user.name) || [];
+		for (const link of this.activity.prevLinks) {
+			this.modifiedLinklist.push({ name: link.summary, _id: link._id });
+		}
+		this.updateModalContent("VIEW");
+	}
 
-    private createViewTemplate() {
-        return `
+	private createViewTemplate() {
+		return `
             <div class="modal-body">
                 <div class="mb-4">
                     <label class="form-label text-muted small">Title</label>
@@ -66,7 +78,7 @@ class ActivityForm extends HTMLElement {
                 
                 <div class="mb-4">
                     <label class="form-label text-muted small">Description</label>
-                    <p class="fs-5">${this.activity.description || 'No description provided.'}</p>
+                    <p class="fs-5">${this.activity.description || "No description provided."}</p>
                 </div>
 
                 <div class="mb-4">
@@ -82,64 +94,95 @@ class ActivityForm extends HTMLElement {
                     </div>
                 </div>
 
-                ${this.activity.isMilestone ? `
+                ${
+					this.activity.isMilestone
+						? `
                 <div class="mb-4">
                     <span class="badge bg-primary">
                         <i class="bi bi-flag-fill me-1"></i>
                         Milestone
                     </span>
                 </div>
-                ` : ''}
+                `
+						: ""
+				}
 
                 <div class="mb-4">
                     <label class="form-label text-muted small">Assigned Users</label>
                     <div class="user-list">
-                        ${this.activity.users?.length > 0
-                        ? this.activity.users.map((user: User) => `
+                        ${
+							this.activity.users?.length > 0
+								? this.activity.users
+										.map(
+											(user: User) => `
                                         <div class="user-item d-flex align-items-center mb-2">
                                             <i class="bi bi-person-fill me-2"></i>
                                             ${user.name}
                                         </div>
-                                    `).join('')
-                        : '<p class="text-muted">No users assigned</p>'}
+                                    `
+										)
+										.join("")
+								: '<p class="text-muted">No users assigned</p>'
+						}
                     </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label text-muted small">Associated Note</label>
+                    <a href="/notepad/${this.activity.noteId}" class="btn btn-outline-info">
+                        Access Note
+                    </a>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         `;
-    }
+	}
 
-    private updateModalContent(mode: "VIEW" | "EDIT" | "LINK" | "DELETE") {
-        const modalContent = this.querySelector('.modal-content');
-        if (!modalContent) return;
+	private updateModalContent(mode: "VIEW" | "EDIT" | "LINK" | "DELETE") {
+		const modalContent = this.querySelector(".modal-content");
+		if (!modalContent) return;
 
-        modalContent.innerHTML = "";
-        if (mode === "DELETE") {
-            const body = new ActivityDeleteForm();
-            body.initialize(this.activity);
-            modalContent.appendChild(body);
+		modalContent.innerHTML = "";
+		if (mode === "DELETE") {
+			const body = new ActivityDeleteForm();
+			body.initialize(this.activity);
+			modalContent.appendChild(body);
 
-            const toggleBtn = modalContent.querySelector('#toggleEditBtn');
-            toggleBtn?.addEventListener('click', () => this.updateModalContent("VIEW"));
-        } else if (mode === "EDIT") {
-            const body = new ActivityModifyForm();
-            body.initialize(this.activity, this.parentPhase, this.usersList, this.usersAvaiable);
-            modalContent.appendChild(body);
+			const toggleBtn = modalContent.querySelector("#toggleEditBtn");
+			toggleBtn?.addEventListener("click", () =>
+				this.updateModalContent("VIEW")
+			);
+		} else if (mode === "EDIT") {
+			const body = new ActivityModifyForm();
+			body.initialize(
+				this.activity,
+				this.parentPhase,
+				this.usersList,
+				this.usersAvaiable
+			);
+			modalContent.appendChild(body);
 
-            const toggleBtn = modalContent.querySelector('#toggleEditBtn');
-            toggleBtn?.addEventListener('click', () => this.updateModalContent("VIEW"));
+			const toggleBtn = modalContent.querySelector("#toggleEditBtn");
+			toggleBtn?.addEventListener("click", () =>
+				this.updateModalContent("VIEW")
+			);
+		} else if (mode === "LINK") {
+			const body = new ActivityLinkForm();
+			body.initialize(
+				this.activity,
+				this.activitiesList,
+				this.modifiedLinklist
+			);
+			modalContent.appendChild(body);
 
-        } else if (mode === "LINK") {
-            const body = new ActivityLinkForm();
-            body.initialize(this.activity, this.activitiesList, this.modifiedLinklist);
-            modalContent.appendChild(body);
-
-            const toggleBtn = modalContent.querySelector('#toggleEditBtn');
-            toggleBtn?.addEventListener('click', () => this.updateModalContent("VIEW"));
-        } else {
-            modalContent.innerHTML = `
+			const toggleBtn = modalContent.querySelector("#toggleEditBtn");
+			toggleBtn?.addEventListener("click", () =>
+				this.updateModalContent("VIEW")
+			);
+		} else {
+			modalContent.innerHTML = `
                 <div class="modal-header d-flex align-items-center">
                     <h5 class="modal-title d-flex align-items-center gap-2">
                         <i class="bi bi-info-circle"></i>
@@ -164,79 +207,91 @@ class ActivityForm extends HTMLElement {
                 ${this.createViewTemplate()}
             `;
 
-            const deleteBtn = modalContent.querySelector('#deleteBtn');
-            deleteBtn?.addEventListener('click', () => this.updateModalContent("DELETE"));
+			const deleteBtn = modalContent.querySelector("#deleteBtn");
+			deleteBtn?.addEventListener("click", () =>
+				this.updateModalContent("DELETE")
+			);
 
-            const linkBtn = modalContent.querySelector('#linkBtn');
-            linkBtn?.addEventListener('click', () => this.updateModalContent("LINK"));
+			const linkBtn = modalContent.querySelector("#linkBtn");
+			linkBtn?.addEventListener("click", () =>
+				this.updateModalContent("LINK")
+			);
 
-            const editBtn = modalContent.querySelector('#editBtn');
-            editBtn?.addEventListener('click', () => this.updateModalContent("EDIT"));
-        }
-    }
+			const editBtn = modalContent.querySelector("#editBtn");
+			editBtn?.addEventListener("click", () =>
+				this.updateModalContent("EDIT")
+			);
+		}
+	}
 }
 
-customElements.define('activity-form', ActivityForm);
+customElements.define("activity-form", ActivityForm);
 
 export default ActivityForm;
 
-class ActivityLinkForm extends HTMLElement{
+class ActivityLinkForm extends HTMLElement {
+	activity: ProjectActivityResponse;
+	activitiesList: ProjectActivityResponse[];
+	modifiedLinklist: PartialLink[];
 
-    activity: ProjectActivityResponse;
-    activitiesList: ProjectActivityResponse[];
-    modifiedLinklist: PartialLink[];
+	constructor() {
+		super();
+		this.activity = {} as ProjectActivityResponse;
+		this.activitiesList = [];
+		this.modifiedLinklist = [];
+	}
 
-    constructor (){
-        super();
-        this.activity = {} as ProjectActivityResponse;
-        this.activitiesList = [];
-        this.modifiedLinklist = [];
-    }
+	private createLinkItems() {
+		const availableActivities = this.getAvailableActivities();
+		const text =
+			availableActivities.length > 0
+				? "Select an activity..."
+				: "No available activities";
 
-    private createLinkItems() {
-        const availableActivities = this.getAvailableActivities();
-        const text = availableActivities.length > 0 ? 'Select an activity...' : 'No available activities';
-
-        let block = `<option value="" disabled selected>${text}</option>`;
-        for (const activity of availableActivities) {
-            block += `
+		let block = `<option value="" disabled selected>${text}</option>`;
+		for (const activity of availableActivities) {
+			block += `
                 <option value="${activity._id}">${activity.summary}</option>
             `;
-        }
-        return block;
-    }
+		}
+		return block;
+	}
 
-    // Funzione per ottenere le attivitá disponibili per il linking
-    // Supponiamo che la lista di activies é giá ordinata per data di fine
-    private getAvailableActivities() {
-        const availableActivities: ProjectActivityResponse[] = [];
+	// Funzione per ottenere le attivitá disponibili per il linking
+	// Supponiamo che la lista di activies é giá ordinata per data di fine
+	private getAvailableActivities() {
+		const availableActivities: ProjectActivityResponse[] = [];
 
-        const startDate = new Date(this.activity.dtStart);
-        for (const activity of this.activitiesList) {
-            // Se siamo arrivati all'attivitá corrente, interrompiamo, quelle successive hanno una due data maggiore
-            if (activity._id === this.activity._id) {
-                break;
-            }
+		const startDate = new Date(this.activity.dtStart);
+		for (const activity of this.activitiesList) {
+			// Se siamo arrivati all'attivitá corrente, interrompiamo, quelle successive hanno una due data maggiore
+			if (activity._id === this.activity._id) {
+				break;
+			}
 
-            // Se l'attivitá é giá collegata o é giá stata selezionata, la saltiamo
-            if(this.activity.prevLinks.some(link => link._id === activity._id) || 
-               this.modifiedLinklist.some(link => link._id === activity._id)) {
-                continue;
-            }
+			// Se l'attivitá é giá collegata o é giá stata selezionata, la saltiamo
+			if (
+				this.activity.prevLinks.some(
+					(link) => link._id === activity._id
+				) ||
+				this.modifiedLinklist.some((link) => link._id === activity._id)
+			) {
+				continue;
+			}
 
-            const activityDue = new Date(formatDate(activity.due));
-            if (activityDue >= startDate) {
-                continue;
-            }
+			const activityDue = new Date(formatDate(activity.due));
+			if (activityDue >= startDate) {
+				continue;
+			}
 
-            availableActivities.push(activity);
-        }
+			availableActivities.push(activity);
+		}
 
-        return availableActivities;
-    }
+		return availableActivities;
+	}
 
-    private createForm() {
-        return `
+	private createForm() {
+		return `
             <div class="modal-body">
                 <div class="mb-4">
                     <h4 class="mb-3">${this.activity.summary}</h4>
@@ -259,17 +314,18 @@ class ActivityLinkForm extends HTMLElement{
                 <button type="submit" class="btn btn-primary">Save Links</button>
             </div>
         `;
-    }
+	}
 
-    private addItem(item: PartialLink) {
-        const list = this.querySelector('#linkList');
-        if (!list) return;
+	private addItem(item: PartialLink) {
+		const list = this.querySelector("#linkList");
+		if (!list) return;
 
-        const itemBlock = document.createElement('div');
-        itemBlock.className = 'user-item d-flex justify-content-between align-items-center bg-light';
-        itemBlock.setAttribute('data-link', item._id);
+		const itemBlock = document.createElement("div");
+		itemBlock.className =
+			"user-item d-flex justify-content-between align-items-center bg-light";
+		itemBlock.setAttribute("data-link", item._id);
 
-        itemBlock.innerHTML = `
+		itemBlock.innerHTML = `
             <span class="link-name">
                 <i class="bi bi-link-45deg me-2"></i>
                 ${item.name}
@@ -279,68 +335,70 @@ class ActivityLinkForm extends HTMLElement{
             </button>
         `;
 
-        itemBlock.querySelector('button')?.addEventListener('click', () => {
-            this.modifiedLinklist = this.modifiedLinklist.filter(link => link._id !== item._id);
-            itemBlock.remove();
-        });
+		itemBlock.querySelector("button")?.addEventListener("click", () => {
+			this.modifiedLinklist = this.modifiedLinklist.filter(
+				(link) => link._id !== item._id
+			);
+			itemBlock.remove();
+		});
 
-        list.appendChild(itemBlock);
-    }
+		list.appendChild(itemBlock);
+	}
 
-    private async handleSave(e: Event){
-        e.preventDefault();
-        const url = "/api/project/activity/link";
-        const method = "PATCH";
+	private async handleSave(e: Event) {
+		e.preventDefault();
+		const url = "/api/project/activity/link";
+		const method = "PATCH";
 
-        for (const link of this.modifiedLinklist) {
-            const body = {
-                "prevId": link._id,
-                "nextId": this.activity._id,
-            }
+		for (const link of this.modifiedLinklist) {
+			const body = {
+				prevId: link._id,
+				nextId: this.activity._id
+			};
 
-            try{
-                // TODO: Controllare
-                const response = await fetcher(method, url, body);
-                console.log(response);
-            } catch (error) {
-                console.error('Error linking activities:', error);
-                alert('Failed to link activities');
-            }
-        }
+			try {
+				// TODO: Controllare
+				const response = await fetcher(method, url, body);
+				console.log(response);
+			} catch (error) {
+				console.error("Error linking activities:", error);
+				alert("Failed to link activities");
+			}
+		}
 
-        window.location.reload();
-    }
+		window.location.reload();
+	}
 
-    private setupEventListeners() {
-        const btn = this.querySelector('#addLinkBtn');
-        const newLink = this.querySelector('#newLink') as HTMLSelectElement;
+	private setupEventListeners() {
+		const btn = this.querySelector("#addLinkBtn");
+		const newLink = this.querySelector("#newLink") as HTMLSelectElement;
 
-        for (const link of this.modifiedLinklist) {
-            this.addItem(link);
-        }
+		for (const link of this.modifiedLinklist) {
+			this.addItem(link);
+		}
 
-        // Link management logic 
-        btn?.addEventListener('click', () => {
-            const selectedOption = newLink.options[newLink.selectedIndex];
-            const value = selectedOption?.value;
-            const name = selectedOption?.textContent;
-            
-            if (!value) return;
+		// Link management logic
+		btn?.addEventListener("click", () => {
+			const selectedOption = newLink.options[newLink.selectedIndex];
+			const value = selectedOption?.value;
+			const name = selectedOption?.textContent;
 
-            const newItem: PartialLink = { name: name || value, _id: value };
-            this.modifiedLinklist.push(newItem);
-            this.addItem(newItem);
-            
-            newLink.innerHTML = this.createLinkItems();
-            newLink.selectedIndex = 0;
-        });
+			if (!value) return;
 
-        const form = this.querySelector('#modifyLinkForm');
-        form?.addEventListener('submit', this.handleSave);
-    }
+			const newItem: PartialLink = { name: name || value, _id: value };
+			this.modifiedLinklist.push(newItem);
+			this.addItem(newItem);
 
-    private render(){
-        this.innerHTML = `
+			newLink.innerHTML = this.createLinkItems();
+			newLink.selectedIndex = 0;
+		});
+
+		const form = this.querySelector("#modifyLinkForm");
+		form?.addEventListener("submit", this.handleSave);
+	}
+
+	private render() {
+		this.innerHTML = `
             <div class="modal-header">
                 <h5 class="modal-title">
                     <i class="bi bi-link"></i>
@@ -356,59 +414,57 @@ class ActivityLinkForm extends HTMLElement{
             </div>
             <form id="modifyLinkForm">${this.createForm()}</form>
         `;
-    }
+	}
 
-    public initialize(
-        activity: ProjectActivityResponse,
-        activitiesList: ProjectActivityResponse[],
-        modifiedLinklist: PartialLink[]
-    ){
-        this.activity = activity;
-        this.activitiesList = activitiesList;
-        this.modifiedLinklist = modifiedLinklist;
-        this.render();
-        this.setupEventListeners();
-    }
+	public initialize(
+		activity: ProjectActivityResponse,
+		activitiesList: ProjectActivityResponse[],
+		modifiedLinklist: PartialLink[]
+	) {
+		this.activity = activity;
+		this.activitiesList = activitiesList;
+		this.modifiedLinklist = modifiedLinklist;
+		this.render();
+		this.setupEventListeners();
+	}
 }
 
-customElements.define('activity-link-form', ActivityLinkForm);
+customElements.define("activity-link-form", ActivityLinkForm);
 
-class ActivityDeleteForm extends HTMLElement{
-    activity: ProjectActivityResponse
+class ActivityDeleteForm extends HTMLElement {
+	activity: ProjectActivityResponse;
 
-    constructor (){
-        super();
-        this.activity = {} as ProjectActivityResponse;
-    }
+	constructor() {
+		super();
+		this.activity = {} as ProjectActivityResponse;
+	}
 
-    async handleDelete(e: Event){
-        const url = "/api/project/activity/delete";
-        const body = {
-            _id: this.activity._id
-        }
-        const method = "DELETE";
+	async handleDelete(e: Event) {
+		const url = "/api/project/activity/delete";
+		const body = {
+			_id: this.activity._id
+		};
+		const method = "DELETE";
 
-        try {
-            // TODO: Controllare
-            const response = await fetcher(method, url, body);
-            console.log(response);
-            window.location.reload();
-        } catch (error) {
-            console.error('Error deleting activity:', error);
-            alert('Failed to delete activity');
-        }
+		try {
+			// TODO: Controllare
+			const response = await fetcher(method, url, body);
+			console.log(response);
+			window.location.reload();
+		} catch (error) {
+			console.error("Error deleting activity:", error);
+			alert("Failed to delete activity");
+		}
+	}
 
+	private setUpEventListeners() {
+		const confirmBtn = this.querySelector("#confirmDeleteBtn");
 
-    }
+		confirmBtn?.addEventListener("click", this.handleDelete);
+	}
 
-    private setUpEventListeners(){
-        const confirmBtn = this.querySelector('#confirmDeleteBtn');
-
-        confirmBtn?.addEventListener('click', this.handleDelete);
-    }
-
-    private render(){
-        this.innerHTML = `
+	private render() {
+		this.innerHTML = `
             <div class="modal-header">
                 <h5 class="modal-title text-danger d-flex align-items-center gap-2">
                     <i class="bi bi-exclamation-triangle-fill"></i>
@@ -433,103 +489,113 @@ class ActivityDeleteForm extends HTMLElement{
                     <p class="mb-0">Title: ${this.activity.summary}</p>
                     <p class="mb-0">Start Date: ${new Date(this.activity.dtStart).toLocaleDateString()}</p>
                     <p class="mb-0">Due Date: ${new Date(formatDate(this.activity.due)).toLocaleDateString()}</p>
-                    ${this.activity.isMilestone ? '<p class="mb-0 text-primary"><i class="bi bi-flag-fill"></i> Milestone</p>' : ''}
+                    ${this.activity.isMilestone ? '<p class="mb-0 text-primary"><i class="bi bi-flag-fill"></i> Milestone</p>' : ""}
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete Activity</button>
             </div>
         `;
-    }
+	}
 
-    public initialize(activity: ProjectActivityResponse){
-        this.activity = activity;
-        this.render();
-        this.setUpEventListeners();
-    }
+	public initialize(activity: ProjectActivityResponse) {
+		this.activity = activity;
+		this.render();
+		this.setUpEventListeners();
+	}
 }
 
-customElements.define('activity-delete-form', ActivityDeleteForm);
+customElements.define("activity-delete-form", ActivityDeleteForm);
 
 class ActivityModifyForm extends HTMLElement {
-    activity: ProjectActivityResponse;
-    parentPhase: PhaseResponse;
-    usersAvailable: string[];
-    modifiedUserlist: string[];
+	activity: ProjectActivityResponse;
+	parentPhase: PhaseResponse;
+	usersAvailable: string[];
+	modifiedUserlist: string[];
 
-    constructor() {
-        super();
-        this.activity = {} as ProjectActivityResponse;
-        this.parentPhase = {} as PhaseResponse;
-        this.usersAvailable = [];
-        this.modifiedUserlist = [];
-    }
+	constructor() {
+		super();
+		this.activity = {} as ProjectActivityResponse;
+		this.parentPhase = {} as PhaseResponse;
+		this.usersAvailable = [];
+		this.modifiedUserlist = [];
+	}
 
-    private async handleSubmit(event: Event) {
-        event.preventDefault();
-        const form = event.target as HTMLFormElement;
-        const formData = new FormData(form);
+	private async handleSubmit(event: Event) {
+		event.preventDefault();
+		const form = event.target as HTMLFormElement;
+		const formData = new FormData(form);
 
-        const data: any = {
-            _id: this.activity._id,
-            summary: formData.get('summary') as string,
-            description: formData.get('description') as string,
-            dtStart: new Date((formData.get('dtStart') as string) + 'T00:00:00.000Z').toISOString(),
-            due: new Date((formData.get('due') as string) + 'T23:59:59.999Z').toISOString(),
-            isMilestone: formData.get('isMilestone') === 'on',
-            usernameList: this.modifiedUserlist
-        };
+		const data: any = {
+			_id: this.activity._id,
+			summary: formData.get("summary") as string,
+			description: formData.get("description") as string,
+			dtStart: new Date(
+				(formData.get("dtStart") as string) + "T00:00:00.000Z"
+			).toISOString(),
+			due: new Date(
+				(formData.get("due") as string) + "T23:59:59.999Z"
+			).toISOString(),
+			isMilestone: formData.get("isMilestone") === "on",
+			usernameList: this.modifiedUserlist
+		};
 
-        const url = `/api/project/activity/modify`;
-        const method = 'PATCH';
+		const url = `/api/project/activity/modify`;
+		const method = "PATCH";
 
-        try {
-            await fetcher(method, url, data);
-            window.location.reload();
-        } catch (error) {
-            console.error('Error modifying activity:', error);
-            alert('Failed to modify activity');
-        }
+		try {
+			await fetcher(method, url, data);
+			window.location.reload();
+		} catch (error) {
+			console.error("Error modifying activity:", error);
+			alert("Failed to modify activity");
+		}
+	}
 
-    }
+	private createUsersSelect() {
+		const availableUsers = this.usersAvailable.filter(
+			(user) => !this.modifiedUserlist.includes(user)
+		);
+		const text =
+			availableUsers.length > 0
+				? "Select a user..."
+				: "No available users";
 
-    private createUsersSelect() {
-        const availableUsers = this.usersAvailable.filter(user => !this.modifiedUserlist.includes(user));
-        const text = availableUsers.length > 0 ? 'Select a user...' : 'No available users';
-
-        let block = `<option value="" disabled selected>${text}</option>`;
-        for (const user of availableUsers) {
-            block += `
+		let block = `<option value="" disabled selected>${text}</option>`;
+		for (const user of availableUsers) {
+			block += `
                 <option value="${user}">${user}</option>
             `;
-        }
-        return block;
-    }
+		}
+		return block;
+	}
 
-    private updateUsersSelect(user: string, action: 'ADD' | 'REMOVE') {
-        const select = this.querySelector('#newUser') as HTMLSelectElement;
-        if (!select) return;
+	private updateUsersSelect(user: string, action: "ADD" | "REMOVE") {
+		const select = this.querySelector("#newUser") as HTMLSelectElement;
+		if (!select) return;
 
-        if (action === 'ADD') {
-            if (select.options.length === 1) {
-                select.innerHTML = "<option value='' disabled selected>Select a user...</option>";
-            }
-            select.innerHTML += `<option value="${user}">${user}</option>`;
-        } else {
-            select.querySelectorAll('option').forEach(option => {
-                if (option.value === user) {
-                    option.remove();
-                }
-            });
+		if (action === "ADD") {
+			if (select.options.length === 1) {
+				select.innerHTML =
+					"<option value='' disabled selected>Select a user...</option>";
+			}
+			select.innerHTML += `<option value="${user}">${user}</option>`;
+		} else {
+			select.querySelectorAll("option").forEach((option) => {
+				if (option.value === user) {
+					option.remove();
+				}
+			});
 
-            if (select.options.length === 1) {
-                select.innerHTML = '<option value="" disabled selected>No available users</option>';
-            }
-        }
-    }
+			if (select.options.length === 1) {
+				select.innerHTML =
+					'<option value="" disabled selected>No available users</option>';
+			}
+		}
+	}
 
-    private createForm() {
-        return `
+	private createForm() {
+		return `
             <div class="modal-body">
                 <div class="mb-4">
                     <label for="summary" class="form-label fw-bold">Title</label>
@@ -540,7 +606,7 @@ class ActivityModifyForm extends HTMLElement {
                 <div class="mb-4">
                     <label for="description" class="form-label fw-bold">Description</label>
                     <textarea class="form-control" id="description" name="description" 
-                          rows="3">${this.activity.description || ''}</textarea>
+                          rows="3">${this.activity.description || ""}</textarea>
                 </div>
 
                 <div class="mb-4 d-flex justify-content-between gap-3">
@@ -562,7 +628,7 @@ class ActivityModifyForm extends HTMLElement {
 
                 <div class="mb-4 form-check">
                     <input type="checkbox" class="form-check-input" id="isMilestone" 
-                           name="isMilestone" ${this.activity.isMilestone ? 'checked' : ''}>
+                           name="isMilestone" ${this.activity.isMilestone ? "checked" : ""}>
                     <label class="form-check-label" for="isMilestone">Is Milestone</label>
                 </div>
 
@@ -586,17 +652,18 @@ class ActivityModifyForm extends HTMLElement {
                 <button type="submit" class="btn btn-primary">Save Changes</button>
             </div>
         `;
-    }
+	}
 
-    // Aggiunge un utente alla lista
-    private addUser(name: string) {
-        const list = this.querySelector('#userList');
-        if (!list) return;
+	// Aggiunge un utente alla lista
+	private addUser(name: string) {
+		const list = this.querySelector("#userList");
+		if (!list) return;
 
-        const itemBlock = document.createElement('div');
-        itemBlock.className = 'user-item d-flex justify-content-between align-items-center bg-light';
+		const itemBlock = document.createElement("div");
+		itemBlock.className =
+			"user-item d-flex justify-content-between align-items-center bg-light";
 
-        itemBlock.innerHTML = `
+		itemBlock.innerHTML = `
         <span class="user-name">
             <i class="bi bi-person-fill me-2"></i>
             ${name}
@@ -606,58 +673,61 @@ class ActivityModifyForm extends HTMLElement {
         </button>
         `;
 
-        itemBlock.querySelector('button')?.addEventListener('click', () => {
-            itemBlock.remove();
-            this.modifiedUserlist = this.modifiedUserlist.filter(user => user !== name);
-            this.usersAvailable.push(name);
-            if (this.modifiedUserlist.length === 0) {
-                list.innerHTML = '<p class="text-muted">No users assigned</p>';
-            }
-            this.updateUsersSelect(name, 'ADD');
-        });
+		itemBlock.querySelector("button")?.addEventListener("click", () => {
+			itemBlock.remove();
+			this.modifiedUserlist = this.modifiedUserlist.filter(
+				(user) => user !== name
+			);
+			this.usersAvailable.push(name);
+			if (this.modifiedUserlist.length === 0) {
+				list.innerHTML = '<p class="text-muted">No users assigned</p>';
+			}
+			this.updateUsersSelect(name, "ADD");
+		});
 
-        list.appendChild(itemBlock);
-    }
+		list.appendChild(itemBlock);
+	}
 
-    // Funzione per l'aggiunta e l'eliminazione degli utenti
-    private setupItemManagement() {
-        const btn = this.querySelector('#addUserBtn');
-        const newUser = this.querySelector('#newUser') as HTMLSelectElement;
+	// Funzione per l'aggiunta e l'eliminazione degli utenti
+	private setupItemManagement() {
+		const btn = this.querySelector("#addUserBtn");
+		const newUser = this.querySelector("#newUser") as HTMLSelectElement;
 
-        for (const user of this.modifiedUserlist) {
-            this.addUser(user);
-        }
-        
-        if (this.modifiedUserlist.length === 0) {
-            const userList = this.querySelector('#userList');
-            if (userList) {
-                userList.innerHTML = '<p class="text-muted">No users assigned</p>';
-            }
-        }
+		for (const user of this.modifiedUserlist) {
+			this.addUser(user);
+		}
 
-        btn?.addEventListener('click', () => {
-            const name = newUser.value;
-            if (!name) return;
+		if (this.modifiedUserlist.length === 0) {
+			const userList = this.querySelector("#userList");
+			if (userList) {
+				userList.innerHTML =
+					'<p class="text-muted">No users assigned</p>';
+			}
+		}
 
-            if (this.modifiedUserlist.length === 0) {
-                const userList = this.querySelector('#userList');
-                if (userList) {
-                    userList.innerHTML = '';
-                }
-            }
+		btn?.addEventListener("click", () => {
+			const name = newUser.value;
+			if (!name) return;
 
-            this.updateUsersSelect(name, 'REMOVE');
-            this.modifiedUserlist.push(name);
-            this.addUser(name);
-            newUser.value = '';
-        });
+			if (this.modifiedUserlist.length === 0) {
+				const userList = this.querySelector("#userList");
+				if (userList) {
+					userList.innerHTML = "";
+				}
+			}
 
-        const form = this.querySelector('#modifyActivityForm');
-        form?.addEventListener('submit', (e) => this.handleSubmit(e));
-    }
+			this.updateUsersSelect(name, "REMOVE");
+			this.modifiedUserlist.push(name);
+			this.addUser(name);
+			newUser.value = "";
+		});
 
-    render() {
-        this.innerHTML = `
+		const form = this.querySelector("#modifyActivityForm");
+		form?.addEventListener("submit", (e) => this.handleSubmit(e));
+	}
+
+	render() {
+		this.innerHTML = `
             <div class="modal-header d-flex align-items-center">
                 <h5 class="modal-title d-flex align-items-center gap-2">
                     <i class="bi bi-pencil-fill"></i>
@@ -673,17 +743,21 @@ class ActivityModifyForm extends HTMLElement {
             </div>
             <form id="modifyActivityForm">${this.createForm()}</form>
         `;
-    }
+	}
 
-    public initialize(activity: ProjectActivityResponse, parentPhase: PhaseResponse, usersList: string[], usersAvailable: string[]) {
-        this.activity = activity;
-        this.parentPhase = parentPhase;
-        this.modifiedUserlist = [...usersList];
-        this.usersAvailable = [...usersAvailable];
-        this.render();
-        this.setupItemManagement();
-    }
-
+	public initialize(
+		activity: ProjectActivityResponse,
+		parentPhase: PhaseResponse,
+		usersList: string[],
+		usersAvailable: string[]
+	) {
+		this.activity = activity;
+		this.parentPhase = parentPhase;
+		this.modifiedUserlist = [...usersList];
+		this.usersAvailable = [...usersAvailable];
+		this.render();
+		this.setupItemManagement();
+	}
 }
 
-customElements.define('activity-modify-form', ActivityModifyForm);
+customElements.define("activity-modify-form", ActivityModifyForm);

@@ -1,7 +1,8 @@
 "use client";
+
 import { GlobalSideBar } from "@/app/components/GlobalSideBar";
-import "./styles.css";
 import { useEffect } from "react";
+import "./styles.css";
 
 declare global {
 	namespace JSX {
@@ -17,21 +18,20 @@ declare global {
 }
 
 export default function Projects() {
-
 	// Necessario in quanto con il ssr HTMLElement non é definito => non possiamo definire i custom elements
 	useEffect(() => {
 		if (typeof window !== "undefined") {
-			import('./ViewToggler');
-			import('./Forms/AddForm');
-			import('./Forms/ProjectSettings');
-			import('./Forms/ActivityForm');
-			import('./Forms/PhaseForm');
-			import('./GanttBody/SideGanttList');
-			import('./GanttBody/ProjectPhaseRow');
-			import('./GanttBody/TimeLine');
-			import('./OnLoadFunctions')
-			import('./ListBody/TimeList');
-			import('./ListBody/UserList')
+			import("./ViewToggler");
+			import("./Forms/AddForm");
+			import("./Forms/ProjectSettings");
+			import("./Forms/ActivityForm");
+			import("./Forms/PhaseForm");
+			import("./GanttBody/SideGanttList");
+			import("./GanttBody/ProjectPhaseRow");
+			import("./GanttBody/TimeLine");
+			import("./OnLoadFunctions");
+			import("./ListBody/TimeList");
+			import("./ListBody/UserList");
 		}
 	}, []);
 
@@ -56,7 +56,7 @@ export default function Projects() {
 					</div>
 				</div>
 				<view-toggler></view-toggler>
-			</div >
+			</div>
 			<activity-form />
 			<phase-form />
 			<onload-functions />
