@@ -19,19 +19,30 @@ import "./calendar.css";
 
 const localizer = momentLocalizer(moment);
 
+type StringActivityFrontend = Omit<StringActivity, "userIdList"> & {
+	usernameList: string[];
+};
+
+type StringEventFrontend = Omit<StringEvent, "userIdList"> & {
+	usernameList: string[];
+};
+
 type CalendarEvent = {
 	id: string;
 	title: string;
 	start: Date;
 	end: Date;
 	typology: "activity" | "event" | "session";
-	originalEvent?: StringEvent | StringActivity | StringSession;
+	originalEvent?:
+		| StringEventFrontend
+		| StringActivityFrontend
+		| StringSession;
 	isRecurring?: boolean;
 };
 
 interface CalendarResponse {
-	activities: StringActivity[];
-	events: StringEvent[];
+	activities: StringActivityFrontend[];
+	events: StringEventFrontend[];
 	sessions: StringSession[];
 }
 
@@ -43,7 +54,7 @@ async function fetcher(url: string) {
 }
 
 function generateRecurringEvents(
-	event: StringEvent,
+	event: StringEventFrontend,
 	range: { start: Date; end: Date }
 ): CalendarEvent[] {
 	const events: CalendarEvent[] = [];
@@ -81,8 +92,10 @@ function generateRecurringEvents(
 
 export default function CalendarPage() {
 	const [events, setEvents] = useState<CalendarEvent[]>([]);
-	const [rawEvents, setRawEvents] = useState<StringEvent[]>([]);
-	const [rawActivities, setRawActivities] = useState<StringActivity[]>([]);
+	const [rawEvents, setRawEvents] = useState<StringEventFrontend[]>([]);
+	const [rawActivities, setRawActivities] = useState<
+		StringActivityFrontend[]
+	>([]);
 	const [rawSessions, setRawSessions] = useState<StringSession[]>([]);
 	const [currentView, setCurrentView] = useState<View>("month");
 	const [currentDate, setCurrentDate] = useState(new Date());
@@ -162,7 +175,7 @@ export default function CalendarPage() {
 			if (originalEvent) {
 				setSelectedCalendarEvent({
 					...event,
-					originalEvent: originalEvent as StringEvent
+					originalEvent: originalEvent as StringEventFrontend
 				});
 				setShowModal(true);
 			}
@@ -304,7 +317,7 @@ export default function CalendarPage() {
 						activity={
 							rawActivities.find(
 								(a) => a._id === selectedCalendarEvent.id
-							) as StringActivity
+							) as StringActivityFrontend
 						}
 					/>
 				)}
@@ -314,7 +327,7 @@ export default function CalendarPage() {
 						show={showModal}
 						setShow={setShowModal}
 						event={
-							selectedCalendarEvent.originalEvent as StringEvent
+							selectedCalendarEvent.originalEvent as StringEventFrontend
 						}
 					/>
 				)}

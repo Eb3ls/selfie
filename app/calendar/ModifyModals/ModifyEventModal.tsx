@@ -5,19 +5,36 @@ import { StringEvent } from "@/utils/db/db";
 import React, { useState } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
 
+type StringEventFrontend = Omit<StringEvent, "userIdList"> & {
+	usernameList: string[];
+};
+
 export function ModifyEventModal({
 	event,
 	show,
 	setShow
 }: {
-	event: StringEvent;
+	event: StringEventFrontend;
 	show: boolean;
 	setShow: (show: boolean) => void;
 }) {
-	const newEvent: StringEvent = { ...event };
+	const newEvent: StringEventFrontend = { ...event };
 	newEvent.dtStart = new Date(newEvent.dtStart).toISOString().slice(0, 16);
 	newEvent.dtEnd = new Date(newEvent.dtEnd).toISOString().slice(0, 16);
 	const [form, setForm] = useState(newEvent);
+
+	// Aggiungi state per gestire l'input per gli inviti
+	const [usernameInput, setUsernameInput] = useState("");
+
+	// Funzione per aggiungere un invito
+	const handleAddUsername = () => {
+		if (!usernameInput.trim()) return;
+		setForm({
+			...form,
+			usernameList: [...form.usernameList, usernameInput.trim()]
+		});
+		setUsernameInput("");
+	};
 
 	console.log("Event:", newEvent);
 
@@ -47,7 +64,7 @@ export function ModifyEventModal({
 			categories: form.categories,
 			location: form.location,
 			geo: form.geo,
-			userIdList: form.userIdList
+			usernameList: form.usernameList
 		};
 
 		console.log("Form inviato:", { ...newForm });
@@ -159,6 +176,39 @@ export function ModifyEventModal({
 								className="input-field"
 								required
 							/>
+						</Form.Group>
+
+						{/* Nuovo Form.Group per aggiungere inviti */}
+						<Form.Group className="mb-3" controlId="formUsernames">
+							<Form.Label>Inviti</Form.Label>
+							<div className="d-flex">
+								<Form.Control
+									type="text"
+									value={usernameInput}
+									onChange={(e) =>
+										setUsernameInput(e.target.value)
+									}
+									placeholder="Inserisci nome utente"
+									className="input-field"
+								/>
+								<Button
+									variant="success"
+									onClick={handleAddUsername}
+									style={{ marginLeft: "10px" }}
+									type="button"
+								>
+									+
+								</Button>
+							</div>
+							{form.usernameList.length > 0 && (
+								<ul>
+									{form.usernameList.map(
+										(username, index) => (
+											<li key={index}>{username}</li>
+										)
+									)}
+								</ul>
+							)}
 						</Form.Group>
 					</Modal.Body>
 					<Modal.Footer>
