@@ -80,6 +80,7 @@ export const POST = async (request: NextRequest) => {
 
 	// Aggiungiamo il campo 'owner' a newActivity
 	newActivity.ownerId = owner._id!;
+	newActivity.userIdList = [owner._id!];
 
 	// Ottieniamo la collezione delle attività
 	const client: Collection<Activity> =

@@ -14,9 +14,12 @@ export function AddActivityModal({ children }: any) {
 		location: "",
 		geo: "",
 		parentActivityId: "",
-		userIdList: [],
+		usernameList: [] as string[],
 		alarms: []
 	});
+
+	// Aggiunta dello state per il nome utente corrente
+	const [usernameInput, setUsernameInput] = useState("");
 
 	const handleChange = (
 		e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -26,6 +29,16 @@ export function AddActivityModal({ children }: any) {
 			...form,
 			[name]: value
 		});
+	};
+
+	// Nuova funzione per aggiungere username alla lista
+	const handleAddUsername = () => {
+		if (!usernameInput.trim()) return;
+		setForm({
+			...form,
+			usernameList: [...form.usernameList, usernameInput.trim()]
+		});
+		setUsernameInput("");
 	};
 
 	// Gestisce il submit del form
@@ -166,6 +179,39 @@ export function AddActivityModal({ children }: any) {
 								placeholder="Inserisci geolocalizzazione"
 								className="input-field"
 							/>
+						</Form.Group>
+
+						{/* Nuovo Form.Group per aggiungere inviti */}
+						<Form.Group className="mb-3" controlId="formUsernames">
+							<Form.Label>Inviti</Form.Label>
+							<div className="d-flex">
+								<Form.Control
+									type="text"
+									value={usernameInput}
+									onChange={(e) =>
+										setUsernameInput(e.target.value)
+									}
+									placeholder="Inserisci nome utente"
+									className="input-field"
+								/>
+								<Button
+									variant="success"
+									onClick={handleAddUsername}
+									style={{ marginLeft: "10px" }}
+									type="button"
+								>
+									+
+								</Button>
+							</div>
+							{form.usernameList.length > 0 && (
+								<ul>
+									{form.usernameList.map(
+										(username, index) => (
+											<li key={index}>{username}</li>
+										)
+									)}
+								</ul>
+							)}
 						</Form.Group>
 					</Modal.Body>
 					<Modal.Footer>

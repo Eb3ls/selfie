@@ -78,6 +78,7 @@ export const POST = async (request: NextRequest) => {
 
 	// Aggiungiamo il campo 'owner' a newEvent
 	newEvent.ownerId = owner._id!;
+	newEvent.userIdList = [owner._id!];
 
 	// Ottieniamo la collezione degli eventi
 	const client: Collection<Event> =
