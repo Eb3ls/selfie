@@ -2,7 +2,7 @@ import {
 	addInvitations,
 	generateMessageResponse,
 	generateObjectResponse,
-	removeArrayDuplicates,
+	usernameListToIds,
 	validate
 } from "@/utils/api/api";
 import {
@@ -27,7 +27,7 @@ const requestTemplate = {
 	categories: [""],
 	location: "",
 	geo: "",
-	userIdList: [""]
+	usernameList: [""]
 };
 
 type RequestType = typeof requestTemplate;
@@ -74,14 +74,26 @@ export const PATCH = async (request: NextRequest) => {
 		return generateMessageResponse("Unauthorized", 400);
 	}
 
-	// Aggiungiamo l'utente alla lista di utenti partecipanti con la modifica richiesta
-	newFields.userIdList.push(userId);
-	newFields.userIdList = removeArrayDuplicates(newFields.userIdList);
+	// Estriamo la lista degli username dal body
+	const usernameList: string[] = newBody.usernameList;
+
+	// Convertiamo lo username in id e aggiungiamo lo userId come primo elemento
+	const convertionOut = await usernameListToIds(usernameList, userId, true);
+
+	if (convertionOut.status !== 200) {
+		return convertionOut;
+	}
+
+	const userIdList: string[] = (await convertionOut.json()).users;
+
+	// Sostituiamo la lista degli username con quella degli id, rimuovendo usernameList
+	const { usernameList: _, ...smallBody } = newFields;
+	const convertedBody = { userIdList: userIdList, ...smallBody };
 
 	// Otteniamo la lista di utenti partecipanti prima della modifica
 	const userListBefore = event[0].userIdList;
 	// Otteniamo la lista di utenti partecipanti con la modifica richiesta
-	const userListAfter = newFields.userIdList;
+	const userListAfter = convertedBody.userIdList;
 
 	// Otteniamo i nuovi utenti
 	const newUsers = userListAfter.filter(
@@ -95,14 +107,14 @@ export const PATCH = async (request: NextRequest) => {
 
 	// Impostiamo gli utenti partecipanti come prima della modifica
 	// ma rimuovendo quelli rimossi
-	newFields.userIdList = userListBefore.filter(
+	convertedBody.userIdList = userListBefore.filter(
 		(userId: string) => !removedUsers.includes(userId)
 	);
 
 	// Modifichiamo l'evento
 	const updateOut = await updateCollectionWrapper<Event>(
 		{ _id: eventId },
-		{ $set: newFields } as any,
+		{ $set: convertedBody } as any,
 		client
 	);
 

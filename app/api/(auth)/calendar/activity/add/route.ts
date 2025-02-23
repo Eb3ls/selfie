@@ -3,7 +3,7 @@ import {
 	generateMessageResponse,
 	generateObjectResponse,
 	generateStringModel,
-	removeArrayDuplicates,
+	usernameListToIds,
 	validate
 } from "@/utils/api/api";
 import {
@@ -26,7 +26,7 @@ const requestTemplate = {
 	location: "",
 	geo: "",
 	parentActivityId: "",
-	userIdList: [""],
+	usernameList: [""],
 	alarms: []
 };
 
@@ -48,20 +48,38 @@ export const POST = async (request: NextRequest) => {
 	// Estraiamo l'utente e il corpo della richiesta
 	const { user: owner, body: newBody } = validation;
 
+	// Estraiamo l'id dell'utente
+	const userId: string = owner._id!;
+
+	// Estriamo la lista degli username dal body
+	const usernameList: string[] = newBody.usernameList;
+
+	// Convertiamo lo username in id e aggiungiamo lo userId come primo elemento
+	const convertionOut = await usernameListToIds(usernameList, userId, true);
+
+	if (convertionOut.status !== 200) {
+		return convertionOut;
+	}
+
+	const userIdList: string[] = (await convertionOut.json()).users;
+
+	// Sostituiamo la lista degli username con quella degli id, rimuovendo usernameList
+	const { usernameList: _, ...smallBody } = newBody;
+	const convertedBody = { userIdList: userIdList, ...smallBody };
+
 	// Creiamo una nuova attività con quei campi
 	const newActivity: StringActivity = generateStringModel<StringActivity>(
-		newBody,
+		convertedBody,
 		"Activity"
 	);
 
 	// Otteniamo gli utenti da invitare
-	const usersToBeInvited = removeArrayDuplicates(
-		newActivity.userIdList.filter((userId) => userId !== owner._id)
+	const usersToBeInvited = newActivity.userIdList.filter(
+		(id) => id !== userId
 	);
 
 	// Aggiungiamo il campo 'owner' a newActivity
 	newActivity.ownerId = owner._id!;
-	newActivity.userIdList = [owner._id!];
 
 	// Ottieniamo la collezione delle attività
 	const client: Collection<Activity> =

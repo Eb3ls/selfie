@@ -3,7 +3,7 @@ import {
 	generateMessageResponse,
 	generateObjectResponse,
 	generateStringModel,
-	removeArrayDuplicates,
+	usernameListToIds,
 	validate
 } from "@/utils/api/api";
 import {
@@ -26,7 +26,7 @@ const requestTemplate = {
 	categories: "",
 	location: "",
 	geo: "",
-	userIdList: [""],
+	usernameList: [""],
 	alarms: []
 };
 
@@ -48,20 +48,36 @@ export const POST = async (request: NextRequest) => {
 	// Estraiamo l'utente e il corpo della richiesta
 	const { user: owner, body: newBody } = validation;
 
+	// Estraiamo l'id dell'utente
+	const userId: string = owner._id!;
+
+	// Estriamo la lista degli username dal body
+	const usernameList: string[] = newBody.usernameList;
+
+	// Convertiamo lo username in id e aggiungiamo lo userId come primo elemento
+	const convertionOut = await usernameListToIds(usernameList, userId, true);
+
+	if (convertionOut.status !== 200) {
+		return convertionOut;
+	}
+
+	const userIdList: string[] = (await convertionOut.json()).users;
+
+	// Sostituiamo la lista degli username con quella degli id, rimuovendo usernameList
+	const { usernameList: _, ...smallBody } = newBody;
+	const convertedBody = { userIdList: userIdList, ...smallBody };
+
 	// Creiamo un nuovo evento con quei campi
 	const newEvent: StringEvent = generateStringModel<StringEvent>(
-		newBody,
+		convertedBody,
 		"Event"
 	);
 
 	// Otteniamo gli utenti da invitare
-	const usersToBeInvited = removeArrayDuplicates(
-		newEvent.userIdList.filter((userId) => userId !== owner._id)
-	);
+	const usersToBeInvited = newEvent.userIdList.filter((id) => id !== userId);
 
 	// Aggiungiamo il campo 'owner' a newEvent
 	newEvent.ownerId = owner._id!;
-	newEvent.userIdList = [owner._id!];
 
 	// Ottieniamo la collezione degli eventi
 	const client: Collection<Event> =
