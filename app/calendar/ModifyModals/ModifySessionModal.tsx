@@ -2,6 +2,7 @@
 
 import "@/app/calendar/Modal.css";
 import { StringSession } from "@/utils/db/db";
+import moment from "moment";
 import React, { useState } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
 
@@ -15,10 +16,6 @@ export function ModifySessionModal({
 	setShow: (show: boolean) => void;
 }) {
 	const newSession: StringSession = { ...session };
-	newSession.dtStart = new Date(newSession.dtStart)
-		.toISOString()
-		.slice(0, 16);
-	newSession.dtEnd = new Date(newSession.dtEnd).toISOString().slice(0, 16);
 	const [form, setForm] = useState(newSession);
 
 	console.log("Session:", newSession);
@@ -158,7 +155,9 @@ export function ModifySessionModal({
 							<Form.Control
 								type="datetime-local"
 								name="dtStart"
-								value={form.dtStart}
+								value={moment(form.dtStart).format(
+									"YYYY-MM-DDTHH:mm"
+								)}
 								onChange={handleChange}
 								placeholder="Inserisci data di inizio"
 								className="input-field"
@@ -168,7 +167,9 @@ export function ModifySessionModal({
 							<Form.Control
 								type="datetime-local"
 								name="dtEnd"
-								value={form.dtEnd}
+								value={moment(form.dtEnd).format(
+									"YYYY-MM-DDTHH:mm"
+								)}
 								onChange={handleChange}
 								placeholder="Inserisci data di fine"
 								className="input-field"

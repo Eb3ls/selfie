@@ -2,6 +2,7 @@
 
 import "@/app/calendar/Modal.css";
 import { StringEvent } from "@/utils/db/db";
+import moment from "moment";
 import React, { useState } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
 
@@ -19,8 +20,6 @@ export function ModifyEventModal({
 	setShow: (show: boolean) => void;
 }) {
 	const newEvent: StringEventFrontend = { ...event };
-	newEvent.dtStart = new Date(newEvent.dtStart).toISOString().slice(0, 16);
-	newEvent.dtEnd = new Date(newEvent.dtEnd).toISOString().slice(0, 16);
 	const [form, setForm] = useState(newEvent);
 
 	// Aggiungi state per gestire l'input per gli inviti
@@ -160,7 +159,9 @@ export function ModifyEventModal({
 							<Form.Control
 								type="datetime-local"
 								name="dtStart"
-								value={form.dtStart}
+								value={moment(form.dtStart).format(
+									"YYYY-MM-DDTHH:mm"
+								)}
 								onChange={handleChange}
 								placeholder="Inserisci data di inizio"
 								className="input-field"
@@ -170,7 +171,9 @@ export function ModifyEventModal({
 							<Form.Control
 								type="datetime-local"
 								name="dtEnd"
-								value={form.dtEnd}
+								value={moment(form.dtEnd).format(
+									"YYYY-MM-DDTHH:mm"
+								)}
 								onChange={handleChange}
 								placeholder="Inserisci data di fine"
 								className="input-field"

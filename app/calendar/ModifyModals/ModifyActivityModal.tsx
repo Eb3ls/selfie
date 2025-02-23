@@ -2,6 +2,7 @@
 
 import "@/app/calendar/Modal.css";
 import { StringActivity } from "@/utils/db/db";
+import moment from "moment";
 import React, { useState } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
 
@@ -19,7 +20,6 @@ export function ModifyActivityModal({
 	setShow: (show: boolean) => void;
 }) {
 	const newActivity: StringActivityFrontend = { ...activity };
-	newActivity.due = new Date(newActivity.due).toISOString().slice(0, 16);
 	const [form, setForm] = useState(newActivity);
 
 	// Aggiungi state per gestire l'input per gli inviti
@@ -156,7 +156,9 @@ export function ModifyActivityModal({
 							<Form.Control
 								type="datetime-local"
 								name="due"
-								value={form.due}
+								value={moment(form.due).format(
+									"YYYY-MM-DDTHH:mm"
+								)}
 								onChange={handleChange}
 								placeholder="Inserisci data di fine"
 								className="input-field"

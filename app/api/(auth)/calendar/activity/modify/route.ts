@@ -22,7 +22,7 @@ const requestTemplate = {
 	description: "",
 	status: "",
 	due: "",
-	categories: [""],
+	categories: "",
 	location: "",
 	geo: "",
 	usernameList: [""]
