@@ -46,38 +46,43 @@ class TimeList extends HTMLElement {
 		const block = document.createElement("div");
 		block.className =
 			"row rounded p-2 mt-3 border-bottom border-secondary list-item";
-		block.addEventListener("click", () => {
+
+		const clickableArea = document.createElement("div");
+		clickableArea.className = "col-9 d-flex";
+		clickableArea.addEventListener("click", () => {
 			this.openModify(act);
 		});
-		block.setAttribute("data-bs-toggle", "modal");
-		block.setAttribute("data-bs-target", "#ModifyActivity");
+		clickableArea.setAttribute("data-bs-toggle", "modal");
+		clickableArea.setAttribute("data-bs-target", "#ModifyActivity");
 
 		const start = new Date(formatDate(act.dtStart)).toLocaleDateString();
 		const end = new Date(formatDate(act.due)).toLocaleDateString();
 
 		const summaryCol = document.createElement("div");
-		summaryCol.className = "col-3 fw-bold";
+		summaryCol.className = "col-4 fw-bold";
 		summaryCol.textContent = act.summary;
 
 		const startCol = document.createElement("div");
-		startCol.className = "col-3 text-muted";
+		startCol.className = "col-4 text-muted";
 		startCol.textContent = `${start}`;
 
 		const dueCol = document.createElement("div");
-		dueCol.className = "col-3 text-muted";
+		dueCol.className = "col-4 text-muted";
 		dueCol.textContent = `${end}`;
+
+		clickableArea.appendChild(summaryCol);
+		clickableArea.appendChild(startCol);
+		clickableArea.appendChild(dueCol);
 
 		const statusCol = document.createElement("div");
 		statusCol.className = "col-3";
 
 		// Creiamo il blocco per lo status
-		const statusBlock = createStatusIcon(act.status as any);
+		const statusBlock = createStatusIcon(act.status as any, act._id);
 		statusCol.appendChild(statusBlock);
 		statusCol.appendChild(document.createTextNode(act.status));
 
-		block.appendChild(summaryCol);
-		block.appendChild(startCol);
-		block.appendChild(dueCol);
+		block.appendChild(clickableArea);
 		block.appendChild(statusCol);
 
 		return block;

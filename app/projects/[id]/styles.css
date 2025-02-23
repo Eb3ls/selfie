@@ -160,6 +160,8 @@ html {
 }
 
 .list-item:hover {
+	position: relative;
 	transform: translateY(-1px);
 	background-color: #eff1f3;
+	z-index: 1;
 }

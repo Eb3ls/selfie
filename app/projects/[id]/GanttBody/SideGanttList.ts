@@ -36,7 +36,7 @@ class SideGanttList extends HTMLElement {
 		activityElement.style.height = `${ROW_HEIGHT_PX}`;
 
 		// Icona
-		const statusIcon = createStatusIcon(activity.status);
+		const statusIcon = createStatusIcon(activity.status, activity._id);
 
 		// Container per le due colonne con titolo e date
 		const columnsContainer = document.createElement("div");

@@ -137,7 +137,8 @@ const statusConfig = {
 // Funzione per creare una singola entry per la lista di stati
 function createStatusEntry(
 	status: keyof typeof statusConfig,
-	iconBlock: HTMLElement
+	iconBlock: HTMLElement,
+	activityId: string
 ): HTMLElement {
 	const item = document.createElement("li");
 	const link = document.createElement("a");
@@ -154,11 +155,22 @@ function createStatusEntry(
 	link.appendChild(statusDot);
 	link.appendChild(text);
 
-	link.onclick = (e) => {
+	link.onclick = async (e) => {
 		e.preventDefault();
-		console.log("Status changed to", value.text);
-		// Necesario per aggiornare l'icona dello stato con le possibilitá corrette
-		iconBlock.replaceWith(createStatusIcon(status));
+		const url = `/api/project/activity/modifyStatus`;
+		const method = "PATCH";
+		const body = {
+			_id: activityId,
+			status: status
+		};
+		try {
+			await fetcher(method, url, body);
+			window.location.reload();
+		} catch (error) {
+			alert("Errore durante la modifica dello stato");
+			console.error(error);
+		}
+		iconBlock.replaceWith(createStatusIcon(status, activityId));
 	};
 
 	item.appendChild(link);
@@ -168,7 +180,8 @@ function createStatusEntry(
 // Funzione per creare la lista di stati coerenti con l'attuale
 function createStatusList(
 	currentStatus: keyof typeof statusConfig,
-	iconBlock: HTMLElement
+	iconBlock: HTMLElement,
+	activityId: string
 ): HTMLElement[] {
 	let statusList: (keyof typeof statusConfig)[] = [];
 	if (currentStatus === "WAITING") {
@@ -187,13 +200,16 @@ function createStatusList(
 
 	const list = [];
 	for (const status of statusList) {
-		list.push(createStatusEntry(status, iconBlock));
+		list.push(createStatusEntry(status, iconBlock, activityId));
 	}
 	return list;
 }
 
 // Funzione per ottenere l'icona dello stato
-function createStatusIcon(status: keyof typeof statusConfig): HTMLElement {
+function createStatusIcon(
+	status: keyof typeof statusConfig,
+	activityId: string
+): HTMLElement {
 	const wrapper = document.createElement("div");
 	wrapper.className = "dropdown d-inline-block";
 
@@ -220,7 +236,7 @@ function createStatusIcon(status: keyof typeof statusConfig): HTMLElement {
 		menu.className = "dropdown-menu p-0 shadow";
 
 		// Creiamo gli elementi coerenti con lo stato attuale
-		const statusEntries = createStatusList(status, wrapper);
+		const statusEntries = createStatusList(status, wrapper, activityId);
 		for (const entry of statusEntries) {
 			menu.appendChild(entry);
 		}
