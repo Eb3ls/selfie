@@ -3,7 +3,7 @@
 	max-width: 1400px;
 	margin: 0 auto;
 	padding: 30px 20px;
-	height: 90vh;
+	height: 86vh;
 }
 
 /* Titolo e descrizione */
@@ -22,7 +22,8 @@
 	align-items: center;
 	flex-wrap: wrap;
 	gap: 15px;
-	margin-bottom: 20px;
+	margin-bottom: 15px;
+	padding: 8px 0;
 }
 
 .toolbar-left {
@@ -41,10 +42,10 @@
 	background: none;
 	border: 2px solid #3498db;
 	color: #3498db;
-	width: 40px;
-	height: 40px;
+	width: 36px;
+	height: 36px;
 	border-radius: 50%;
-	font-size: 1.2rem;
+	font-size: 1rem;
 	cursor: pointer;
 	transition: all 0.3s;
 }
@@ -82,7 +83,7 @@
 }
 
 .add-button {
-	padding: 8px 15px;
+	padding: 6px 12px;
 	border: none;
 	border-radius: 8px;
 	color: white;
@@ -92,11 +93,11 @@
 	align-items: center;
 	gap: 5px;
 	transition: transform 0.2s;
-	font-size: 0.9rem;
+	font-size: 0.8rem;
 }
 
 .add-button span {
-	font-size: 1rem;
+	font-size: 0.9rem;
 }
 
 .add-button:hover {
@@ -118,15 +119,20 @@
 	border-radius: 12px;
 	overflow: hidden;
 	box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+	height: auto !important;
 }
 
 .rbc-month-row {
-	min-height: 120px;
+	min-height: 80px;
+}
+
+.rbc-month-row + .rbc-month-row {
+	border-top-width: 1px;
 }
 
 .date-cell {
-	padding: 8px;
-	font-size: 1.1rem;
+	padding: 4px;
+	font-size: 1rem;
 	color: #2c3e50;
 }
 
@@ -145,9 +151,9 @@
 .rbc-event {
 	border: none;
 	border-radius: 6px;
-	padding: 4px 8px;
-	margin: 2px;
-	font-size: 0.9rem;
+	padding: 2px 4px;
+	margin: 1px;
+	font-size: 0.8rem;
 	transition: transform 0.2s;
 }
 
@@ -181,7 +187,7 @@
 }
 
 .event-projectActivity {
-	background-color: #8e44ad; /* Colore viola per esempio */
+	background-color: #8e44ad;
 	border-color: #732d91;
 }
 
@@ -198,9 +204,10 @@
 /* Header delle colonne */
 .rbc-header {
 	background: #f8f9fa;
-	padding: 12px;
+	padding: 8px 12px;
 	color: #34495e;
 	font-weight: 600;
+	font-size: 0.9rem;
 	border-bottom: 2px solid #dee2e6;
 }
 
@@ -251,6 +258,106 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
+}
+
+/* Vista lista */
+.list-view {
+	background: white;
+	border-radius: 12px;
+	box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+	padding: 20px;
+}
+
+.list-header {
+	display: grid;
+	grid-template-columns: 250px 1fr 150px;
+	font-weight: 600;
+	padding: 10px 15px;
+	border-bottom: 2px solid #eee;
+	margin-bottom: 8px;
+}
+
+.list-event {
+	display: grid;
+	grid-template-columns: 250px 1fr 150px;
+	padding: 10px 15px;
+	border-radius: 8px;
+	margin-bottom: 6px;
+	transition: background 0.2s;
+}
+
+.list-event:hover {
+	background: #f8f9fa;
+}
+
+.list-date {
+	color: #666;
+	font-size: 0.8em;
+}
+
+.list-title {
+	font-weight: 500;
+	font-size: 0.9rem;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.recurring-badge {
+	background: #e74c3c;
+	color: white;
+	font-size: 0.6em;
+	padding: 1px 6px;
+	border-radius: 10px;
+}
+
+.list-type {
+	text-transform: capitalize;
+	font-size: 0.8em;
+}
+
+.list-type.activity {
+	color: #ff9aa2;
+}
+.list-type.event {
+	color: #8bd3c7;
+}
+.list-type.session {
+	color: #b5b2ff;
+}
+.list-type.projectActivity {
+	color: #8e44ad;
+}
+
+/* Nuovi stili per la toolbar */
+.toolbar-right {
+	display: flex;
+	align-items: center;
+	gap: 15px;
+}
+
+.view-switch-button {
+	padding: 6px 12px;
+	border: none;
+	border-radius: 8px;
+	background: #3498db;
+	color: white;
+	cursor: pointer;
+	transition: all 0.3s;
+	font-size: 0.9rem;
+}
+
+.view-switch-button:hover {
+	background: #2980b9;
+}
+
+.view-switch-button.list {
+	background: #ffffff;
+	color: #3498db;
+	border: 2px solid #3498db;
+}
+.view-switch-button.list:hover {
+	background: #f0f0f0;
 }
 
 /* Adattamenti responsive */

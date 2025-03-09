@@ -135,6 +135,58 @@ function generateRecurringSessions(
 	return events;
 }
 
+const ListView = ({
+	events,
+	range
+}: {
+	events: CalendarEvent[];
+	range: { start: Date; end: Date };
+}) => {
+	moment.locale("it");
+
+	return (
+		<div className="list-view">
+			<div className="list-header">
+				<div className="header-item">Data</div>
+				<div className="header-item">Evento</div>
+				<div className="header-item">Tipologia</div>
+			</div>
+			{events
+				.filter((event) =>
+					moment(event.start).isBetween(
+						range.start,
+						range.end,
+						undefined,
+						"[]"
+					)
+				)
+				.map((event, index) => (
+					<div key={index} className="list-event">
+						<div className="list-date">
+							{moment(event.start).format(
+								"dddd D MMMM YYYY - HH:mm"
+							)}
+						</div>
+						<div className="list-title">
+							{event.title}
+							{event.isRecurring && (
+								<span className="recurring-badge">
+									Ricorrente
+								</span>
+							)}
+						</div>
+						<div className={`list-type ${event.typology}`}>
+							{event.typology === "activity" && "Attività"}
+							{event.typology === "event" && "Evento"}
+							{event.typology === "session" && "Sessione"}
+							{event.typology === "projectActivity" && "Progetto"}
+						</div>
+					</div>
+				))}
+		</div>
+	);
+};
+
 export default function CalendarPage() {
 	const router = useRouter();
 	const [events, setEvents] = useState<CalendarEvent[]>([]);
@@ -146,7 +198,10 @@ export default function CalendarPage() {
 	const [rawProjectActivities, setRawProjectActivities] = useState<
 		StringProjectActivityFrontend[]
 	>([]);
-	const [currentView, setCurrentView] = useState<View>("month");
+	const [currentView, setCurrentView] = useState<"calendar" | "list">(
+		"calendar"
+	);
+	const [calendarView, setCalendarView] = useState<View>("month");
 	const [currentDate, setCurrentDate] = useState(new Date());
 	const [range, setRange] = useState<{ start: Date; end: Date }>({
 		start: moment().startOf("month").toDate(),
@@ -165,7 +220,6 @@ export default function CalendarPage() {
 		if (raw_elements_list) {
 			const newEvents: CalendarEvent[] = [];
 
-			// Aggiungi project activities
 			raw_elements_list.projectActivities.forEach((projectActivity) => {
 				newEvents.push({
 					id: projectActivity._id!,
@@ -176,7 +230,6 @@ export default function CalendarPage() {
 				});
 			});
 
-			// Aggiungi attività normali
 			raw_elements_list.activities.forEach((activity) => {
 				newEvents.push({
 					id: activity._id!,
@@ -187,7 +240,6 @@ export default function CalendarPage() {
 				});
 			});
 
-			// Gestione eventi e sessioni
 			raw_elements_list.events.forEach((event) => {
 				if (event.rrule) {
 					newEvents.push(...generateRecurringEvents(event, range));
@@ -251,27 +303,30 @@ export default function CalendarPage() {
 
 	const handleNavigate = (newDate: Date) => {
 		setCurrentDate(newDate);
-		updateRange(newDate, currentView);
+		updateRange(newDate);
 	};
 
-	const handleView = (newView: View) => {
-		setCurrentView(newView);
-		updateRange(currentDate, newView);
-	};
-
-	const updateRange = (date: Date, view: View) => {
+	const updateRange = (date: Date) => {
 		const startOf =
-			view === "month" ? "month" : view === "week" ? "isoWeek" : "day";
+			calendarView === "month"
+				? "month"
+				: calendarView === "week"
+					? "isoWeek"
+					: "day";
 		const start = moment(date).startOf(startOf).toDate();
 		const end = moment(date).endOf(startOf).toDate();
 		setRange({ start, end });
 	};
 
-	const CustomToolbar = (toolbarProps: any) => {
+	const switchView = () => {
+		setCurrentView((prev) => (prev === "list" ? "calendar" : "list"));
+	};
+
+	const CustomToolbar = () => {
 		const formattedDate =
-			currentView === "month"
+			calendarView === "month"
 				? moment(currentDate).format("MMMM YYYY")
-				: currentView === "week"
+				: calendarView === "week"
 					? `${moment(range.start).format("D MMM")} - ${moment(range.end).format("D MMM YYYY")}`
 					: moment(currentDate).format("D MMMM YYYY");
 
@@ -280,26 +335,52 @@ export default function CalendarPage() {
 				<div className="toolbar-left">
 					<div className="toolbar-controls">
 						<button
-							onClick={() => toolbarProps.onNavigate("PREV")}
+							onClick={() =>
+								handleNavigate(
+									moment(currentDate)
+										.subtract(
+											1,
+											calendarView === "month"
+												? "month"
+												: calendarView === "week"
+													? "week"
+													: "day"
+										)
+										.toDate()
+								)
+							}
 							className="nav-button"
 						>
 							‹
 						</button>
 						<span className="current-date">{formattedDate}</span>
 						<button
-							onClick={() => toolbarProps.onNavigate("NEXT")}
+							onClick={() =>
+								handleNavigate(
+									moment(currentDate)
+										.add(
+											1,
+											calendarView === "month"
+												? "month"
+												: calendarView === "week"
+													? "week"
+													: "day"
+										)
+										.toDate()
+								)
+							}
 							className="nav-button"
 						>
 							›
 						</button>
 					</div>
 					<select
-						value={currentView}
-						onChange={(e) => {
-							toolbarProps.onView(e.target.value as View);
-							handleView(e.target.value as View);
-						}}
+						value={calendarView}
+						onChange={(e) =>
+							setCalendarView(e.target.value as View)
+						}
 						className="view-select"
+						disabled={currentView === "list"}
 					>
 						{["month", "week", "day"].map((view) => (
 							<option key={view} value={view}>
@@ -309,22 +390,32 @@ export default function CalendarPage() {
 					</select>
 				</div>
 
-				<div className="add-buttons-container">
-					<AddActivityModal>
-						<button className="add-button activity">
-							<span>+</span> Attività
-						</button>
-					</AddActivityModal>
-					<AddEventModal>
-						<button className="add-button event">
-							<span>+</span> Evento
-						</button>
-					</AddEventModal>
-					<AddSessionModal>
-						<button className="add-button session">
-							<span>+</span> Sessione
-						</button>
-					</AddSessionModal>
+				<div className="toolbar-right">
+					<button
+						onClick={switchView}
+						className={`view-switch-button ${
+							currentView === "list" ? "to-calendar" : "to-list"
+						}`}
+					>
+						{currentView === "list" ? "Calendario" : "Lista"}
+					</button>
+					<div className="add-buttons-container">
+						<AddActivityModal>
+							<button className="add-button activity">
+								<span>+</span> Attività
+							</button>
+						</AddActivityModal>
+						<AddEventModal>
+							<button className="add-button event">
+								<span>+</span> Evento
+							</button>
+						</AddEventModal>
+						<AddSessionModal>
+							<button className="add-button session">
+								<span>+</span> Sessione
+							</button>
+						</AddSessionModal>
+					</div>
 				</div>
 			</div>
 		);
@@ -334,41 +425,46 @@ export default function CalendarPage() {
 		<>
 			<GlobalSideBar />
 			<Container className="calendar-container">
-				<Calendar
-					localizer={localizer}
-					events={events}
-					view={currentView}
-					date={currentDate}
-					onNavigate={handleNavigate}
-					onView={handleView}
-					onSelectEvent={handleSelectEvent}
-					startAccessor="start"
-					endAccessor="end"
-					className="custom-calendar"
-					components={{
-						toolbar: CustomToolbar,
-						month: {
-							dateHeader: ({ date }) => {
-								const isToday = moment(date).isSame(
-									moment(),
-									"day"
-								);
-								return (
-									<div
-										className={`date-cell ${isToday ? "today" : ""}`}
-									>
-										{moment(date).format("D")}
-									</div>
-								);
-							}
-						}
-					}}
-					eventPropGetter={(event) => ({
-						className: `event-${event.typology}${event.isRecurring ? " recurring" : ""}`
-					})}
-				/>
+				<CustomToolbar />
 
-				{/* Modali solo per attività/eventi/sessioni */}
+				{currentView === "list" ? (
+					<ListView events={events} range={range} />
+				) : (
+					<Calendar
+						localizer={localizer}
+						events={events}
+						view={calendarView}
+						date={currentDate}
+						onNavigate={handleNavigate}
+						onView={setCalendarView}
+						onSelectEvent={handleSelectEvent}
+						startAccessor="start"
+						endAccessor="end"
+						className="custom-calendar"
+						components={{
+							toolbar: () => null,
+							month: {
+								dateHeader: ({ date }) => {
+									const isToday = moment(date).isSame(
+										moment(),
+										"day"
+									);
+									return (
+										<div
+											className={`date-cell ${isToday ? "today" : ""}`}
+										>
+											{moment(date).format("D")}
+										</div>
+									);
+								}
+							}
+						}}
+						eventPropGetter={(event) => ({
+							className: `event-${event.typology}${event.isRecurring ? " recurring" : ""}`
+						})}
+					/>
+				)}
+
 				{selectedCalendarEvent?.typology === "activity" && (
 					<ModifyActivityModal
 						show={showModal}
