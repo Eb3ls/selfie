@@ -9,16 +9,26 @@ import {
 	Activity,
 	EVENT_COLLECTION,
 	Event,
+	PROJECT_ACTIVITY_COLLECTION,
+	ProjectActivity,
 	SESSION_COLLECTION,
 	Session,
 	StringActivity,
 	StringEvent,
+	StringProjectActivity,
 	StringSession,
 	findCollectionWrapper,
 	getCollection
 } from "@/utils/db/db";
 import { Collection } from "mongodb";
 import { NextRequest } from "next/server";
+
+type StringProjectActivityFrontend = Omit<
+	StringProjectActivity,
+	"userIdList"
+> & {
+	usernameList: string[];
+};
 
 type StringActivityFrontend = Omit<StringActivity, "userIdList"> & {
 	usernameList: string[];
@@ -32,6 +42,7 @@ interface CalendarResponse {
 	activities: StringActivityFrontend[];
 	events: StringEventFrontend[];
 	sessions: StringSession[];
+	projectActivities: StringProjectActivityFrontend[];
 }
 
 export const GET = async (request: NextRequest) => {
@@ -61,9 +72,13 @@ export const GET = async (request: NextRequest) => {
 	const sessionClient: Collection<Session> =
 		await getCollection<Session>(SESSION_COLLECTION);
 
+	// Otteniamo la collezione delle project activities
+	const projectActivityClient: Collection<ProjectActivity> =
+		await getCollection<ProjectActivity>(PROJECT_ACTIVITY_COLLECTION);
+
 	// Otteniamo tutte le attività dell'utente
 	const outActivity = await findCollectionWrapper<Activity>(
-		{ userIdList: { $in: [userId] } } as any,
+		{ userIdList: { $in: [userId] } as any },
 		activityClient
 	);
 
@@ -98,7 +113,7 @@ export const GET = async (request: NextRequest) => {
 
 	// Otteniamo tutti gli eventi dell'utente
 	const outEvent = await findCollectionWrapper<Event>(
-		{ userIdList: { $in: [userId] } } as any,
+		{ userIdList: { $in: [userId] } as any },
 		eventClient
 	);
 
@@ -136,7 +151,6 @@ export const GET = async (request: NextRequest) => {
 		{ ownerId: userId } as any,
 		sessionClient
 	);
-
 	let sessions: StringSession[];
 
 	if (outSession.status === 500) {
@@ -148,12 +162,47 @@ export const GET = async (request: NextRequest) => {
 		sessions = await outSession.json();
 	}
 
-	// Se arriviamo qui, abbiamo ottenuto 3 array di attività, eventi e sessioni
+	// Otteniamo tutte le project activities dell'utente
+	const outProjectActivity = await findCollectionWrapper<ProjectActivity>(
+		{ userIdList: { $in: [userId] } as any },
+		projectActivityClient
+	);
 
+	let projectActivities: StringProjectActivity[];
+
+	if (outProjectActivity.status === 500) {
+		// Se c'è stato un errore, ritorna un errore
+		return outProjectActivity;
+	} else if (outProjectActivity.status === 404) {
+		projectActivities = [];
+	} else {
+		projectActivities = await outProjectActivity.json();
+	}
+
+	let projectActivitiesFrontend: StringProjectActivityFrontend[] = [];
+
+	// Per ogni project activity, convertiamo la userIdList in un array di username
+	for (const projectActivity of projectActivities) {
+		const outNameList = await idListToNameList(projectActivity.userIdList);
+
+		if (outNameList.status !== 200) {
+			return outNameList.status;
+		}
+
+		const { userIdList: _, ...smallProjectActivity } = projectActivity;
+
+		projectActivitiesFrontend.push({
+			...smallProjectActivity,
+			usernameList: outNameList.userNameList!
+		});
+	}
+
+	// Se arriviamo qui, abbiamo ottenuto 4 array: attività, eventi, sessioni e project activities
 	const response: CalendarResponse = {
 		activities: activitiesFrontend,
 		events: eventsFrontend,
-		sessions
+		sessions,
+		projectActivities: projectActivitiesFrontend
 	};
 
 	return generateObjectResponse(response, 200);

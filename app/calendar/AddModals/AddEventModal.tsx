@@ -452,18 +452,6 @@ export function AddEventModal({ children }: any) {
 							/>
 						</Form.Group>
 
-						<Form.Group className="mb-3" controlId="formGeo">
-							<Form.Label>Geolocalizzazione</Form.Label>
-							<Form.Control
-								type="text"
-								name="geo"
-								value={form.geo}
-								onChange={handleChange}
-								placeholder="Inserisci geolocalizzazione"
-								className="input-field"
-							/>
-						</Form.Group>
-
 						{/* Nuovo Form.Group per aggiungere inviti */}
 						<Form.Group className="mb-3" controlId="formUsernames">
 							<Form.Label>Inviti</Form.Label>
