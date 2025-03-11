@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import "./MusicBar.css";
 
 export function TitleBar({ videoTitleList }: { videoTitleList: string[] }) {
 	const parentRef = useRef<HTMLDivElement | null>(null);
@@ -33,7 +32,7 @@ export function TitleBar({ videoTitleList }: { videoTitleList: string[] }) {
 	return (
 		<div
 			ref={parentRef}
-			className="mx-3 overflow-x-hidden"
+			className="m-3 overflow-x-hidden"
 			style={{ width: "90%" }}
 		>
 			<h3
@@ -48,9 +47,7 @@ export function TitleBar({ videoTitleList }: { videoTitleList: string[] }) {
 					} as any
 				}
 			>
-				{videoTitleList.length !== 0
-					? videoTitleList[0]
-					: "Nessun video"}
+				{videoTitleList[0]}
 			</h3>
 		</div>
 	);

@@ -2,17 +2,16 @@
 
 import { useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
-import { Button, Container } from "react-bootstrap";
-import { FaLightbulb, FaShareNodes } from "react-icons/fa6";
+import { Button } from "react-bootstrap";
+import { IoMusicalNotes, IoShareSocial, IoTimerOutline } from "react-icons/io5";
 import useSWR from "swr";
 import { GlobalSideBar } from "../components/GlobalSideBar";
 import { Coffee } from "./Animation/Coffee";
 import { Tree } from "./Animation/Tree";
-import { ReminderModal } from "./Modals/ReminderModal";
-import { ShareModal } from "./Modals/ShareModal";
-import { MusicBar } from "./MusicBar/MusicBar";
+import { MusicView } from "./MusicBar/MusicView";
 import "./Pomodoro.css";
-import { Setting } from "./Setting/Setting";
+import { Setting } from "./Setting";
+import { ShareModal } from "./ShareModal";
 
 async function fetcher(url: string) {
 	console.log("Fetching data from " + url);
@@ -35,6 +34,7 @@ function PomodoroComponent() {
 	const [breakTime, setBreakTime] = useState(1);
 	const [sessions, setSessions] = useState(1);
 	const [remainingSessions, setRemainingSessions] = useState(sessions);
+	const [isMusicView, setIsMusicView] = useState(false);
 
 	const searchParams = useSearchParams();
 	let id = searchParams.get("id");
@@ -217,125 +217,148 @@ function PomodoroComponent() {
 		handleFinish();
 	}
 
-	function TimerBlock() {
-		let header = calcTime();
-		if (id !== null && !isStarted && sessions === 0) {
-			header = "Sessioni completate!";
-		}
-
-		let handlerButtons;
-		if (isStarted && isPaused) {
-			handlerButtons = (
-				<>
-					<Button variant="link" onClick={handleRestart}>
-						Restart
-					</Button>
-					<Button variant="link" onClick={handleSetCompleted}>
-						Completed
-					</Button>
-					<Button variant="link" onClick={reset}>
-						Stop
-					</Button>
-				</>
-			);
-		}
-
-		let subHeader = <>Sessioni rimanenti: {remainingSessions}</>;
-		if (isStudying && sessions === 1) {
-			subHeader = <>Ultima sessione!</>;
-		} else if (!isStudying && sessions === 0) {
-			subHeader = <>Ultima pausa!</>;
-		}
-
-		/*
-		 * Mostriamo i bottoni per start, resume e pause solo se
-		 * il numero di sessioni > 0
-		 * oppure se é in pausa (l'ultima ha sessions = 0)
-		 * Necessario per evitare che si possa iniziare una nuova sessione quando id
-		 */
+	function LargeButton(text: string, onClick: () => void) {
 		return (
-			<div className="d-flex flex-column align-items-center justify-content-center">
-				<h1 style={{ fontSize: "100px" }}>{header}</h1>
-				{isStarted && <h1 style={{ fontSize: "50px" }}>{subHeader}</h1>}
-				{(sessions > 0 || !isStudying) && (
-					<Button
-						variant="link"
-						onClick={isStarted ? handleResume : handleStart}
-					>
-						{!isStarted ? " Start" : isPaused ? "Resume" : "Pause"}
-					</Button>
-				)}
-				{handlerButtons}
+			<Button
+				onClick={onClick}
+				className="btn btn-primary btn-lg rounded-pill mt-4 px-5 py-3"
+				size="lg"
+			>
+				{text}
+			</Button>
+		);
+	}
+
+	function TimerBlock() {
+		const getHeader = () => {
+			if (id !== null && !isStarted && sessions === 0) {
+				return "Sessioni completate!";
+			}
+			return calcTime();
+		};
+
+		const getSubHeader = () => {
+			if (isStudying && sessions === 1) {
+				return <>Ultima sessione!</>;
+			} else if (!isStudying && sessions === 0) {
+				return <>Ultima pausa!</>;
+			}
+			return <>Sessioni rimanenti: {remainingSessions}</>;
+		};
+
+		const getMainButtonText = () => {
+			if (!isStarted) return "Start";
+			return isPaused ? "Resume" : "Pause";
+		};
+
+		const renderHandlerButtons = () => {
+			if (isStarted && isPaused) {
+				return (
+					<>
+						{LargeButton("Restart", handleRestart)}
+						{LargeButton("Set Completed", handleSetCompleted)}
+						{LargeButton("Stop", reset)}
+					</>
+				);
+			}
+			return null;
+		};
+
+		const shouldShowMainButton = sessions > 0 || !isStudying;
+
+		return (
+			<div className="d-flex flex-column align-items-center justify-content-center container-sm">
+				<h1 className="display-1 fw-semibold">{getHeader()}</h1>
+				{isStarted && <h1 className="display-4">{getSubHeader()}</h1>}
+				<div className="d-flex flex-column w-100">
+					{shouldShowMainButton &&
+						LargeButton(
+							getMainButtonText(),
+							isStarted ? handleResume : handleStart
+						)}
+					{renderHandlerButtons()}
+				</div>
 			</div>
 		);
 	}
 
 	return (
-		<>
+		<div className="d-flex vh-100 flex-column">
 			<GlobalSideBar />
-			<Container
-				fluid
-				className="vh-100 d-flex flex-column"
+			<div
+				className="d-flex flex-column position-relative flex-grow-1"
 				style={{ backgroundColor: "rgb(240, 240, 240)" }}
 			>
 				{error && <h1>Invalid Session</h1>}
 				{!data && !error && <h1>Caricamento...</h1>}
 				{data && !error && (
 					<>
-						<div className="d-flex position-absolute top-0 end-0 m-5 z-3">
-							<ReminderModal
-								studyTime={studyTime}
-								sessions={sessions}
-								breakTime={breakTime}
+						<div className="d-flex position-absolute top-0 end-0 m-4 me-5">
+							<Button
+								variant="link"
+								onClick={() => {
+									setIsMusicView(!isMusicView);
+									console.log(isMusicView);
+								}}
+								className="p-0 m-0"
 							>
-								<FaLightbulb size={30} className="me-2" />
-							</ReminderModal>
+								{isMusicView ? (
+									<IoTimerOutline size={30} />
+								) : (
+									<IoMusicalNotes size={30} />
+								)}
+							</Button>
 							<ShareModal
 								studyTime={studyTime}
 								sessions={sessions}
 								breakTime={breakTime}
 							>
-								<FaShareNodes size={30} />
+								<IoShareSocial
+									size={30}
+									className="text-primary"
+								/>
 							</ShareModal>
 						</div>
-						{isStudying ? (
-							<Tree
-								time={studyTime * 60}
-								started={isStarted}
-								paused={isPaused}
-							></Tree>
-						) : (
-							<Coffee
-								time={breakTime * 60}
-								started={isStarted}
-								paused={isPaused}
-							></Coffee>
-						)}
-						<TimerBlock></TimerBlock>
-						{!isStarted && id === null && (
-							<div className="d-flex flex-column flex-md-row justify-content-center">
-								<Setting
-									name="Study Time"
-									getter={studyTime}
-									setter={setStudyTime}
-								></Setting>
-								<Setting
-									name="Sessions"
-									getter={sessions}
-									setter={setSessions}
-								></Setting>
-								<Setting
-									name="Break Time"
-									getter={breakTime}
-									setter={setBreakTime}
-								></Setting>
+
+						<div
+							style={{ display: isMusicView ? "none" : "flex" }}
+							className="flex-column h-100"
+						>
+							<div className="flex-grow-1"></div>
+							<div className="d-flex flex-column justify-content-center m-4">
+								<TimerBlock></TimerBlock>
+								{!isStarted && id === null && (
+									<div className="d-flex flex-column justify-content-center m-4">
+										<Setting
+											name="Study Time"
+											getter={studyTime}
+											setter={setStudyTime}
+										></Setting>
+										<Setting
+											name="Sessions"
+											getter={sessions}
+											setter={setSessions}
+										></Setting>
+										<Setting
+											name="Break Time"
+											getter={breakTime}
+											setter={setBreakTime}
+										></Setting>
+									</div>
+								)}
 							</div>
-						)}
-						<MusicBar></MusicBar>
+						</div>
+
+						<div
+							style={{ display: isMusicView ? "flex" : "none" }}
+							className="flex-column h-100"
+						>
+							<MusicView></MusicView>
+						</div>
 					</>
 				)}
-			</Container>
-		</>
+			</div>
+		</div>
 	);
 }
 
