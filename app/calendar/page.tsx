@@ -135,31 +135,17 @@ function generateRecurringSessions(
 	return events;
 }
 
-const ListView = ({
-	events,
-	range
-}: {
-	events: CalendarEvent[];
-	range: { start: Date; end: Date };
-}) => {
+const ListView = ({ events }: { events: CalendarEvent[] }) => {
 	moment.locale("it");
 
 	return (
 		<div className="list-view">
 			<div className="list-header">
 				<div className="header-item">Data</div>
-				<div className="header-item">Evento</div>
-				<div className="header-item">Tipologia</div>
+				<div className="header-item">Attività</div>
 			</div>
 			{events
-				.filter((event) =>
-					moment(event.start).isBetween(
-						range.start,
-						range.end,
-						undefined,
-						"[]"
-					)
-				)
+				.filter((event) => event.typology === "activity") // Filtra solo le attività
 				.map((event, index) => (
 					<div key={index} className="list-event">
 						<div className="list-date">
@@ -176,10 +162,7 @@ const ListView = ({
 							)}
 						</div>
 						<div className={`list-type ${event.typology}`}>
-							{event.typology === "activity" && "Attività"}
-							{event.typology === "event" && "Evento"}
-							{event.typology === "session" && "Sessione"}
-							{event.typology === "projectActivity" && "Progetto"}
+							Attività
 						</div>
 					</div>
 				))}
@@ -428,7 +411,7 @@ export default function CalendarPage() {
 				<CustomToolbar />
 
 				{currentView === "list" ? (
-					<ListView events={events} range={range} />
+					<ListView events={events} />
 				) : (
 					<Calendar
 						localizer={localizer}
