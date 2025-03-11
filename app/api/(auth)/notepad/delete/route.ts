@@ -2,8 +2,10 @@ import { generateMessageResponse, validate } from "@/utils/api/api";
 import {
 	NOTE_COLLECTION,
 	Note,
+	PROJECT_ACTIVITY_COLLECTION,
 	PROJECT_COLLECTION,
 	Project,
+	ProjectActivity,
 	StringNote,
 	deleteCollectionWrapper,
 	findCollectionWrapper,
@@ -55,11 +57,29 @@ export const DELETE = async (request: NextRequest) => {
 	} else if (outProject.status === 200) {
 		return generateMessageResponse(
 			"Note is associated with a project",
-			400
+			401
 		);
 	}
 
-	// Se arriviamo qui, la nota non è associata ad un progetto
+	// Controlliamo che la nota non sia associata a una project activity
+	const projectActivityClient: Collection<ProjectActivity> =
+		await getCollection<ProjectActivity>(PROJECT_ACTIVITY_COLLECTION);
+
+	const outProjectActivity = await findCollectionWrapper<ProjectActivity>(
+		{ noteId: noteId },
+		projectActivityClient
+	);
+
+	if (outProjectActivity.status === 500) {
+		return outProjectActivity;
+	} else if (outProjectActivity.status === 200) {
+		return generateMessageResponse(
+			"Note is associated with a project activity",
+			401
+		);
+	}
+
+	// Se arriviamo qui, la nota non è associata ad un progetto o ad una project activity
 
 	// Ottieniamo la collezione delle note
 	const noteClient: Collection<Note> =

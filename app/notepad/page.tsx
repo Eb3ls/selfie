@@ -163,10 +163,16 @@ export default function Notepad() {
 		});
 
 		if (!response.ok) {
-			alert("Errore nell'eliminazione della nota!");
+			if (response.status == 401) {
+				alert(
+					"La nota appartiene a un progetto o a una attività di progetto!"
+				);
+			} else {
+				alert("Errore nell'eliminazione della nota!");
+			}
+		} else {
+			window.location.reload();
 		}
-
-		window.location.reload();
 	}
 
 	// Funzione per restituire l'icona corretta per il campo access
