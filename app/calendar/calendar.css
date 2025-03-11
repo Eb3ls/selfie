@@ -236,3 +236,56 @@
 		text-align: center;
 	}
 }
+
+/* Aggiungi queste regole al media query mobile */
+@media (max-width: 768px) {
+	/* Forza un'altezza minima per il container del calendario */
+	.calendar-container {
+		min-height: 100vh;
+		padding-bottom: 20px;
+	}
+
+	/* Adatta l'altezza del calendario */
+	.custom-calendar {
+		height: 70vh !important;
+		min-height: 500px;
+	}
+
+	/* Ottimizza la visualizzazione degli eventi */
+	.rbc-event {
+		font-size: 0.7rem;
+		padding: 1px 2px;
+	}
+
+	/* Modifica il layout della toolbar */
+	.toolbar-right {
+		flex-direction: column;
+		width: 100%;
+	}
+
+	.add-buttons-container {
+		flex-direction: column;
+		width: 100%;
+	}
+
+	.add-button {
+		width: 100%;
+		justify-content: center;
+		padding: 8px 12px;
+	}
+
+	/* Ottimizza la visualizzazione delle date */
+	.rbc-month-view {
+		min-height: 400px;
+	}
+
+	.rbc-row-bg {
+		min-height: 80px;
+	}
+}
+
+/* Aggiungi questa regola generale per il calendario */
+.custom-calendar {
+	flex-grow: 1;
+	min-height: 600px;
+}
