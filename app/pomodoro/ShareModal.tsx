@@ -90,7 +90,7 @@ export function ShareModal({
 								name="username"
 								value={form.username}
 								onChange={handleChange}
-								placeholder="Inserisci il tuo nome"
+								placeholder="Inserisci lo username"
 								className="input-field"
 								required
 								minLength={2}

@@ -35,6 +35,7 @@ export default function Pomodoro() {
 	const [remainingSessions, setRemainingSessions] = useState(sessions);
 	const [isMusicView, setIsMusicView] = useState(false);
 	const [resetTrigger, setResetTrigger] = useState(0);
+	const originalSessions = useRef<number>(0);
 
 	const searchParams = useSearchParams();
 	let id = searchParams.get("id");
@@ -58,6 +59,7 @@ export default function Pomodoro() {
 			if (id) {
 				setSessions(pomodoroData.cycles - data.cycles);
 				setDoneCycles(data.cycles);
+				originalSessions.current = pomodoroData.cycles;
 			} else {
 				setSessions(pomodoroData.cycles);
 			}
@@ -339,7 +341,7 @@ export default function Pomodoro() {
 							</Button>
 							<ShareModal
 								studyTime={studyTime}
-								sessions={sessions}
+								sessions={originalSessions.current || sessions}
 								breakTime={breakTime}
 							>
 								<IoShareSocial
