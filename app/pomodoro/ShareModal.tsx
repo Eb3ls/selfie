@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
-import { FaShareNodes } from "react-icons/fa6";
+import { IoShareSocial } from "react-icons/io5";
 
 interface ShareModalInterface {
 	studyTime: number;
@@ -38,7 +38,10 @@ export function ShareModal({
 	return (
 		<>
 			{/* Bottone per aprire il modal */}
-			<span onClick={() => setShow(true)} style={{ cursor: "pointer" }}>
+			<span
+				onClick={() => setShow(true)}
+				style={{ cursor: "pointer", zIndex: 1 }}
+			>
 				{children}
 			</span>
 
@@ -51,23 +54,47 @@ export function ShareModal({
 				fullscreen="lg-down"
 			>
 				<Modal.Header closeButton className="custom-modal-header">
-					<Modal.Title>
-						<FaShareNodes size={30} className="mx-2" />
-						Condividi il Pomodoro
+					<Modal.Title className="d-flex align-items-center">
+						<IoShareSocial size={30} className="me-2" />
+						<span>Condividi il Pomodoro</span>
 					</Modal.Title>
 				</Modal.Header>
 				<Form onSubmit={handleSubmit} className="custom-form">
 					<Modal.Body>
+						<div className="pomodoro-details p-3 bg-light rounded mb-4">
+							<div className="d-flex justify-content-between">
+								<div className="text-center">
+									<small className="text-muted">Studio</small>
+									<p className="mb-0 fw-bold">
+										{studyTime} min
+									</p>
+								</div>
+								<div className="text-center">
+									<small className="text-muted">
+										Sessioni
+									</small>
+									<p className="mb-0 fw-bold">{sessions}</p>
+								</div>
+								<div className="text-center">
+									<small className="text-muted">Pausa</small>
+									<p className="mb-0 fw-bold">
+										{breakTime} min
+									</p>
+								</div>
+							</div>
+						</div>
 						<Form.Group className="mb-3" controlId="formFirstName">
-							<Form.Label>Nome dell`utente</Form.Label>
+							<Form.Label>Nome utente</Form.Label>
 							<Form.Control
 								type="text"
 								name="username"
 								value={form.username}
 								onChange={handleChange}
-								placeholder="Inserisci nome"
+								placeholder="Inserisci il tuo nome"
 								className="input-field"
 								required
+								minLength={2}
+								autoFocus
 							/>
 						</Form.Group>
 					</Modal.Body>
@@ -83,6 +110,7 @@ export function ShareModal({
 							variant="primary"
 							type="submit"
 							className="custom-submit-button"
+							disabled={!form.username.trim()}
 						>
 							Condividi
 						</Button>

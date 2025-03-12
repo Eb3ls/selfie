@@ -292,8 +292,8 @@ export default function Pomodoro() {
 					La sessione a cui stai tentando di accedere non esiste o è
 					scaduta
 				</p>
-				<Button href="/" variant="primary" className="mt-3">
-					Return Home
+				<Button href="/home" variant="primary" className="mt-3">
+					Torna alla home
 				</Button>
 			</div>
 		);
@@ -329,6 +329,7 @@ export default function Pomodoro() {
 									console.log(isMusicView);
 								}}
 								className="p-0 m-0"
+								style={{ zIndex: 1 }}
 							>
 								{isMusicView ? (
 									<IoTimerOutline size={30} />
