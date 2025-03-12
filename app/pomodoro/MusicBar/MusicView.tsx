@@ -58,7 +58,7 @@ export function MusicView() {
 
 	// Stati dei controlli del player
 	const [toLoop, setToLoop] = useState<boolean>(false); // Ripetizione video corrente
-	const [isInteracting, setIsInteracting] = useState<boolean>(false); // Interazione con la barra di avanzamento
+	const isInteracting = useRef<boolean>(false); // Stato di interazione con la barra di avanzamento
 
 	// Stati della playlist
 	const [videoList, setVideoList] = useState<string[]>([]); // Lista degli ID dei video
@@ -96,11 +96,11 @@ export function MusicView() {
 
 	// Gestori interazione barra di avanzamento
 	function handleMouseDown() {
-		setIsInteracting(true);
+		isInteracting.current = true;
 	}
 
 	function handleMouseUp() {
-		setIsInteracting(false);
+		isInteracting.current = false;
 	}
 
 	// Gestore fine video
@@ -128,16 +128,15 @@ export function MusicView() {
 
 	// Effect per aggiornare il tempo corrente durante la riproduzione
 	useEffect(() => {
-		if (player.current) {
-			// Imposta un intervallo per aggiornare il tempo corrente
-			const interval = setInterval(() => {
-				if (!isInteracting) {
-					setCurrentTime(player.current.getCurrentTime());
-				}
-			}, 1000);
-			return () => clearInterval(interval);
-		}
-	}, [isInteracting]);
+		// Imposta un intervallo per aggiornare il tempo corrente
+		const interval = setInterval(() => {
+			if (player.current && !isInteracting.current) {
+				const ct = player.current.getCurrentTime();
+				setCurrentTime(ct);
+			}
+		}, 1000);
+		return () => clearInterval(interval);
+	}, []);
 
 	// Effect per resettare lo stato del player.current quando la playlist è vuota
 	useEffect(() => {

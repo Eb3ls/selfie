@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "react-bootstrap";
 import { IoMusicalNotes, IoShareSocial, IoTimerOutline } from "react-icons/io5";
 import useSWR from "swr";
@@ -9,7 +9,6 @@ import { GlobalSideBar } from "../components/GlobalSideBar";
 import { Coffee } from "./Animation/Coffee";
 import { Tree } from "./Animation/Tree";
 import { MusicView } from "./MusicBar/MusicView";
-import "./Pomodoro.css";
 import { Setting } from "./Setting";
 import { ShareModal } from "./ShareModal";
 
@@ -24,7 +23,7 @@ async function fetcher(url: string) {
 	return response.json();
 }
 
-function PomodoroComponent() {
+export default function Pomodoro() {
 	const [isStudying, setIsStudying] = useState(true); // true for studying, false for break
 	const [isPaused, setIsPaused] = useState(true); // true for paused, false for running
 	const [isStarted, setIsStarted] = useState(false); // true for started, false for not started
@@ -35,6 +34,7 @@ function PomodoroComponent() {
 	const [sessions, setSessions] = useState(1);
 	const [remainingSessions, setRemainingSessions] = useState(sessions);
 	const [isMusicView, setIsMusicView] = useState(false);
+	const [resetTrigger, setResetTrigger] = useState(0);
 
 	const searchParams = useSearchParams();
 	let id = searchParams.get("id");
@@ -73,7 +73,8 @@ function PomodoroComponent() {
 		setIsStarted(false);
 		setIsStudying(true);
 		setCurrentTime(studyTime * 60);
-	}, [studyTime]);
+		setResetTrigger(resetTrigger + 1);
+	}, [studyTime, resetTrigger]);
 
 	const updatePomodoro = useCallback(
 		async (retries = 5) => {
@@ -209,6 +210,7 @@ function PomodoroComponent() {
 
 	function handleRestart() {
 		setIsPaused(false);
+		setResetTrigger(resetTrigger + 1);
 		setCurrentTime(isStudying ? studyTime * 60 : breakTime * 60);
 	}
 
@@ -282,6 +284,32 @@ function PomodoroComponent() {
 		);
 	}
 
+	function InvalidSessionBlock() {
+		return (
+			<div className="d-flex flex-column align-items-center justify-content-center h-100">
+				<h1 className="display-4 text-danger mb-3">Invalid Session</h1>
+				<p className="text-muted">
+					La sessione a cui stai tentando di accedere non esiste o è
+					scaduta
+				</p>
+				<Button href="/" variant="primary" className="mt-3">
+					Return Home
+				</Button>
+			</div>
+		);
+	}
+
+	function LoadingBlock() {
+		return (
+			<div className="d-flex flex-column align-items-center justify-content-center h-100">
+				<div className="spinner-border text-primary mb-3" role="status">
+					<span className="visually-hidden">Caricamento...</span>
+				</div>
+				<h2 className="h4 text-muted">Caricamento...</h2>
+			</div>
+		);
+	}
+
 	return (
 		<div className="d-flex vh-100 flex-column">
 			<GlobalSideBar />
@@ -289,8 +317,8 @@ function PomodoroComponent() {
 				className="d-flex flex-column position-relative flex-grow-1"
 				style={{ backgroundColor: "rgb(240, 240, 240)" }}
 			>
-				{error && <h1>Invalid Session</h1>}
-				{!data && !error && <h1>Caricamento...</h1>}
+				{error && <InvalidSessionBlock />}
+				{!data && !error && <LoadingBlock />}
 				{data && !error && (
 					<>
 						<div className="d-flex position-absolute top-0 end-0 m-4 me-5">
@@ -324,23 +352,37 @@ function PomodoroComponent() {
 							style={{ display: isMusicView ? "none" : "flex" }}
 							className="flex-column h-100"
 						>
-							<div className="flex-grow-1"></div>
+							<div className="flex-grow-1">
+								{isStudying ? (
+									<Tree
+										resetTrigger={resetTrigger}
+										time={studyTime * 60}
+										started={isStarted}
+										paused={isPaused}
+									/>
+								) : (
+									<Coffee />
+								)}
+							</div>
 							<div className="d-flex flex-column justify-content-center m-4">
 								<TimerBlock></TimerBlock>
 								{!isStarted && id === null && (
 									<div className="d-flex flex-column justify-content-center m-4">
 										<Setting
 											name="Study Time"
+											maxValue={600}
 											getter={studyTime}
 											setter={setStudyTime}
 										></Setting>
 										<Setting
 											name="Sessions"
+											maxValue={60}
 											getter={sessions}
 											setter={setSessions}
 										></Setting>
 										<Setting
 											name="Break Time"
+											maxValue={600}
 											getter={breakTime}
 											setter={setBreakTime}
 										></Setting>
@@ -359,13 +401,5 @@ function PomodoroComponent() {
 				)}
 			</div>
 		</div>
-	);
-}
-
-export default function Pomodoro() {
-	return (
-		<Suspense fallback={<h1>Caricamento...</h1>}>
-			<PomodoroComponent />
-		</Suspense>
 	);
 }

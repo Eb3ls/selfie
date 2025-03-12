@@ -1,32 +1,50 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Button, Form } from "react-bootstrap";
 import { FaMinus, FaPlus } from "react-icons/fa6";
 
 interface SettingsProps {
 	name: string;
+	maxValue: number;
 	getter: number;
 	setter: React.Dispatch<React.SetStateAction<number>>;
 }
 
-export function Setting({ name, getter, setter }: SettingsProps) {
+export function Setting({ name, maxValue, getter, setter }: SettingsProps) {
 	const inputRef = useRef<HTMLInputElement | null>(null);
 
-	function changeValue(value: number) {
-		setter(Math.max(1, getter + value));
-		return;
+	// Teniamo il valore come stringa per permettere all'utente di inserire valori non numerici (quando cancella tutto)
+	const [localValue, setLocalValue] = useState(getter.toString());
+
+	// Aggiorna il valore locale quando il valore di getter cambia
+	useEffect(() => {
+		setLocalValue(getter.toString());
+	}, [getter]);
+
+	function changeValue(change: number) {
+		const newValue = Math.max(1, Math.min(maxValue, getter + change));
+		setter(newValue);
+		setLocalValue(newValue.toString());
 	}
 
 	function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
-		if (e.target.value === "") {
-			setter(1);
-		} else {
-			const val = parseInt(e.target.value);
-			if (isNaN(val)) {
-				setter(1);
-			} else {
-				setter(val);
-			}
+		setLocalValue(e.target.value);
+	}
+
+	// Quando l'utente preme invio o clicca fuori dall'input, aggiorna il valore
+	function handleInputBlur() {
+		let parsed = parseInt(localValue);
+		if (isNaN(parsed)) {
+			parsed = 1;
 		}
+
+		if (parsed < 1) {
+			parsed = 1;
+		} else if (parsed > maxValue) {
+			parsed = maxValue;
+		}
+
+		setter(parsed);
+		setLocalValue(parsed.toString());
 		inputRef.current?.focus();
 	}
 
@@ -44,8 +62,15 @@ export function Setting({ name, getter, setter }: SettingsProps) {
 				<Form.Control
 					type="number"
 					min={1}
-					value={getter}
+					max={maxValue}
+					value={localValue}
 					onChange={handleInputChange}
+					onKeyDown={(e) => {
+						if (e.key === "Enter") {
+							handleInputBlur();
+						}
+					}}
+					onBlur={handleInputBlur}
 					className="text-center mx-2 rounded-pill flex-grow-1"
 					style={{
 						WebkitAppearance: "none",

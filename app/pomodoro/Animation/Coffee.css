@@ -9,9 +9,9 @@
 }
 
 .top-cup-up {
-	width: 31vmin;
+	width: calc(var(--containerSize) * 0.31);
 	aspect-ratio: 16/9;
-	top: 50%;
+	top: 40%;
 	left: 50%;
 	background-color: var(--cup-color-border);
 	border-radius: 50%;
@@ -19,40 +19,41 @@
 }
 
 .top-cup-down {
-	width: 31vmin;
+	width: calc(var(--containerSize) * 0.31);
 	aspect-ratio: 16/9;
-	top: 50%;
+	top: 40%;
 	left: 50%;
-	border: 1.5vmin solid var(--cup-color-border);
+	border: calc(var(--containerSize) * 0.015) solid var(--cup-color-border);
 	border-radius: 50%;
 	z-index: 3;
 }
 
 .main-cup {
-	width: 30vmin;
-	height: 70vmin;
+	width: calc(var(--containerSize) * 0.299);
+	height: calc(var(--containerSize) * 0.71);
 	left: 50%;
-	top: 50%;
+	top: 40%;
 	background: var(--cup-color-light);
 	clip-path: polygon(0 53%, 100% 53%, 89.8% 99%, 10.2% 99%);
 	z-index: 2;
 }
 
 .bottom-cup {
-	width: 24.1vmin;
-	height: 10vmin;
+	width: calc(var(--containerSize) * 0.241);
+	height: calc(var(--containerSize) * 0.1);
 	background-color: var(--cup-color-light);
 	border-radius: 50%;
 	left: 50%;
-	top: calc(50% + 33.9vmin);
+	top: calc(40% + (var(--containerSize) * 0.34));
 	box-sizing: content-box;
-	border-bottom: var(--cup-color-border-dark) 1.5vmin solid;
-	z-index: 1;
+	border-bottom: calc(var(--containerSize) * 0.015) solid
+		var(--cup-color-border-dark);
+	z-index: 3;
 }
 
 .coffee-circle {
-	width: 28vmin;
-	height: 12vmin;
+	width: calc(var(--containerSize) * 0.28);
+	height: calc(var(--containerSize) * 0.12);
 	background: radial-gradient(
 		circle,
 		var(--coffee-color-light) 30%,
@@ -60,13 +61,13 @@
 	);
 	border-radius: 50%;
 	z-index: 2;
-	top: calc(50% + 1.5vmin);
+	top: calc(40% + (var(--containerSize) * 0.015));
 	left: 50%;
 }
 
 .steam {
-	width: 3vmin;
-	height: 6vmin;
+	width: calc(var(--containerSize) * 0.03);
+	height: calc(var(--containerSize) * 0.06);
 	background: linear-gradient(to bottom, var(--steam-color), transparent);
 	border-radius: 50%;
 	opacity: 0.7;
@@ -74,20 +75,20 @@
 }
 
 .steam-1 {
-	left: calc(50% - 10vmin);
-	top: 50%;
+	left: calc(50% - (var(--containerSize) * 0.1));
+	top: 40%;
 	animation-delay: 0s;
 }
 
 .steam-2 {
-	left: calc(50% - 5vmin);
-	top: calc(50% + 2vmin);
+	left: calc(50% - (var(--containerSize) * 0.05));
+	top: calc(40% + (var(--containerSize) * 0.02));
 	animation-delay: 1s;
 }
 
 .steam-3 {
-	left: calc(50% + 5vmin);
-	top: calc(50% + 4vmin);
+	left: calc(50% + (var(--containerSize) * 0.05));
+	top: calc(40% + (var(--containerSize) * 0.04));
 	animation-delay: 3s ease-out;
 }
 

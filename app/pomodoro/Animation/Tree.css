@@ -1,25 +1,32 @@
+.tree-container {
+	width: 100%;
+	height: 100%;
+}
+
 .bottom-circle {
-	width: 50vmin;
-	height: 20vmin;
+	width: calc(var(--containerSize) * 0.5);
+	height: calc(var(--containerSize) * 0.2);
 	background-color: #8b4513;
 	border-radius: 0% 0% 60% 60%;
 	clip-path: inset(50% 0 0 0);
-	top: 50%;
+	top: calc(50% + var(--vertical-offset, 0%));
 }
 
 .oval-circle {
-	width: 50vmin;
-	height: 5vmin;
+	width: calc(var(--containerSize) * 0.5);
+	height: calc(var(--containerSize) * 0.05);
 	background-color: #ad581a;
 	border-radius: 50%;
 	z-index: 1;
-	top: 50%;
+	top: calc(50% + var(--vertical-offset, 0%));
 }
 
 .log {
-	width: 10vmin;
-	height: 20vmin;
-	top: calc(50% - 7.5vmin);
+	width: calc(var(--containerSize) * 0.1);
+	height: calc(var(--containerSize) * 0.2);
+	top: calc(
+		50% - calc(var(--containerSize) * 0.075) + var(--vertical-offset, 0%)
+	);
 	left: 50%;
 	clip-path: polygon(30% 0%, 80% 0%, 80% 90%, 50% 95%, 30% 90%);
 	background: linear-gradient(to right, #834112 50%, #bd5f1d 50%);
@@ -27,24 +34,30 @@
 }
 
 .leaves-1 {
-	--final-width: 20vmin;
-	top: calc(50% - 30vmin);
+	--final-width: calc(var(--containerSize) * 0.2);
+	top: calc(
+		50% - calc(var(--containerSize) * 0.3) + var(--vertical-offset, 0%)
+	);
 	z-index: 5;
 	animation: grow calc(var(--time) / 3) forwards;
 	animation-delay: calc(var(--time) / 1.5);
 }
 
 .leaves-2 {
-	--final-width: 30vmin;
-	top: calc(50% - 25vmin);
+	--final-width: calc(var(--containerSize) * 0.3);
+	top: calc(
+		50% - calc(var(--containerSize) * 0.25) + var(--vertical-offset, 0%)
+	);
 	z-index: 4;
 	animation: grow calc(var(--time) / 3) forwards;
 	animation-delay: calc(var(--time) / 3);
 }
 
 .leaves-3 {
-	--final-width: 40vmin;
-	top: calc(50% - 20vmin);
+	--final-width: calc(var(--containerSize) * 0.4);
+	top: calc(
+		50% - calc(var(--containerSize) * 0.2) + var(--vertical-offset, 0%)
+	);
 	z-index: 3;
 	animation: grow calc(var(--time) / 3) forwards;
 	animation-delay: 0s;
