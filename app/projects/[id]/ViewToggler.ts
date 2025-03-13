@@ -16,7 +16,7 @@ import {
 } from "./Utils";
 
 class ViewToggler extends HTMLElement {
-	viewType: "GANTT" | "LIST";
+	viewType: "GANTT" | "LIST" | "ERROR";
 	listViewType: "USER" | "TIME";
 	projectData: ProjectResponse | null;
 	sortedActivities: SortedActivity[];
@@ -37,25 +37,28 @@ class ViewToggler extends HTMLElement {
 		this.render("GANTT");
 	}
 
-	render(viewMode: "GANTT" | "LIST") {
+	render(viewMode: "GANTT" | "LIST" | "ERROR") {
 		if (this.viewType === viewMode) return;
 		this.viewType = viewMode;
 
 		if (viewMode === "GANTT") {
 			this.innerHTML = `
-                ${this.getHeaderTemplate()}
-                ${this.getGanntBody()}
+					${this.getHeaderTemplate()}
+					${this.getGanntBody()}
             `;
 			this.addEventListeners();
 			this.loadData();
-		} else {
+		} else if (viewMode === "LIST") {
 			this.innerHTML = `
                 ${this.getHeaderTemplate()}
             `;
 			const body = this.getListBody(this.listViewType);
 			this.appendChild(body);
 			this.addEventListeners();
+		} else {
+			this.innerHTML = "Error";
 		}
+		this.classList.add("d-flex", "flex-column", "h-100");
 	}
 
 	getHeaderTemplate() {
@@ -63,8 +66,8 @@ class ViewToggler extends HTMLElement {
 		if (this.viewType === "GANTT") {
 			block = `
                 <div class="col-9 d-flex flex-column align-items-center">
-                    <div class="fs-4" id="yearDiv"></div>
-                    <div class="fs-5" id="monthDiv"></div>
+                    <div class="fs-5 fw-bold" id="yearDiv"></div>
+                    <div class="fs-6 fw-semibold" id="monthDiv"></div>
                 </div>
             `;
 		} else {
@@ -77,7 +80,7 @@ class ViewToggler extends HTMLElement {
 		}
 
 		return `
-            <div class="row p-3 border-bottom border-secondary">
+            <div class="row border-bottom border-secondary px-3 align-items-center" style="height: ${ROW_HEIGHT_PX};">
                 <div class="col-3 d-flex align-items-center">
                     <button class="btn me-2 p-0" id="renderGantt">Gantt</button>
                     <button class="btn ms-2 p-0" id="renderList">List</button>
@@ -89,11 +92,11 @@ class ViewToggler extends HTMLElement {
 
 	getGanntBody() {
 		return `
-            <div class="row border-bottom border-secondary" style="height: 500px;">
+            <div class="row border-bottom border-secondary flex-grow-1">
             <div id="listView"
                 class="col-3 hide-scroll z-2 border-end border-secondary bg-white mh-100 overflow-y-auto"
                 style="position: sticky; left: 0;">
-                <div id="header" class="row p-3 border-bottom border-secondary sticky-top bg-white" style="min-height: ${ROW_HEIGHT_PX};">
+                <div id="header" class="row p-3 border-bottom border-secondary sticky-top bg-white align-items-center" style="height: ${ROW_HEIGHT_PX};">
                     <div class="col-6">Titolo</div>
                     <div class="col-6 d-flex justify-content-center">Range</div>
                 </div>
@@ -140,6 +143,8 @@ class ViewToggler extends HTMLElement {
 		});
 
 		if (this.viewType === "LIST") {
+			listBtn.classList.add("fw-bold");
+			ganttBtn.classList.add("fw-light");
 			const userSortBtn = this.querySelector(
 				"#userSort"
 			) as HTMLButtonElement;
@@ -160,6 +165,9 @@ class ViewToggler extends HTMLElement {
 				if (!body) return;
 				body.replaceWith(this.getListBody("TIME"));
 			});
+		} else {
+			listBtn.classList.add("fw-light");
+			ganttBtn.classList.add("fw-bold");
 		}
 	}
 
@@ -176,7 +184,7 @@ class ViewToggler extends HTMLElement {
 			return data;
 		} catch (error) {
 			console.error(error);
-			alert("Failed to get data, please try again");
+			console.warn("Failed to get data, please try again");
 			return null;
 		}
 	}

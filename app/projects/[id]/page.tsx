@@ -45,9 +45,8 @@ export default function Projects() {
 							className="btn text-secondary me-1 p-0"
 							href="/projects"
 						>
-							Dashboard
+							Dashboard /
 						</a>
-						<div>/</div>
 						<div className="ms-1" id="mainTitle"></div>
 					</div>
 					<div className="col d-flex justify-content-end align-items-center">
