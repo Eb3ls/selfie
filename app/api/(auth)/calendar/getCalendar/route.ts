@@ -100,7 +100,7 @@ export const GET = async (request: NextRequest) => {
 		const outNameList = await idListToNameList(activity.userIdList);
 
 		if (outNameList.status !== 200) {
-			return outNameList.status;
+			return generateMessageResponse("Errore nel recupero del nome", outNameList.status);
 		}
 
 		const { userIdList: _, ...smallActivity } = activity;
@@ -135,7 +135,7 @@ export const GET = async (request: NextRequest) => {
 		const outNameList = await idListToNameList(event.userIdList);
 
 		if (outNameList.status !== 200) {
-			return outNameList.status;
+			return generateMessageResponse("Errore nel recupero del nome", outNameList.status);
 		}
 
 		const { userIdList: _, ...smallEvent } = event;
@@ -186,7 +186,7 @@ export const GET = async (request: NextRequest) => {
 		const outNameList = await idListToNameList(projectActivity.userIdList);
 
 		if (outNameList.status !== 200) {
-			return outNameList.status;
+			return generateMessageResponse("Errore nel recupero del nome", outNameList.status);
 		}
 
 		const { userIdList: _, ...smallProjectActivity } = projectActivity;

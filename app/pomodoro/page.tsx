@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, Suspense } from "react";
 import { Button } from "react-bootstrap";
 import { IoMusicalNotes, IoShareSocial, IoTimerOutline } from "react-icons/io5";
 import useSWR from "swr";
@@ -23,7 +23,7 @@ async function fetcher(url: string) {
 	return response.json();
 }
 
-export default function Pomodoro() {
+function PomodoroImplementation() {
 	const [isStudying, setIsStudying] = useState(true); // true for studying, false for break
 	const [isPaused, setIsPaused] = useState(true); // true for paused, false for running
 	const [isStarted, setIsStarted] = useState(false); // true for started, false for not started
@@ -398,5 +398,13 @@ export default function Pomodoro() {
 				)}
 			</div>
 		</div>
+	);
+}
+
+export default function Pomodoro() {
+	return (
+		<Suspense fallback={<div>Loading search params...</div>}>
+			<PomodoroImplementation />
+		</Suspense>
 	);
 }
