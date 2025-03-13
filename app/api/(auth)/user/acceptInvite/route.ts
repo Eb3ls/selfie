@@ -2,9 +2,12 @@ import { generateMessageResponse, validate } from "@/utils/api/api";
 import {
 	ACTIVITY_COLLECTION,
 	Activity,
+	EVENT_COLLECTION,
+	Event,
 	INVITATION_COLLECTION,
 	Invitation,
 	StringActivity,
+	StringEvent,
 	StringInvitation,
 	deleteCollectionWrapper,
 	findCollectionWrapper,
@@ -123,7 +126,49 @@ export const POST = async (request: NextRequest) => {
 
 		return generateMessageResponse("Invito accettato", 200);
 	} else if (type === "EVENT") {
-		// TODO
+		// Otteniamo la collezione degli eventi
+		const eventClient: Collection<Event> =
+			await getCollection<Event>(EVENT_COLLECTION);
+
+		// Otteniamo l'evento
+		const outEvent = await findCollectionWrapper<Event>(
+			{
+				_id: targetId
+			},
+			eventClient
+		);
+
+		if (outEvent.status !== 200) {
+			return outEvent;
+		}
+
+		const event: StringEvent = (await outEvent.json())[0];
+
+		// Aggiungiamo l'utente alla lista degli utenti che hanno accesso all'evento
+		event.userIdList.push(userId);
+
+		// Aggiorniamo l'evento
+		const updateOut = await updateCollectionWrapper<Event>(
+			{ _id: event._id },
+			{ $set: { userIdList: event.userIdList } } as any,
+			eventClient
+		);
+
+		if (updateOut.status !== 200) {
+			return updateOut;
+		}
+
+		// Eliminiamo l'invito
+		const deleteOut = await deleteCollectionWrapper<Invitation>(
+			{ _id: invitationId },
+			invitationClient
+		);
+
+		if (deleteOut.status !== 200) {
+			return deleteOut;
+		}
+
+		return generateMessageResponse("Invito accettato", 200);
 	} else if (type === "SESSION") {
 		// TODO
 	} else if (type === "PROJECT") {
