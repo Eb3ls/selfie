@@ -76,19 +76,19 @@
 
 .steam-1 {
 	left: calc(50% - (var(--containerSize) * 0.1));
-	top: 40%;
+	top: 30%;
 	animation-delay: 0s;
 }
 
 .steam-2 {
 	left: calc(50% - (var(--containerSize) * 0.05));
-	top: calc(40% + (var(--containerSize) * 0.02));
+	top: calc(30% + (var(--containerSize) * 0.02));
 	animation-delay: 1s;
 }
 
 .steam-3 {
 	left: calc(50% + (var(--containerSize) * 0.05));
-	top: calc(40% + (var(--containerSize) * 0.04));
+	top: calc(30% + (var(--containerSize) * 0.04));
 	animation-delay: 3s ease-out;
 }
 

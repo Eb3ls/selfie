@@ -351,10 +351,7 @@ export default function Pomodoro() {
 							</ShareModal>
 						</div>
 
-						<div
-							style={{ display: isMusicView ? "none" : "flex" }}
-							className="flex-column h-100"
-						>
+						<div className="d-flex flex-column h-100">
 							<div className="flex-grow-1">
 								{isStudying ? (
 									<Tree
@@ -367,38 +364,35 @@ export default function Pomodoro() {
 									<Coffee />
 								)}
 							</div>
-							<div className="d-flex flex-column justify-content-center m-4">
-								<TimerBlock></TimerBlock>
-								{!isStarted && id === null && (
-									<div className="d-flex flex-column justify-content-center m-4">
-										<Setting
-											name="Study Time"
-											maxValue={600}
-											getter={studyTime}
-											setter={setStudyTime}
-										></Setting>
-										<Setting
-											name="Sessions"
-											maxValue={60}
-											getter={sessions}
-											setter={setSessions}
-										></Setting>
-										<Setting
-											name="Break Time"
-											maxValue={600}
-											getter={breakTime}
-											setter={setBreakTime}
-										></Setting>
-									</div>
-								)}
-							</div>
-						</div>
-
-						<div
-							style={{ display: isMusicView ? "flex" : "none" }}
-							className="flex-column h-100"
-						>
-							<MusicView></MusicView>
+							{isMusicView ? (
+								<MusicView />
+							) : (
+								<div className="d-flex flex-column justify-content-center m-4">
+									<TimerBlock></TimerBlock>
+									{!isStarted && id === null && (
+										<div className="d-flex flex-column justify-content-center m-4">
+											<Setting
+												name="Study Time"
+												maxValue={600}
+												getter={studyTime}
+												setter={setStudyTime}
+											></Setting>
+											<Setting
+												name="Sessions"
+												maxValue={60}
+												getter={sessions}
+												setter={setSessions}
+											></Setting>
+											<Setting
+												name="Break Time"
+												maxValue={600}
+												getter={breakTime}
+												setter={setBreakTime}
+											></Setting>
+										</div>
+									)}
+								</div>
+							)}
 						</div>
 					</>
 				)}

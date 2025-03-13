@@ -27,6 +27,7 @@ export function Tree({ time, started, paused, resetTrigger }: TreeProps) {
 	useEffect(() => {
 		if (containerRef.current) {
 			const updateSize = () => {
+				if (!containerRef) return;
 				const { width, height } =
 					containerRef.current!.getBoundingClientRect();
 				setContainerSize(Math.min(width, height));

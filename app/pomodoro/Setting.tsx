@@ -13,7 +13,7 @@ export function Setting({ name, maxValue, getter, setter }: SettingsProps) {
 	const inputRef = useRef<HTMLInputElement | null>(null);
 
 	// Teniamo il valore come stringa per permettere all'utente di inserire valori non numerici (quando cancella tutto)
-	const [localValue, setLocalValue] = useState(getter.toString());
+	const [localValue, setLocalValue] = useState(getter.toString() || "1");
 
 	// Aggiorna il valore locale quando il valore di getter cambia
 	useEffect(() => {
