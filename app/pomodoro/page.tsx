@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useRef, useState, Suspense } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "react-bootstrap";
 import { IoMusicalNotes, IoShareSocial, IoTimerOutline } from "react-icons/io5";
 import useSWR from "swr";
@@ -343,6 +343,7 @@ function PomodoroImplementation() {
 								studyTime={studyTime}
 								sessions={originalSessions.current || sessions}
 								breakTime={breakTime}
+								id={id}
 							>
 								<IoShareSocial
 									size={30}

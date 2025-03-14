@@ -8,6 +8,7 @@ interface ShareModalInterface {
 	studyTime: number;
 	sessions: number;
 	breakTime: number;
+	id: string | null;
 	children: any;
 }
 
@@ -15,6 +16,7 @@ export function ShareModal({
 	studyTime,
 	sessions,
 	breakTime,
+	id,
 	children
 }: ShareModalInterface) {
 	const [show, setShow] = useState(false);
@@ -29,9 +31,33 @@ export function ShareModal({
 		});
 	};
 
-	function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+	async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		console.log("Dati del form:", form);
+		console.log("Form inviato:", form);
+
+		if (id === null) {
+			alert("Failed! Invalid session ID");
+			return;
+		}
+
+		const response = await fetch("/api/calendar/session/" + id + "/share", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify(form)
+		});
+
+		if (response.status === 200) {
+			const fetched_data = await response.json();
+			alert("Successful: " + fetched_data.message);
+		} else {
+			alert("Failed! Status code: " + response.status);
+		}
+
+		setForm({
+			username: ""
+		});
 		setShow(false);
 	}
 

@@ -6,9 +6,13 @@ import {
 	Event,
 	INVITATION_COLLECTION,
 	Invitation,
+	SESSION_COLLECTION,
+	Session,
 	StringActivity,
 	StringEvent,
 	StringInvitation,
+	StringSession,
+	addCollectionWrapper,
 	deleteCollectionWrapper,
 	findCollectionWrapper,
 	getCollection,
@@ -16,6 +20,7 @@ import {
 } from "@/utils/db/db";
 import { Collection } from "mongodb";
 import { NextRequest } from "next/server";
+import { rrulestr } from "rrule";
 
 const requestTemplate = {
 	_id: "",
@@ -170,7 +175,88 @@ export const POST = async (request: NextRequest) => {
 
 		return generateMessageResponse("Invito accettato", 200);
 	} else if (type === "SESSION") {
-		// TODO
+		// Otteniamo la collezione delle sessioni
+		const sessionClient: Collection<Session> =
+			await getCollection<Session>(SESSION_COLLECTION);
+
+		// Otteniamo la sessione
+		const outSession = await findCollectionWrapper<Session>(
+			{
+				_id: targetId
+			},
+			sessionClient
+		);
+
+		if (outSession.status !== 200) {
+			return outSession;
+		}
+
+		const session: StringSession = (await outSession.json())[0];
+
+		// Dobbiamo duplicare la sessione e aggiungerla all'utente
+		// Dobbiamo impostare le date di inizio in modo tale che la sessione abbia le stesse occorrenze
+		// con le rrule.
+		// Per farlo troviamo la prossima occorrenza della sessione e impostiamo la data di inizio
+		// della nuova sessione a quella data.
+		// Non importa che impostiamo anche la data di fine perchè va bene che la sessione finisca allo stesso
+		// giorno della sessione originale.
+
+		const rule = rrulestr(session.rrule, {
+			dtstart: new Date(session.dtStart)
+		});
+
+		// TODO: Utilizzare data da TimeMachine
+		const timeNow = new Date();
+
+		// Se la data di inizio della sessione è nel futuro, la prossima occorrenza è quella
+		// della data di inizio della sessione.
+		const nextOccurrence = rule.after(timeNow, true);
+
+		if (nextOccurrence === null) {
+			return generateMessageResponse("La sessione è scaduta", 400);
+		}
+
+		// Assumiamo che ci sia almeno una impostazione
+		const lastSetting =
+			session.settingsList[session.settingsList.length - 1];
+
+		lastSetting.modificationDate = timeNow.toISOString();
+
+		// Creiamo la nuova sessione
+		const newSession: StringSession = {
+			ownerId: userId,
+			summary: session.summary,
+			description: session.description,
+			status: session.status,
+			rrule: session.rrule,
+			dtStart: nextOccurrence.toISOString(),
+			dtEnd: session.dtEnd,
+			dtStamp: new Date().toISOString(),
+			settingsList: [lastSetting],
+			completedCycles: []
+		};
+
+		// Inseriamo la nuova sessione
+		const insertOut = await addCollectionWrapper<Session>(
+			newSession,
+			sessionClient
+		);
+
+		if (insertOut.status !== 200) {
+			return insertOut;
+		}
+
+		// Eliminiamo l'invito
+		const deleteOut = await deleteCollectionWrapper<Invitation>(
+			{ _id: invitationId },
+			invitationClient
+		);
+
+		if (deleteOut.status !== 200) {
+			return deleteOut;
+		}
+
+		return generateMessageResponse("Invito accettato", 200);
 	} else if (type === "PROJECT") {
 		// TODO
 	}

@@ -9,7 +9,7 @@ import useSWR from "swr";
 async function fetcher(url: string) {
 	const response = await fetch(url);
 	if (!response.ok) {
-		alert("Errore durante il fetch dell'API acceptInvite!");
+		alert("Errore durante il fetch dell'API getInbox!");
 	}
 	return response.json();
 }
