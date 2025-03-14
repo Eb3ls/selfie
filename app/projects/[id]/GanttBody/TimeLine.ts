@@ -1,23 +1,40 @@
 import * as CONST from "../Utils";
 
+const scrollDistance = 3 * CONST.CELL_WIDTH;
+
 class TimeLine extends HTMLElement {
 	private timeline: HTMLElement;
-	private startScroll: number;
 	private firstDate: Date;
 	private lastDate: Date;
 	private centerDate: Date;
-	private scrollTimeout: NodeJS.Timeout | null;
-	private scrollListenerAdded: boolean;
+	private isScrolling: boolean;
+	private isRightScrolling: boolean;
+	private resizeObserver: ResizeObserver | null;
 
 	constructor() {
 		super();
-		this.startScroll = 0;
 		this.timeline = document.createElement("div");
 		this.firstDate = new Date();
 		this.lastDate = new Date();
 		this.centerDate = new Date();
-		this.scrollTimeout = null;
-		this.scrollListenerAdded = false;
+		this.isScrolling = false;
+		this.isRightScrolling = false;
+		this.resizeObserver = null;
+	}
+
+	connectedCallback() {
+		this.style.display = "flex";
+		this.resizeObserver = new ResizeObserver(() => {
+			console.log("Resize observer");
+			this.render(this.centerDate);
+		});
+		this.resizeObserver.observe(this);
+	}
+
+	disconnectedCallback() {
+		if (this.resizeObserver) {
+			this.resizeObserver.disconnect();
+		}
 	}
 
 	updateMonth() {
@@ -51,9 +68,10 @@ class TimeLine extends HTMLElement {
 	createSingleCell(date: Date) {
 		const cell = document.createElement("div");
 		cell.className =
-			"d-flex flex-column align-items-center justify-content-center";
+			"d-flex flex-column align-items-center justify-content-center flex-shrink-0";
 		cell.style.borderBottom = "1px solid grey";
 		cell.style.borderRight = "1px solid grey";
+		cell.style.width = `${CONST.CELL_WIDTH_PX}`;
 
 		const dayText = document.createElement("div");
 		dayText.textContent = date.getDate().toString();
@@ -69,9 +87,10 @@ class TimeLine extends HTMLElement {
 		return cell;
 	}
 
-	createCells(currentDate: Date) {
-		for (let i = 0; i < CONST.COL_NUM; i++) {
-			const curDate = new Date();
+	createCells(currentDate: Date, cols: number = 30) {
+		this.timeline.innerHTML = "";
+		for (let i = 0; i < cols; i++) {
+			const curDate = new Date(this.firstDate);
 			curDate.setDate(this.firstDate.getDate() + i);
 
 			const cell = this.createSingleCell(curDate);
@@ -85,65 +104,6 @@ class TimeLine extends HTMLElement {
 		}
 	}
 
-	handleScrollLeft(cellScrolled: number) {
-		for (let i = 0; i < cellScrolled; i++) {
-			this.firstDate.setDate(this.firstDate.getDate() - 1);
-			this.lastDate.setDate(this.lastDate.getDate() - 1);
-			const cell = this.createSingleCell(this.firstDate);
-			this.timeline.prepend(cell);
-			this.timeline.removeChild(
-				this.timeline.children[this.timeline.children.length - 1]
-			);
-			this.centerDate.setDate(this.centerDate.getDate() + cellScrolled);
-		}
-	}
-
-	handleScrollRight(cellScrolled: number) {
-		for (let i = 0; i < cellScrolled; i++) {
-			this.firstDate.setDate(this.firstDate.getDate() + 1);
-			this.lastDate.setDate(this.lastDate.getDate() + 1);
-			const cell = this.createSingleCell(this.lastDate);
-			this.timeline.appendChild(cell);
-			this.timeline.removeChild(this.timeline.children[0]);
-		}
-		this.centerDate.setDate(this.centerDate.getDate() - cellScrolled);
-	}
-
-	handleScroll = (event: Event) => {
-		if (this.scrollTimeout) {
-			clearTimeout(this.scrollTimeout);
-		}
-
-		this.scrollTimeout = setTimeout(() => {
-			const target = event.target as HTMLElement;
-			const scroll = target.scrollLeft - this.startScroll;
-			const cellScrolled = Math.floor(
-				Math.abs(scroll) / CONST.CELL_WIDTH
-			);
-			if (cellScrolled !== 0) {
-				const prevCenterDate = new Date(this.centerDate);
-
-				if (scroll < 0) {
-					this.handleScrollLeft(cellScrolled);
-					target.scrollLeft = target.scrollLeft - scroll;
-				} else {
-					this.handleScrollRight(cellScrolled);
-					target.scrollLeft = target.scrollLeft - scroll;
-				}
-
-				if (prevCenterDate.getMonth() !== this.centerDate.getMonth()) {
-					this.updateMonth();
-				}
-				if (
-					prevCenterDate.getFullYear() !==
-					this.centerDate.getFullYear()
-				) {
-					this.updateYear();
-				}
-			}
-		}, 300);
-	};
-
 	scrollToCenter() {
 		const currentDay = document.getElementById("currentDay");
 		if (currentDay) {
@@ -154,35 +114,132 @@ class TimeLine extends HTMLElement {
 		} else {
 			console.error("Elemento currentDay non trovato");
 		}
+	}
 
-		const ganttView = document.getElementById("ganttView");
-		if (ganttView) {
-			this.startScroll = ganttView.scrollLeft;
-		} else {
-			console.error("Elemento ganttView non trovato");
-		}
+	calculateCells() {
+		const width = this.clientWidth || this.getBoundingClientRect().width;
+		console.log("Width:", width);
+
+		const cols = Math.floor((width * 10) / CONST.CELL_WIDTH);
+		console.log("Cols:", cols);
+		return cols;
 	}
 
 	handleTimeline(date: Date) {
-		const fragment = document.createDocumentFragment();
-		this.timeline.className = "bg-white z-1 sticky-top";
+		this.timeline.className = "d-flex bg-white z-1 sticky-top";
 		this.timeline.style.height = `${CONST.ROW_HEIGHT_PX}`;
-		this.timeline.style.display = "grid";
-		this.timeline.style.gridTemplateColumns = `repeat(${CONST.COL_NUM}, ${CONST.CELL_WIDTH_PX})`;
-		this.timeline.style.gap = "0";
-		this.timeline.style.width = CONST.CELL_WIDTH * CONST.COL_NUM + "px";
 
-		fragment.appendChild(this.timeline);
+		const cells = this.calculateCells();
 
-		this.firstDate.setDate(date.getDate() - Math.floor(CONST.COL_NUM / 2));
+		this.firstDate = new Date(date);
+		this.firstDate.setDate(date.getDate() - Math.floor(cells / 2));
 		this.centerDate = new Date(date);
-		this.lastDate.setDate(this.firstDate.getDate() + CONST.COL_NUM);
+		this.lastDate = new Date(this.firstDate);
+		this.lastDate.setDate(this.firstDate.getDate() + cells);
 
 		this.updateMonth();
 		this.updateYear();
-		this.createCells(date);
+		this.createCells(date, cells);
 
-		return fragment;
+		return this.timeline;
+	}
+
+	handleLeftScroll() {
+		// Aggiungiamo le prime 3 celle
+		for (let i = 0; i < 3; i++) {
+			const firstDate = new Date(this.firstDate);
+			firstDate.setDate(this.firstDate.getDate() - 1);
+			const cell = this.createSingleCell(firstDate);
+			this.timeline.insertBefore(cell, this.timeline.firstElementChild);
+			this.firstDate = firstDate;
+		}
+
+		// Rimuoviamo le ultime 3 celle
+		for (let i = 0; i < 3; i++) {
+			const lastCell = this.timeline.lastElementChild;
+			if (lastCell) {
+				this.timeline.removeChild(lastCell);
+				this.lastDate.setDate(this.lastDate.getDate() - 1);
+			}
+		}
+
+		// Reset transform e transition
+		this.timeline.style.transition = "none";
+		this.timeline.style.transform = "translateX(0)";
+
+		this.isScrolling = false;
+		console.log("Left scroll");
+	}
+
+	handleRightScroll() {
+		// Rimuoviamo le prime 3 celle
+		for (let i = 0; i < 3; i++) {
+			const firstCell = this.timeline.firstElementChild;
+			if (firstCell) {
+				this.timeline.removeChild(firstCell);
+				this.firstDate.setDate(this.firstDate.getDate() + 1);
+			}
+		}
+
+		// Aggiungiamo le ultime 3 celle
+		for (let i = 0; i < 3; i++) {
+			const lastDate = new Date(this.lastDate);
+			lastDate.setDate(this.lastDate.getDate() + 1);
+			const cell = this.createSingleCell(lastDate);
+			this.timeline.appendChild(cell);
+			this.lastDate = lastDate;
+		}
+
+		// Reset transform e transition
+		this.timeline.style.transition = "none";
+		this.timeline.style.transform = "translateX(0)";
+
+		this.isScrolling = false;
+		console.log("Right scroll");
+	}
+
+	addEventListeners() {
+		const leftScrollBtn = document.getElementById("leftScroll");
+		const rightScrollBtn = document.getElementById("rightScroll");
+
+		if (!leftScrollBtn || !rightScrollBtn) {
+			console.error("Elementi per lo scroll non trovati");
+			return;
+		}
+
+		leftScrollBtn.addEventListener("click", () => {
+			if (this.isScrolling) return;
+			this.isScrolling = true;
+			this.isRightScrolling = false;
+			this.timeline.style.transition = "transform 0.5s ease";
+			this.timeline.style.transform = `translateX(${scrollDistance}px)`;
+
+			// Aggiungiamo un listener one-time per gestire il transitionend
+			this.timeline.addEventListener(
+				"transitionend",
+				() => {
+					this.handleLeftScroll();
+				},
+				{ once: true }
+			);
+		});
+
+		rightScrollBtn.addEventListener("click", () => {
+			if (this.isScrolling) return;
+			this.isScrolling = true;
+			this.isRightScrolling = true;
+			this.timeline.style.transition = "transform 0.5s ease";
+			this.timeline.style.transform = `translateX(${-scrollDistance}px)`;
+
+			// Aggiungiamo un listener one-time per gestire il transitionend
+			this.timeline.addEventListener(
+				"transitionend",
+				() => {
+					this.handleRightScroll();
+				},
+				{ once: true }
+			);
+		});
 	}
 
 	public render(date: Date) {
@@ -193,12 +250,8 @@ class TimeLine extends HTMLElement {
 		this.appendChild(this.handleTimeline(date));
 		this.scrollToCenter();
 
-		const ganttView = document.getElementById("ganttView");
-
-		if (ganttView && !this.scrollListenerAdded) {
-			ganttView.addEventListener("scroll", this.handleScroll);
-			this.scrollListenerAdded = true;
-		}
+		// Event listeners
+		this.addEventListeners();
 	}
 }
 

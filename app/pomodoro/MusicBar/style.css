@@ -1,0 +1,16 @@
+.scrollText {
+	animation-name: scroll;
+	animation-timing-function: linear;
+	animation-iteration-count: infinite;
+	animation-direction: normal;
+	animation-duration: var(--animationDuration, 10s);
+}
+
+@keyframes scroll {
+	20% {
+		transform: translateX(0%);
+	}
+	100% {
+		transform: translateX(calc(-1 * var(--scrollDistance, 0%)));
+	}
+}

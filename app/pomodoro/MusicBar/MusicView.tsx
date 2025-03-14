@@ -175,13 +175,16 @@ export function MusicView() {
 					cursor: "default"
 				}}
 			>
-				<div className="d-flex align-items-center flex-grow-1 me-3">
+				<div
+					className="d-flex align-items-center flex-grow-1 me-3"
+					style={{ overflow: "hidden" }}
+				>
 					<span className="me-3 text-muted">{index + 1}.</span>
 					<span className="text-truncate">{videoTitle}</span>
 				</div>
 				<Button
 					variant="link"
-					className="bg-danger rounded-circle p-1 d-flex align-items-center justify-content-center"
+					className="bg-danger rounded-circle p-1 d-flex align-items-center justify-content-center flex-shrink-0"
 					onClick={() => handleRemoveVideo(index)}
 					title="Rimuovi video"
 				>
@@ -214,10 +217,10 @@ export function MusicView() {
 					/>
 					<input
 						type="range"
-						className="form-range mx-2"
+						className="form-range mx-2 p-3"
 						style={{
 							width: "100px",
-							height: "4px",
+							height: "10px",
 							cursor: "pointer"
 						}}
 						min={0}

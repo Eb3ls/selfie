@@ -16,7 +16,7 @@ import {
 } from "./Utils";
 
 class ViewToggler extends HTMLElement {
-	viewType: "GANTT" | "LIST" | "ERROR";
+	viewType: "GANTT" | "LIST";
 	listViewType: "USER" | "TIME";
 	projectData: ProjectResponse | null;
 	sortedActivities: SortedActivity[];
@@ -37,76 +37,68 @@ class ViewToggler extends HTMLElement {
 		this.render("GANTT");
 	}
 
-	render(viewMode: "GANTT" | "LIST" | "ERROR") {
+	render(viewMode: "GANTT" | "LIST") {
 		if (this.viewType === viewMode) return;
 		this.viewType = viewMode;
+		const block = document.createElement("div");
+		block.classList.add("container-fluid");
+		this.appendChild(block);
 
 		if (viewMode === "GANTT") {
-			this.innerHTML = `
-					${this.getHeaderTemplate()}
-					${this.getGanntBody()}
-            `;
+			block.innerHTML = this.getHeaderTemplate() + this.getGanntBody();
 			this.addEventListeners();
 			this.loadData();
-		} else if (viewMode === "LIST") {
-			this.innerHTML = `
-                ${this.getHeaderTemplate()}
-            `;
+		} else {
+			block.innerHTML = this.getHeaderTemplate();
 			const body = this.getListBody(this.listViewType);
 			this.appendChild(body);
 			this.addEventListeners();
-		} else {
-			this.innerHTML = "Error";
 		}
-		this.classList.add("d-flex", "flex-column", "h-100");
 	}
 
 	getHeaderTemplate() {
-		let block;
-		if (this.viewType === "GANTT") {
-			block = `
-                <div class="col-9 d-flex flex-column align-items-center">
-                    <div class="fs-5 fw-bold" id="yearDiv"></div>
-                    <div class="fs-6 fw-semibold" id="monthDiv"></div>
-                </div>
-            `;
-		} else {
-			block = `
-                <div class="col-9 d-flex justify-content-end">
-                    <button class="btn" id="userSort">Attore</button>
-                    <button class="btn" id="timeSort">Temporalmente</button>
-                </div>
-            `;
-		}
-
 		return `
-            <div class="row border-bottom border-secondary px-3 align-items-center" style="height: ${ROW_HEIGHT_PX};">
-                <div class="col-3 d-flex align-items-center">
-                    <button class="btn me-2 p-0" id="renderGantt">Gantt</button>
-                    <button class="btn ms-2 p-0" id="renderList">List</button>
-                </div>
-                ${block}
-            </div>
-        `;
+			<div class="row border-bottom border-secondary align-items-center" style="height: ${ROW_HEIGHT_PX};">
+			<div class="col-3 d-flex align-items-center">
+				<button class="btn me-2 p-0" id="renderGantt">Gantt</button>
+				<button class="btn ms-2 p-0" id="renderList">List</button>
+			</div>
+			${
+				this.viewType === "GANTT"
+					? `
+				<div class="col-9 d-flex flex-row justify-content-between">
+					<button class="btn p-0 me-2" id="leftScroll"><i class="bi bi-chevron-left"></i></button>
+					<div class="d-flex flex-column align-items-center">
+						<div class="fs-5 fw-bold" id="yearDiv"></div>
+						<div class="fs-6 fw-semibold" id="monthDiv"></div>
+					</div>
+					<button class="btn p-0 ms-2" id="rightScroll"><i class="bi bi-chevron-right"></i></button>
+				</div>
+			`
+					: `
+				<div class="col-9 d-flex justify-content-end">
+				<button class="btn" id="userSort">Attore</button>
+				<button class="btn" id="timeSort">Temporalmente</button>
+				</div>
+			`
+			}
+			</div>
+		`;
 	}
 
 	getGanntBody() {
 		return `
-            <div class="row border-bottom border-secondary flex-grow-1">
-            <div id="listView"
-                class="col-3 hide-scroll z-2 border-end border-secondary bg-white mh-100 overflow-y-auto"
-                style="position: sticky; left: 0;">
-                <div id="header" class="row p-3 border-bottom border-secondary sticky-top bg-white align-items-center" style="height: ${ROW_HEIGHT_PX};">
-                    <div class="col-6">Titolo</div>
-                    <div class="col-6 d-flex justify-content-center">Range</div>
-                </div>
-				<side-gantt-list></side-gantt-list>
-            </div>
-            <div id="ganttView" class="col-9 hide-scrll mh-100 overflow-auto p-0">
-                <time-line></time-line>
-                <project-phase-row></project-phase-row>
-            </div>
-            </div>
+            <div class="row">
+				<div id="listView" class="col-3 hide-scroll border-end border-secondary bg-white">
+					<div id="header" class="d-flex align-items-center" style="height: ${ROW_HEIGHT_PX};">
+						<div class="col-6">Titolo</div>
+						<div class="col-6 d-flex justify-content-center">Range</div>
+					</div>
+				</div>
+				<div id="ganttView" class="col-9 hide-scroll">
+					<time-line/>
+				</div>
+         </div>
         `;
 	}
 
@@ -128,6 +120,37 @@ class ViewToggler extends HTMLElement {
 		}
 	}
 
+	syncGanttScroll() {
+		const ganttView = document.getElementById("ganttView");
+		const listView = document.getElementById("listView");
+
+		let isSyncingScroll = false;
+
+		if (ganttView && listView) {
+			ganttView.addEventListener("scroll", () => {
+				if (!isSyncingScroll) {
+					isSyncingScroll = true;
+					listView.scrollTop = ganttView.scrollTop;
+					requestAnimationFrame(() => {
+						isSyncingScroll = false;
+					});
+				}
+			});
+
+			listView.addEventListener("scroll", () => {
+				if (!isSyncingScroll) {
+					isSyncingScroll = true;
+					ganttView.scrollTop = listView.scrollTop;
+					requestAnimationFrame(() => {
+						isSyncingScroll = false;
+					});
+				}
+			});
+		} else {
+			console.error("Elementi per sincronizzare lo scroll non trovati");
+		}
+	}
+
 	addEventListeners() {
 		const ganttBtn = this.querySelector(
 			"#renderGantt"
@@ -145,6 +168,7 @@ class ViewToggler extends HTMLElement {
 		if (this.viewType === "LIST") {
 			listBtn.classList.add("fw-bold");
 			ganttBtn.classList.add("fw-light");
+
 			const userSortBtn = this.querySelector(
 				"#userSort"
 			) as HTMLButtonElement;
@@ -168,6 +192,8 @@ class ViewToggler extends HTMLElement {
 		} else {
 			listBtn.classList.add("fw-light");
 			ganttBtn.classList.add("fw-bold");
+
+			this.syncGanttScroll();
 		}
 	}
 
@@ -234,6 +260,7 @@ class ViewToggler extends HTMLElement {
 				this.projectData.users
 			);
 		}
+
 		const addFormComponent = document.querySelector(
 			"add-form-component"
 		) as AddForm;
@@ -244,30 +271,32 @@ class ViewToggler extends HTMLElement {
 				usersAvaiable
 			);
 		}
+
 		const activityForm = document.querySelector(
 			"activity-form"
 		) as ActivityForm;
 		if (activityForm) {
 			activityForm.loadData(this.sortedActivities, usersAvaiable);
 		}
+
 		const sideGanttList = document.querySelector(
 			"side-gantt-list"
 		) as SideGanttList;
 		if (sideGanttList) {
 			sideGanttList.loadProjectData(this.projectData.phases);
 		}
+
 		const projectPhaseRow = document.querySelector(
 			"project-phase-row"
 		) as ProjectPhaseRow;
 		if (projectPhaseRow) {
 			projectPhaseRow.loadProjectData(this.projectData.phases);
 		}
+
 		const timeLine = document.querySelector("time-line") as TimeLine;
 		if (timeLine) {
 			timeLine.render(new Date());
 		}
-
-		console.log("Data:", this.projectData);
 
 		const mainTitle = document.getElementById("mainTitle");
 		if (mainTitle) mainTitle.textContent = this.projectData.summary;

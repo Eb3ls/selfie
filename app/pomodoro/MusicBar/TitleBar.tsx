@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import "./style.css";
 
 export function TitleBar({ videoTitleList }: { videoTitleList: string[] }) {
 	const parentRef = useRef<HTMLDivElement | null>(null);
