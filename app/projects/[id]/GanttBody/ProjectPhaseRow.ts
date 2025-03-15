@@ -1,94 +1,109 @@
-import * as CONST from "../Utils";
+import {
+	CELL_WIDTH_PX,
+	PhaseResponse,
+	ROW_HEIGHT_PX,
+	calculateCells
+} from "../Utils";
 
 class ProjectPhaseRow extends HTMLElement {
+	rowsArray: HTMLElement[] = [];
+
 	constructor() {
 		super();
 	}
 
-	loadProjectData(data: any) {
+	loadProjectData(data: PhaseResponse[], currentDate: Date) {
 		if (!data) return;
-		this.render(data);
+		this.render(data, currentDate);
 	}
 
-	handleRow(summary: string) {
-		const row = document.createElement("div");
-		row.className = "z-0";
-		row.style.height = `${CONST.ROW_HEIGHT_PX}`;
-		row.style.display = "grid";
-		row.style.gridTemplateColumns = `repeat(${CONST.COL_NUM}, ${CONST.CELL_WIDTH_PX})`;
-		row.style.gap = "0";
-		row.style.width = CONST.CELL_WIDTH * CONST.COL_NUM + "px";
-
-		const fragment = document.createDocumentFragment();
-
-		// Crea le 15 colonne con un bordo grigio
-		for (let i = 1; i <= CONST.COL_NUM; i++) {
-			const cell = document.createElement("div");
-			cell.style.borderBottom = "1px solid grey";
-			cell.style.borderRight = "1px solid grey";
-
-			if (i === Math.floor(CONST.COL_NUM / 2) + 1) {
-				const phaseBlock = document.createElement("div");
-				phaseBlock.style.gridColumn = "span 1"; // Estendi su 4 colonne (6-9)
-				phaseBlock.style.backgroundColor = "#ffcccc";
-				phaseBlock.style.color = "white";
-				phaseBlock.style.borderRight = "1px solid grey";
-				phaseBlock.style.borderBottom = "1px solid grey";
-				phaseBlock.style.padding = "0";
-				phaseBlock.className =
-					"d-flex justify-content-center align-items-center";
-				phaseBlock.innerText = summary;
-				fragment.appendChild(phaseBlock);
-			} else {
-				fragment.appendChild(cell);
-			}
-		}
-		row.appendChild(fragment);
-
-		return row;
+	createSingleCell() {
+		const cell = document.createElement("div");
+		cell.className =
+			"d-flex flex-column align-items-center justify-content-center flex-shrink-0";
+		cell.style.borderBottom = "1px solid grey";
+		cell.style.borderRight = "1px solid grey";
+		cell.style.width = `${CELL_WIDTH_PX}`;
+		cell.innerHTML = "Cell";
+		return cell;
 	}
 
-	renderPhaseRow(data: any) {
+	renderPhaseRow(data: PhaseResponse, cells: number) {
 		// Row per la fase
-		const phaseRow = this.handleRow(data.summary);
+		const row = document.createElement("div");
+		row.style.height = `${ROW_HEIGHT_PX}`;
+		row.className = "d-flex bg-white z-1 phase-row";
+		this.rowsArray.push(row);
+
+		for (let i = 1; i <= cells; i++) {
+			const cell = this.createSingleCell();
+			row.appendChild(cell);
+		}
 
 		// Contenitore per il collapse con lo stesso id per fare il toggle di tutti
 		const collapse = document.createElement("div");
 		collapse.id = `collapse${data._id}`;
-		collapse.className = "collapse";
-		collapse.style.width = CONST.CELL_WIDTH * CONST.COL_NUM + "px";
+		collapse.className = "collapse d-flex";
 
 		// Gestione delle sottofasi
 		if (data.subPhases && data.subPhases.length > 0) {
 			for (const subPhase of data.subPhases) {
-				collapse.innerHTML += this.renderPhaseRow(subPhase);
+				// collapse.innerHTML += this.renderPhaseRow(subPhase);
 			}
 		}
 
 		//Gestione delle attività
 		if (data.activities && data.activities.length > 0) {
 			for (const activity of data.activities) {
-				const activityElement = this.handleRow(activity.summary);
-				collapse.appendChild(activityElement);
+				// const activityElement = this.handleRow(activity.summary);
+				// collapse.appendChild(activityElement);
 			}
 		}
 
-		return phaseRow.outerHTML + collapse.outerHTML;
+		const container = document.createElement("div");
+		container.appendChild(row);
+		container.appendChild(collapse);
+
+		return container;
 	}
 
-	render(data: any) {
-		const container = document.createElement("div");
-		container.className = "container";
+	public shiftTimeline(isRightScroll: boolean): void {
+		this.rowsArray.forEach((row) => {
+			// Remove cells
+			for (let i = 0; i < 3; i++) {
+				if (isRightScroll) {
+					const firstCell = row.firstElementChild;
+					if (firstCell) {
+						row.removeChild(firstCell);
+					}
+				} else {
+					const lastCell = row.lastElementChild;
+					if (lastCell) {
+						row.removeChild(lastCell);
+					}
+				}
+			}
+			// Add new cells
+			for (let i = 0; i < 3; i++) {
+				const newCell = this.createSingleCell();
+				newCell.innerHTML = "New Cell";
+				if (isRightScroll) {
+					console.log("Right");
+					row.appendChild(newCell);
+				} else {
+					row.insertBefore(newCell, row.firstChild);
+				}
+			}
+		});
+	}
+
+	public render(data: PhaseResponse[], currentDate: Date) {
+		const cellsNumber = calculateCells(this);
 
 		for (const phase of data) {
-			const phaseElement = document.createElement("div");
-			phaseElement.className = "row";
-			phaseElement.innerHTML = this.renderPhaseRow(phase);
-			container.appendChild(phaseElement);
+			const phaseRow = this.renderPhaseRow(phase, cellsNumber);
+			this.appendChild(phaseRow);
 		}
-
-		this.innerHTML = "";
-		this.appendChild(container);
 	}
 }
 

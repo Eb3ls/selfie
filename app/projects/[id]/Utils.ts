@@ -84,6 +84,7 @@ interface SortedActivity extends ProjectActivityResponse {
 function formatDate(date: string): string {
 	return date.split("T")[0];
 }
+
 function validateUsername(username: string): boolean {
 	if (!username) return false;
 	const usernameRegex = /^[a-zA-Z0-9_-]{3,20}$/;
@@ -94,6 +95,7 @@ function validateLength(item: string, min: number, max: number): boolean {
 	if (!item) return false;
 	return item.length >= min && item.length <= max;
 }
+
 // Controlliamo se la data é dentro i limiti della fase/sottofase
 function checkDate(date: string, start: string, due: string): boolean {
 	const newDate = new Date(date);
@@ -104,6 +106,13 @@ function checkDate(date: string, start: string, due: string): boolean {
 		return true;
 	}
 	return false;
+}
+
+function calculateCells(element: HTMLElement): number {
+	const width = element.clientWidth || element.getBoundingClientRect().width;
+	const cols = Math.floor((width * 2) / CELL_WIDTH);
+
+	return cols;
 }
 
 function showError(inputElement: HTMLElement, message: string) {
@@ -287,6 +296,7 @@ export {
 	validateUsername,
 	validateLength,
 	checkDate,
+	calculateCells,
 	showError,
 	clearError,
 	statusConfig,

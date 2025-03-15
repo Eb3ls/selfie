@@ -94,9 +94,11 @@ class ViewToggler extends HTMLElement {
 						<div class="col-6">Titolo</div>
 						<div class="col-6 d-flex justify-content-center">Range</div>
 					</div>
+					<side-gantt-list/>
 				</div>
-				<div id="ganttView" class="col-9 hide-scroll">
-					<time-line/>
+				<div id="ganttView" class="col-9 d-flex flex-column hide-scroll overflow-hidden">
+					<time-line></time-line>
+					<project-phase-row/><project-phase-row/>
 				</div>
          </div>
         `;
@@ -290,7 +292,10 @@ class ViewToggler extends HTMLElement {
 			"project-phase-row"
 		) as ProjectPhaseRow;
 		if (projectPhaseRow) {
-			projectPhaseRow.loadProjectData(this.projectData.phases);
+			projectPhaseRow.loadProjectData(
+				this.projectData.phases,
+				new Date()
+			);
 		}
 
 		const timeLine = document.querySelector("time-line") as TimeLine;
