@@ -11,6 +11,7 @@ class TimeLine extends HTMLElement {
 	private firstDate: Date;
 	private lastDate: Date;
 	private centerDate: Date;
+	private todayDate: Date;
 	private isScrolling: boolean;
 	private resizeObserver: ResizeObserver | null;
 	private phaseRowsHandler: ProjectPhaseRow | null;
@@ -20,6 +21,7 @@ class TimeLine extends HTMLElement {
 		this.firstDate = new Date();
 		this.lastDate = new Date();
 		this.centerDate = new Date();
+		this.todayDate = new Date();
 		this.isScrolling = false;
 		this.resizeObserver = null;
 		this.phaseRowsHandler = null;
@@ -30,7 +32,7 @@ class TimeLine extends HTMLElement {
 		this.resizeObserver = new ResizeObserver(() => {
 			// Renderizziamo prima phaseRowsHandler e poi il timeline perché é la timeline a fare lo scroll poi
 			this.phaseRowsHandler!.render(this.centerDate);
-			this.render(this.centerDate);
+			this.render();
 		});
 		this.resizeObserver.observe(this);
 	}
@@ -69,7 +71,23 @@ class TimeLine extends HTMLElement {
 		yearDiv.textContent = year;
 	}
 
-	createSingleCell(date: Date, currentDate: Date) {
+	cellStyling(cell: HTMLElement, date: Date) {
+		cell.id = formatDate(date.toISOString());
+		cell.children[0].textContent = date.getDate().toString();
+		cell.children[1].textContent = date.toLocaleDateString(timeFormat, {
+			weekday: "short"
+		});
+		if (
+			formatDate(date.toISOString()) ===
+			formatDate(this.todayDate.toISOString())
+		) {
+			cell.style.backgroundColor = "#ffcccc";
+		} else {
+			cell.style.backgroundColor = "";
+		}
+	}
+
+	createSingleCell(date: Date) {
 		const cell = document.createElement("div");
 		cell.className =
 			"d-flex flex-column align-items-center justify-content-center flex-shrink-0";
@@ -78,30 +96,16 @@ class TimeLine extends HTMLElement {
 		cell.style.width = `${CELL_WIDTH_PX}`;
 
 		const dayText = document.createElement("div");
-		dayText.textContent = date.getDate().toString();
-
 		const dayNum = document.createElement("div");
-		dayNum.textContent = date.toLocaleDateString(timeFormat, {
-			weekday: "short"
-		});
-
-		cell.id = formatDate(date.toISOString());
-
-		if (
-			formatDate(date.toISOString()) ===
-			formatDate(currentDate.toISOString())
-		) {
-			cell.style.backgroundColor = "#ffcccc";
-		}
-
 		cell.appendChild(dayText);
 		cell.appendChild(dayNum);
+
+		this.cellStyling(cell, date);
 
 		return cell;
 	}
 
 	scrollToDate(date: Date) {
-		// TODO: controllare, a volte manca una data
 		const id = formatDate(date.toISOString());
 		const centerBlock = document.getElementById(id);
 
@@ -115,15 +119,16 @@ class TimeLine extends HTMLElement {
 		}
 	}
 
-	handleTimeline(currentDate: Date) {
+	handleTimeline() {
 		this.className = "d-flex bg-white z-1";
 		this.style.height = `${ROW_HEIGHT_PX}`;
 
 		const cells = calculateCells(this);
 
-		this.firstDate = new Date(currentDate);
-		this.firstDate.setDate(currentDate.getDate() - Math.floor(cells / 2));
-		this.centerDate = new Date(currentDate);
+		this.firstDate = new Date(this.centerDate);
+		this.firstDate.setDate(
+			this.firstDate.getDate() - Math.floor(cells / 2)
+		);
 		// Devo considerare anche la cella iniziare quindi aggiungo cells - 1
 		this.lastDate = new Date(this.firstDate);
 		this.lastDate.setDate(this.firstDate.getDate() + cells - 1);
@@ -135,49 +140,15 @@ class TimeLine extends HTMLElement {
 			const curDate = new Date(this.firstDate);
 			curDate.setDate(this.firstDate.getDate() + i);
 
-			const cell = this.createSingleCell(curDate, currentDate);
+			const cell = this.createSingleCell(curDate);
 
 			this.appendChild(cell);
 		}
 	}
 
 	handleScroll(isRight: boolean) {
-		let offset;
+		let offset = isRight ? 3 : -3;
 		let previousDate = new Date(this.centerDate);
-
-		if (isRight) {
-			// Rimuoviamo le celle iniziali e aggiungiamo quelle finali
-			offset = 3;
-			for (let i = 0; i < 3; i++) {
-				const firstCell = this.firstElementChild;
-				if (firstCell) {
-					this.removeChild(firstCell);
-				}
-			}
-
-			for (let i = 1; i <= offset; i++) {
-				const newDate = new Date(this.lastDate);
-				newDate.setDate(this.lastDate.getDate() + i);
-				const cell = this.createSingleCell(newDate, new Date());
-				this.appendChild(cell);
-			}
-		} else {
-			// Rimuoviamo le celle finali e aggiungiamo quelle iniziali
-			offset = -3;
-			for (let i = 1; i <= 3; i++) {
-				const newDate = new Date(this.firstDate);
-				newDate.setDate(this.firstDate.getDate() - i);
-				const cell = this.createSingleCell(newDate, new Date());
-				this.insertBefore(cell, this.firstElementChild);
-			}
-
-			for (let i = 0; i < offset; i++) {
-				const lastCell = this.lastElementChild;
-				if (lastCell) {
-					this.removeChild(lastCell);
-				}
-			}
-		}
 
 		this.firstDate.setDate(this.firstDate.getDate() + offset);
 		this.lastDate.setDate(this.lastDate.getDate() + offset);
@@ -187,6 +158,13 @@ class TimeLine extends HTMLElement {
 		if (this.centerDate.getMonth() !== previousDate.getMonth()) {
 			this.updateMonth();
 			this.updateYear();
+		}
+
+		const date = new Date(this.firstDate);
+		for (const cell of this.children) {
+			const htmlCell = cell as HTMLElement;
+			this.cellStyling(htmlCell, date);
+			date.setDate(date.getDate() + 1);
 		}
 
 		this.parentElement!.style.scrollBehavior = "auto";
@@ -237,17 +215,23 @@ class TimeLine extends HTMLElement {
 		});
 	}
 
-	public render(date: Date) {
+	public loadData(todayDate: Date) {
+		this.todayDate = todayDate;
+		// Le date sono passate per riferimento quindi ne creo una nuova
+		this.centerDate = new Date(todayDate);
+		this.render();
+	}
+
+	public render() {
 		this.innerHTML = "";
 		this.phaseRowsHandler = document.querySelector("project-phase-row");
 		if (!this.phaseRowsHandler) {
 			console.error("Elemento project-phase-row non trovato");
 			return;
 		}
-		// console.log("date", date);
 
-		this.handleTimeline(date);
-		this.scrollToDate(date);
+		this.handleTimeline();
+		this.scrollToDate(this.centerDate);
 
 		this.addEventListeners();
 	}

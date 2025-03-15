@@ -300,7 +300,7 @@ class ViewToggler extends HTMLElement {
 
 		const timeLine = document.querySelector("time-line") as TimeLine;
 		if (timeLine) {
-			timeLine.render(new Date());
+			timeLine.loadData(new Date());
 		}
 
 		const mainTitle = document.getElementById("mainTitle");

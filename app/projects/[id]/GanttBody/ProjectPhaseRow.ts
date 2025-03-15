@@ -1,23 +1,29 @@
 import {
+	CELL_WIDTH,
 	CELL_WIDTH_PX,
 	PhaseResponse,
 	ProjectActivityResponse,
 	ROW_HEIGHT_PX,
 	SubPhaseResponse,
 	calculateCells,
+	formatDate,
 	statusConfig
 } from "../Utils";
 
 interface RowReference {
-	row: HTMLElement;
-	startDate: Date;
-	dueDate: Date;
-	statusColor: string;
-	isMilstone: boolean;
+	pill: HTMLElement;
+	data: {
+		summary: string;
+		startDate: Date;
+		dueDate: Date;
+		statusColor: string;
+		isMilstone: boolean;
+	};
 }
 
 class ProjectPhaseRow extends HTMLElement {
 	firstDate: Date;
+	lastDate: Date;
 	cellsNumber: number;
 	phasesData: PhaseResponse[];
 	rowsArray: RowReference[];
@@ -25,6 +31,7 @@ class ProjectPhaseRow extends HTMLElement {
 	constructor() {
 		super();
 		this.firstDate = new Date();
+		this.lastDate = new Date();
 		this.cellsNumber = 0;
 		this.phasesData = [];
 		this.rowsArray = [];
@@ -53,15 +60,18 @@ class ProjectPhaseRow extends HTMLElement {
 		}
 
 		this.rowsArray.push({
-			row: ref,
-			startDate: new Date(data.dtStart),
-			dueDate: new Date(data.due),
-			statusColor: status,
-			isMilstone: "isMilestone" in data ? data.isMilestone : false
+			pill: ref,
+			data: {
+				summary: data.summary,
+				startDate: new Date(data.dtStart),
+				dueDate: new Date(data.due),
+				statusColor: status,
+				isMilstone: "isMilestone" in data ? data.isMilestone : false
+			}
 		});
 	}
 
-	createSingleCell(date: Date) {
+	createSingleCell() {
 		const cell = document.createElement("div");
 		cell.className =
 			"d-flex flex-column align-items-center justify-content-center flex-shrink-0";
@@ -71,18 +81,88 @@ class ProjectPhaseRow extends HTMLElement {
 		return cell;
 	}
 
+	createPill(
+		text: string,
+		color: string,
+		isMilestone: boolean,
+		start: string,
+		due: string
+	) {
+		const phasePill = document.createElement("div");
+		phasePill.className =
+			"rounded-pill position-absolute bg-primary text-white top-50 translate-middle-y d-flex align-items-center justify-content-start px-3";
+		phasePill.style.height = "70%";
+
+		// Calcoliamo le date iniziale e finale in base agli estremi della timeline
+		const initialDate = new Date(
+			Math.max(this.firstDate.getTime(), new Date(start).getTime())
+		);
+		const formattedDue = new Date(formatDate(due));
+		const finalDate = new Date(
+			Math.min(this.lastDate.getTime(), formattedDue.getTime())
+		);
+
+		// Calcoliamo la larghezza in base alla differenza di giorni (attenzione: getDate() funziona se le date sono nello stesso mese)
+		let width;
+		if (initialDate.getTime() > finalDate.getTime()) {
+			width = 0;
+		} else {
+			const diffTime = Math.abs(
+				finalDate.getTime() - initialDate.getTime()
+			);
+			const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+			width = diffDays * CELL_WIDTH;
+		}
+
+		// Calcoliamo la posizione left del pill in base alla data iniziale
+		let left;
+		if (initialDate.getTime() < this.firstDate.getTime() && this.lastDate) {
+			left = 0;
+		} else {
+			const diffTime = Math.abs(
+				initialDate.getTime() - this.firstDate.getTime()
+			);
+			const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+			left = CELL_WIDTH * diffDays;
+		}
+
+		// Togliamo 30px per non farlo iniziare dal bordo
+		phasePill.style.width = `${width - 40}px`;
+		phasePill.style.left = `${left + 20}px`;
+
+		const textElement = document.createElement("span");
+		textElement.innerText = text;
+		textElement.style.whiteSpace = "nowrap";
+		textElement.style.overflow = "hidden";
+
+		if (isMilestone) {
+			const flag = document.createElement("i");
+			flag.className = "bi bi-flag-fill";
+			textElement.appendChild(flag);
+		}
+
+		phasePill.appendChild(textElement);
+		return phasePill;
+	}
+
 	renderPhaseRow(data: PhaseResponse, isPhase: boolean) {
 		// Row per la fase
 		const row = document.createElement("div");
 		row.style.height = `${ROW_HEIGHT_PX}`;
-		row.className = "d-flex bg-white z-1 phase-row";
-		this.pushReference(row, data, isPhase ? "phase" : "subPhase");
+		row.className = "d-flex bg-white z-1 phase-row position-relative";
+		const pill = this.createPill(
+			data.summary,
+			"primary",
+			false,
+			data.dtStart,
+			data.due
+		);
+
+		this.pushReference(pill, data, isPhase ? "phase" : "subPhase");
+		row.appendChild(pill);
 
 		for (let i = 0; i < this.cellsNumber; i++) {
-			const date = new Date(this.firstDate);
-			date.setDate(this.firstDate.getDate() + i);
-			const cell = this.createSingleCell(date);
-			cell.textContent = date.getDate().toString();
+			const cell = this.createSingleCell();
 			row.appendChild(cell);
 		}
 
@@ -113,54 +193,21 @@ class ProjectPhaseRow extends HTMLElement {
 		return container;
 	}
 
-	private handleRightScroll(ref: RowReference, dates: Date[]) {
-		for (let i = 0; i < 3; i++) {
-			const firstCell = ref.row.firstElementChild;
-			if (firstCell) {
-				ref.row.removeChild(firstCell);
-			}
-		}
-
-		for (const date of dates) {
-			const newCell = this.createSingleCell(date);
-			ref.row.appendChild(newCell);
-		}
-	}
-
-	private handleLeftScroll(ref: RowReference, dates: Date[]) {
-		for (let i = 0; i < 3; i++) {
-			const lastCell = ref.row.lastElementChild;
-			if (lastCell) {
-				ref.row.removeChild(lastCell);
-			}
-		}
-
-		for (const date of dates) {
-			const newCell = this.createSingleCell(date);
-			ref.row.insertBefore(newCell, ref.row.firstChild);
-		}
-	}
-
 	public shiftTimeline(isRightScroll: boolean): void {
-		const dates: Date[] = [];
-		for (let i = 1; i < 4; i++) {
-			const date = new Date(this.firstDate);
-			isRightScroll
-				? date.setDate(this.firstDate.getDate() + this.cellsNumber + i)
-				: date.setDate(this.firstDate.getDate() - i);
-			dates.push(date);
-		}
-		if (isRightScroll) {
-			this.rowsArray.forEach((row) => {
-				this.handleRightScroll(row, dates);
-			});
-			this.firstDate.setDate(this.firstDate.getDate() + 3);
-		} else {
-			this.rowsArray.forEach((row) => {
-				this.handleLeftScroll(row, dates);
-			});
-			this.firstDate.setDate(this.firstDate.getDate() - 3);
-		}
+		const offset = isRightScroll ? 3 : -3;
+		this.firstDate.setDate(this.firstDate.getDate() + offset);
+		this.lastDate.setDate(this.lastDate.getDate() + offset);
+		this.rowsArray.forEach((ref) => {
+			const pill = this.createPill(
+				ref.data.summary,
+				ref.data.statusColor,
+				ref.data.isMilstone,
+				ref.data.startDate.toISOString(),
+				ref.data.dueDate.toISOString()
+			);
+			ref.pill.replaceWith(pill);
+			ref.pill = pill;
+		});
 	}
 
 	public render(currentDate: Date) {
@@ -168,6 +215,7 @@ class ProjectPhaseRow extends HTMLElement {
 		this.firstDate.setDate(
 			currentDate.getDate() - Math.floor(this.cellsNumber / 2)
 		);
+		this.lastDate.setDate(this.firstDate.getDate() + this.cellsNumber - 1);
 
 		this.innerHTML = "";
 
