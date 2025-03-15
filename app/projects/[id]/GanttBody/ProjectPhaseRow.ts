@@ -1,42 +1,88 @@
 import {
 	CELL_WIDTH_PX,
 	PhaseResponse,
+	ProjectActivityResponse,
 	ROW_HEIGHT_PX,
-	calculateCells
+	SubPhaseResponse,
+	calculateCells,
+	statusConfig
 } from "../Utils";
 
+interface RowReference {
+	row: HTMLElement;
+	startDate: Date;
+	dueDate: Date;
+	statusColor: string;
+	isMilstone: boolean;
+}
+
 class ProjectPhaseRow extends HTMLElement {
-	rowsArray: HTMLElement[] = [];
+	firstDate: Date;
+	cellsNumber: number;
+	phasesData: PhaseResponse[];
+	rowsArray: RowReference[];
 
 	constructor() {
 		super();
+		this.firstDate = new Date();
+		this.cellsNumber = 0;
+		this.phasesData = [];
+		this.rowsArray = [];
 	}
 
 	loadProjectData(data: PhaseResponse[], currentDate: Date) {
 		if (!data) return;
-		this.render(data, currentDate);
+		this.phasesData = data;
+		this.render(currentDate);
 	}
 
-	createSingleCell() {
+	pushReference(
+		ref: HTMLElement,
+		data: ProjectActivityResponse | SubPhaseResponse | PhaseResponse,
+		type: "activity" | "subPhase" | "phase"
+	) {
+		let status = "";
+		if (type === "activity") {
+			const statusKey = (data as ProjectActivityResponse)
+				.status as keyof typeof statusConfig;
+			status = statusConfig[statusKey].color;
+		} else if (type === "subPhase") {
+			status = "grey";
+		} else {
+			status = "black";
+		}
+
+		this.rowsArray.push({
+			row: ref,
+			startDate: new Date(data.dtStart),
+			dueDate: new Date(data.due),
+			statusColor: status,
+			isMilstone: "isMilestone" in data ? data.isMilestone : false
+		});
+	}
+
+	createSingleCell(date: Date) {
 		const cell = document.createElement("div");
 		cell.className =
 			"d-flex flex-column align-items-center justify-content-center flex-shrink-0";
 		cell.style.borderBottom = "1px solid grey";
 		cell.style.borderRight = "1px solid grey";
 		cell.style.width = `${CELL_WIDTH_PX}`;
-		cell.innerHTML = "Cell";
 		return cell;
 	}
 
-	renderPhaseRow(data: PhaseResponse, cells: number) {
+	renderPhaseRow(data: PhaseResponse, isPhase: boolean) {
 		// Row per la fase
 		const row = document.createElement("div");
 		row.style.height = `${ROW_HEIGHT_PX}`;
 		row.className = "d-flex bg-white z-1 phase-row";
-		this.rowsArray.push(row);
+		this.pushReference(row, data, isPhase ? "phase" : "subPhase");
 
-		for (let i = 1; i <= cells; i++) {
-			const cell = this.createSingleCell();
+		for (let i = 0; i < this.cellsNumber; i++) {
+			const date = new Date(this.firstDate);
+			date.setDate(this.firstDate.getDate() + i);
+			const cell = this.createSingleCell(date);
+			cell.textContent = date.getDate().toString();
 			row.appendChild(cell);
 		}
 
@@ -67,41 +113,66 @@ class ProjectPhaseRow extends HTMLElement {
 		return container;
 	}
 
-	public shiftTimeline(isRightScroll: boolean): void {
-		this.rowsArray.forEach((row) => {
-			// Remove cells
-			for (let i = 0; i < 3; i++) {
-				if (isRightScroll) {
-					const firstCell = row.firstElementChild;
-					if (firstCell) {
-						row.removeChild(firstCell);
-					}
-				} else {
-					const lastCell = row.lastElementChild;
-					if (lastCell) {
-						row.removeChild(lastCell);
-					}
-				}
+	private handleRightScroll(ref: RowReference, dates: Date[]) {
+		for (let i = 0; i < 3; i++) {
+			const firstCell = ref.row.firstElementChild;
+			if (firstCell) {
+				ref.row.removeChild(firstCell);
 			}
-			// Add new cells
-			for (let i = 0; i < 3; i++) {
-				const newCell = this.createSingleCell();
-				newCell.innerHTML = "New Cell";
-				if (isRightScroll) {
-					console.log("Right");
-					row.appendChild(newCell);
-				} else {
-					row.insertBefore(newCell, row.firstChild);
-				}
-			}
-		});
+		}
+
+		for (const date of dates) {
+			const newCell = this.createSingleCell(date);
+			ref.row.appendChild(newCell);
+		}
 	}
 
-	public render(data: PhaseResponse[], currentDate: Date) {
-		const cellsNumber = calculateCells(this);
+	private handleLeftScroll(ref: RowReference, dates: Date[]) {
+		for (let i = 0; i < 3; i++) {
+			const lastCell = ref.row.lastElementChild;
+			if (lastCell) {
+				ref.row.removeChild(lastCell);
+			}
+		}
 
-		for (const phase of data) {
-			const phaseRow = this.renderPhaseRow(phase, cellsNumber);
+		for (const date of dates) {
+			const newCell = this.createSingleCell(date);
+			ref.row.insertBefore(newCell, ref.row.firstChild);
+		}
+	}
+
+	public shiftTimeline(isRightScroll: boolean): void {
+		const dates: Date[] = [];
+		for (let i = 1; i < 4; i++) {
+			const date = new Date(this.firstDate);
+			isRightScroll
+				? date.setDate(this.firstDate.getDate() + this.cellsNumber + i)
+				: date.setDate(this.firstDate.getDate() - i);
+			dates.push(date);
+		}
+		if (isRightScroll) {
+			this.rowsArray.forEach((row) => {
+				this.handleRightScroll(row, dates);
+			});
+			this.firstDate.setDate(this.firstDate.getDate() + 3);
+		} else {
+			this.rowsArray.forEach((row) => {
+				this.handleLeftScroll(row, dates);
+			});
+			this.firstDate.setDate(this.firstDate.getDate() - 3);
+		}
+	}
+
+	public render(currentDate: Date) {
+		this.cellsNumber = calculateCells(this);
+		this.firstDate.setDate(
+			currentDate.getDate() - Math.floor(this.cellsNumber / 2)
+		);
+
+		this.innerHTML = "";
+
+		for (const phase of this.phasesData) {
+			const phaseRow = this.renderPhaseRow(phase, true);
 			this.appendChild(phaseRow);
 		}
 	}

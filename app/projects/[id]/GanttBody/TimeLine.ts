@@ -2,6 +2,7 @@ import {
 	CELL_WIDTH_PX,
 	ROW_HEIGHT_PX,
 	calculateCells,
+	formatDate,
 	timeFormat
 } from "../Utils";
 import ProjectPhaseRow from "./ProjectPhaseRow";
@@ -27,6 +28,8 @@ class TimeLine extends HTMLElement {
 	connectedCallback() {
 		this.style.display = "flex";
 		this.resizeObserver = new ResizeObserver(() => {
+			// Renderizziamo prima phaseRowsHandler e poi il timeline perché é la timeline a fare lo scroll poi
+			this.phaseRowsHandler!.render(this.centerDate);
 			this.render(this.centerDate);
 		});
 		this.resizeObserver.observe(this);
@@ -82,11 +85,11 @@ class TimeLine extends HTMLElement {
 			weekday: "short"
 		});
 
-		cell.id = date.toISOString();
+		cell.id = formatDate(date.toISOString());
 
 		if (
-			date.toISOString().split("T")[0] ===
-			currentDate.toISOString().split("T")[0]
+			formatDate(date.toISOString()) ===
+			formatDate(currentDate.toISOString())
 		) {
 			cell.style.backgroundColor = "#ffcccc";
 		}
@@ -97,8 +100,38 @@ class TimeLine extends HTMLElement {
 		return cell;
 	}
 
-	createCells(currentDate: Date, cols: number = 30) {
-		for (let i = 0; i < cols; i++) {
+	scrollToDate(date: Date) {
+		// TODO: controllare, a volte manca una data
+		const id = formatDate(date.toISOString());
+		const centerBlock = document.getElementById(id);
+
+		if (centerBlock) {
+			centerBlock.scrollIntoView({
+				block: "center",
+				inline: "center"
+			});
+		} else {
+			console.error("Elemento a cui scrollare non trovato: ", id);
+		}
+	}
+
+	handleTimeline(currentDate: Date) {
+		this.className = "d-flex bg-white z-1";
+		this.style.height = `${ROW_HEIGHT_PX}`;
+
+		const cells = calculateCells(this);
+
+		this.firstDate = new Date(currentDate);
+		this.firstDate.setDate(currentDate.getDate() - Math.floor(cells / 2));
+		this.centerDate = new Date(currentDate);
+		// Devo considerare anche la cella iniziare quindi aggiungo cells - 1
+		this.lastDate = new Date(this.firstDate);
+		this.lastDate.setDate(this.firstDate.getDate() + cells - 1);
+
+		this.updateMonth();
+		this.updateYear();
+
+		for (let i = 0; i < cells; i++) {
 			const curDate = new Date(this.firstDate);
 			curDate.setDate(this.firstDate.getDate() + i);
 
@@ -108,58 +141,11 @@ class TimeLine extends HTMLElement {
 		}
 	}
 
-	scrollToDate(date: Date) {
-		// TODO: controllare, a volte non lo trova senza motivo
-		const centerBlock = document.getElementById(date.toISOString());
-
-		if (centerBlock) {
-			centerBlock.scrollIntoView({
-				block: "center",
-				inline: "center"
-			});
-		} else {
-			console.error("Elemento currentDay non trovato");
-		}
-	}
-
-	handleTimeline(date: Date) {
-		this.className = "d-flex bg-white z-1";
-		this.style.height = `${ROW_HEIGHT_PX}`;
-
-		const cells = calculateCells(this);
-
-		this.firstDate = new Date(date);
-		this.firstDate.setDate(date.getDate() - Math.floor(cells / 2));
-		this.centerDate = new Date(date);
-		this.lastDate = new Date(this.firstDate);
-		this.lastDate.setDate(this.firstDate.getDate() + cells);
-
-		this.updateMonth();
-		this.updateYear();
-		this.createCells(new Date(), cells);
-	}
-
 	handleScroll(isRight: boolean) {
 		let offset;
 		let previousDate = new Date(this.centerDate);
 
-		if (!isRight) {
-			// Rimuoviamo le celle finali e aggiungiamo quelle iniziali
-			offset = -3;
-			for (let i = 1; i <= 3; i++) {
-				const newDate = new Date(this.firstDate);
-				newDate.setDate(this.firstDate.getDate() - i);
-				const cell = this.createSingleCell(newDate, new Date());
-				this.insertBefore(cell, this.firstElementChild);
-			}
-
-			for (let i = 0; i < offset; i++) {
-				const lastCell = this.lastElementChild;
-				if (lastCell) {
-					this.removeChild(lastCell);
-				}
-			}
-		} else {
+		if (isRight) {
 			// Rimuoviamo le celle iniziali e aggiungiamo quelle finali
 			offset = 3;
 			for (let i = 0; i < 3; i++) {
@@ -174,6 +160,22 @@ class TimeLine extends HTMLElement {
 				newDate.setDate(this.lastDate.getDate() + i);
 				const cell = this.createSingleCell(newDate, new Date());
 				this.appendChild(cell);
+			}
+		} else {
+			// Rimuoviamo le celle finali e aggiungiamo quelle iniziali
+			offset = -3;
+			for (let i = 1; i <= 3; i++) {
+				const newDate = new Date(this.firstDate);
+				newDate.setDate(this.firstDate.getDate() - i);
+				const cell = this.createSingleCell(newDate, new Date());
+				this.insertBefore(cell, this.firstElementChild);
+			}
+
+			for (let i = 0; i < offset; i++) {
+				const lastCell = this.lastElementChild;
+				if (lastCell) {
+					this.removeChild(lastCell);
+				}
 			}
 		}
 
@@ -200,6 +202,11 @@ class TimeLine extends HTMLElement {
 			console.error("Elementi per lo scroll non trovati");
 			return;
 		}
+
+		// Aggiungiamo gli event listeners per lo scroll
+		// Quando clicchiamo su un bottone facciamo scrollIntoView della nuova data in modo smooth
+		// Quando ha finito eliminiamo e aggiungiamo le celle necessarie e riscrolliamo alla data centrale
+		// TODO: sostituire solo il testo delle celle e non ricrearle tutte
 
 		leftScrollBtn.addEventListener("click", () => {
 			if (this.isScrolling) return;
@@ -237,6 +244,7 @@ class TimeLine extends HTMLElement {
 			console.error("Elemento project-phase-row non trovato");
 			return;
 		}
+		// console.log("date", date);
 
 		this.handleTimeline(date);
 		this.scrollToDate(date);

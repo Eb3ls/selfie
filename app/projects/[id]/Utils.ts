@@ -228,7 +228,7 @@ function createStatusIcon(
 	const icon = document.createElement("i");
 	icon.className = "bi bi-circle-fill fs-5 me-3";
 
-	const currentStatus = statusConfig[status as keyof typeof statusConfig];
+	const currentStatus = statusConfig[status];
 	if (currentStatus) {
 		icon.style.color = currentStatus.color;
 		icon.setAttribute("title", currentStatus.text);
