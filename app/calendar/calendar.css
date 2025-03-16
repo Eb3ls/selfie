@@ -111,6 +111,9 @@
 .add-button.session {
 	background: #8d89f7;
 }
+.add-button.download {
+	background: #dd8b1f;
+}
 
 /* Celle del mese */
 .rbc-month-view {

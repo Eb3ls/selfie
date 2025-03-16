@@ -112,6 +112,14 @@ export function CustomToolbar({
 			</div>
 
 			<div className="toolbar-right">
+				<a
+					href="/api/calendar/exportCalendar"
+					className="download-button"
+				>
+					<button className="add-button download">
+						Scarica calendario
+					</button>
+				</a>
 				<button
 					onClick={switchView}
 					className={`view-switch-button ${

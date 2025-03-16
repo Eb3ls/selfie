@@ -10,6 +10,7 @@
 	},
 	"dependencies": {
 		"dompurify": "^3.1.7",
+		"ics": "^3.8.1",
 		"jose": "^5.6.3",
 		"marked": "^14.1.2",
 		"mongodb": "^6.8.0",
