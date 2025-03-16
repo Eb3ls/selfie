@@ -208,6 +208,11 @@ export const POST = async (request: NextRequest) => {
 		// TODO: Utilizzare data da TimeMachine
 		const timeNow = new Date();
 
+		// Durata della sessione
+		const duration =
+			new Date(session.dtEnd).getTime() -
+			new Date(session.dtStart).getTime();
+
 		// Se la data di inizio della sessione è nel futuro, la prossima occorrenza è quella
 		// della data di inizio della sessione.
 		const nextOccurrence = rule.after(timeNow, true);
@@ -220,7 +225,7 @@ export const POST = async (request: NextRequest) => {
 		const lastSetting =
 			session.settingsList[session.settingsList.length - 1];
 
-		lastSetting.modificationDate = timeNow.toISOString();
+		lastSetting.modificationDate = timeNow.toDateString();
 
 		// Creiamo la nuova sessione
 		const newSession: StringSession = {
@@ -230,7 +235,7 @@ export const POST = async (request: NextRequest) => {
 			status: session.status,
 			rrule: session.rrule,
 			dtStart: nextOccurrence.toISOString(),
-			dtEnd: session.dtEnd,
+			dtEnd: new Date(nextOccurrence.getTime() + duration).toISOString(),
 			dtStamp: new Date().toISOString(),
 			settingsList: [lastSetting],
 			completedCycles: []

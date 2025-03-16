@@ -71,10 +71,13 @@ export default function CalendarPage() {
 
 	useEffect(() => {
 		if (pulledCalendar) {
-			const newEvents = convertToCalendarEvents(pulledCalendar);
+			const newEvents = convertToCalendarEvents(
+				pulledCalendar,
+				currentDate
+			);
 			setEvents(newEvents);
 		}
-	}, [pulledCalendar]);
+	}, [pulledCalendar, currentDate]);
 
 	const handleSelectEvent = (event: CalendarEvent) => {
 		if (event.typology === "projectActivity") {

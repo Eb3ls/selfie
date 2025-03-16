@@ -1,3 +1,4 @@
+import { generateRecurringCalendarEvents } from "@/app/calendar/calendarUtils/calendarRRule";
 import {
 	CalendarEvent,
 	StringActivityFrontend,
@@ -21,34 +22,42 @@ export async function fetchCalendar(url: string) {
 	return response.json();
 }
 
-export function convertToCalendarEvents(pulledCalendar: CalendarResponse) {
+export function convertToCalendarEvents(
+	pulledCalendar: CalendarResponse,
+	currentDate: Date
+) {
 	const calendarEvents: CalendarEvent[] = [];
 
-	const activities: CalendarEvent[] = pulledCalendar.activities.map(
-		(activity) => {
-			const start = moment(activity.due).toDate();
-			const end = moment(activity.due).toDate();
-			return {
-				id: activity._id!,
-				title: activity.summary,
-				start,
-				end,
-				typology: "activity",
-				originalElement: activity,
-				isRecurring: false
-			};
-		}
-	);
+	pulledCalendar.activities.forEach((activity) => {
+		const start = moment(activity.due).toDate();
+		const end = moment(activity.due).toDate();
 
-	const events: CalendarEvent[] = pulledCalendar.events.map((event) => {
+		calendarEvents.push({
+			id: activity._id!,
+			title: activity.summary,
+			start,
+			end,
+			typology: "activity",
+			originalElement: activity,
+			isRecurring: false
+		});
+	});
+
+	pulledCalendar.events.forEach((event) => {
 		const start = moment(event.dtStart).toDate();
 		const end = moment(event.dtEnd).toDate();
 
 		if (event.rrule) {
-			// TODO: gestire eventi ricorrenti
+			const recurringEvents = generateRecurringCalendarEvents(
+				event,
+				"event",
+				currentDate
+			);
+			calendarEvents.push(...recurringEvents);
+			return;
 		}
 
-		return {
+		calendarEvents.push({
 			id: event._id!,
 			title: event.summary,
 			start,
@@ -56,18 +65,24 @@ export function convertToCalendarEvents(pulledCalendar: CalendarResponse) {
 			typology: "event",
 			originalElement: event,
 			isRecurring: false
-		};
+		});
 	});
 
-	const sessions: CalendarEvent[] = pulledCalendar.sessions.map((session) => {
+	pulledCalendar.sessions.forEach((session) => {
 		const start = moment(session.dtStart).toDate();
 		const end = moment(session.dtEnd).toDate();
 
 		if (session.rrule) {
-			// TODO: gestire sessioni ricorrenti
+			const recurringSessions = generateRecurringCalendarEvents(
+				session,
+				"session",
+				currentDate
+			);
+			calendarEvents.push(...recurringSessions);
+			return;
 		}
 
-		return {
+		calendarEvents.push({
 			id: session._id!,
 			title: session.summary,
 			start,
@@ -75,31 +90,23 @@ export function convertToCalendarEvents(pulledCalendar: CalendarResponse) {
 			typology: "session",
 			originalElement: session,
 			isRecurring: false
-		};
+		});
 	});
 
-	const projectActivities: CalendarEvent[] =
-		pulledCalendar.projectActivities.map((projectActivity) => {
-			const start = moment(projectActivity.due).toDate();
-			const end = moment(projectActivity.due).toDate();
+	pulledCalendar.projectActivities.forEach((projectActivity) => {
+		const start = moment(projectActivity.due).toDate();
+		const end = moment(projectActivity.due).toDate();
 
-			return {
-				id: projectActivity._id!,
-				title: projectActivity.summary,
-				start,
-				end,
-				typology: "projectActivity",
-				originalElement: projectActivity,
-				isRecurring: false
-			};
+		calendarEvents.push({
+			id: projectActivity._id!,
+			title: projectActivity.summary,
+			start,
+			end,
+			typology: "projectActivity",
+			originalElement: projectActivity,
+			isRecurring: false
 		});
-
-	calendarEvents.push(
-		...activities,
-		...events,
-		...sessions,
-		...projectActivities
-	);
+	});
 
 	return calendarEvents;
 }

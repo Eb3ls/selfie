@@ -4,6 +4,32 @@ import "@/app/calendar/Modal.css";
 import React, { useState } from "react";
 import { Button, Col, Form, Modal, Row } from "react-bootstrap";
 
+// Mappe per la conversione dei valori
+const WEEKDAY_MAP: { [key: string]: string } = {
+	Lunedì: "MO",
+	Martedì: "TU",
+	Mercoledì: "WE",
+	Giovedì: "TH",
+	Venerdì: "FR",
+	Sabato: "SA",
+	Domenica: "SU"
+};
+
+const MONTH_MAP: { [key: string]: string } = {
+	Gennaio: "1",
+	Febbraio: "2",
+	Marzo: "3",
+	Aprile: "4",
+	Maggio: "5",
+	Giugno: "6",
+	Luglio: "7",
+	Agosto: "8",
+	Settembre: "9",
+	Ottobre: "10",
+	Novembre: "11",
+	Dicembre: "12"
+};
+
 export function AddEventModal({ children }: any) {
 	const [show, setShow] = useState(false);
 	const [enableRecurrence, setEnableRecurrence] = useState(false); // Stato per abilitare/disabilitare la ripetizione
@@ -13,6 +39,7 @@ export function AddEventModal({ children }: any) {
 	const [recurrenceEnd, setRecurrenceEnd] = useState<
 		"NEVER" | "UNTIL_EVENT_END" | "COUNT"
 	>("NEVER"); // Fine della ripetizione
+	const [recurrenceEndDate, setRecurrenceEndDate] = useState("");
 	const [recurrenceCount, setRecurrenceCount] = useState<number>(1); // Numero di occorrenze
 	const [weeklyDays, setWeeklyDays] = useState<string[]>([]); // Giorni della settimana per ripetizione settimanale
 	const [monthlyDays, setMonthlyDays] = useState<number[]>([]); // Giorni del mese per ripetizione mensile
@@ -81,8 +108,11 @@ export function AddEventModal({ children }: any) {
 	};
 
 	const handleWeeklyDaysChange = (day: string) => {
+		const mappedDay = WEEKDAY_MAP[day];
 		setWeeklyDays((prev) =>
-			prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
+			prev.includes(mappedDay)
+				? prev.filter((d) => d !== mappedDay)
+				: [...prev, mappedDay]
 		);
 	};
 
@@ -93,10 +123,11 @@ export function AddEventModal({ children }: any) {
 	};
 
 	const handleYearlyMonthsChange = (month: string) => {
+		const mappedMonth = MONTH_MAP[month];
 		setYearlyMonths((prev) =>
-			prev.includes(month)
-				? prev.filter((m) => m !== month)
-				: [...prev, month]
+			prev.includes(mappedMonth)
+				? prev.filter((m) => m !== mappedMonth)
+				: [...prev, mappedMonth]
 		);
 	};
 
@@ -113,8 +144,8 @@ export function AddEventModal({ children }: any) {
 
 		if (recurrenceEnd === "COUNT") {
 			rrule += `;COUNT=${recurrenceCount}`;
-		} else if (recurrenceEnd === "UNTIL_EVENT_END" && form.dtEnd) {
-			rrule += `;UNTIL=${new Date(form.dtEnd).toISOString().replace(/[-:]/g, "").split(".")[0]}Z`;
+		} else if (recurrenceEnd === "UNTIL_EVENT_END" && recurrenceEndDate) {
+			rrule += `;UNTIL=${new Date(recurrenceEndDate).toISOString().replace(/[-:]/g, "").split(".")[0]}Z`;
 		}
 
 		return rrule;
@@ -297,7 +328,7 @@ export function AddEventModal({ children }: any) {
 															type="checkbox"
 															label={day}
 															checked={weeklyDays.includes(
-																day
+																WEEKDAY_MAP[day]
 															)}
 															onChange={() =>
 																handleWeeklyDaysChange(
@@ -373,7 +404,7 @@ export function AddEventModal({ children }: any) {
 															type="checkbox"
 															label={month}
 															checked={yearlyMonths.includes(
-																month
+																MONTH_MAP[month]
 															)}
 															onChange={() =>
 																handleYearlyMonthsChange(
@@ -403,6 +434,23 @@ export function AddEventModal({ children }: any) {
 											Dopo un numero di occorrenze
 										</option>
 									</Form.Select>
+
+									{recurrenceEnd === "UNTIL_EVENT_END" && (
+										<div className="mt-3">
+											<Form.Label>
+												Fine ricorrenza
+											</Form.Label>
+											<Form.Control
+												type="date"
+												value={recurrenceEndDate}
+												onChange={(e) =>
+													setRecurrenceEndDate(
+														e.target.value
+													)
+												}
+											/>
+										</div>
+									)}
 
 									{recurrenceEnd === "COUNT" && (
 										<div className="mt-3">
