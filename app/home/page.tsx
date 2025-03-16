@@ -166,104 +166,106 @@ function PreviewList({
 
 	return (
 		<Stack gap={3}>
-			{items.map((item) => (
-				<div
-					key={item._id}
-					className="d-flex justify-content-between align-items-center p-3 border rounded-4 shadow-sm"
-					style={{
-						cursor: "pointer",
-						background: "white",
-						transition: "transform 0.2s, box-shadow 0.2s"
-					}}
-					onClick={() => handleItemClick(item._id)}
-					onMouseEnter={(e) => {
-						e.currentTarget.style.transform = "translateY(-3px)";
-						e.currentTarget.style.boxShadow =
-							"0 6px 12px rgba(0, 0, 0, 0.15)";
-					}}
-					onMouseLeave={(e) => {
-						e.currentTarget.style.transform = "translateY(0)";
-						e.currentTarget.style.boxShadow =
-							"0 4px 8px rgba(0, 0, 0, 0.1)";
-					}}
-				>
-					<div>
-						<h6 className="mb-2 fw-bold">{item.summary}</h6>
-						{type === "notepad" && (
-							<>
-								<div className="mb-1">
-									<Badge bg="info" className="me-2">
-										Categorie
-									</Badge>
-									<span className="text-muted">
-										{item.categories}
-									</span>
-								</div>
-								<div>
-									<Badge bg="secondary" className="me-2">
-										Ultima modifica
-									</Badge>
-									<span className="text-muted">
-										{formatDate(item.dtModified)}
-									</span>
-								</div>
-							</>
-						)}
-						{type === "projects" && (
-							<>
-								<div className="mb-1">
-									<Badge bg="warning" className="me-2">
-										Nota
-									</Badge>
-									<span
-										className="ms-2 p-0"
-										onClick={(e) => {
-											e.stopPropagation();
-											router.push(
-												`/notepad/${item.noteId}`
-											);
-										}}
-										style={{ cursor: "pointer" }}
-									>
-										<FaStickyNote
-											size={20}
-											className="text-warning"
-										/>
-									</span>
-								</div>
-							</>
-						)}
-						{type === "chat" && (
-							<>
-								<div className="mb-1">
-									<Badge bg="success" className="me-2">
-										Ultimo messaggio
-									</Badge>
-									<span className="text-muted">
-										{item.lastMessage}
-									</span>
-								</div>
-								<div className="mb-1">
-									<Badge bg="dark" className="me-2">
-										Da
-									</Badge>
-									<span className="text-muted">
-										{item.lastMessageOwner}
-									</span>
-								</div>
-								<div>
-									<Badge bg="secondary" className="me-2">
-										Inviato
-									</Badge>
-									<span className="text-muted">
-										{formatDate(item.lastMessageAt)}
-									</span>
-								</div>
-							</>
-						)}
+			{items &&
+				items.map((item) => (
+					<div
+						key={item._id}
+						className="d-flex justify-content-between align-items-center p-3 border rounded-4 shadow-sm"
+						style={{
+							cursor: "pointer",
+							background: "white",
+							transition: "transform 0.2s, box-shadow 0.2s"
+						}}
+						onClick={() => handleItemClick(item._id)}
+						onMouseEnter={(e) => {
+							e.currentTarget.style.transform =
+								"translateY(-3px)";
+							e.currentTarget.style.boxShadow =
+								"0 6px 12px rgba(0, 0, 0, 0.15)";
+						}}
+						onMouseLeave={(e) => {
+							e.currentTarget.style.transform = "translateY(0)";
+							e.currentTarget.style.boxShadow =
+								"0 4px 8px rgba(0, 0, 0, 0.1)";
+						}}
+					>
+						<div>
+							<h6 className="mb-2 fw-bold">{item.summary}</h6>
+							{type === "notepad" && (
+								<>
+									<div className="mb-1">
+										<Badge bg="info" className="me-2">
+											Categorie
+										</Badge>
+										<span className="text-muted">
+											{item.categories}
+										</span>
+									</div>
+									<div>
+										<Badge bg="secondary" className="me-2">
+											Ultima modifica
+										</Badge>
+										<span className="text-muted">
+											{formatDate(item.dtModified)}
+										</span>
+									</div>
+								</>
+							)}
+							{type === "projects" && (
+								<>
+									<div className="mb-1">
+										<Badge bg="warning" className="me-2">
+											Nota
+										</Badge>
+										<span
+											className="ms-2 p-0"
+											onClick={(e) => {
+												e.stopPropagation();
+												router.push(
+													`/notepad/${item.noteId}`
+												);
+											}}
+											style={{ cursor: "pointer" }}
+										>
+											<FaStickyNote
+												size={20}
+												className="text-warning"
+											/>
+										</span>
+									</div>
+								</>
+							)}
+							{type === "chat" && (
+								<>
+									<div className="mb-1">
+										<Badge bg="success" className="me-2">
+											Ultimo messaggio
+										</Badge>
+										<span className="text-muted">
+											{item.lastMessage}
+										</span>
+									</div>
+									<div className="mb-1">
+										<Badge bg="dark" className="me-2">
+											Da
+										</Badge>
+										<span className="text-muted">
+											{item.lastMessageOwner}
+										</span>
+									</div>
+									<div>
+										<Badge bg="secondary" className="me-2">
+											Inviato
+										</Badge>
+										<span className="text-muted">
+											{formatDate(item.lastMessageAt)}
+										</span>
+									</div>
+								</>
+							)}
+						</div>
 					</div>
-				</div>
-			))}
+				))}
 		</Stack>
 	);
 }
@@ -282,31 +284,32 @@ function PreviewCalendar({ calendar }: { calendar: ReducedCalendar }) {
 					{title}
 				</Badge>
 			</h6>
-			{items.length === 0 ? (
+			{items && items.length === 0 ? (
 				<p className="text-muted ms-4">Nessun {title.toLowerCase()}</p>
 			) : (
 				<Stack gap={2} className="ms-4">
-					{items.map((item) => (
-						<div
-							key={item._id}
-							className="border rounded-3 p-2"
-							style={{ backgroundColor: "#fff" }}
-						>
-							<h6 className="mb-1">{item.summary}</h6>
-							<p
-								className="mb-1 text-muted"
-								style={{ fontSize: "0.9rem" }}
+					{items &&
+						items.map((item) => (
+							<div
+								key={item._id}
+								className="border rounded-3 p-2"
+								style={{ backgroundColor: "#fff" }}
 							>
-								{item.description}
-							</p>
-							<p
-								className="mb-0 text-secondary"
-								style={{ fontSize: "0.8rem" }}
-							>
-								{formatDate(item.data)} - {item.ownerName}
-							</p>
-						</div>
-					))}
+								<h6 className="mb-1">{item.summary}</h6>
+								<p
+									className="mb-1 text-muted"
+									style={{ fontSize: "0.9rem" }}
+								>
+									{item.description}
+								</p>
+								<p
+									className="mb-0 text-secondary"
+									style={{ fontSize: "0.8rem" }}
+								>
+									{formatDate(item.data)} - {item.ownerName}
+								</p>
+							</div>
+						))}
 				</Stack>
 			)}
 		</div>
@@ -314,9 +317,17 @@ function PreviewCalendar({ calendar }: { calendar: ReducedCalendar }) {
 
 	return (
 		<div>
-			{renderItems("Attività", calendar.activities, "primary")}
-			{renderItems("Eventi", calendar.events, "warning")}
-			{renderItems("Sessione Pomodoro", calendar.sessions, "success")}
+			{renderItems(
+				"Attività",
+				calendar && calendar.activities,
+				"primary"
+			)}
+			{renderItems("Eventi", calendar && calendar.events, "warning")}
+			{renderItems(
+				"Sessione Pomodoro",
+				calendar && calendar.sessions,
+				"success"
+			)}
 		</div>
 	);
 }
