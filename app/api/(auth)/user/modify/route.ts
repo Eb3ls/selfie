@@ -33,7 +33,7 @@ export const PATCH = async (request: NextRequest) => {
 	const validation = await validate<RequestType>(
 		request,
 		requestTemplate,
-		false
+		true
 	);
 
 	// Se la validazione fallisce, ritorna il messaggio di errore

@@ -38,7 +38,7 @@ const mainLinks = [
 
 // Link secondari raggruppati in "Altro"
 const otherLinks = [
-	{ name: "Impostazioni", icon: FaCog, link: "#impostazioni" },
+	{ name: "Impostazioni", icon: FaCog, link: "/settings" },
 	{ name: "Inbox", icon: FaInbox, link: "/inbox" }
 ];
 
@@ -48,7 +48,7 @@ const menuItems = [
 		title: "Sistema",
 		items: [
 			{ name: "Inbox", icon: FaInbox, link: "/inbox" },
-			{ name: "Impostazioni", icon: FaCog, link: "#impostazioni" }
+			{ name: "Impostazioni", icon: FaCog, link: "/settings" }
 		]
 	},
 	{
