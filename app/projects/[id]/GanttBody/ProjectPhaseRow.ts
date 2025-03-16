@@ -46,26 +46,15 @@ class ProjectPhaseRow extends HTMLElement {
 	pushReference(
 		ref: HTMLElement,
 		data: ProjectActivityResponse | SubPhaseResponse | PhaseResponse,
-		type: "activity" | "subPhase" | "phase"
+		color: string
 	) {
-		let status = "";
-		if (type === "activity") {
-			const statusKey = (data as ProjectActivityResponse)
-				.status as keyof typeof statusConfig;
-			status = statusConfig[statusKey].color;
-		} else if (type === "subPhase") {
-			status = "grey";
-		} else {
-			status = "black";
-		}
-
 		this.rowsArray.push({
 			pill: ref,
 			data: {
 				summary: data.summary,
 				startDate: new Date(data.dtStart),
 				dueDate: new Date(data.due),
-				statusColor: status,
+				statusColor: color,
 				isMilstone: "isMilestone" in data ? data.isMilestone : false
 			}
 		});
@@ -90,8 +79,9 @@ class ProjectPhaseRow extends HTMLElement {
 	) {
 		const phasePill = document.createElement("div");
 		phasePill.className =
-			"rounded-pill position-absolute bg-primary text-white top-50 translate-middle-y d-flex align-items-center justify-content-start px-3";
+			"rounded-pill position-absolute text-white top-50 translate-middle-y d-flex align-items-center justify-content-start px-3";
 		phasePill.style.height = "70%";
+		phasePill.style.backgroundColor = color;
 
 		// Calcoliamo le date iniziale e finale in base agli estremi della timeline
 		const initialDate = new Date(
@@ -132,12 +122,13 @@ class ProjectPhaseRow extends HTMLElement {
 
 		const textElement = document.createElement("span");
 		textElement.innerText = text;
+		textElement.className = "fw-bold text-truncate";
 		textElement.style.whiteSpace = "nowrap";
 		textElement.style.overflow = "hidden";
 
 		if (isMilestone) {
 			const flag = document.createElement("i");
-			flag.className = "bi bi-flag-fill";
+			flag.className = "bi bi-flag-fill ms-2";
 			textElement.appendChild(flag);
 		}
 
@@ -145,21 +136,27 @@ class ProjectPhaseRow extends HTMLElement {
 		return phasePill;
 	}
 
-	renderPhaseRow(data: PhaseResponse, isPhase: boolean) {
-		// Row per la fase
+	renderPhaseRow(
+		parentElement: HTMLElement,
+		data: PhaseResponse | SubPhaseResponse | ProjectActivityResponse,
+		color: string
+	) {
+		// Riga principale
 		const row = document.createElement("div");
 		row.style.height = `${ROW_HEIGHT_PX}`;
-		row.className = "d-flex bg-white z-1 phase-row position-relative";
+		row.className = "d-flex position-relative";
+		row.style.width = "max-content";
 		const pill = this.createPill(
 			data.summary,
-			"primary",
+			color,
 			false,
 			data.dtStart,
 			data.due
 		);
 
-		this.pushReference(pill, data, isPhase ? "phase" : "subPhase");
+		this.pushReference(pill, data, color);
 		row.appendChild(pill);
+		parentElement.appendChild(row);
 
 		for (let i = 0; i < this.cellsNumber; i++) {
 			const cell = this.createSingleCell();
@@ -169,28 +166,31 @@ class ProjectPhaseRow extends HTMLElement {
 		// Contenitore per il collapse con lo stesso id per fare il toggle di tutti
 		const collapse = document.createElement("div");
 		collapse.id = `collapse${data._id}`;
-		collapse.className = "collapse d-flex";
+		collapse.className = "collapse";
+		collapse.style.width = "max-content";
 
 		// Gestione delle sottofasi
-		if (data.subPhases && data.subPhases.length > 0) {
+		if ("subPhases" in data && data.subPhases.length > 0) {
 			for (const subPhase of data.subPhases) {
-				// collapse.innerHTML += this.renderPhaseRow(subPhase);
+				this.renderPhaseRow(collapse, subPhase, "gray");
 			}
+			parentElement.appendChild(collapse);
 		}
 
 		//Gestione delle attività
-		if (data.activities && data.activities.length > 0) {
+		if ("activities" in data && data.activities.length > 0) {
 			for (const activity of data.activities) {
-				// const activityElement = this.handleRow(activity.summary);
-				// collapse.appendChild(activityElement);
+				const status = activity.status as keyof typeof statusConfig;
+				this.renderPhaseRow(
+					collapse,
+					activity,
+					statusConfig[status].color
+				);
 			}
+			parentElement.appendChild(collapse);
 		}
 
-		const container = document.createElement("div");
-		container.appendChild(row);
-		container.appendChild(collapse);
-
-		return container;
+		// Il collapse é inserito una volta sola, non ci sono sia sottofasi che attività
 	}
 
 	public shiftTimeline(isRightScroll: boolean): void {
@@ -218,10 +218,10 @@ class ProjectPhaseRow extends HTMLElement {
 		this.lastDate.setDate(this.firstDate.getDate() + this.cellsNumber - 1);
 
 		this.innerHTML = "";
+		this.className = "d-flex flex-column overflow-hidden";
 
 		for (const phase of this.phasesData) {
-			const phaseRow = this.renderPhaseRow(phase, true);
-			this.appendChild(phaseRow);
+			this.renderPhaseRow(this, phase, "black");
 		}
 	}
 }

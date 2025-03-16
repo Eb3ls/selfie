@@ -119,33 +119,6 @@ class TimeLine extends HTMLElement {
 		}
 	}
 
-	handleTimeline() {
-		this.className = "d-flex bg-white z-1";
-		this.style.height = `${ROW_HEIGHT_PX}`;
-
-		const cells = calculateCells(this);
-
-		this.firstDate = new Date(this.centerDate);
-		this.firstDate.setDate(
-			this.firstDate.getDate() - Math.floor(cells / 2)
-		);
-		// Devo considerare anche la cella iniziare quindi aggiungo cells - 1
-		this.lastDate = new Date(this.firstDate);
-		this.lastDate.setDate(this.firstDate.getDate() + cells - 1);
-
-		this.updateMonth();
-		this.updateYear();
-
-		for (let i = 0; i < cells; i++) {
-			const curDate = new Date(this.firstDate);
-			curDate.setDate(this.firstDate.getDate() + i);
-
-			const cell = this.createSingleCell(curDate);
-
-			this.appendChild(cell);
-		}
-	}
-
 	handleScroll(isRight: boolean) {
 		let offset = isRight ? 3 : -3;
 		let previousDate = new Date(this.centerDate);
@@ -167,7 +140,7 @@ class TimeLine extends HTMLElement {
 			date.setDate(date.getDate() + 1);
 		}
 
-		this.parentElement!.style.scrollBehavior = "auto";
+		this.style.scrollBehavior = "auto";
 		this.scrollToDate(this.centerDate);
 		this.isScrolling = false;
 	}
@@ -184,14 +157,18 @@ class TimeLine extends HTMLElement {
 		// Aggiungiamo gli event listeners per lo scroll
 		// Quando clicchiamo su un bottone facciamo scrollIntoView della nuova data in modo smooth
 		// Quando ha finito eliminiamo e aggiungiamo le celle necessarie e riscrolliamo alla data centrale
-		// TODO: sostituire solo il testo delle celle e non ricrearle tutte
+
+		this.addEventListener("scroll", () => {
+			// Imposta lo scrollLeft del phaseRowsHandler in base a quello del timeline
+			this.phaseRowsHandler!.scrollLeft = this.scrollLeft;
+		});
 
 		leftScrollBtn.addEventListener("click", () => {
 			if (this.isScrolling) return;
 			this.isScrolling = true;
 			const date = new Date(this.centerDate);
 			date.setDate(date.getDate() - 3);
-			this.parentElement!.style.scrollBehavior = "smooth";
+			this.style.scrollBehavior = "smooth";
 			this.scrollToDate(date);
 
 			setTimeout(() => {
@@ -205,7 +182,7 @@ class TimeLine extends HTMLElement {
 			this.isScrolling = true;
 			const date = new Date(this.centerDate);
 			date.setDate(date.getDate() + 3);
-			this.parentElement!.style.scrollBehavior = "smooth";
+			this.style.scrollBehavior = "smooth";
 			this.scrollToDate(date);
 
 			setTimeout(() => {
@@ -229,11 +206,33 @@ class TimeLine extends HTMLElement {
 			console.error("Elemento project-phase-row non trovato");
 			return;
 		}
+		const cells = calculateCells(this);
 
-		this.handleTimeline();
-		this.scrollToDate(this.centerDate);
+		this.firstDate = new Date(this.centerDate);
+		this.firstDate.setDate(
+			this.firstDate.getDate() - Math.floor(cells / 2)
+		);
+		// Devo considerare anche la cella iniziare quindi aggiungo cells - 1
+		this.lastDate = new Date(this.firstDate);
+		this.lastDate.setDate(this.firstDate.getDate() + cells - 1);
+
+		this.className = "overflow-hidden d-flex bg-white z-1";
+		this.style.height = `${ROW_HEIGHT_PX}`;
+
+		this.updateMonth();
+		this.updateYear();
+
+		for (let i = 0; i < cells; i++) {
+			const curDate = new Date(this.firstDate);
+			curDate.setDate(this.firstDate.getDate() + i);
+
+			const cell = this.createSingleCell(curDate);
+
+			this.appendChild(cell);
+		}
 
 		this.addEventListeners();
+		this.scrollToDate(this.centerDate);
 	}
 }
 

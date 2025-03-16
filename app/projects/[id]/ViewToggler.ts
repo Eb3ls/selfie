@@ -96,9 +96,9 @@ class ViewToggler extends HTMLElement {
 					</div>
 					<side-gantt-list/>
 				</div>
-				<div id="ganttView" class="col-9 d-flex flex-column hide-scroll overflow-hidden">
+				<div id="ganttView" class="col-9 p-0">
 					<time-line></time-line>
-					<project-phase-row/><project-phase-row/>
+					<project-phase-row></project-phase-row>
 				</div>
          </div>
         `;
