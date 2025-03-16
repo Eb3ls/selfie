@@ -17,6 +17,7 @@ export function ModifySessionModal({
 }) {
 	const newSession: StringSession = { ...session };
 	const [form, setForm] = useState(newSession);
+	const [userToInvite, setUserToInvite] = useState("");
 
 	console.log("Session:", newSession);
 
@@ -38,6 +39,32 @@ export function ModifySessionModal({
 				}
 			]
 		});
+	};
+
+	const handleShare = async () => {
+		const body = {
+			username: userToInvite
+		};
+
+		const response = await fetch(
+			"/api/calendar/session/" + session._id + "/share",
+			{
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify(body)
+			}
+		);
+
+		if (response.status === 200) {
+			const fetched_data = await response.json();
+			alert("Successful: " + fetched_data.message);
+		} else {
+			alert("Failed! Status code: " + response.status);
+		}
+
+		setUserToInvite("");
 	};
 
 	// Gestisce il submit del form
@@ -222,6 +249,28 @@ export function ModifySessionModal({
 								className="input-field"
 								required
 							/>
+						</Form.Group>
+						{/* Nuova sezione grafica per condividere la sessione */}
+						<Form.Group className="mb-3" controlId="formInviteUser">
+							<Form.Label>Condividi impostazioni</Form.Label>
+							<div className="d-flex">
+								<Form.Control
+									type="text"
+									placeholder="Inserisci nome utente"
+									className="input-field"
+									value={userToInvite}
+									onChange={(e) =>
+										setUserToInvite(e.target.value)
+									}
+								/>
+								<Button
+									variant="success"
+									className="ms-2"
+									onClick={handleShare}
+								>
+									Condividi
+								</Button>
+							</div>
 						</Form.Group>
 					</Modal.Body>
 					<Modal.Footer>

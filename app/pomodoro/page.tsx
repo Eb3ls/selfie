@@ -10,7 +10,6 @@ import { Coffee } from "./Animation/Coffee";
 import { Tree } from "./Animation/Tree";
 import { MusicView } from "./MusicBar/MusicView";
 import { Setting } from "./Setting";
-import { ShareModal } from "./ShareModal";
 
 async function fetcher(url: string) {
 	console.log("Fetching data from " + url);
@@ -339,17 +338,6 @@ function PomodoroImplementation() {
 									<IoMusicalNotes size={30} />
 								)}
 							</Button>
-							<ShareModal
-								studyTime={studyTime}
-								sessions={originalSessions.current || sessions}
-								breakTime={breakTime}
-								id={id}
-							>
-								<IoShareSocial
-									size={30}
-									className="text-primary"
-								/>
-							</ShareModal>
 						</div>
 
 						<div className="d-flex flex-column h-100">
