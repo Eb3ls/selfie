@@ -1,9 +1,8 @@
 import "@/app/chat/chat.css";
-import "./Footer.css";
 import React from "react";
 import { Button, Form, InputGroup } from "react-bootstrap";
 import { IoIosSend } from "react-icons/io";
-import "./Footer.css"
+import "./Footer.css";
 
 interface FooterProps {
 	newMessage: string;
@@ -17,16 +16,14 @@ export function Footer({
 	sendMessage
 }: FooterProps) {
 	const handleKeyPress = (e: React.KeyboardEvent) => {
-		if (e.key === 'Enter' && !e.shiftKey) {
+		if (e.key === "Enter" && !e.shiftKey) {
 			e.preventDefault();
 			sendMessage();
 		}
 	};
 
 	return (
-		<div
-			className="p-3 mb-3 rounded-pill w-50 mx-auto chat-footer"
-		>
+		<div className="p-3 mb-3 rounded-pill w-50 mx-auto chat-footer">
 			<InputGroup className="border-0">
 				<Form.Control
 					type="text"

@@ -120,11 +120,12 @@ function CompleteFormComponent() {
 					backgroundColor: greenColor,
 					border: "none",
 					borderRadius: "12px",
-					transition: "all 0.3s ease",
+					transition: "all 0.3s ease"
 				}}
 				onMouseOver={(e) => {
 					e.currentTarget.style.transform = "translateY(-2px)";
-					e.currentTarget.style.boxShadow = "0 6px 20px rgba(0,0,0,0.1)";
+					e.currentTarget.style.boxShadow =
+						"0 6px 20px rgba(0,0,0,0.1)";
 					e.currentTarget.style.backgroundColor = `${greenColor}dd`;
 				}}
 				onMouseOut={(e) => {
@@ -141,23 +142,29 @@ function CompleteFormComponent() {
 
 export default function Login() {
 	return (
-		<main className="min-vh-100 d-flex align-items-center py-5"
-			style={{ background: "#f8f9fa" }}>
+		<main
+			className="min-vh-100 d-flex align-items-center py-5"
+			style={{ background: "#f8f9fa" }}
+		>
 			<Container>
 				<Row className="justify-content-center">
 					<Col xs={11} lg={10} xl={9}>
-						<div className="bg-white p-4 p-md-5 rounded-4 shadow-lg"
-							style={{ transition: "all 0.3s ease" }}>
+						<div
+							className="bg-white p-4 p-md-5 rounded-4 shadow-lg"
+							style={{ transition: "all 0.3s ease" }}
+						>
 							<Row className="align-items-center">
 								<Col
 									xs={12}
 									md={6}
 									className="order-2 order-md-1 d-flex flex-column"
 								>
-									<h1 className="mb-4 fw-bold">Welcome Back!</h1>
+									<h1 className="mb-4 fw-bold">
+										Welcome Back!
+									</h1>
 									<CompleteFormComponent />
 									<p className="text-center mb-0">
-										Needs to create an account?{' '}
+										Needs to create an account?{" "}
 										<Link
 											href="/register"
 											className="ms-1 text-decoration-none"
@@ -166,17 +173,23 @@ export default function Login() {
 												transition: "all 0.2s ease"
 											}}
 											onMouseOver={(e) => {
-												e.currentTarget.style.opacity = "0.8";
+												e.currentTarget.style.opacity =
+													"0.8";
 											}}
 											onMouseOut={(e) => {
-												e.currentTarget.style.opacity = "1";
+												e.currentTarget.style.opacity =
+													"1";
 											}}
 										>
 											Sign up
 										</Link>
 									</p>
 								</Col>
-								<Col xs={12} md={6} className="order-1 order-md-2 text-center mb-4 mb-md-0">
+								<Col
+									xs={12}
+									md={6}
+									className="order-1 order-md-2 text-center mb-4 mb-md-0"
+								>
 									<Image
 										src="/Sloth.png"
 										alt="Logo"

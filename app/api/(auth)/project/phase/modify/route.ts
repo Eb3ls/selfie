@@ -127,7 +127,7 @@ export const PATCH = async (request: NextRequest) => {
 	// Modifichiamo la fase
 	const updateOut = await updateCollectionWrapper<Phase>(
 		{ _id: phaseId },
-		{ $set: newFields } as any,	
+		{ $set: newFields } as any,
 		phaseClient
 	);
 

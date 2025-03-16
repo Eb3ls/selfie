@@ -107,11 +107,11 @@ export const POST = async (request: NextRequest) => {
 		// Controlliamo che la fase padre non abbia giá delle activity
 		const activitiesClient: Collection<Activity> =
 			await getCollection<Activity>(ACTIVITY_COLLECTION);
-		
+
 		const activitiesOut = await findCollectionWrapper<Activity>(
 			{ parentActivityId: parentId },
 			activitiesClient
-		)
+		);
 		console.log(activitiesOut);
 
 		if (activitiesOut.status !== 404) {

@@ -13,8 +13,8 @@ import { chatBody } from "@/app/color_palette";
 import { StringMessage } from "@/utils/db/db";
 import React, { useEffect, useRef, useState } from "react";
 import { ListGroup } from "react-bootstrap";
-import { GlobalSideBar } from "../components/GlobalSideBar";
 import useSWR from "swr";
+import { GlobalSideBar } from "../components/GlobalSideBar";
 
 async function fetcher(url: string) {
 	const response = await fetch(url);
@@ -155,12 +155,12 @@ export default function ChatMain() {
 				const lastMessage = chat.lastMessage;
 				const lastMessageObj = lastMessage
 					? {
-						name: fromIdToUsername(
-							lastMessage.ownerId,
-							chatResponse!.userList
-						)!,
-						content: lastMessage.content
-					}
+							name: fromIdToUsername(
+								lastMessage.ownerId,
+								chatResponse!.userList
+							)!,
+							content: lastMessage.content
+						}
 					: null;
 
 				filteredChats.push({
@@ -209,9 +209,9 @@ export default function ChatMain() {
 				chatResponse!.whoAmI._id === message.ownerId
 					? "Io"
 					: fromIdToUsername(
-						message.ownerId,
-						chatResponse!.userList
-					)!;
+							message.ownerId,
+							chatResponse!.userList
+						)!;
 			const newSentAt = new Date(message.sentAt).toLocaleTimeString([], {
 				hour: "2-digit",
 				minute: "2-digit"
@@ -251,16 +251,18 @@ export default function ChatMain() {
 			<div className="d-flex flex-grow-1 overflow-hidden">
 				{/* Sidebar */}
 				<div
-					className={`col-12 col-lg-3 d-flex flex-column p-0 px-2 bg-dark border-end border-black ${isSidebarOpen ? "d-block" : "d-none d-lg-block"
-						}`}
+					className={`col-12 col-lg-3 d-flex flex-column p-0 px-2 bg-dark border-end border-black ${
+						isSidebarOpen ? "d-block" : "d-none d-lg-block"
+					}`}
 				>
 					{Sidebar()}
 				</div>
 
 				{/* Chat principale */}
 				<div
-					className={`col flex-grow-1 d-flex flex-column p-0 ${isSidebarOpen ? "d-none d-lg-block" : "d-block"
-						}`}
+					className={`col flex-grow-1 d-flex flex-column p-0 ${
+						isSidebarOpen ? "d-none d-lg-block" : "d-block"
+					}`}
 					style={{ backgroundColor: chatBody }}
 				>
 					{selectedChat && MainChatComponent()}

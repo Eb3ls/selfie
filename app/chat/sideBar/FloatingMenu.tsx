@@ -31,8 +31,8 @@ export function FloatingMenu() {
 				variant="primary"
 				className="p-2 rounded-circle d-flex align-items-center justify-content-center shadow-sm hover-shadow transition-all"
 				style={{
-					width: '42px',
-					height: '42px',
+					width: "42px",
+					height: "42px"
 				}}
 				onClick={() => setShowOptions(!showOptions)}
 			>

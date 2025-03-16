@@ -1,52 +1,52 @@
 /* Modal container */
 .custom-modal .modal-content {
-    border: none;
-    border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
+	border: none;
+	border-radius: 16px;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+	overflow: hidden;
 }
 
 /* Header del modal */
 .custom-modal-header {
-    background: linear-gradient(135deg, #6366f1, #4f46e5);
-    padding: 20px 25px;
-    border: none;
-    color: white;
-    border-top-left-radius: 15px;
-    border-top-right-radius: 15px;
+	background: linear-gradient(135deg, #6366f1, #4f46e5);
+	padding: 20px 25px;
+	border: none;
+	color: white;
+	border-top-left-radius: 15px;
+	border-top-right-radius: 15px;
 }
 
 .custom-modal-header .modal-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    color: white;
+	font-size: 1.25rem;
+	font-weight: 600;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	color: white;
 }
 
 .custom-modal-header .btn-close {
-    filter: brightness(0) invert(1);
-    opacity: 0.8;
-    transition: opacity 0.2s;
+	filter: brightness(0) invert(1);
+	opacity: 0.8;
+	transition: opacity 0.2s;
 }
 
 .custom-modal-header .btn-close:hover {
-    opacity: 1;
+	opacity: 1;
 }
 
 .modal-icon {
-    margin-right: 10px;
+	margin-right: 10px;
 }
 
 /* Stile per i campi di input */
 .input-field {
-    border: 2px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 12px 16px;
-    font-size: 0.95rem;
-    background-color: white;
-    transition: all 0.2s ease;
+	border: 2px solid #e2e8f0;
+	border-radius: 12px;
+	padding: 12px 16px;
+	font-size: 0.95rem;
+	background-color: white;
+	transition: all 0.2s ease;
 }
 
 .input-field:focus {
@@ -56,63 +56,63 @@
 
 /* Bottoni */
 .custom-cancel-button {
-    background-color: #f1f5f9;
-    border: none;
-    border-radius: 12px;
-    padding: 12px 24px;
-    color: #64748b;
-    font-weight: 600;
-    transition: all 0.2s ease;
+	background-color: #f1f5f9;
+	border: none;
+	border-radius: 12px;
+	padding: 12px 24px;
+	color: #64748b;
+	font-weight: 600;
+	transition: all 0.2s ease;
 }
 
 .custom-submit-button {
-    background: linear-gradient(135deg, #6366f1, #4f46e5);
-    border: none;
-    border-radius: 12px;
-    padding: 12px 24px;
-    font-weight: 600;
-    transition: all 0.2s ease;
+	background: linear-gradient(135deg, #6366f1, #4f46e5);
+	border: none;
+	border-radius: 12px;
+	padding: 12px 24px;
+	font-weight: 600;
+	transition: all 0.2s ease;
 }
 
 .custom-submit-button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+	transform: translateY(-1px);
+	box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
 }
 
 .custom-cancel-button:hover {
-    background-color: #e2e8f0;
-    color: #475569;
+	background-color: #e2e8f0;
+	color: #475569;
 }
 
 /* Form */
 .custom-form {
-    padding: 0;
+	padding: 0;
 }
 
 /* Modal body */
 .modal-body {
-    padding: 25px;
-    background-color: #f8fafc;
+	padding: 25px;
+	background-color: #f8fafc;
 }
 
 /* List group */
 .list-group {
-    border-radius: 12px;
-    overflow: hidden;
+	border-radius: 12px;
+	overflow: hidden;
 }
 
 .list-group-item {
-    padding: 12px 16px;
-    border: 1px solid #e2e8f0;
-    background-color: white;
-    transition: background-color 0.2s;
+	padding: 12px 16px;
+	border: 1px solid #e2e8f0;
+	background-color: white;
+	transition: background-color 0.2s;
 }
 
 .list-group-item:hover {
-    background-color: #f8fafc;
+	background-color: #f8fafc;
 }
 
 .list-group-item button {
-    padding: 4px 12px;
-    border-radius: 8px;
+	padding: 4px 12px;
+	border-radius: 8px;
 }

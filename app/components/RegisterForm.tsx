@@ -1,6 +1,7 @@
 "use client";
-import React from "react";
+
 import { onSubmit } from "@/app/components/components_utils/components_functions";
+import React from "react";
 
 export function RegisterForm() {
 	return (

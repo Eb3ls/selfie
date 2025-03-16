@@ -1,4 +1,3 @@
-// SearchBar.tsx
 "use client";
 
 import { Button, Form, InputGroup } from "react-bootstrap";
@@ -7,8 +6,6 @@ import { AddNoteModal } from "./AddNoteModal";
 import { FilterModal } from "./FilterModal";
 import styles from "./Notepad.module.css";
 import { SortModal } from "./SortModal";
-
-// SearchBar.tsx
 
 export function SearchBar({
 	handleFilters,

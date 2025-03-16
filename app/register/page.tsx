@@ -196,7 +196,10 @@ function CompleteFormComponent() {
 								autoComplete="email"
 								required
 								className="py-2 shadow-sm"
-								style={{ transition: "all 0.2s ease", borderRadius: "12px 0 0 12px" }}
+								style={{
+									transition: "all 0.2s ease",
+									borderRadius: "12px 0 0 12px"
+								}}
 							/>
 							<InputGroup.Text
 								onClick={sendVerificationEmail}
@@ -208,10 +211,12 @@ function CompleteFormComponent() {
 									borderRadius: "0 12px 12px 0"
 								}}
 								onMouseOver={(e) => {
-									e.currentTarget.style.backgroundColor = "#f8f9fa";
+									e.currentTarget.style.backgroundColor =
+										"#f8f9fa";
 								}}
 								onMouseOut={(e) => {
-									e.currentTarget.style.backgroundColor = "#fff";
+									e.currentTarget.style.backgroundColor =
+										"#fff";
 								}}
 							>
 								<IoIosSend />
@@ -254,7 +259,10 @@ function CompleteFormComponent() {
 								autoComplete="new-password"
 								required
 								className="py-2 shadow-sm"
-								style={{ transition: "all 0.2s ease", borderRadius: "12px 0 0 12px" }}
+								style={{
+									transition: "all 0.2s ease",
+									borderRadius: "12px 0 0 12px"
+								}}
 							/>
 							<InputGroup.Text
 								onClick={togglePasswordVisibility}
@@ -285,11 +293,12 @@ function CompleteFormComponent() {
 					backgroundColor: greenColor,
 					border: "none",
 					borderRadius: "12px",
-					transition: "all 0.3s ease",
+					transition: "all 0.3s ease"
 				}}
 				onMouseOver={(e) => {
 					e.currentTarget.style.transform = "translateY(-2px)";
-					e.currentTarget.style.boxShadow = "0 6px 20px rgba(0,0,0,0.1)";
+					e.currentTarget.style.boxShadow =
+						"0 6px 20px rgba(0,0,0,0.1)";
 					e.currentTarget.style.backgroundColor = `${greenColor}dd`;
 				}}
 				onMouseOut={(e) => {
@@ -306,19 +315,31 @@ function CompleteFormComponent() {
 
 export default function Register() {
 	return (
-		<main className="min-vh-100 d-flex align-items-center py-4"
-			style={{ background: "#f8f9fa" }}>
-			<Container fluid="xxl"> {/* Cambiato a fluid="xxl" per più controllo */}
+		<main
+			className="min-vh-100 d-flex align-items-center py-4"
+			style={{ background: "#f8f9fa" }}
+		>
+			<Container fluid="xxl">
+				{" "}
+				{/* Cambiato a fluid="xxl" per più controllo */}
 				<Row className="justify-content-center">
 					<Col xs={11} lg={10} xxl={9}>
-						<div className="bg-white p-3 p-md-4 rounded-4 shadow-lg"
-							style={{ transition: "all 0.3s ease" }}>
+						<div
+							className="bg-white p-3 p-md-4 rounded-4 shadow-lg"
+							style={{ transition: "all 0.3s ease" }}
+						>
 							<Row className="align-items-center g-4">
-								<Col xs={12} lg={7} className="order-2 order-lg-1 d-flex flex-column">
-									<h1 className="mb-4 fw-bold">Create Account</h1>
+								<Col
+									xs={12}
+									lg={7}
+									className="order-2 order-lg-1 d-flex flex-column"
+								>
+									<h1 className="mb-4 fw-bold">
+										Create Account
+									</h1>
 									<CompleteFormComponent />
 									<p className="text-center mb-0">
-										Already have an account?{' '}
+										Already have an account?{" "}
 										<Link
 											href="/login"
 											className="ms-1 text-decoration-none"
@@ -327,17 +348,23 @@ export default function Register() {
 												transition: "all 0.2s ease"
 											}}
 											onMouseOver={(e) => {
-												e.currentTarget.style.opacity = "0.8";
+												e.currentTarget.style.opacity =
+													"0.8";
 											}}
 											onMouseOut={(e) => {
-												e.currentTarget.style.opacity = "1";
+												e.currentTarget.style.opacity =
+													"1";
 											}}
 										>
 											Sign in
 										</Link>
 									</p>
 								</Col>
-								<Col xs={12} lg={5} className="order-1 order-lg-2 text-center mb-4 mb-lg-0">
+								<Col
+									xs={12}
+									lg={5}
+									className="order-1 order-lg-2 text-center mb-4 mb-lg-0"
+								>
 									<Image
 										src="/Sloth.png"
 										alt="Logo"
