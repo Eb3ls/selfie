@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Script from "next/script";
+import { TimeButton } from "./components/TimeButton";
+import { TimeProvider } from "./components/TimeContext";
 import { UserProvider } from "./components/UserContext";
 import "./globals.css";
 
@@ -31,7 +33,12 @@ export default function RootLayout({
 				/>
 			</head>
 			<UserProvider>
-				<body className={`${inter.className} m-0 p-0`}>{children}</body>
+				<TimeProvider>
+					<body className={`${inter.className} m-0 p-0`}>
+						{children}
+						<TimeButton />
+					</body>
+				</TimeProvider>
 			</UserProvider>
 			<Script
 				src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"

@@ -1,6 +1,6 @@
 import {
 	generateMessageResponse,
-	isISO8601,
+	generateObjectResponse,
 	isTemplateValid,
 	parseJSONInput
 } from "@/utils/api/api";
@@ -32,7 +32,7 @@ function backgroundServiceFunction() {
 	timeMachine.timeMachineTime = new Date(baseDate.getTime() + ms_diff);
 }
 
-export const GET = async (request: NextRequest) => {
+export const PATCH = async (request: NextRequest) => {
 	if (!isServiceActive) {
 		baseDate = new Date();
 		dateOfChange = new Date();
@@ -62,7 +62,7 @@ export const POST = async (request: NextRequest) => {
 	}
 
 	// Controlliamo che la data richiesta sia valida
-	if (!isISO8601(body.requestedDate)) {
+	if (isNaN(new Date(body.requestedDate).getTime())) {
 		return generateMessageResponse("Invalid format for the date", 400);
 	}
 
@@ -77,5 +77,21 @@ export const POST = async (request: NextRequest) => {
 		dateOfChange = currentDate;
 	}
 
+	backgroundServiceFunction();
+
 	return generateMessageResponse("Service time updated", 200);
+};
+
+export const GET = async (request: NextRequest) => {
+	const currentDate: Date = timeMachine.timeMachineTime;
+
+	if (currentDate === undefined) {
+		return generateMessageResponse("Service not activated", 400);
+	}
+
+	const response = {
+		time: currentDate
+	};
+
+	return generateObjectResponse(response, 200);
 };
