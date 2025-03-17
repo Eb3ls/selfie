@@ -44,7 +44,7 @@ class UsersList extends HTMLElement {
 	}
 
 	render() {
-		this.classList = "px-3";
+		this.className = "px-3";
 		if (Object.keys(this.data).length === 0) {
 			const noActivities = document.createElement("div");
 			noActivities.className = "alert alert-info text-center m-3";
