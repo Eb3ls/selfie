@@ -34,20 +34,8 @@ export default function Projects() {
 	}, []);
 
 	return (
-		<div className="d-flex flex-column vh-100">
+		<div className="d-flex flex-column vh-100 vw-100">
 			<GlobalSideBar />
-			<div className="d-flex p-3 border-bottom border-secondary">
-				<div className="col d-flex align-items-center">
-					<a className="btn text-secondary me-1 p-0" href="/projects">
-						Dashboard /
-					</a>
-					<div className="ms-1" id="mainTitle"></div>
-				</div>
-				<div className="col d-flex justify-content-end align-items-center">
-					<add-form-component></add-form-component>
-					<project-settings></project-settings>
-				</div>
-			</div>
 			<view-toggler />
 			<activity-form />
 			<phase-form />

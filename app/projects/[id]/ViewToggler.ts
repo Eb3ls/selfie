@@ -9,6 +9,7 @@ import UsersList from "./ListBody/UserList";
 import {
 	PhaseResponse,
 	ProjectResponse,
+	ROW_HEIGHT,
 	ROW_HEIGHT_PX,
 	SortedActivity,
 	SubPhaseResponse,
@@ -34,22 +35,21 @@ class ViewToggler extends HTMLElement {
 		this.projectData = await this.getData();
 		if (!this.projectData) return;
 		this.sortedActivities = this.sortActivies(this.projectData.phases);
+		this.className = "d-flex flex-column";
+		this.style.height = `calc(100vh - 82px)`;
 		this.render("GANTT");
 	}
 
 	render(viewMode: "GANTT" | "LIST") {
 		if (this.viewType === viewMode) return;
 		this.viewType = viewMode;
-		const block = document.createElement("div");
-		block.classList.add("container-fluid");
-		this.appendChild(block);
 
 		if (viewMode === "GANTT") {
-			block.innerHTML = this.getHeaderTemplate() + this.getGanntBody();
+			this.innerHTML = this.getHeaderTemplate() + this.getGanntBody();
 			this.addEventListeners();
 			this.loadData();
 		} else {
-			block.innerHTML = this.getHeaderTemplate();
+			this.innerHTML = this.getHeaderTemplate();
 			const body = this.getListBody(this.listViewType);
 			this.appendChild(body);
 			this.addEventListeners();
@@ -57,46 +57,64 @@ class ViewToggler extends HTMLElement {
 	}
 
 	getHeaderTemplate() {
-		return `
-			<div class="row border-bottom border-secondary align-items-center" style="height: ${ROW_HEIGHT_PX};">
-			<div class="col-3 d-flex align-items-center">
-				<button class="btn me-2 p-0" id="renderGantt">Gantt</button>
-				<button class="btn ms-2 p-0" id="renderList">List</button>
-			</div>
-			${
-				this.viewType === "GANTT"
-					? `
+		const headerTop = `
+			<div class="d-flex border-bottom border-secondary px-3" style="min-height: ${ROW_HEIGHT_PX};">
+				<div class="col d-flex align-items-center">
+					<a class="btn text-secondary me-1 p-0" href="/projects">
+						Dashboard /
+					</a>
+					<div class="ms-1">${this.projectData?.summary}</div>
+				</div>
+				<div class="col d-flex justify-content-end align-items-center">
+					<add-form-component></add-form-component>
+					<project-settings></project-settings>
+				</div>
+			</div>`;
+
+		const headerBottom =
+			this.viewType === "GANTT"
+				? `
 				<div class="col-9 d-flex flex-row justify-content-between">
-					<button class="btn p-0 me-2" id="leftScroll"><i class="bi bi-chevron-left"></i></button>
+					<button class="btn p-0 me-2" id="leftScroll">
+						<i class="bi bi-chevron-left"></i>
+					</button>
 					<div class="d-flex flex-column align-items-center">
 						<div class="fs-5 fw-bold" id="yearDiv"></div>
 						<div class="fs-6 fw-semibold" id="monthDiv"></div>
 					</div>
-					<button class="btn p-0 ms-2" id="rightScroll"><i class="bi bi-chevron-right"></i></button>
-				</div>
-			`
-					: `
+					<button class="btn p-0 ms-2" id="rightScroll">
+						<i class="bi bi-chevron-right"></i>
+					</button>
+				</div>`
+				: `
 				<div class="col-9 d-flex justify-content-end">
-				<button class="btn" id="userSort">Attore</button>
-				<button class="btn" id="timeSort">Temporalmente</button>
+					<button class="btn" id="userSort">Attore</button>
+					<button class="btn" id="timeSort">Temporalmente</button>
+				</div>`;
+
+		return `
+			${headerTop}
+			<div class="d-flex flex-row border-bottom border-secondary align-items-center px-3" style="min-height: ${ROW_HEIGHT_PX}">
+				<div class="col-3 d-flex align-items-center">
+					<button class="btn me-2 p-0" id="renderGantt">Gantt</button>
+					<button class="btn ms-2 p-0" id="renderList">List</button>
 				</div>
-			`
-			}
+				${headerBottom}
 			</div>
-		`;
+			`;
 	}
 
 	getGanntBody() {
 		return `
-            <div class="row">
-				<div id="listView" class="col-3 hide-scroll border-end border-secondary bg-white">
-					<div id="header" class="d-flex align-items-center" style="height: ${ROW_HEIGHT_PX};">
+            <div class="row overflow-y-auto g-0" style="min-height: calc(100% - ${ROW_HEIGHT * 2}px)">
+				<div id="listView" class="col-3 p-0 border-end border-secondary">
+					<div id="header" class="d-flex align-items-center sticky-top bg-white border-bottom border-secondary px-5" style="height: ${ROW_HEIGHT_PX};">
 						<div class="col-6">Titolo</div>
 						<div class="col-6 d-flex justify-content-center">Range</div>
 					</div>
 					<side-gantt-list/>
 				</div>
-				<div id="ganttView" class="col-9 p-0">
+				<div id="ganttView" class="col-9 p-0 d-flex flex-column">
 					<time-line></time-line>
 					<project-phase-row></project-phase-row>
 				</div>

@@ -28,7 +28,6 @@ class TimeLine extends HTMLElement {
 	}
 
 	connectedCallback() {
-		this.style.display = "flex";
 		this.resizeObserver = new ResizeObserver(() => {
 			// Renderizziamo prima phaseRowsHandler e poi il timeline perché é la timeline a fare lo scroll poi
 			this.phaseRowsHandler!.render(this.centerDate);
@@ -105,14 +104,15 @@ class TimeLine extends HTMLElement {
 		return cell;
 	}
 
-	scrollToDate(date: Date) {
+	scrollToDate(date: Date, smooth: boolean) {
 		const id = formatDate(date.toISOString());
 		const centerBlock = document.getElementById(id);
 
 		if (centerBlock) {
 			centerBlock.scrollIntoView({
-				block: "center",
-				inline: "center"
+				block: "nearest",
+				inline: "center",
+				behavior: smooth ? "smooth" : "auto"
 			});
 		} else {
 			console.error("Elemento a cui scrollare non trovato: ", id);
@@ -140,8 +140,7 @@ class TimeLine extends HTMLElement {
 			date.setDate(date.getDate() + 1);
 		}
 
-		this.style.scrollBehavior = "auto";
-		this.scrollToDate(this.centerDate);
+		this.scrollToDate(this.centerDate, false);
 		this.isScrolling = false;
 	}
 
@@ -168,8 +167,7 @@ class TimeLine extends HTMLElement {
 			this.isScrolling = true;
 			const date = new Date(this.centerDate);
 			date.setDate(date.getDate() - 3);
-			this.style.scrollBehavior = "smooth";
-			this.scrollToDate(date);
+			this.scrollToDate(date, true);
 
 			setTimeout(() => {
 				this.handleScroll(false);
@@ -182,8 +180,7 @@ class TimeLine extends HTMLElement {
 			this.isScrolling = true;
 			const date = new Date(this.centerDate);
 			date.setDate(date.getDate() + 3);
-			this.style.scrollBehavior = "smooth";
-			this.scrollToDate(date);
+			this.scrollToDate(date, true);
 
 			setTimeout(() => {
 				this.handleScroll(true);
@@ -216,7 +213,7 @@ class TimeLine extends HTMLElement {
 		this.lastDate = new Date(this.firstDate);
 		this.lastDate.setDate(this.firstDate.getDate() + cells - 1);
 
-		this.className = "overflow-hidden d-flex bg-white z-1";
+		this.className = "d-flex overflow-hidden bg-white sticky-top";
 		this.style.height = `${ROW_HEIGHT_PX}`;
 
 		this.updateMonth();
@@ -232,7 +229,7 @@ class TimeLine extends HTMLElement {
 		}
 
 		this.addEventListeners();
-		this.scrollToDate(this.centerDate);
+		this.scrollToDate(this.centerDate, false);
 	}
 }
 

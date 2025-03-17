@@ -3,6 +3,7 @@ import {
 	CELL_WIDTH_PX,
 	PhaseResponse,
 	ProjectActivityResponse,
+	ROW_HEIGHT,
 	ROW_HEIGHT_PX,
 	SubPhaseResponse,
 	calculateCells,
@@ -79,7 +80,7 @@ class ProjectPhaseRow extends HTMLElement {
 	) {
 		const phasePill = document.createElement("div");
 		phasePill.className =
-			"rounded-pill position-absolute text-white top-50 translate-middle-y d-flex align-items-center justify-content-start px-3";
+			"rounded-pill position-absolute text-white top-50 translate-middle-y d-flex align-items-center justify-content-start px-2";
 		phasePill.style.height = "70%";
 		phasePill.style.backgroundColor = color;
 
@@ -117,8 +118,8 @@ class ProjectPhaseRow extends HTMLElement {
 		}
 
 		// Togliamo 30px per non farlo iniziare dal bordo
-		phasePill.style.width = `${width - 40}px`;
-		phasePill.style.left = `${left + 20}px`;
+		phasePill.style.width = `${width - 20}px`;
+		phasePill.style.left = `${left + 10}px`;
 
 		const textElement = document.createElement("span");
 		textElement.innerText = text;
@@ -193,6 +194,21 @@ class ProjectPhaseRow extends HTMLElement {
 		// Il collapse é inserito una volta sola, non ci sono sia sottofasi che attività
 	}
 
+	calculateAdditionalRows(): number {
+		const visibleHeight = this.parentElement!.clientHeight;
+
+		let occupiedHeight = 0;
+		Array.from(this.parentElement!.children).forEach((child) => {
+			occupiedHeight += (child as HTMLElement).offsetHeight;
+		});
+
+		const freeSpace = visibleHeight - occupiedHeight;
+
+		const extraRows =
+			freeSpace > 0 ? Math.floor(freeSpace / ROW_HEIGHT) : 0;
+		return extraRows + 1;
+	}
+
 	public shiftTimeline(isRightScroll: boolean): void {
 		const offset = isRightScroll ? 3 : -3;
 		this.firstDate.setDate(this.firstDate.getDate() + offset);
@@ -216,12 +232,21 @@ class ProjectPhaseRow extends HTMLElement {
 			currentDate.getDate() - Math.floor(this.cellsNumber / 2)
 		);
 		this.lastDate.setDate(this.firstDate.getDate() + this.cellsNumber - 1);
-
 		this.innerHTML = "";
-		this.className = "d-flex flex-column overflow-hidden";
-
+		this.className = "d-flex flex-column overflow-x-hidden";
 		for (const phase of this.phasesData) {
 			this.renderPhaseRow(this, phase, "black");
+		}
+		const extraRows = this.calculateAdditionalRows();
+		for (let i = 0; i < extraRows; i++) {
+			const row = document.createElement("div");
+			row.style.height = `${ROW_HEIGHT_PX}`;
+			row.className = "d-flex position-relative";
+			this.appendChild(row);
+			for (let i = 0; i < this.cellsNumber; i++) {
+				const cell = this.createSingleCell();
+				row.appendChild(cell);
+			}
 		}
 	}
 }

@@ -90,6 +90,7 @@ class TimeList extends HTMLElement {
 
 	render() {
 		this.innerHTML = "";
+		this.classList = "px-3";
 		const innerBlock = document.createElement("div");
 		innerBlock.className = "container-fluid mt-3 px-4";
 		this.appendChild(innerBlock);

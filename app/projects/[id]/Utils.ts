@@ -4,7 +4,6 @@ const ROW_HEIGHT_PX = "70px";
 const CELL_WIDTH_PX = "200px";
 const ROW_HEIGHT = parseInt(ROW_HEIGHT_PX, 10);
 const CELL_WIDTH = parseInt(CELL_WIDTH_PX, 10);
-const COL_NUM = 25;
 
 const waiting_color = "#6c757d";
 const activable_color = "#ffc107";
@@ -290,7 +289,6 @@ export {
 	CELL_WIDTH_PX,
 	ROW_HEIGHT,
 	CELL_WIDTH,
-	COL_NUM,
 	timeFormat,
 	formatDate,
 	validateUsername,
