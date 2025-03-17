@@ -10,7 +10,9 @@ import {
 	findCollectionWrapper,
 	getCollection
 } from "@/utils/db/db";
+import fs from "fs";
 import { NextRequest } from "next/server";
+import path from "path";
 
 export const GET = async (request: NextRequest) => {
 	const validation = await validate(request, {}, false);
@@ -34,8 +36,6 @@ export const GET = async (request: NextRequest) => {
 
 		// Verifica se l'immagine esiste fisicamente
 		if (profilePic !== DEFAULT_PROFILE_PIC) {
-			const fs = require("fs");
-			const path = require("path");
 			const imagePath = path.join(process.cwd(), "public", profilePic);
 
 			if (!fs.existsSync(imagePath)) {

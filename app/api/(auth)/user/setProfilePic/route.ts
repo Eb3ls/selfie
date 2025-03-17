@@ -1,4 +1,3 @@
-// app/api/user/setProfilePic/route.ts
 import { DEFAULT_PROFILE_PIC } from "@/app/constants";
 import {
 	generateMessageResponse,
@@ -124,10 +123,4 @@ const getSession = async (cookies: any) => {
 	const session = cookies.get("session")?.value;
 	if (!session) return null;
 	return await decrypt(session);
-};
-
-export const config = {
-	api: {
-		bodyParser: false
-	}
 };

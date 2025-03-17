@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
@@ -12,9 +13,10 @@ import {
 	Spinner,
 	Stack
 } from "react-bootstrap";
-import { FaImage, FaKey, FaSave, FaTimes, FaUserEdit } from "react-icons/fa";
+import { FaImage, FaKey, FaSave, FaUserEdit } from "react-icons/fa";
 import { GlobalSideBar } from "../components/GlobalSideBar";
 import { useUser } from "../components/UserContext";
+import { DEFAULT_PROFILE_PIC } from "../constants";
 import styles from "./SettingsPage.module.css";
 
 export default function SettingsPage() {
@@ -37,6 +39,7 @@ export default function SettingsPage() {
 	const [showPasswordFields, setShowPasswordFields] = useState(false);
 	const [errorMessage, setErrorMessage] = useState("");
 	const [successMessage, setSuccessMessage] = useState("");
+	const [errorLoadImage, setErrorLoadImage] = useState<boolean>(false);
 
 	useEffect(() => {
 		const loadUserData = async () => {
@@ -179,20 +182,21 @@ export default function SettingsPage() {
 													styles.profilePicContainer
 												}
 											>
-												<img
+												<Image
 													src={
-														profilePic ||
-														"/defaults/default-profile.png"
+														errorLoadImage
+															? DEFAULT_PROFILE_PIC
+															: profilePic ||
+																DEFAULT_PROFILE_PIC
 													}
 													alt="Profile"
+													width={500}
+													height={500}
 													className={
 														styles.profilePic
 													}
-													onError={(e) =>
-														((
-															e.target as HTMLImageElement
-														).src =
-															"/defaults/default-profile.png")
+													onError={() =>
+														setErrorLoadImage(true)
 													}
 												/>
 												{isUploading && (
