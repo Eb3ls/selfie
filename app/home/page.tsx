@@ -167,9 +167,9 @@ function PreviewList({
 	return (
 		<Stack gap={3}>
 			{items &&
-				items.map((item) => (
+				items.map((item, index) => (
 					<div
-						key={item._id}
+						key={index}
 						className="d-flex justify-content-between align-items-center p-3 border rounded-4 shadow-sm"
 						style={{
 							cursor: "pointer",
@@ -289,9 +289,9 @@ function PreviewCalendar({ calendar }: { calendar: ReducedCalendar }) {
 			) : (
 				<Stack gap={2} className="ms-4">
 					{items &&
-						items.map((item) => (
+						items.map((item, index) => (
 							<div
-								key={item._id}
+								key={index}
 								className="border rounded-3 p-2"
 								style={{ backgroundColor: "#fff" }}
 							>
