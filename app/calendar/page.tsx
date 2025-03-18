@@ -8,6 +8,7 @@ import {
 } from "@/app/calendar/calendarUtils/calendarFetch";
 import { CalendarEvent } from "@/app/calendar/calendarUtils/calendarTypes";
 import { GlobalSideBar } from "@/app/components/GlobalSideBar";
+import { useTime } from "@/app/components/TimeContext";
 import moment from "moment";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -63,6 +64,7 @@ export default function CalendarPage() {
 	const [showModal, setShowModal] = useState(false);
 	const [selectedCalendarEvent, setSelectedCalendarEvent] =
 		useState<CalendarEvent | null>(null);
+	const { dateTime } = useTime();
 
 	const { data: pulledCalendar } = useSWR(
 		"/api/calendar/getCalendar",
@@ -117,23 +119,9 @@ export default function CalendarPage() {
 						startAccessor="start"
 						endAccessor="end"
 						className="custom-calendar"
+						getNow={() => dateTime}
 						components={{
-							toolbar: () => null,
-							month: {
-								dateHeader: ({ date }) => {
-									const isToday = moment(date).isSame(
-										moment(),
-										"day"
-									);
-									return (
-										<div
-											className={`date-cell ${isToday ? "today" : ""}`}
-										>
-											{moment(date).format("D")}
-										</div>
-									);
-								}
-							}
+							toolbar: () => null
 						}}
 						eventPropGetter={(event) => ({
 							className: `event-${event.typology}${event.isRecurring ? " recurring" : ""}`

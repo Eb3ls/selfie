@@ -9,12 +9,13 @@ import { Message } from "@/app/chat/mainChat/Message";
 import { SideBarHeader } from "@/app/chat/sideBar/SideBarHeader";
 import { UserItem } from "@/app/chat/sideBar/UserItem";
 import { chatBody } from "@/app/color_palette";
+import { GlobalSideBar } from "@/app/components/GlobalSideBar";
+import { useTime } from "@/app/components/TimeContext";
 // Librerie
 import { StringMessage } from "@/utils/db/db";
 import React, { useEffect, useRef, useState } from "react";
 import { ListGroup } from "react-bootstrap";
 import useSWR from "swr";
-import { GlobalSideBar } from "../components/GlobalSideBar";
 
 async function fetcher(url: string) {
 	const response = await fetch(url);
@@ -39,6 +40,8 @@ export default function ChatMain() {
 
 	const [newMessage, setNewMessage] = useState<string>(""); // Nuovo messaggio da inviare
 	const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Sidebar aperta o chiusa
+
+	const { dateTime } = useTime();
 
 	const chatEndRef = useRef<HTMLDivElement>(null); // Riferimento all'ultimo messaggio della chat
 
@@ -113,7 +116,7 @@ export default function ChatMain() {
 			const newMessageObj: StringMessage = {
 				ownerId: chatResponse?.whoAmI._id!,
 				content: newMessage,
-				sentAt: new Date().toISOString()
+				sentAt: dateTime.toISOString()
 			};
 			setCurrentMessages([...currentMessages, newMessageObj]);
 		} else {
