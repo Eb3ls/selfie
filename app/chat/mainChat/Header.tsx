@@ -1,5 +1,5 @@
 import { ChatEntry } from "@/app/chat/chatTypes";
-import { Button, Form } from "react-bootstrap";
+import { Button } from "react-bootstrap";
 import { FaArrowLeft } from "react-icons/fa";
 
 interface HeaderProps {
@@ -14,7 +14,10 @@ export function Header({
 	setIsSidebarOpen
 }: HeaderProps) {
 	return (
-		<div className="bg-dark text-white p-3 border-bottom border-black d-flex align-items-center justify-content-end">
+		<div
+			className="text-dark p-3 border-bottom d-flex align-items-center justify-content-end bg-light"
+			style={{ zIndex: 100 }}
+		>
 			<Button
 				variant="link"
 				className="d-block d-ld-none"
@@ -23,18 +26,11 @@ export function Header({
 					setSelectedChat(null);
 				}}
 			>
-				<FaArrowLeft fill="white" size={30}></FaArrowLeft>
+				<FaArrowLeft fill="black" size={28}></FaArrowLeft>
 			</Button>
-			<h2 className="text-center m-0 mx-3 fw-bold flex-grow-1">
+			<h3 className="text-center m-0 mx-3 fw-bold flex-grow-1">
 				{chatSummary}
-			</h2>
-			<Form.Control
-				type="text"
-				name="topSearchBar"
-				placeholder="Cerca..."
-				className="me-3 w-auto"
-			/>
-			<Button variant="outline-primary">Opzioni</Button>
+			</h3>
 		</div>
 	);
 }

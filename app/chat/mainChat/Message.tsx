@@ -17,7 +17,7 @@ export function Message({ msg }: { msg: MinMessage }) {
 			{!isOwn && (
 				// Posizionato in basso a sinistra
 				<div className="message-avatar d-flex align-items-end">
-					<div className="avatar-circle">
+					<div className="avatar-circle" title={msg.owner}>
 						<small>{msg.owner[0]}</small>
 					</div>
 				</div>

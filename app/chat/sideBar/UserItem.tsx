@@ -1,5 +1,5 @@
-import "@/app/chat/chat.css";
 import { DeleteModal } from "@/app/chat/sideBar/DeleteModal";
+import "@/app/chat/styles.css";
 import { Container, ListGroup } from "react-bootstrap";
 import { IoPersonCircleOutline, IoTrash } from "react-icons/io5";
 
@@ -20,12 +20,8 @@ export function UserItem({
 	return (
 		<ListGroup.Item
 			action
-			className={`fw-bold p-3 rounded-3 border-0 d-flex align-items-center bg-transparent text-white userHover position-relative`}
+			className={`fw-bold p-3 my-2 rounded-4 border d-flex align-items-center position-relative hover-shadow`}
 			onClick={entry.loader}
-			style={{
-				transition: "all 0.2s ease-in-out",
-				marginBottom: "0.5rem"
-			}}
 		>
 			<div className="position-relative">
 				<IoPersonCircleOutline
@@ -40,14 +36,14 @@ export function UserItem({
 
 			<Container className="d-flex flex-column justify-content-center m-0 overflow-hidden py-1">
 				<h5
-					className="fw-bold m-0 text-truncate mb-1"
+					className="fw-bold m-0 text-truncate mb-1 text-dark"
 					style={{ fontSize: "1.1rem" }}
 				>
 					{entry.summary}
 				</h5>
 				{entry.lastMessage && (
 					<p
-						className="m-0 text-truncate opacity-75"
+						className="m-0 text-truncate text-secondary"
 						style={{ fontSize: "0.9rem" }}
 					>
 						<span className="fw-semibold">
@@ -65,14 +61,8 @@ export function UserItem({
 				setSelectedChat={setSelectedChat}
 				className="ms-3"
 			>
-				<Container
-					className="rounded-circle p-2 delete-btn"
-					style={{
-						backgroundColor: "rgba(220, 53, 69, 0.1)",
-						transition: "all 0.2s ease"
-					}}
-				>
-					<IoTrash className="text-danger" size={20} />
+				<Container className="rounded-circle p-2 delete-btn">
+					<IoTrash className="icon text-danger" size={24} />
 				</Container>
 			</DeleteModal>
 		</ListGroup.Item>

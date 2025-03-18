@@ -1,19 +1,17 @@
 "use client";
 
 // Componenti e stili
-import "@/app/chat/chat.css";
 import { ChatEntry, ChatResponse, UserElement } from "@/app/chat/chatTypes";
 import { Footer } from "@/app/chat/mainChat/Footer";
 import { Header } from "@/app/chat/mainChat/Header";
 import { Message } from "@/app/chat/mainChat/Message";
 import { SideBarHeader } from "@/app/chat/sideBar/SideBarHeader";
 import { UserItem } from "@/app/chat/sideBar/UserItem";
-import { chatBody } from "@/app/color_palette";
 import { GlobalSideBar } from "@/app/components/GlobalSideBar";
 import { useTime } from "@/app/components/TimeContext";
 // Librerie
 import { StringMessage } from "@/utils/db/db";
-import React, { useEffect, useRef, useState } from "react";
+import React, { Fragment, useEffect, useRef, useState } from "react";
 import { ListGroup } from "react-bootstrap";
 import useSWR from "swr";
 
@@ -185,7 +183,7 @@ export default function ChatMain() {
 					className="me-4 me-lg-0 flex-grow-1 overflow-auto"
 					style={{ maxHeight: "90vh" }}
 				>
-					<ListGroup variant="flush" className="ms-1 mt-3">
+					<ListGroup className="p-3">
 						{filteredChats.length > 0 ? (
 							filteredChats.map((chat) => (
 								<UserItem
@@ -215,17 +213,48 @@ export default function ChatMain() {
 							message.ownerId,
 							chatResponse!.userList
 						)!;
-			const newSentAt = new Date(message.sentAt).toLocaleTimeString([], {
-				hour: "2-digit",
-				minute: "2-digit"
-			});
 			return {
 				_id: index++,
 				owner: newOwner,
 				content: message.content,
-				sentAt: newSentAt
+				sentAt: message.sentAt
 			};
 		});
+
+		translatedMessages.sort((a, b) => {
+			const dateA = new Date(a.sentAt);
+			const dateB = new Date(b.sentAt);
+			return dateA.getTime() - dateB.getTime();
+		});
+
+		let lastDate = "0";
+		const messageList = translatedMessages.map((message) => {
+			const messageDate = new Date(message.sentAt);
+			const messageDateFormatted = messageDate.toISOString().slice(0, 10);
+			let newDate = false;
+			if (lastDate !== messageDateFormatted) {
+				lastDate = messageDateFormatted;
+				newDate = true;
+			}
+
+			message.sentAt = new Date(message.sentAt).toLocaleTimeString([], {
+				hour: "2-digit",
+				minute: "2-digit"
+			});
+
+			if (messageDate)
+				return (
+					<Fragment key={message._id}>
+						{newDate && (
+							<div className="d-flex justify-content-center text-muted my-2">
+								{messageDate.toDateString()}
+							</div>
+						)}
+						<Message msg={message} />
+					</Fragment>
+				);
+		});
+
 		return (
 			<>
 				<Header
@@ -234,9 +263,7 @@ export default function ChatMain() {
 					setIsSidebarOpen={setIsSidebarOpen}
 				></Header>
 				<div className="flex-grow-1 overflow-auto p-3">
-					{translatedMessages.map((message) => (
-						<Message key={message._id} msg={message} />
-					))}
+					{messageList}
 					<div ref={chatEndRef}></div>
 				</div>
 				<Footer
@@ -254,7 +281,7 @@ export default function ChatMain() {
 			<div className="d-flex flex-grow-1 overflow-hidden">
 				{/* Sidebar */}
 				<div
-					className={`col-12 col-lg-3 d-flex flex-column p-0 px-2 bg-dark border-end border-black ${
+					className={`col-12 col-lg-4 col-xl-3 d-flex flex-column p-0 border-end ${
 						isSidebarOpen ? "d-block" : "d-none d-lg-block"
 					}`}
 				>
@@ -266,7 +293,6 @@ export default function ChatMain() {
 					className={`col flex-grow-1 d-flex flex-column p-0 ${
 						isSidebarOpen ? "d-none d-lg-block" : "d-block"
 					}`}
-					style={{ backgroundColor: chatBody }}
 				>
 					{selectedChat && MainChatComponent()}
 				</div>
@@ -274,5 +300,3 @@ export default function ChatMain() {
 		</div>
 	);
 }
-
-//TODO quando si restring troppo l'header fa overflow-x

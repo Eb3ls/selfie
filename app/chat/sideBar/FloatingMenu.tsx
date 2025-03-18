@@ -9,10 +9,13 @@ export function FloatingMenu() {
 	const [showOptions, setShowOptions] = useState(false);
 
 	return (
-		<div className="position-relative">
+		<div className="position-relative" style={{ zIndex: 100 }}>
 			{/* Menu con le opzioni */}
 			{showOptions && (
-				<div className="position-absolute end-0 top-100 mt-2">
+				<div
+					className="position-absolute end-0 top-100 mt-2"
+					style={{ width: "200px" }}
+				>
 					<ChatModal>
 						<Button variant="primary" className="mb-2 w-100">
 							Crea nuova chat

@@ -12,15 +12,11 @@ export function SideBarHeader({
 	setSearchTerm
 }: SideBarHeaderProps) {
 	return (
-		<div
-			className="d-flex justify-content-between p-1 mt-2"
-			style={{
-				position: "sticky",
-				top: 0,
-				zIndex: 1030
-			}}
-		>
-			<InputGroup className="me-2" style={{ flex: 1 }}>
+		<div className="d-flex justify-content-between p-3 border-bottom bg-light">
+			<InputGroup
+				className="ms-5 ps-2 me-2 ms-lg-0 ps-lg-0"
+				style={{ flex: 1 }}
+			>
 				<Form.Control
 					type="text"
 					name="searchUsersBar"
