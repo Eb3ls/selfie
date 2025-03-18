@@ -21,6 +21,7 @@ class ViewToggler extends HTMLElement {
 	listViewType: "USER" | "TIME";
 	projectData: ProjectResponse | null;
 	sortedActivities: SortedActivity[];
+	dateTime: Date | null;
 
 	constructor() {
 		super();
@@ -29,6 +30,7 @@ class ViewToggler extends HTMLElement {
 		this.listViewType = "USER";
 		this.projectData = null;
 		this.sortedActivities = [];
+		this.dateTime = null;
 	}
 
 	async connectedCallback() {
@@ -318,7 +320,8 @@ class ViewToggler extends HTMLElement {
 
 		const timeLine = document.querySelector("time-line") as TimeLine;
 		if (timeLine) {
-			timeLine.loadData(new Date());
+			// Passa la data dateTime se presente, altrimenti usa new Date()
+			timeLine.loadData(this.dateTime ? this.dateTime : new Date());
 		}
 
 		const mainTitle = document.getElementById("mainTitle");

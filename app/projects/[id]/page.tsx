@@ -1,6 +1,7 @@
 "use client";
 
 import { GlobalSideBar } from "@/app/components/GlobalSideBar";
+import { useTime } from "@/app/components/TimeContext";
 import { useEffect } from "react";
 import "./styles.css";
 
@@ -17,6 +18,8 @@ declare global {
 }
 
 export default function Projects() {
+	const { dateTime } = useTime();
+
 	// Necessario in quanto con il ssr HTMLElement non é definito => non possiamo definire i custom elements
 	useEffect(() => {
 		if (typeof window !== "undefined") {
@@ -32,6 +35,14 @@ export default function Projects() {
 			import("./ListBody/UserList");
 		}
 	}, []);
+
+	useEffect(() => {
+		// Assegna il valore di dateTime al custom element view-toggler
+		const viewToggler = document.querySelector("view-toggler") as any;
+		if (viewToggler) {
+			viewToggler.dateTime = dateTime;
+		}
+	}, [dateTime]);
 
 	return (
 		<div className="d-flex flex-column vh-100 vw-100">
