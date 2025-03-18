@@ -1,6 +1,7 @@
 "use client";
 
 import "@/app/calendar/Modal.css";
+import { useTime } from "@/app/components/TimeContext";
 import React, { useState } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
 
@@ -17,6 +18,7 @@ export function AddActivityModal({ children }: any) {
 		usernameList: [] as string[],
 		alarms: []
 	});
+	const { dateTime } = useTime();
 
 	// Aggiunta dello state per il nome utente corrente
 	const [usernameInput, setUsernameInput] = useState("");
@@ -49,7 +51,7 @@ export function AddActivityModal({ children }: any) {
 		form.due = new Date(form.due).toISOString();
 
 		// Imposta la data di inizio (dtStart) come la data di creazione (dtStamp)
-		const dtStart = new Date().toISOString();
+		const dtStart = dateTime.toISOString();
 
 		// TODO: Implementare la selezione delle attività genitore
 		form.parentActivityId = null as any;

@@ -60,11 +60,15 @@ export default function CalendarPage() {
 		"calendar"
 	);
 	const [calendarView, setCalendarView] = useState<View>("month");
-	const [currentDate, setCurrentDate] = useState(new Date());
 	const [showModal, setShowModal] = useState(false);
 	const [selectedCalendarEvent, setSelectedCalendarEvent] =
 		useState<CalendarEvent | null>(null);
 	const { dateTime } = useTime();
+	const [currentDate, setCurrentDate] = useState(dateTime);
+
+	useEffect(() => {
+		setCurrentDate(dateTime);
+	}, [dateTime]);
 
 	const { data: pulledCalendar } = useSWR(
 		"/api/calendar/getCalendar",

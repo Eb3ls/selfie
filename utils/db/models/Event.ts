@@ -1,5 +1,6 @@
 import { Alarm } from "@/utils/db/models/Alarm";
 import { ConvertToString } from "@/utils/db/models/ModelConverter";
+import { timeMachine } from "@/utils/timeMachine/timeMachine";
 import { ObjectId } from "mongodb";
 
 /*
@@ -34,9 +35,9 @@ export function createEvent({
 	description = "",
 	status = "TENTATIVE",
 	rrule = "",
-	dtStart = new Date(new Date().toISOString()),
-	dtEnd = new Date(new Date().toISOString()),
-	dtStamp = new Date(new Date().toISOString()),
+	dtStart = timeMachine.timeMachineTime,
+	dtEnd = timeMachine.timeMachineTime,
+	dtStamp = timeMachine.timeMachineTime,
 	categories = "",
 	location = "",
 	geo = "",

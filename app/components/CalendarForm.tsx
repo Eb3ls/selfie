@@ -1,5 +1,6 @@
 "use client";
 
+import { timeMachine } from "@/utils/timeMachine/timeMachine";
 import React from "react";
 import { FormEvent } from "react";
 
@@ -16,9 +17,9 @@ async function onSubmit(event: FormEvent<HTMLFormElement>) {
 		description: "Test",
 		status: 0,
 		rrule: "Test",
-		dtStart: new Date(),
-		dtEnd: new Date(),
-		dtStamp: new Date(),
+		dtStart: timeMachine.timeMachineTime,
+		dtEnd: timeMachine.timeMachineTime,
+		dtStamp: timeMachine.timeMachineTime,
 		categories: [],
 		location: "Test",
 		geo: "Test",

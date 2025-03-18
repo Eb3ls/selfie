@@ -1,5 +1,6 @@
 import { Message } from "@/utils/db/models/Message";
 import { ConvertToString } from "@/utils/db/models/ModelConverter";
+import { timeMachine } from "@/utils/timeMachine/timeMachine";
 import { ObjectId } from "mongodb";
 
 /*
@@ -18,7 +19,7 @@ export type StringChat = ConvertToString<Chat>;
 
 export function createChat({
 	userIdList = [new ObjectId(), new ObjectId()],
-	createdAt = new Date(new Date().toISOString()),
+	createdAt = timeMachine.timeMachineTime,
 	lastMessageAt = null,
 	messages = []
 }: Partial<Chat>): Chat {

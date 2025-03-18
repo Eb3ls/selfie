@@ -18,6 +18,7 @@ import {
 	getCollection,
 	updateCollectionWrapper
 } from "@/utils/db/db";
+import { timeMachine } from "@/utils/timeMachine/timeMachine";
 import { Collection } from "mongodb";
 import { NextRequest } from "next/server";
 import { rrulestr } from "rrule";
@@ -205,8 +206,8 @@ export const POST = async (request: NextRequest) => {
 			dtstart: new Date(session.dtStart)
 		});
 
-		// TODO: Utilizzare data da TimeMachine
-		const timeNow = new Date();
+		// Prendiamo il tempo attuale dalla time machine
+		const timeNow = timeMachine.timeMachineTime;
 
 		// Durata della sessione
 		const duration =
@@ -236,7 +237,7 @@ export const POST = async (request: NextRequest) => {
 			rrule: session.rrule,
 			dtStart: nextOccurrence.toISOString(),
 			dtEnd: new Date(nextOccurrence.getTime() + duration).toISOString(),
-			dtStamp: new Date().toISOString(),
+			dtStamp: timeNow.toISOString(),
 			settingsList: [lastSetting],
 			completedCycles: []
 		};

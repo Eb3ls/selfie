@@ -1,4 +1,5 @@
 import { ConvertToString } from "@/utils/db/models/ModelConverter";
+import { timeMachine } from "@/utils/timeMachine/timeMachine";
 import { ObjectId } from "mongodb";
 
 /*
@@ -31,8 +32,8 @@ export function createNote({
 	text = "",
 	length = 0,
 	access = "PRIVATE",
-	dtStamp = new Date(new Date().toISOString()),
-	dtModified = new Date(new Date().toISOString()),
+	dtStamp = timeMachine.timeMachineTime,
+	dtModified = timeMachine.timeMachineTime,
 	userIdList = [],
 	activityIdList = []
 }: Partial<Note>): Note {

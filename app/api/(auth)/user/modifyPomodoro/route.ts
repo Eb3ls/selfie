@@ -10,6 +10,7 @@ import {
 	getCollection,
 	updateCollectionWrapper
 } from "@/utils/db/db";
+import { timeMachine } from "@/utils/timeMachine/timeMachine";
 import { Collection } from "mongodb";
 import { NextRequest } from "next/server";
 
@@ -53,7 +54,8 @@ export const PATCH = async (request: NextRequest) => {
 		{
 			$set: {
 				pomodoro: {
-					modificationDate: new Date().toDateString(),
+					modificationDate:
+						timeMachine.timeMachineTime.toDateString(),
 					cycles: newBody.cycles,
 					studyTime: newBody.studyTime,
 					breakTime: newBody.breakTime

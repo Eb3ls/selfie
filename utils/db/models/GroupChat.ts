@@ -1,5 +1,6 @@
 import { Message } from "@/utils/db/models/Message";
 import { ConvertToString } from "@/utils/db/models/ModelConverter";
+import { timeMachine } from "@/utils/timeMachine/timeMachine";
 import { ObjectId } from "mongodb";
 
 /*
@@ -22,8 +23,8 @@ export function createGroupChat({
 	summary = "",
 	ownerId = new ObjectId(),
 	userIdList = [],
-	createdAt = new Date(new Date().toISOString()),
-	lastMessageAt = new Date(new Date().toISOString()),
+	createdAt = timeMachine.timeMachineTime,
+	lastMessageAt = timeMachine.timeMachineTime,
 	messages = []
 }: Partial<GroupChat>): GroupChat {
 	return {

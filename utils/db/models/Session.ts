@@ -1,5 +1,6 @@
 import { ConvertToString } from "@/utils/db/models/ModelConverter";
 import { StringDayInstance, StringPomodoroSettings } from "@/utils/db/models/Pomodoro";
+import { timeMachine } from "@/utils/timeMachine/timeMachine";
 import { ObjectId } from "mongodb";
 
 /*
@@ -28,9 +29,9 @@ export function createSession({
 	description = "",
 	status = "",
 	rrule = "",
-	dtStart = new Date(new Date().toISOString()),
-	dtEnd = new Date(new Date().toISOString()),
-	dtStamp = new Date(new Date().toISOString()),
+	dtStart = timeMachine.timeMachineTime,
+	dtEnd = timeMachine.timeMachineTime,
+	dtStamp = timeMachine.timeMachineTime,
 	settingsList = [],
 	completedCycles = []
 }: Partial<Session>): Session {

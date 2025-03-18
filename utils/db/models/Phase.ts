@@ -1,4 +1,5 @@
 import { ConvertToString } from "@/utils/db/models/ModelConverter";
+import { timeMachine } from "@/utils/timeMachine/timeMachine";
 import { ObjectId } from "mongodb";
 
 /*
@@ -22,8 +23,8 @@ export function createPhase({
 	ownerId = new ObjectId(),
 	projectId = new ObjectId(),
 	parentId = new ObjectId(),
-	dtStart = new Date(new Date().toISOString()),
-	due = new Date(new Date().toISOString())
+	dtStart = timeMachine.timeMachineTime,
+	due = timeMachine.timeMachineTime,
 }: Partial<Phase>): Phase {
 	return {
 		summary: summary,

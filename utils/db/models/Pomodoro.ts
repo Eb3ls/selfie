@@ -1,4 +1,5 @@
 import { ConvertToString } from "@/utils/db/models/ModelConverter";
+import { timeMachine } from "@/utils/timeMachine/timeMachine";
 
 /*
 NO COLLECTION
@@ -21,7 +22,7 @@ export interface DayInstance {
 export type StringDayInstance = ConvertToString<DayInstance>;
 
 export function createPomodoroSettings({
-	modificationDate = new Date(new Date().toISOString()),
+	modificationDate = timeMachine.timeMachineTime,
 	cycles = 4,
 	studyTime = 25,
 	breakTime = 5
@@ -35,7 +36,7 @@ export function createPomodoroSettings({
 }
 
 export function createDayInstance({
-	date = new Date(new Date().toISOString()),
+	date = timeMachine.timeMachineTime,
 	cycles = 0
 }: Partial<DayInstance>): DayInstance {
 	return {

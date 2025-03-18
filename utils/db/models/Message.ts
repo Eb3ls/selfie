@@ -1,4 +1,5 @@
 import { ConvertToString } from "@/utils/db/models/ModelConverter";
+import { timeMachine } from "@/utils/timeMachine/timeMachine";
 import { ObjectId } from "mongodb";
 
 /*
@@ -17,7 +18,7 @@ export type StringMessage = ConvertToString<Message>;
 export function createMessage({
 	ownerId = new ObjectId(),
 	content = "",
-	sentAt = new Date()
+	sentAt = timeMachine.timeMachineTime
 }: Partial<Message>): Message {
 	return {
 		ownerId: ownerId,

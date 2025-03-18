@@ -23,6 +23,7 @@ import {
 	findCollectionWrapper,
 	getCollection
 } from "@/utils/db/db";
+import { timeMachine } from "@/utils/timeMachine/timeMachine";
 import { Collection } from "mongodb";
 import { NextRequest } from "next/server";
 import { rrulestr } from "rrule";
@@ -262,7 +263,7 @@ export const GET = async (request: NextRequest) => {
 	// - Eventi: se hanno rrule, estrai le occorrenze (altrimenti usa dtStart)
 	// - Attività: usa il campo "due"
 	// - Sessioni: usa le occorrenze dalla rrule (che è obbligatoria)
-	const now = new Date();
+	const now = timeMachine.timeMachineTime;
 	const futureLimit = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000); // ad es. 1 anno in avanti
 
 	// Array per raccogliere tutte le occorrenze
