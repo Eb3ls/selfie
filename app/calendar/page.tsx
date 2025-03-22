@@ -66,10 +66,6 @@ export default function CalendarPage() {
 	const { dateTime } = useTime();
 	const [currentDate, setCurrentDate] = useState(dateTime);
 
-	useEffect(() => {
-		setCurrentDate(dateTime);
-	}, [dateTime]);
-
 	const { data: pulledCalendar } = useSWR(
 		"/api/calendar/getCalendar",
 		fetchCalendar
