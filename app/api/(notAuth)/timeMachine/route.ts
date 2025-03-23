@@ -4,6 +4,7 @@ import {
 	isTemplateValid,
 	parseJSONInput
 } from "@/utils/api/api";
+import { notifyAll } from "@/utils/timeMachine/getFromDB";
 import { timeMachine } from "@/utils/timeMachine/timeMachine";
 import { NextRequest } from "next/server";
 
@@ -24,12 +25,16 @@ function backgroundServiceFunction() {
 	// Calcoliamo quanto tempo è passato dall'ultima richiesta di cambio della data ad ora
 	const ms_diff: number = new Date().getTime() - dateOfChange.getTime();
 
-	console.log(
-		"Data attuale:",
-		new Date(baseDate.getTime() + ms_diff).toString()
-	);
+	const new_time = new Date(baseDate.getTime() + ms_diff);
 
-	timeMachine.timeMachineTime = new Date(baseDate.getTime() + ms_diff);
+	console.log("Data attuale:", new_time.toString());
+
+	timeMachine.timeMachineTime = new_time;
+
+	// Dobbiamo verificare nel database se ci sono eventi che iniziano in questo momento
+	// e notificare gli utenti interessati.
+	// Non facciamo await qui, perché non ci interessa aspettare che la funzione finisca.
+	notifyAll(new_time);
 }
 
 export const PATCH = async (request: NextRequest) => {
