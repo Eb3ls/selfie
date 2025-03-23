@@ -25,7 +25,17 @@ export interface User {
 			p256dh: "",
 			auth: ""
 		}
-	}[]	// Lista di subscription per le notifiche
+	}[];	// Lista di subscription per le notifiche
+	previews:{
+		calendar:{
+			activity: boolean;			// Se l'utente vuole vedere le attività
+			event: boolean;				// Se l'utente vuole vedere gli eventi
+			session: boolean;			// Se l'utente vuole vedere le sessioni
+			projectActivity: boolean;	// Se l'utente vuole vedere le attività dei progetti
+		}
+		maxChats: number;				// Numero massimo di chat
+		maxNotes: number;				// Numero massimo di note
+	}
 }
 
 export type StringUser = ConvertToString<User>;
@@ -41,7 +51,17 @@ export function createUser({
 	profilePic = "/images/?.png",
 	isResource = false,
 	pomodoro = createPomodoroSettings({}),
-	subscriptionList = []
+	subscriptionList = [],
+	previews = {
+		calendar: {
+			activity: true,
+			event: true,
+			session: true,
+			projectActivity: true
+		},
+		maxChats: 10,
+		maxNotes: 10
+	}
 }: Partial<User>): User {
 	return {
 		username: username,
@@ -54,6 +74,7 @@ export function createUser({
 		profilePic: profilePic,
 		isResource: isResource,
 		pomodoro: pomodoro,
-		subscriptionList: subscriptionList
+		subscriptionList: subscriptionList,
+		previews: previews
 	};
 }

@@ -16,10 +16,14 @@ import {
 	GroupChat,
 	NOTE_COLLECTION,
 	Note,
+	PROJECT_ACTIVITY_COLLECTION,
 	PROJECT_COLLECTION,
 	Project,
+	ProjectActivity,
 	SESSION_COLLECTION,
 	Session,
+	USER_COLLECTION,
+	User,
 	findCollectionWrapper,
 	getCollection
 } from "@/utils/db/db";
@@ -63,6 +67,14 @@ interface ReducedActivity {
 	ownerName: string;
 }
 
+interface ReducedProjectActivity {
+	_id: string;
+	summary: string;
+	description: string;
+	data: string; // in formato ISO
+	ownerName: string;
+}
+
 interface ReducedEvent {
 	_id: string;
 	summary: string;
@@ -81,6 +93,7 @@ interface ReducedSession {
 
 interface ReducedCalendar {
 	activities: ReducedActivity[];
+	projectActivities: ReducedProjectActivity[];
 	events: ReducedEvent[];
 	sessions: ReducedSession[];
 }
@@ -109,6 +122,22 @@ export const GET = async (request: NextRequest) => {
 
 	const { user } = validation;
 
+	// Prendo l'utente dal db
+	const userClient: Collection<User> =
+		await getCollection<User>(USER_COLLECTION);
+	const userOut = await findCollectionWrapper<User>(
+		{ _id: user._id } as any,
+		userClient
+	);
+	if (userOut.status !== 200) {
+		return userOut;
+	}
+	if (!userOut.body) {
+		return generateMessageResponse("No data found", 404);
+	}
+
+	const previews = (await userOut.json())[0].previews;
+
 	// ======================
 	// Preview delle NOTE
 	// ======================
@@ -125,12 +154,24 @@ export const GET = async (request: NextRequest) => {
 		return generateMessageResponse("No data found", 404);
 	}
 	const notes = await noteOut.json();
-	const reducedNotes: ReducedNote[] = notes.map((note: any) => ({
+	// Ordina le note dalla più recente alla più vecchia
+	const sortedNotes = notes.sort(
+		(a: Note, b: Note) =>
+			new Date(b.dtModified).getTime() - new Date(a.dtModified).getTime()
+	);
+
+	// Applica il limite delle preview
+	const limitedNotes = sortedNotes.slice(0, previews.maxNotes);
+
+	// Mappa alla struttura ReducedNote
+	const reducedNotes: ReducedNote[] = limitedNotes.map((note: Note) => ({
 		_id: note._id,
 		summary: note.summary,
 		categories: note.categories,
 		dtModified: note.dtModified
 	}));
+
+	console.log("reducedNotes", reducedNotes);
 
 	// ======================
 	// Preview dei PROGETTI
@@ -255,19 +296,31 @@ export const GET = async (request: NextRequest) => {
 		}
 	}
 
+	// Ordina le chat per lastMessageAt dalla più recente alla più vecchia
+	reducedChats = reducedChats.sort(
+		(a, b) =>
+			new Date(b.lastMessageAt).getTime() -
+			new Date(a.lastMessageAt).getTime()
+	);
+
+	// Riduci il numero di chat a maxChats
+	reducedChats = reducedChats.slice(0, previews.maxChats);
+
 	// ======================
 	// Preview del CALENDARIO
 	// ======================
-	// Obiettivo: spedire 7 occorrenze (eventi, attività, sessioni) ordinate per data.
+	// Obiettivo: spedire 10 occorrenze (eventi, attività, sessioni, projectActivity) ordinate per data.
 	// Per:
 	// - Eventi: se hanno rrule, estrai le occorrenze (altrimenti usa dtStart)
 	// - Attività: usa il campo "due"
 	// - Sessioni: usa le occorrenze dalla rrule (che è obbligatoria)
+	// - ProjectActivity: usa il campo due
+	// Scegli se mettere o no ogni evento (in senso generico) in base alle impostazioni dell'utente
 	const now = timeMachine.timeMachineTime;
 	const futureLimit = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000); // ad es. 1 anno in avanti
 
 	// Array per raccogliere tutte le occorrenze
-	type OccurrenceType = "event" | "activity" | "session";
+	type OccurrenceType = "event" | "activity" | "session" | "projectActivity";
 	interface Occurrence {
 		type: OccurrenceType;
 		occurrenceDate: Date;
@@ -279,117 +332,155 @@ export const GET = async (request: NextRequest) => {
 	let calendarOccurrences: Occurrence[] = [];
 
 	// --- Attività ---
-	const activityClient: Collection<Activity> =
-		await getCollection<Activity>(ACTIVITY_COLLECTION);
-	const activityOut = await findCollectionWrapper<Activity>(
-		{ userIdList: { $in: [user._id] } } as any,
-		activityClient
-	);
-	let activities: Activity[] = [];
-	if (activityOut.status === 200 && activityOut.body) {
-		activities = await activityOut.json();
-	}
-	for (const act of activities) {
-		try {
-			const ownerName = await getNameFromId(act.ownerId.toString());
-			const due = new Date(act.due);
-			if (due >= now) {
-				calendarOccurrences.push({
-					type: "activity",
-					occurrenceDate: due,
-					_id: act._id?.toString()!,
-					summary: act.summary,
-					description: act.description,
-					ownerName
-				});
+	if (previews.calendar.activity) {
+		const activityClient: Collection<Activity> =
+			await getCollection<Activity>(ACTIVITY_COLLECTION);
+		const activityOut = await findCollectionWrapper<Activity>(
+			{ userIdList: { $in: [user._id] } } as any,
+			activityClient
+		);
+		let activities: Activity[] = [];
+		if (activityOut.status === 200 && activityOut.body) {
+			activities = await activityOut.json();
+		}
+		for (const act of activities) {
+			try {
+				const ownerName = await getNameFromId(act.ownerId.toString());
+				const due = new Date(act.due);
+				if (due >= now) {
+					calendarOccurrences.push({
+						type: "activity",
+						occurrenceDate: due,
+						_id: act._id?.toString()!,
+						summary: act.summary,
+						description: act.description,
+						ownerName
+					});
+				}
+			} catch (e) {
+				console.error("Error processing activity", e);
 			}
-		} catch (e) {
-			console.error("Error processing activity", e);
+		}
+	}
+
+	// --- ProjectActivity ---
+	if (previews.calendar.projectActivity) {
+		const projectActivityClient: Collection<ProjectActivity> =
+			await getCollection<ProjectActivity>(PROJECT_ACTIVITY_COLLECTION);
+		const projectActivityOut = await findCollectionWrapper<ProjectActivity>(
+			{ userIdList: { $in: [user._id] } } as any,
+			projectActivityClient
+		);
+		let projectActivities: ProjectActivity[] = [];
+		if (projectActivityOut.status === 200 && projectActivityOut.body) {
+			projectActivities = await projectActivityOut.json();
+		}
+		for (const pa of projectActivities) {
+			try {
+				const ownerName = await getNameFromId(pa.ownerId.toString());
+				const due = new Date(pa.due);
+				if (due >= now) {
+					calendarOccurrences.push({
+						type: "projectActivity",
+						occurrenceDate: due,
+						_id: pa._id?.toString()!,
+						summary: pa.summary,
+						description: pa.description,
+						ownerName
+					});
+				}
+			} catch (e) {
+				console.error("Error processing project activity", e);
+			}
 		}
 	}
 
 	// --- Eventi ---
-	const eventClient: Collection<Event> =
-		await getCollection<Event>(EVENT_COLLECTION);
-	const eventOut = await findCollectionWrapper<Event>(
-		{ userIdList: { $in: [user._id] } } as any,
-		eventClient
-	);
-	let events: Event[] = [];
-	if (eventOut.status === 200 && eventOut.body) {
-		events = await eventOut.json();
+	if (previews.calendar.event) {
+		const eventClient: Collection<Event> =
+			await getCollection<Event>(EVENT_COLLECTION);
+		const eventOut = await findCollectionWrapper<Event>(
+			{ userIdList: { $in: [user._id] } } as any,
+			eventClient
+		);
+		let events: Event[] = [];
+		if (eventOut.status === 200 && eventOut.body) {
+			events = await eventOut.json();
+		}
+		for (const ev of events) {
+			try {
+				const ownerName = await getNameFromId(ev.ownerId.toString());
+				if (ev.rrule && ev.rrule.trim() !== "") {
+					// Evento ricorrente: estraiamo le occorrenze a partire da "now"
+					const rule = rrulestr(ev.rrule, {
+						dtstart: new Date(ev.dtStart),
+						forceset: true
+					});
+					const dates = rule.between(now, futureLimit, true);
+					for (const d of dates) {
+						calendarOccurrences.push({
+							type: "event",
+							occurrenceDate: d,
+							_id: ev._id?.toString()!,
+							summary: ev.summary,
+							description: ev.description,
+							ownerName
+						});
+					}
+				} else {
+					// Evento non ricorrente: usa dtStart
+					const dtStart = new Date(ev.dtStart);
+					if (dtStart >= now) {
+						calendarOccurrences.push({
+							type: "event",
+							occurrenceDate: dtStart,
+							_id: ev._id?.toString()!,
+							summary: ev.summary,
+							description: ev.description,
+							ownerName
+						});
+					}
+				}
+			} catch (e) {
+				console.error("Error processing event", e);
+			}
+		}
 	}
-	for (const ev of events) {
-		try {
-			const ownerName = await getNameFromId(ev.ownerId.toString());
-			if (ev.rrule && ev.rrule.trim() !== "") {
-				// Evento ricorrente: estraiamo le occorrenze a partire da "now"
-				const rule = rrulestr(ev.rrule, {
-					dtstart: new Date(ev.dtStart),
+
+	// --- Sessioni ---
+	if (previews.calendar.session) {
+		const sessionClient: Collection<Session> =
+			await getCollection<Session>(SESSION_COLLECTION);
+		const sessionOut = await findCollectionWrapper<Session>(
+			{ userIdList: { $in: [user._id] } } as any,
+			sessionClient
+		);
+		let sessions: Session[] = [];
+		if (sessionOut.status === 200 && sessionOut.body) {
+			sessions = await sessionOut.json();
+		}
+		for (const sess of sessions) {
+			try {
+				const ownerName = await getNameFromId(sess.ownerId.toString());
+				// Le sessioni hanno obbligatoria la rrule
+				const rule = rrulestr(sess.rrule, {
+					dtstart: new Date(sess.dtStart),
 					forceset: true
 				});
 				const dates = rule.between(now, futureLimit, true);
 				for (const d of dates) {
 					calendarOccurrences.push({
-						type: "event",
+						type: "session",
 						occurrenceDate: d,
-						_id: ev._id?.toString()!,
-						summary: ev.summary,
-						description: ev.description,
+						_id: sess._id?.toString()!,
+						summary: sess.summary,
+						description: sess.description,
 						ownerName
 					});
 				}
-			} else {
-				// Evento non ricorrente: usa dtStart
-				const dtStart = new Date(ev.dtStart);
-				if (dtStart >= now) {
-					calendarOccurrences.push({
-						type: "event",
-						occurrenceDate: dtStart,
-						_id: ev._id?.toString()!,
-						summary: ev.summary,
-						description: ev.description,
-						ownerName
-					});
-				}
+			} catch (e) {
+				console.error("Error processing session", e);
 			}
-		} catch (e) {
-			console.error("Error processing event", e);
-		}
-	}
-
-	// --- Sessioni ---
-	const sessionClient: Collection<Session> =
-		await getCollection<Session>(SESSION_COLLECTION);
-	const sessionOut = await findCollectionWrapper<Session>(
-		{ userIdList: { $in: [user._id] } } as any,
-		sessionClient
-	);
-	let sessions: Session[] = [];
-	if (sessionOut.status === 200 && sessionOut.body) {
-		sessions = await sessionOut.json();
-	}
-	for (const sess of sessions) {
-		try {
-			const ownerName = await getNameFromId(sess.ownerId.toString());
-			// Le sessioni hanno obbligatoria la rrule
-			const rule = rrulestr(sess.rrule, {
-				dtstart: new Date(sess.dtStart),
-				forceset: true
-			});
-			const dates = rule.between(now, futureLimit, true);
-			for (const d of dates) {
-				calendarOccurrences.push({
-					type: "session",
-					occurrenceDate: d,
-					_id: sess._id?.toString()!,
-					summary: sess.summary,
-					description: sess.description,
-					ownerName
-				});
-			}
-		} catch (e) {
-			console.error("Error processing session", e);
 		}
 	}
 
@@ -398,10 +489,11 @@ export const GET = async (request: NextRequest) => {
 		(a, b) => a.occurrenceDate.getTime() - b.occurrenceDate.getTime()
 	);
 
-	// Prendi le prime 7 occorrenze
-	const nextSeven = calendarOccurrences.slice(0, 7);
+	// Prendi le prime 10 occorrenze
+	const nextSeven = calendarOccurrences.slice(0, 10);
 
 	// Distribuisci le occorrenze nei rispettivi array in base al tipo
+	let reducedProjectsActivities: ReducedProjectActivity[] = [];
 	let reducedActivities: ReducedActivity[] = [];
 	let reducedEvents: ReducedEvent[] = [];
 	let reducedSessions: ReducedSession[] = [];
@@ -416,6 +508,10 @@ export const GET = async (request: NextRequest) => {
 		};
 		if (occ.type === "activity") {
 			reducedActivities.push(reducedItem as ReducedActivity);
+		} else if (occ.type === "projectActivity") {
+			reducedProjectsActivities.push(
+				reducedItem as ReducedProjectActivity
+			);
 		} else if (occ.type === "event") {
 			reducedEvents.push(reducedItem as ReducedEvent);
 		} else if (occ.type === "session") {
@@ -425,6 +521,7 @@ export const GET = async (request: NextRequest) => {
 
 	const reducedCalendar: ReducedCalendar = {
 		activities: reducedActivities,
+		projectActivities: reducedProjectsActivities,
 		events: reducedEvents,
 		sessions: reducedSessions
 	};

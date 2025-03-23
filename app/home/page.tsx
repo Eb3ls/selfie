@@ -53,6 +53,14 @@ interface ReducedActivity {
 	ownerName: string;
 }
 
+interface ReducedProjectActivity {
+	_id: string;
+	summary: string;
+	description: string;
+	data: string; // formato ISO
+	ownerName: string;
+}
+
 interface ReducedEvent {
 	_id: string;
 	summary: string;
@@ -71,6 +79,7 @@ interface ReducedSession {
 
 interface ReducedCalendar {
 	activities: ReducedActivity[];
+	projectActivities: ReducedProjectActivity[];
 	events: ReducedEvent[];
 	sessions: ReducedSession[];
 }
@@ -275,7 +284,12 @@ function PreviewCalendar({ calendar }: { calendar: ReducedCalendar }) {
 	// Funzione per generare il layout degli elementi con badge colorati
 	const renderItems = (
 		title: string,
-		items: (ReducedActivity | ReducedEvent | ReducedSession)[],
+		items: (
+			| ReducedActivity
+			| ReducedEvent
+			| ReducedSession
+			| ReducedProjectActivity
+		)[],
 		badgeColor: string
 	) => (
 		<div className="mb-3">
@@ -285,7 +299,9 @@ function PreviewCalendar({ calendar }: { calendar: ReducedCalendar }) {
 				</Badge>
 			</h6>
 			{items && items.length === 0 ? (
-				<p className="text-muted ms-4">Nessun {title.toLowerCase()}</p>
+				<p className="text-muted ms-4">
+					Nessun {title.toLowerCase()} imminente
+				</p>
 			) : (
 				<Stack gap={2} className="ms-4">
 					{items &&
@@ -328,6 +344,11 @@ function PreviewCalendar({ calendar }: { calendar: ReducedCalendar }) {
 				calendar && calendar.sessions,
 				"success"
 			)}
+			{renderItems(
+				"Attività Progetti",
+				calendar && calendar.projectActivities,
+				"info"
+			)}
 		</div>
 	);
 }
@@ -367,15 +388,6 @@ function PreviewPomodoro({
 					<h6 className="mb-0 fw-bold">Tempo di pausa</h6>
 					<small className="text-muted">
 						{pomodoro.breakTime} minuti
-					</small>
-				</div>
-			</div>
-			<div className="d-flex align-items-center">
-				<FaRegClock className="text-secondary me-2" size={20} />
-				<div>
-					<h6 className="mb-0 fw-bold">Ultima modifica</h6>
-					<small className="text-muted">
-						{formatDate(pomodoro.modificationDate)}
 					</small>
 				</div>
 			</div>
