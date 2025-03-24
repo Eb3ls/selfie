@@ -1,23 +1,32 @@
 import ModifyActivity from "../Forms/ActivityForm";
 import {
-	PhaseResponse,
 	ProjectActivityResponse,
 	SortedActivity,
-	SubPhaseResponse,
+	User,
 	createStatusIcon,
 	formatDate
 } from "../Utils";
 
 class TimeList extends HTMLElement {
 	sortedActivities: SortedActivity[];
+	currentUser: User | null;
+	isOwner: boolean;
 
 	constructor() {
 		super();
 		this.sortedActivities = [];
+		this.currentUser = null;
+		this.isOwner = false;
 	}
 
-	loadProjectData(sortedActivities: SortedActivity[]) {
+	loadProjectData(
+		sortedActivities: SortedActivity[],
+		currentUser: User,
+		isOwner: boolean
+	) {
 		if (!sortedActivities) return;
+		this.currentUser = currentUser;
+		this.isOwner = isOwner;
 
 		// Se siamo nella view a lista per utente passiamo direttamente le activities
 		this.sortedActivities = sortedActivities;
@@ -78,7 +87,15 @@ class TimeList extends HTMLElement {
 		statusCol.className = "col-3";
 
 		// Creiamo il blocco per lo status
-		const statusBlock = createStatusIcon(act.status as any, act._id);
+		const hasPermission = act.users.some(
+			(user: User) => user.id === this.currentUser?.id
+		);
+		const statusBlock = createStatusIcon(
+			act.status as any,
+			act._id,
+			hasPermission,
+			this.isOwner
+		);
 		statusCol.appendChild(statusBlock);
 		statusCol.appendChild(document.createTextNode(act.status));
 

@@ -28,6 +28,7 @@ class ViewToggler extends HTMLElement {
 	ganttPositionY: number;
 	dateTime: Date | null;
 	currentUser: User | null;
+	isOwner: boolean;
 
 	constructor() {
 		super();
@@ -40,11 +41,13 @@ class ViewToggler extends HTMLElement {
 		this.ganttPositionY = 0;
 		this.dateTime = null;
 		this.currentUser = null;
+		this.isOwner = false;
 	}
 
 	async connectedCallback() {
 		this.projectData = await this.getData();
 		if (!this.projectData) return;
+		this.isOwner = this.currentUser?.id === this.projectData?.users[0].id;
 		this.sortActivies();
 		this.populateOpenToggleList();
 
@@ -88,7 +91,6 @@ class ViewToggler extends HTMLElement {
 	}
 
 	private insertUpperHeader(): void {
-		const isOwner = this.currentUser?.id === this.projectData?.users[0].id;
 		const wrapper = document.createElement("div");
 		wrapper.className = "d-flex border-bottom border-secondary px-3";
 		wrapper.style.minHeight = ROW_HEIGHT_PX;
@@ -100,7 +102,7 @@ class ViewToggler extends HTMLElement {
 					<div class="ms-1">${this.projectData!.summary}</div>
 				</div>
 				<div class="col d-flex justify-content-end align-items-center">
-					${isOwner ? `<add-form-component></add-form-component> ` : ""}
+					${this.isOwner ? `<add-form-component></add-form-component> ` : ""}
 					<project-settings></project-settings>
 				</div>
 			</div>
@@ -110,7 +112,7 @@ class ViewToggler extends HTMLElement {
 
 		if (!this.projectData) return;
 
-		if (isOwner) {
+		if (this.isOwner) {
 			const addForm = this.querySelector("add-form-component") as AddForm;
 			addForm.loadProjectData(
 				this.projectData._id,
@@ -120,7 +122,7 @@ class ViewToggler extends HTMLElement {
 		}
 
 		const phaseForm = document.querySelector("phase-form") as PhaseForm;
-		phaseForm.isOwner = isOwner;
+		phaseForm.isOwner = this.isOwner;
 
 		const projectSettings = this.querySelector(
 			"project-settings"
@@ -139,7 +141,7 @@ class ViewToggler extends HTMLElement {
 			activityForm.loadProjectData(
 				this.sortedActivities,
 				this.projectData.users,
-				isOwner
+				this.isOwner
 			);
 		}
 	}
@@ -212,8 +214,8 @@ class ViewToggler extends HTMLElement {
 		sideGanttList.loadProjectData(
 			this.projectData.phases,
 			this.openToggleList,
-			this.currentUser || this.projectData.users[0],
-			this.currentUser?.id === this.projectData.users[0].id
+			this.currentUser!,
+			this.isOwner
 		);
 
 		const projectPhaseRow = this.querySelector(
@@ -239,11 +241,19 @@ class ViewToggler extends HTMLElement {
 
 		if (this.listViewType === "USER") {
 			const listBlock = document.createElement("users-list") as UsersList;
-			listBlock.loadProjectData(this.projectData!.phases);
+			listBlock.loadProjectData(
+				this.projectData!.phases,
+				this.currentUser!,
+				this.isOwner
+			);
 			container.appendChild(listBlock);
 		} else {
 			const listBlock = document.createElement("time-list") as TimeList;
-			listBlock.loadProjectData(this.sortedActivities);
+			listBlock.loadProjectData(
+				this.sortedActivities,
+				this.currentUser!,
+				this.isOwner
+			);
 			container.appendChild(listBlock);
 		}
 

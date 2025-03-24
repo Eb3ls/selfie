@@ -1,4 +1,9 @@
-import { PhaseResponse, SortedActivity, SubPhaseResponse } from "../Utils";
+import {
+	PhaseResponse,
+	SortedActivity,
+	SubPhaseResponse,
+	User
+} from "../Utils";
 import TimeList from "./TimeList";
 
 class UsersList extends HTMLElement {
@@ -43,7 +48,7 @@ class UsersList extends HTMLElement {
 		return userData;
 	}
 
-	render() {
+	render(currentUser: User, isOwner: boolean) {
 		this.className = "px-3";
 		if (Object.keys(this.data).length === 0) {
 			const noActivities = document.createElement("div");
@@ -87,7 +92,11 @@ class UsersList extends HTMLElement {
 			const userActivitiesBlock = document.createElement(
 				"time-list"
 			) as TimeList;
-			userActivitiesBlock.loadProjectData(this.data[user]);
+			userActivitiesBlock.loadProjectData(
+				this.data[user],
+				currentUser,
+				isOwner
+			);
 			userActivitiesBlock.id = `collapse${user}`;
 			userActivitiesBlock.className = "collapse";
 
@@ -98,12 +107,16 @@ class UsersList extends HTMLElement {
 		}
 	}
 
-	public loadProjectData(phases: PhaseResponse[]) {
+	public loadProjectData(
+		phases: PhaseResponse[],
+		currentUser: User,
+		isOwner: boolean
+	) {
 		if (!phases) return;
 
 		this.phases = phases;
 		this.data = this.sortData();
-		this.render();
+		this.render(currentUser, isOwner);
 	}
 }
 
