@@ -14,10 +14,10 @@ import {
 	findCollectionWrapper,
 	getCollection
 } from "@/utils/db/db";
-import { sendNotification } from "@/utils/notification/notification_server";
 import {
 	areInTheSameMinute,
-	checkIfIsInRecurrence
+	checkIfIsInRecurrence,
+	sendTimeMachineNotification
 } from "@/utils/timeMachine/timeMachineHelpers";
 import { Collection } from "mongodb";
 
@@ -43,17 +43,13 @@ async function notifyAllActivities(time: Date) {
 	});
 
 	for (const activity of filtered_activities) {
-		// Inviamo la notifica all'utente
-		const notificationData = {
-			title: "Notifica attività",
-			body: `L'attività ${activity.summary} è scaduta!`,
-			image: "Sloth.png",
-			icon: "",
-			url: "/calendar"
-		};
-
-		// Inviamo la notifica
-		await sendNotification(activity.ownerId, notificationData);
+		// Non facciamo await qui, perché non ci interessa aspettare che la funzione finisca
+		// prima di passare alla prossima iterazione
+		sendTimeMachineNotification(
+			activity.ownerId,
+			"activity",
+			activity.summary
+		);
 	}
 }
 
@@ -83,17 +79,9 @@ async function notifyAllEvents(time: Date) {
 	});
 
 	for (const event of filtered_events) {
-		// Inviamo la notifica all'utente
-		const notificationData = {
-			title: "Notifica evento",
-			body: `L'evento ${event.summary} è iniziato!`,
-			image: "Sloth.png",
-			icon: "",
-			url: "/calendar"
-		};
-
-		// Inviamo la notifica
-		await sendNotification(event.ownerId, notificationData);
+		// Non facciamo await qui, perché non ci interessa aspettare che la funzione finisca
+		// prima di passare alla prossima iterazione
+		sendTimeMachineNotification(event.ownerId, "event", event.summary);
 	}
 }
 
@@ -123,17 +111,13 @@ async function notifyAllSessions(time: Date) {
 	});
 
 	for (const session of filtered_sessions) {
-		// Inviamo la notifica all'utente
-		const notificationData = {
-			title: "Notifica sessione",
-			body: `La sessione ${session.summary} è iniziata!`,
-			image: "Sloth.png",
-			icon: "",
-			url: "/calendar"
-		};
-
-		// Inviamo la notifica
-		await sendNotification(session.ownerId, notificationData);
+		// Non facciamo await qui, perché non ci interessa aspettare che la funzione finisca
+		// prima di passare alla prossima iterazione
+		sendTimeMachineNotification(
+			session.ownerId,
+			"session",
+			session.summary
+		);
 	}
 }
 
@@ -161,17 +145,13 @@ async function notifyAllProjectActivities(time: Date) {
 	);
 
 	for (const projectActivity of filtered_projectActivities) {
-		// Inviamo la notifica all'utente
-		const notificationData = {
-			title: "Notifica attività di progetto",
-			body: `L'attività di progetto ${projectActivity.summary} è scaduta!`,
-			image: "Sloth.png",
-			icon: "",
-			url: "/calendar"
-		};
-
-		// Inviamo la notifica
-		await sendNotification(projectActivity.ownerId, notificationData);
+		// Non facciamo await qui, perché non ci interessa aspettare che la funzione finisca
+		// prima di passare alla prossima iterazione
+		sendTimeMachineNotification(
+			projectActivity.ownerId,
+			"projectActivity",
+			projectActivity.summary
+		);
 	}
 }
 
