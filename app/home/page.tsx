@@ -139,7 +139,11 @@ function PreviewBox({
 		>
 			<Card.Body className="d-flex flex-column h-100 p-3">
 				<Stack gap={2} className="h-100">
-					<Link href={link} passHref>
+					<Link
+						href={link}
+						passHref
+						className="text-center text-lg-start"
+					>
 						<Button
 							variant="link"
 							className="text-start p-0 text-decoration-none"
@@ -413,7 +417,12 @@ export default function Home() {
 			<GlobalSideBar />
 			<Container fluid className="mt-3 px-3 overflow-hidden">
 				<Row className="gx-3">
-					<Col xs={12} lg={3} className="mb-3">
+					<Col
+						xs={12}
+						lg={3}
+						className="mb-3"
+						style={{ zIndex: -20 }}
+					>
 						<PreviewBox
 							title="Chat"
 							content={
@@ -429,7 +438,12 @@ export default function Home() {
 					</Col>
 					<Col xs={12} lg={9}>
 						<Row className="gx-3">
-							<Col xs={12} md={6} className="mb-3">
+							<Col
+								xs={12}
+								md={6}
+								className="mb-3"
+								style={{ zIndex: -20 }}
+							>
 								<PreviewBox
 									title="Calendario"
 									content={
@@ -442,7 +456,12 @@ export default function Home() {
 									link="/calendar"
 								/>
 							</Col>
-							<Col xs={12} md={6} className="mb-3">
+							<Col
+								xs={12}
+								md={6}
+								className="mb-3"
+								style={{ zIndex: -20 }}
+							>
 								<PreviewBox
 									title="Progetti"
 									content={
@@ -456,7 +475,12 @@ export default function Home() {
 									link="/projects"
 								/>
 							</Col>
-							<Col xs={12} md={6} className="mb-3">
+							<Col
+								xs={12}
+								md={6}
+								className="mb-3"
+								style={{ zIndex: -20 }}
+							>
 								<PreviewBox
 									title="Note"
 									content={
@@ -470,7 +494,12 @@ export default function Home() {
 									link="/notepad"
 								/>
 							</Col>
-							<Col xs={12} md={6} className="mb-3">
+							<Col
+								xs={12}
+								md={6}
+								className="mb-3"
+								style={{ zIndex: -20 }}
+							>
 								<PreviewBox
 									title="Pomodoro"
 									content={
