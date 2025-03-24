@@ -62,6 +62,11 @@ class SideGanttList extends HTMLElement {
 		firstCol.className = "col d-flex align-items-center";
 		const summaryText = document.createTextNode(activity.summary);
 		firstCol.appendChild(summaryText);
+		if (activity.isMilestone) {
+			const flag = document.createElement("i");
+			flag.className = "bi bi-flag-fill ms-2";
+			firstCol.appendChild(flag);
+		}
 
 		// Seconda colonna con le date
 		const secondCol = document.createElement("div");
@@ -100,16 +105,24 @@ class SideGanttList extends HTMLElement {
 		const togglerContent = document.createElement("div");
 		togglerContent.className = "d-flex align-items-center";
 
+		let isAnimating = false; // Variabile per bloccare i click durante l'animazione
+
 		const caretIcon = document.createElement("i");
 		caretIcon.className = "bi bi-caret-right-fill me-3 fs-5";
 		caretIcon.style.transition = "transform 0.2s";
 		caretIcon.setAttribute("data-bs-toggle", "collapse");
 		caretIcon.setAttribute("data-bs-target", `#collapse${data._id}`);
 		caretIcon.onclick = () => {
-			caretIcon.style.transform =
-				caretIcon.style.transform === "rotate(90deg)"
-					? "rotate(0)"
-					: "rotate(90deg)";
+			// Se l'animazione é in corso non facciamo nulla
+			if (isAnimating) return;
+			isAnimating = true;
+			let animation;
+			if (caretIcon.style.transform === "rotate(90deg)") {
+				animation = "rotate(0)";
+			} else {
+				animation = "rotate(90deg)";
+			}
+			caretIcon.style.transform = animation;
 		};
 
 		const button = document.createElement("button");
@@ -134,6 +147,13 @@ class SideGanttList extends HTMLElement {
 		const collapse = document.createElement("div");
 		collapse.id = `collapse${data._id}`;
 		collapse.className = "collapse ms-3";
+		// Aggiungiamo l'evento per sbloccare il click
+		collapse.addEventListener("shown.bs.collapse", (e) => {
+			isAnimating = false;
+		});
+		collapse.addEventListener("hidden.bs.collapse", (e) => {
+			isAnimating = false;
+		});
 
 		if (data.subPhases?.length > 0) {
 			noInsideData = false;
