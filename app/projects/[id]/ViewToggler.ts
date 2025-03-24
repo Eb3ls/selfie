@@ -8,12 +8,12 @@ import TimeList from "./ListBody/TimeList";
 import UsersList from "./ListBody/UserList";
 import {
 	PhaseResponse,
+	PhaseToggleMap,
 	ProjectResponse,
 	ROW_HEIGHT,
 	ROW_HEIGHT_PX,
 	SortedActivity,
-	SubPhaseResponse,
-	User
+	SubPhaseResponse
 } from "./Utils";
 
 class ViewToggler extends HTMLElement {
@@ -21,6 +21,9 @@ class ViewToggler extends HTMLElement {
 	listViewType: "USER" | "TIME";
 	projectData: ProjectResponse | null;
 	sortedActivities: SortedActivity[];
+	openToggleList: PhaseToggleMap;
+	// Salviamo la posizione dello scroll per il gantt
+	ganttPositionY: number;
 	dateTime: Date | null;
 
 	constructor() {
@@ -30,13 +33,16 @@ class ViewToggler extends HTMLElement {
 		this.listViewType = "USER";
 		this.projectData = null;
 		this.sortedActivities = [];
+		this.openToggleList = {};
+		this.ganttPositionY = 0;
 		this.dateTime = null;
 	}
 
 	async connectedCallback() {
 		this.projectData = await this.getData();
 		if (!this.projectData) return;
-		this.sortedActivities = this.sortActivies(this.projectData.phases);
+		this.sortActivies();
+		this.populateOpenToggleList();
 
 		// Grafica fissa
 		this.className = "d-flex flex-column";
@@ -46,9 +52,17 @@ class ViewToggler extends HTMLElement {
 		this.render("GANTT");
 	}
 
-	render(viewMode: "GANTT" | "LIST") {
+	private render(viewMode: "GANTT" | "LIST") {
 		if (this.viewType === viewMode) return;
 		this.viewType = viewMode;
+		if (viewMode === "LIST") {
+			// Ci salviamo la posizione dello scroll Y per ripristinarlo quando torniamo al gantt
+			const ganttContainer = this.querySelector(
+				"#ganttContainer"
+			) as HTMLElement;
+			this.ganttPositionY = ganttContainer.scrollTop;
+		}
+
 		// Rimuoviamo i figli eccetto l'upper header
 		for (let i = this.children.length - 1; i > 0; i--) {
 			this.children[i].remove();
@@ -58,6 +72,10 @@ class ViewToggler extends HTMLElement {
 			this.insertBottomHeader();
 			this.insertGanttBody();
 			this.addEventListeners();
+			const ganttContainer = this.querySelector(
+				"#ganttContainer"
+			) as HTMLElement;
+			ganttContainer.scrollTo(0, this.ganttPositionY);
 		} else {
 			this.insertBottomHeader();
 			this.insertListBody(this.listViewType);
@@ -65,7 +83,7 @@ class ViewToggler extends HTMLElement {
 		}
 	}
 
-	insertUpperHeader(): void {
+	private insertUpperHeader(): void {
 		const wrapper = document.createElement("div");
 		wrapper.className = "d-flex border-bottom border-secondary px-3";
 		wrapper.style.minHeight = ROW_HEIGHT_PX;
@@ -113,7 +131,7 @@ class ViewToggler extends HTMLElement {
 		}
 	}
 
-	insertBottomHeader(): void {
+	private insertBottomHeader(): void {
 		const headerBottom =
 			this.viewType === "GANTT"
 				? `
@@ -150,10 +168,11 @@ class ViewToggler extends HTMLElement {
 		this.appendChild(container);
 	}
 
-	insertGanttBody(): void {
+	private insertGanttBody(): void {
 		const container = document.createElement("div");
 		container.className = "row overflow-y-auto g-0";
 		container.style.minHeight = `calc(100% - ${ROW_HEIGHT * 2}px)`;
+		container.id = "ganttContainer";
 
 		container.innerHTML = `
 			<div id="listView" class="col-3 p-0 border-end border-secondary">
@@ -177,21 +196,25 @@ class ViewToggler extends HTMLElement {
 		const sideGanttList = this.querySelector(
 			"side-gantt-list"
 		) as SideGanttList;
-		sideGanttList.loadProjectData(this.projectData.phases);
+		sideGanttList.loadProjectData(
+			this.projectData.phases,
+			this.openToggleList
+		);
 
 		const projectPhaseRow = this.querySelector(
 			"project-phase-row"
 		) as ProjectPhaseRow;
 		projectPhaseRow.loadProjectData(
 			this.projectData.phases,
-			this.dateTime || new Date()
+			this.dateTime || new Date(),
+			this.openToggleList
 		);
 
 		const timeLine = this.querySelector("time-line") as TimeLine;
 		timeLine.loadProjectData(this.dateTime || new Date());
 	}
 
-	insertListBody(view: "USER" | "TIME"): void {
+	private insertListBody(view: "USER" | "TIME"): void {
 		// Impostiamo la nuova vista corrente
 		this.listViewType = view;
 		// Creiamo il container per gestire l'overflow
@@ -212,7 +235,7 @@ class ViewToggler extends HTMLElement {
 		this.appendChild(container);
 	}
 
-	addEventListeners() {
+	private addEventListeners() {
 		const ganttBtn = this.querySelector(
 			"#renderGantt"
 		) as HTMLButtonElement;
@@ -237,8 +260,13 @@ class ViewToggler extends HTMLElement {
 				"#timeSort"
 			) as HTMLButtonElement;
 
-			timeSortBtn.classList.add("fw-light");
-			userSortBtn.classList.add("fw-bold");
+			if (this.listViewType === "USER") {
+				userSortBtn.classList.add("fw-bold");
+				timeSortBtn.classList.add("fw-light");
+			} else {
+				timeSortBtn.classList.add("fw-bold");
+				userSortBtn.classList.add("fw-light");
+			}
 
 			userSortBtn.addEventListener("click", () => {
 				if (this.listViewType === "USER") return;
@@ -293,7 +321,7 @@ class ViewToggler extends HTMLElement {
 	}
 
 	// Funzione che dato un array di fasi ritorna un array ordinato sulla due di SortedActivity
-	sortActivies(phases: PhaseResponse[]): SortedActivity[] {
+	private sortActivies(): void {
 		const allActivities: SortedActivity[] = [];
 
 		function apppendActivities(phase: PhaseResponse | SubPhaseResponse) {
@@ -309,8 +337,8 @@ class ViewToggler extends HTMLElement {
 			}
 		}
 
-		if (!this.projectData) return allActivities;
-		for (const phase of phases) {
+		if (!this.projectData) return;
+		for (const phase of this.projectData.phases) {
 			apppendActivities(phase);
 		}
 
@@ -318,7 +346,21 @@ class ViewToggler extends HTMLElement {
 			return a.due < b.due ? -1 : 1;
 		});
 
-		return allActivities;
+		this.sortedActivities = allActivities;
+	}
+
+	private populateOpenToggleList() {
+		for (const phase of this.projectData!.phases) {
+			this.openToggleList[phase._id] = {
+				isOpen: false,
+				subPhases: {}
+			};
+
+			if (!("subPhases" in phase)) continue;
+			for (const subPhase of phase.subPhases) {
+				this.openToggleList[phase._id].subPhases[subPhase._id] = false;
+			}
+		}
 	}
 }
 

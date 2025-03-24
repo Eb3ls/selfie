@@ -1,28 +1,28 @@
 import { Alarm } from "@/utils/db/models/Alarm";
 
-const ROW_HEIGHT_PX = "70px";
-const CELL_WIDTH_PX = "200px";
-const ROW_HEIGHT = parseInt(ROW_HEIGHT_PX, 10);
-const CELL_WIDTH = parseInt(CELL_WIDTH_PX, 10);
+export const ROW_HEIGHT_PX = "70px";
+export const CELL_WIDTH_PX = "200px";
+export const ROW_HEIGHT = parseInt(ROW_HEIGHT_PX, 10);
+export const CELL_WIDTH = parseInt(CELL_WIDTH_PX, 10);
 
-const waiting_color = "#6c757d";
-const activable_color = "#ffc107";
-const active_color = "#007bff";
-const submitted_color = "#28a745";
-const completed_color = "#17a2b8";
-const reactivated_color = "#6610f2";
-const overdue_color = "#dc3545";
-const dropped_color = "#343a40";
+export const waiting_color = "#6c757d";
+export const activable_color = "#ffc107";
+export const active_color = "#007bff";
+export const submitted_color = "#28a745";
+export const completed_color = "#17a2b8";
+export const reactivated_color = "#6610f2";
+export const overdue_color = "#dc3545";
+export const dropped_color = "#343a40";
 
-const timeFormat = "en-US";
+export const timeFormat = "en-US";
 
 // TODO sono copiati dalla risposta del server, vanno spostati in un file comune
 
-interface User {
+export interface User {
 	id: string;
 	name: string;
 }
-interface ProjectResponse {
+export interface ProjectResponse {
 	_id: string;
 	summary: string;
 	owner: User;
@@ -31,7 +31,7 @@ interface ProjectResponse {
 	phases: PhaseResponse[];
 }
 
-interface PhaseResponse {
+export interface PhaseResponse {
 	_id: string;
 	summary: string;
 	owner: { id: string; name: string };
@@ -41,7 +41,7 @@ interface PhaseResponse {
 	activities: ProjectActivityResponse[];
 }
 
-interface SubPhaseResponse {
+export interface SubPhaseResponse {
 	_id: string;
 	summary: string;
 	owner: User;
@@ -50,13 +50,13 @@ interface SubPhaseResponse {
 	activities: ProjectActivityResponse[];
 }
 
-interface Link {
+export interface Link {
 	_id: string;
 	summary: string;
 	date: string;
 }
 
-interface ProjectActivityResponse {
+export interface ProjectActivityResponse {
 	_id: string;
 	summary: string;
 	description: string;
@@ -75,28 +75,70 @@ interface ProjectActivityResponse {
 	noteLink: string | null;
 }
 // Interfaccia per le attivitá ordinate, aggiungiamo il riferimento alla fase genitore
-interface SortedActivity extends ProjectActivityResponse {
+export interface SortedActivity extends ProjectActivityResponse {
 	parentPhase: PhaseResponse;
 }
 
+export interface PhaseToggleMap {
+	[phaseId: string]: {
+		// Stato del toggle della fase
+		isOpen: boolean;
+		// Mappa degli id delle sottofasi e il loro stato del toggle
+		subPhases: {
+			[subPhaseId: string]: boolean;
+		};
+	};
+}
+
+export function setToggleState(
+	map: PhaseToggleMap,
+	phaseId: string,
+	parentId: string | null,
+	state: boolean
+): void {
+	if (parentId && map[parentId]) {
+		map[parentId].subPhases[phaseId] = state;
+	} else if (map[phaseId]) {
+		map[phaseId].isOpen = state;
+	}
+}
+
+export function getToggleState(
+	map: PhaseToggleMap,
+	phaseId: string,
+	parentId: string | null
+): boolean {
+	if (parentId && map[parentId]) {
+		return map[parentId].subPhases[phaseId];
+	}
+	if (map[phaseId]) {
+		return map[phaseId].isOpen;
+	}
+	return false;
+}
+
 // Formatta la data ISO per l'input date (yyyy-mm-dd unico formato supportato per min-max)
-function formatDate(date: string): string {
+export function formatDate(date: string): string {
 	return date.split("T")[0];
 }
 
-function validateUsername(username: string): boolean {
+export function validateUsername(username: string): boolean {
 	if (!username) return false;
 	const usernameRegex = /^[a-zA-Z0-9_-]{3,20}$/;
 	return usernameRegex.test(username);
 }
 
-function validateLength(item: string, min: number, max: number): boolean {
+export function validateLength(
+	item: string,
+	min: number,
+	max: number
+): boolean {
 	if (!item) return false;
 	return item.length >= min && item.length <= max;
 }
 
 // Controlliamo se la data é dentro i limiti della fase/sottofase
-function checkDate(date: string, start: string, due: string): boolean {
+export function checkDate(date: string, start: string, due: string): boolean {
 	const newDate = new Date(date);
 	const startDate = new Date(start);
 	const dueDate = new Date(due);
@@ -107,13 +149,13 @@ function checkDate(date: string, start: string, due: string): boolean {
 	return false;
 }
 
-function calculateCells(element: HTMLElement): number {
+export function calculateCells(element: HTMLElement): number {
 	const width = element.clientWidth || element.getBoundingClientRect().width;
 	const cols = Math.floor(width / CELL_WIDTH) * 2;
 	return Math.max(cols, 18);
 }
 
-function showError(inputElement: HTMLElement, message: string) {
+export function showError(inputElement: HTMLElement, message: string) {
 	const errorDiv = document.createElement("div");
 	errorDiv.className = "invalid-feedback d-block";
 	errorDiv.textContent = message;
@@ -121,14 +163,14 @@ function showError(inputElement: HTMLElement, message: string) {
 	inputElement.parentElement?.appendChild(errorDiv);
 }
 
-function clearError(inputElement: HTMLElement) {
+export function clearError(inputElement: HTMLElement) {
 	inputElement.classList.remove("is-invalid");
 	const errorDiv =
 		inputElement.parentElement?.querySelector(".invalid-feedback");
 	if (errorDiv) errorDiv.remove();
 }
 
-const statusConfig = {
+export const statusConfig = {
 	WAITING: { color: waiting_color, text: "In attesa" },
 	ACTIVABLE: { color: activable_color, text: "Attivabile" },
 	ACTIVE: { color: active_color, text: "Attivo" },
@@ -142,7 +184,7 @@ const statusConfig = {
 // Status icon
 
 // Funzione per creare una singola entry per la lista di stati
-function createStatusEntry(
+export function createStatusEntry(
 	status: keyof typeof statusConfig,
 	iconBlock: HTMLElement,
 	activityId: string
@@ -185,7 +227,7 @@ function createStatusEntry(
 }
 
 // Funzione per creare la lista di stati coerenti con l'attuale
-function createStatusList(
+export function createStatusList(
 	currentStatus: keyof typeof statusConfig,
 	iconBlock: HTMLElement,
 	activityId: string
@@ -213,7 +255,7 @@ function createStatusList(
 }
 
 // Funzione per ottenere l'icona dello stato
-function createStatusIcon(
+export function createStatusIcon(
 	status: keyof typeof statusConfig,
 	activityId: string
 ): HTMLElement {
@@ -253,7 +295,7 @@ function createStatusIcon(
 	return wrapper;
 }
 
-async function fetcher(
+export async function fetcher(
 	method: "GET" | "POST" | "PATCH" | "DELETE",
 	url: string,
 	data?: any
@@ -272,31 +314,3 @@ async function fetcher(
 		throw new Error(response.statusText);
 	}
 }
-
-export type {
-	User,
-	ProjectResponse,
-	PhaseResponse,
-	SubPhaseResponse,
-	ProjectActivityResponse,
-	Link,
-	SortedActivity
-};
-
-export {
-	ROW_HEIGHT_PX,
-	CELL_WIDTH_PX,
-	ROW_HEIGHT,
-	CELL_WIDTH,
-	timeFormat,
-	formatDate,
-	validateUsername,
-	validateLength,
-	checkDate,
-	calculateCells,
-	showError,
-	clearError,
-	statusConfig,
-	createStatusIcon,
-	fetcher
-};

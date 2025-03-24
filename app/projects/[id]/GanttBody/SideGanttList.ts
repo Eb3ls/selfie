@@ -2,18 +2,31 @@ import ModifyActivity from "../Forms/ActivityForm";
 import ModifyPhase from "../Forms/PhaseForm";
 import {
 	PhaseResponse,
+	PhaseToggleMap,
+	ProjectActivityResponse,
 	ROW_HEIGHT_PX,
+	SubPhaseResponse,
 	createStatusIcon,
-	formatDate
+	formatDate,
+	getToggleState,
+	setToggleState
 } from "../Utils";
 
 class SideGanttList extends HTMLElement {
+	openToggleList: PhaseToggleMap;
+
 	constructor() {
 		super();
+		this.openToggleList = {};
 	}
 
-	public loadProjectData(phases: PhaseResponse[]) {
+	public loadProjectData(
+		phases: PhaseResponse[],
+		openToggleList: PhaseToggleMap
+	) {
 		if (!phases) return;
+		this.openToggleList = openToggleList;
+
 		const container = document.createElement("div");
 		container.className = "container";
 
@@ -44,13 +57,19 @@ class SideGanttList extends HTMLElement {
 	}
 
 	// Funzione per creare una attivitá
-	handleItem(activity: any, phaseData: any): HTMLElement {
+	handleItem(
+		activity: ProjectActivityResponse,
+		phaseData: PhaseResponse | SubPhaseResponse
+	): HTMLElement {
 		const activityElement = document.createElement("div");
 		activityElement.className = "d-flex align-items-center ms-5";
 		activityElement.style.height = `${ROW_HEIGHT_PX}`;
 
 		// Icona
-		const statusIcon = createStatusIcon(activity.status, activity._id);
+		const statusIcon = createStatusIcon(
+			activity.status as any,
+			activity._id
+		);
 
 		// Container per le due colonne con titolo e date
 		const columnsContainer = document.createElement("div");
@@ -94,7 +113,10 @@ class SideGanttList extends HTMLElement {
 		return activityElement;
 	}
 
-	renderPhase(data: any, parentData: any): HTMLElement {
+	renderPhase(
+		data: PhaseResponse | SubPhaseResponse,
+		parentData: PhaseResponse | null
+	): HTMLElement {
 		const container = document.createElement("div");
 
 		// Creiamo il toggler per la fase
@@ -141,42 +163,62 @@ class SideGanttList extends HTMLElement {
 		toggler.appendChild(togglerContent);
 		container.appendChild(toggler);
 
-		let noInsideData = true;
+		let hasDataInside = false;
 
 		// Creiamo il collapse per le sottofasi/attivitá
 		const collapse = document.createElement("div");
 		collapse.id = `collapse${data._id}`;
 		collapse.className = "collapse ms-3";
+
 		// Aggiungiamo l'evento per sbloccare il click
-		collapse.addEventListener("shown.bs.collapse", (e) => {
+		collapse.addEventListener("shown.bs.collapse", () => {
 			isAnimating = false;
-		});
-		collapse.addEventListener("hidden.bs.collapse", (e) => {
-			isAnimating = false;
+			setToggleState(
+				this.openToggleList,
+				data._id,
+				parentData?._id || null,
+				true
+			);
 		});
 
-		if (data.subPhases?.length > 0) {
-			noInsideData = false;
-			const dataForModify = { ...data, subPhases: [] };
-			data.subPhases.forEach((subPhase: any) => {
-				collapse.appendChild(this.renderPhase(subPhase, dataForModify));
+		collapse.addEventListener("hidden.bs.collapse", () => {
+			isAnimating = false;
+			setToggleState(
+				this.openToggleList,
+				data._id,
+				parentData?._id || null,
+				false
+			);
+		});
+
+		if ("subPhases" in data && data.subPhases.length > 0) {
+			hasDataInside = true;
+			data.subPhases.forEach((subPhase) => {
+				collapse.appendChild(this.renderPhase(subPhase, data));
 			});
 		}
 
 		if (data.activities?.length > 0) {
-			noInsideData = false;
+			hasDataInside = true;
 			data.activities.forEach((activity: any) => {
-				const dataForModify = { ...data, activities: [] };
-				const activityElement = this.handleItem(
-					activity,
-					dataForModify
-				);
+				const activityElement = this.handleItem(activity, data);
 				collapse.appendChild(activityElement);
 			});
 		}
 
-		if (!noInsideData) {
+		// Se non abbiamo dati nel collapse nascondiamo l'icona e non lo appendiamo
+		if (hasDataInside) {
 			container.appendChild(collapse);
+			if (
+				getToggleState(
+					this.openToggleList,
+					data._id,
+					parentData?._id || null
+				)
+			) {
+				collapse.classList.add("show");
+				caretIcon.style.transform = "rotate(90deg)";
+			}
 		} else {
 			caretIcon.classList.add("invisible");
 		}

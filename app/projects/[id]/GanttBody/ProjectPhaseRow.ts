@@ -2,12 +2,13 @@ import {
 	CELL_WIDTH,
 	CELL_WIDTH_PX,
 	PhaseResponse,
+	PhaseToggleMap,
 	ProjectActivityResponse,
-	ROW_HEIGHT,
 	ROW_HEIGHT_PX,
 	SubPhaseResponse,
 	calculateCells,
 	formatDate,
+	getToggleState,
 	statusConfig
 } from "../Utils";
 
@@ -28,6 +29,7 @@ class ProjectPhaseRow extends HTMLElement {
 	cellsNumber: number;
 	phasesData: PhaseResponse[];
 	rowsArray: RowReference[];
+	openToggleList: PhaseToggleMap;
 
 	constructor() {
 		super();
@@ -36,11 +38,17 @@ class ProjectPhaseRow extends HTMLElement {
 		this.cellsNumber = 0;
 		this.phasesData = [];
 		this.rowsArray = [];
+		this.openToggleList = {};
 	}
 
-	loadProjectData(data: PhaseResponse[], currentDate: Date) {
+	loadProjectData(
+		data: PhaseResponse[],
+		currentDate: Date,
+		openToggleList: PhaseToggleMap
+	) {
 		if (!data) return;
 		this.phasesData = data;
+		this.openToggleList = openToggleList;
 		this.render(currentDate);
 	}
 
@@ -137,11 +145,10 @@ class ProjectPhaseRow extends HTMLElement {
 		return phasePill;
 	}
 
-	renderPhaseRow(
-		parentElement: HTMLElement,
+	createRow(
 		data: PhaseResponse | SubPhaseResponse | ProjectActivityResponse,
 		color: string
-	) {
+	): HTMLElement {
 		// Riga principale
 		const row = document.createElement("div");
 		row.style.height = `${ROW_HEIGHT_PX}`;
@@ -157,12 +164,22 @@ class ProjectPhaseRow extends HTMLElement {
 
 		this.pushReference(pill, data, color);
 		row.appendChild(pill);
-		parentElement.appendChild(row);
 
 		for (let i = 0; i < this.cellsNumber; i++) {
 			const cell = this.createSingleCell();
 			row.appendChild(cell);
 		}
+
+		return row;
+	}
+
+	renderPhaseRow(
+		parentElement: HTMLElement,
+		data: PhaseResponse | SubPhaseResponse,
+		parentId: string | null
+	) {
+		const row = this.createRow(data, parentId ? "gray" : "black");
+		parentElement.appendChild(row);
 
 		// Contenitore per il collapse con lo stesso id per fare il toggle di tutti
 		const collapse = document.createElement("div");
@@ -170,43 +187,37 @@ class ProjectPhaseRow extends HTMLElement {
 		collapse.className = "collapse";
 		collapse.style.width = "max-content";
 
+		let hasDataInside = false;
+
 		// Gestione delle sottofasi
 		if ("subPhases" in data && data.subPhases.length > 0) {
+			hasDataInside = true;
 			for (const subPhase of data.subPhases) {
-				this.renderPhaseRow(collapse, subPhase, "gray");
+				this.renderPhaseRow(collapse, subPhase, data._id);
 			}
-			parentElement.appendChild(collapse);
 		}
 
 		//Gestione delle attività
-		if ("activities" in data && data.activities.length > 0) {
+		if (data.activities.length > 0) {
+			hasDataInside = true;
 			for (const activity of data.activities) {
-				const status = activity.status as keyof typeof statusConfig;
-				this.renderPhaseRow(
-					collapse,
+				const row = this.createRow(
 					activity,
-					statusConfig[status].color
+					statusConfig[activity.status as keyof typeof statusConfig]
+						.color
 				);
+				collapse.appendChild(row);
 			}
-			parentElement.appendChild(collapse);
 		}
 
-		// Il collapse é inserito una volta sola, non ci sono sia sottofasi che attività
-	}
-
-	calculateAdditionalRows(): number {
-		const visibleHeight = this.parentElement!.clientHeight;
-
-		let occupiedHeight = 0;
-		Array.from(this.parentElement!.children).forEach((child) => {
-			occupiedHeight += (child as HTMLElement).offsetHeight;
-		});
-
-		const freeSpace = visibleHeight - occupiedHeight;
-
-		const extraRows =
-			freeSpace > 0 ? Math.floor(freeSpace / ROW_HEIGHT) : 0;
-		return extraRows + 1;
+		if (hasDataInside) {
+			parentElement.appendChild(collapse);
+			if (
+				getToggleState(this.openToggleList, data._id, parentId || null)
+			) {
+				collapse.classList.add("show");
+			}
+		}
 	}
 
 	public shiftTimeline(isRightScroll: boolean): void {
@@ -235,18 +246,7 @@ class ProjectPhaseRow extends HTMLElement {
 		this.innerHTML = "";
 		this.className = "d-flex flex-column overflow-x-hidden";
 		for (const phase of this.phasesData) {
-			this.renderPhaseRow(this, phase, "black");
-		}
-		const extraRows = this.calculateAdditionalRows();
-		for (let i = 0; i < extraRows; i++) {
-			const row = document.createElement("div");
-			row.style.height = `${ROW_HEIGHT_PX}`;
-			row.className = "d-flex position-relative";
-			this.appendChild(row);
-			for (let i = 0; i < this.cellsNumber; i++) {
-				const cell = this.createSingleCell();
-				row.appendChild(cell);
-			}
+			this.renderPhaseRow(this, phase, null);
 		}
 	}
 }
