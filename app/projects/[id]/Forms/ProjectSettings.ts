@@ -38,7 +38,7 @@ class ProjectSettings extends HTMLElement {
         `;
 	}
 
-	public loadData(title: string, id: string, users: User[]) {
+	public loadProjectData(title: string, id: string, users: User[]) {
 		if (!title || !users || !id) return;
 		this.title = title;
 		this.id = id;

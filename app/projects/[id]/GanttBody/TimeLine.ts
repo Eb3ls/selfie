@@ -189,7 +189,7 @@ class TimeLine extends HTMLElement {
 		});
 	}
 
-	public loadData(todayDate: Date) {
+	public loadProjectData(todayDate: Date) {
 		this.todayDate = todayDate;
 		// Le date sono passate per riferimento quindi ne creo una nuova
 		this.centerDate = new Date(todayDate);

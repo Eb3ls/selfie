@@ -15,8 +15,8 @@ class ActivityForm extends HTMLElement {
 	parentPhase: PhaseResponse;
 	activity: ProjectActivityResponse;
 	activitiesList: ProjectActivityResponse[];
-	usersAvaiable: string[];
-	usersList: string[];
+	usersAvaiable: User[];
+	usersList: User[];
 	modifiedLinklist: PartialLink[];
 
 	constructor() {
@@ -46,7 +46,7 @@ class ActivityForm extends HTMLElement {
 	// Funzione chiamata per fornire i dati generali, chimata da viewToggler
 	public loadData(
 		activitiesList: ProjectActivityResponse[],
-		usersAvaiable: string[]
+		usersAvaiable: User[]
 	) {
 		this.activitiesList = [...activitiesList];
 		this.usersAvaiable = [...usersAvaiable];
@@ -61,7 +61,7 @@ class ActivityForm extends HTMLElement {
 		this.activity = activity;
 		// Necessario per capire il range di date disponibili
 		this.parentPhase = parentPhase;
-		this.usersList = activity.users?.map((user) => user.name) || [];
+		this.usersList = this.activity.users || [];
 		for (const link of this.activity.prevLinks) {
 			this.modifiedLinklist.push({ name: link.summary, _id: link._id });
 		}
@@ -510,8 +510,8 @@ customElements.define("activity-delete-form", ActivityDeleteForm);
 class ActivityModifyForm extends HTMLElement {
 	activity: ProjectActivityResponse;
 	parentPhase: PhaseResponse;
-	usersAvailable: string[];
-	modifiedUserlist: string[];
+	usersAvailable: User[];
+	modifiedUserlist: User[];
 
 	constructor() {
 		super();
@@ -537,7 +537,7 @@ class ActivityModifyForm extends HTMLElement {
 				(formData.get("due") as string) + "T23:59:59.999Z"
 			).toISOString(),
 			isMilestone: formData.get("isMilestone") === "on",
-			usernameList: this.modifiedUserlist
+			usernameList: this.modifiedUserlist.map((user) => user.name)
 		};
 
 		const url = `/api/project/activity/modify`;
@@ -554,7 +554,10 @@ class ActivityModifyForm extends HTMLElement {
 
 	private createUsersSelect() {
 		const availableUsers = this.usersAvailable.filter(
-			(user) => !this.modifiedUserlist.includes(user)
+			(user) =>
+				!this.modifiedUserlist.some(
+					(modifiedUser) => modifiedUser.id === user.id
+				)
 		);
 		const text =
 			availableUsers.length > 0
@@ -564,7 +567,7 @@ class ActivityModifyForm extends HTMLElement {
 		let block = `<option value="" disabled selected>${text}</option>`;
 		for (const user of availableUsers) {
 			block += `
-                <option value="${user}">${user}</option>
+                <option value="${user.name}">${user.name}</option>
             `;
 		}
 		return block;
@@ -675,10 +678,15 @@ class ActivityModifyForm extends HTMLElement {
 
 		itemBlock.querySelector("button")?.addEventListener("click", () => {
 			itemBlock.remove();
-			this.modifiedUserlist = this.modifiedUserlist.filter(
-				(user) => user !== name
+			const removedUser = this.modifiedUserlist.find(
+				(user) => user.name === name
 			);
-			this.usersAvailable.push(name);
+			this.modifiedUserlist = this.modifiedUserlist.filter(
+				(user) => user.name !== name
+			);
+			if (removedUser) {
+				this.usersAvailable.push(removedUser);
+			}
 			if (this.modifiedUserlist.length === 0) {
 				list.innerHTML = '<p class="text-muted">No users assigned</p>';
 			}
@@ -694,7 +702,7 @@ class ActivityModifyForm extends HTMLElement {
 		const newUser = this.querySelector("#newUser") as HTMLSelectElement;
 
 		for (const user of this.modifiedUserlist) {
-			this.addUser(user);
+			this.addUser(user.name);
 		}
 
 		if (this.modifiedUserlist.length === 0) {
@@ -717,7 +725,11 @@ class ActivityModifyForm extends HTMLElement {
 			}
 
 			this.updateUsersSelect(name, "REMOVE");
-			this.modifiedUserlist.push(name);
+			const selectedUser = this.usersAvailable.find(
+				(user) => user.name === name
+			);
+			if (!selectedUser) return;
+			this.modifiedUserlist.push(selectedUser);
 			this.addUser(name);
 			newUser.value = "";
 		});
@@ -748,8 +760,8 @@ class ActivityModifyForm extends HTMLElement {
 	public initialize(
 		activity: ProjectActivityResponse,
 		parentPhase: PhaseResponse,
-		usersList: string[],
-		usersAvailable: string[]
+		usersList: User[],
+		usersAvailable: User[]
 	) {
 		this.activity = activity;
 		this.parentPhase = parentPhase;

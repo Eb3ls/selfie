@@ -1,6 +1,7 @@
 import {
 	PhaseResponse,
 	SubPhaseResponse,
+	User,
 	checkDate,
 	fetcher,
 	formatDate
@@ -8,7 +9,7 @@ import {
 
 class AddForm extends HTMLElement {
 	projectId: string;
-	avaiableUsers: string[];
+	avaiableUsers: User[];
 	phaseList: PhaseResponse[];
 
 	constructor() {
@@ -21,7 +22,7 @@ class AddForm extends HTMLElement {
 	public loadProjectData(
 		id: string,
 		phases: PhaseResponse[],
-		avaiableUsers: string[]
+		avaiableUsers: User[]
 	) {
 		if (!id || !phases) return;
 		this.projectId = id;
@@ -375,8 +376,8 @@ customElements.define("add-subphase-form", AddSubPhaseForm);
 class AddActivityForm extends HTMLElement {
 	phaseList: PhaseResponse[];
 	mainPhaseSelected: PhaseResponse | null;
-	users: string[];
-	avaiableUsers: string[];
+	users: User[];
+	avaiableUsers: User[];
 
 	constructor() {
 		super();
@@ -386,7 +387,7 @@ class AddActivityForm extends HTMLElement {
 		this.avaiableUsers = [];
 	}
 
-	public initialize(phaseList: PhaseResponse[], avaiableUsers: string[]) {
+	public initialize(phaseList: PhaseResponse[], avaiableUsers: User[]) {
 		if (!phaseList) return;
 		this.phaseList = phaseList;
 		this.avaiableUsers = avaiableUsers;
@@ -410,7 +411,7 @@ class AddActivityForm extends HTMLElement {
 			due: new Date(data.Due + "T23:59:59.999Z").toISOString(),
 			isMilestone: data.isMilestone === "on",
 			phaseId: data.SubPhase || data.MainPhase,
-			usernameList: this.users
+			usernameList: this.users.map((user) => user.name)
 		};
 
 		try {
@@ -569,8 +570,8 @@ class AddActivityForm extends HTMLElement {
 
 		this.avaiableUsers.forEach((user) => {
 			option += `
-				<option value="${user}">
-					${user}
+				<option value="${user.name}">
+					${user.name}
 				</option>
 			`;
 		});
@@ -624,8 +625,10 @@ class AddActivityForm extends HTMLElement {
 
 		itemBlock.querySelector("button")?.addEventListener("click", () => {
 			itemBlock.remove();
-			this.users = this.users.filter((user) => user !== name);
-			this.avaiableUsers.push(name);
+			const removedUser = this.users.find((user) => user.name === name);
+			this.users = this.users.filter((user) => user.name !== name);
+			if (!removedUser) return;
+			this.avaiableUsers.push(removedUser);
 			if (this.users.length === 0) {
 				list.innerHTML = '<p class="text-muted">No users assigned</p>';
 			}
@@ -738,7 +741,9 @@ class AddActivityForm extends HTMLElement {
 				}
 
 				this.updateUsersSelect(user, "REMOVE");
-				this.users.push(user);
+				const newUser = this.avaiableUsers.find((u) => u.name === user);
+				if (!newUser) return;
+				this.users.push(newUser);
 				this.addUser(user);
 				newUserSelect.value = "";
 			});

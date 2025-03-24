@@ -109,9 +109,8 @@ function checkDate(date: string, start: string, due: string): boolean {
 
 function calculateCells(element: HTMLElement): number {
 	const width = element.clientWidth || element.getBoundingClientRect().width;
-	const cols = Math.floor((width * 2) / CELL_WIDTH);
-
-	return cols;
+	const cols = Math.floor(width / CELL_WIDTH) * 2;
+	return Math.max(cols, 18);
 }
 
 function showError(inputElement: HTMLElement, message: string) {

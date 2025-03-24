@@ -37,91 +37,159 @@ class ViewToggler extends HTMLElement {
 		this.projectData = await this.getData();
 		if (!this.projectData) return;
 		this.sortedActivities = this.sortActivies(this.projectData.phases);
+
+		// Grafica fissa
 		this.className = "d-flex flex-column";
 		this.style.height = `calc(100vh - 82px)`;
+		this.insertUpperHeader();
+
 		this.render("GANTT");
 	}
 
 	render(viewMode: "GANTT" | "LIST") {
 		if (this.viewType === viewMode) return;
 		this.viewType = viewMode;
+		// Rimuoviamo i figli eccetto l'upper header
+		for (let i = this.children.length - 1; i > 0; i--) {
+			this.children[i].remove();
+		}
 
 		if (viewMode === "GANTT") {
-			this.innerHTML = this.getHeaderTemplate() + this.getGanntBody();
+			this.insertBottomHeader();
+			this.insertGanttBody();
 			this.addEventListeners();
-			this.loadData();
 		} else {
-			this.innerHTML = this.getHeaderTemplate();
+			this.insertBottomHeader();
 			const body = this.getListBody(this.listViewType);
 			this.appendChild(body);
 			this.addEventListeners();
 		}
 	}
 
-	getHeaderTemplate() {
-		const headerTop = `
-			<div class="d-flex border-bottom border-secondary px-3" style="min-height: ${ROW_HEIGHT_PX};">
+	insertUpperHeader(): void {
+		const wrapper = document.createElement("div");
+		wrapper.className = "d-flex border-bottom border-secondary px-3";
+		wrapper.style.minHeight = ROW_HEIGHT_PX;
+		wrapper.innerHTML = `
 				<div class="col d-flex align-items-center">
 					<a class="btn text-secondary me-1 p-0" href="/projects">
 						Dashboard /
 					</a>
-					<div class="ms-1">${this.projectData?.summary}</div>
+					<div class="ms-1">${this.projectData!.summary}</div>
 				</div>
 				<div class="col d-flex justify-content-end align-items-center">
 					<add-form-component></add-form-component>
 					<project-settings></project-settings>
 				</div>
-			</div>`;
+			</div>
+		`;
 
+		this.appendChild(wrapper);
+
+		if (!this.projectData) return;
+		const addForm = this.querySelector("add-form-component") as AddForm;
+		addForm.loadProjectData(
+			this.projectData._id,
+			this.projectData.phases,
+			this.projectData.users
+		);
+
+		const projectSettings = this.querySelector(
+			"project-settings"
+		) as ProjectSettings;
+		projectSettings.loadProjectData(
+			this.projectData.summary,
+			this.projectData._id,
+			this.projectData.users
+		);
+
+		const activityForm = document.querySelector(
+			"activity-form"
+		) as ActivityForm;
+		if (activityForm) {
+			activityForm.loadData(
+				this.sortedActivities,
+				this.projectData.users
+			);
+		}
+	}
+
+	insertBottomHeader(): void {
 		const headerBottom =
 			this.viewType === "GANTT"
 				? `
-				<div class="col-9 d-flex flex-row justify-content-between">
-					<button class="btn p-0 me-2" id="leftScroll">
-						<i class="bi bi-chevron-left"></i>
-					</button>
-					<div class="d-flex flex-column align-items-center">
-						<div class="fs-5 fw-bold" id="yearDiv"></div>
-						<div class="fs-6 fw-semibold" id="monthDiv"></div>
-					</div>
-					<button class="btn p-0 ms-2" id="rightScroll">
-						<i class="bi bi-chevron-right"></i>
-					</button>
-				</div>`
-				: `
-				<div class="col-9 d-flex justify-content-end">
-					<button class="btn" id="userSort">Attore</button>
-					<button class="btn" id="timeSort">Temporalmente</button>
-				</div>`;
-
-		return `
-			${headerTop}
-			<div class="d-flex flex-row border-bottom border-secondary align-items-center px-3" style="min-height: ${ROW_HEIGHT_PX}">
-				<div class="col-3 d-flex align-items-center">
-					<button class="btn me-2 p-0" id="renderGantt">Gantt</button>
-					<button class="btn ms-2 p-0" id="renderList">List</button>
+			<div class="col-9 d-flex flex-row justify-content-between">
+				<button class="btn p-0 me-2" id="leftScroll">
+				<i class="bi bi-chevron-left"></i>
+				</button>
+				<div class="d-flex flex-column align-items-center">
+				<div class="fs-5 fw-bold" id="yearDiv"></div>
+				<div class="fs-6 fw-semibold" id="monthDiv"></div>
 				</div>
-				${headerBottom}
+				<button class="btn p-0 ms-2" id="rightScroll">
+				<i class="bi bi-chevron-right"></i>
+				</button>
+			</div>`
+				: `
+			<div class="col-9 d-flex justify-content-end">
+				<button class="btn" id="userSort">Attore</button>
+				<button class="btn" id="timeSort">Temporalmente</button>
+			</div>`;
+
+		const container = document.createElement("div");
+		container.className =
+			"d-flex flex-row border-bottom border-secondary align-items-center px-3";
+		container.style.minHeight = ROW_HEIGHT_PX;
+		container.innerHTML = `
+			<div class="col-3 d-flex align-items-center">
+				<button class="btn me-2 p-0" id="renderGantt">Gantt</button>
+				<button class="btn ms-2 p-0" id="renderList">List</button>
 			</div>
-			`;
+			${headerBottom}
+		`;
+
+		this.appendChild(container);
 	}
 
-	getGanntBody() {
-		return `
-            <div class="row overflow-y-auto g-0" style="min-height: calc(100% - ${ROW_HEIGHT * 2}px)">
-				<div id="listView" class="col-3 p-0 border-end border-secondary">
-					<div id="header" class="d-flex align-items-center sticky-top bg-white border-bottom border-secondary px-5" style="height: ${ROW_HEIGHT_PX};">
-						<div class="col-6">Titolo</div>
-						<div class="col-6 d-flex justify-content-center">Range</div>
-					</div>
-					<side-gantt-list/>
+	insertGanttBody(): void {
+		const container = document.createElement("div");
+		container.className = "row overflow-y-auto g-0";
+		container.style.minHeight = `calc(100% - ${ROW_HEIGHT * 2}px)`;
+
+		container.innerHTML = `
+			<div id="listView" class="col-3 p-0 border-end border-secondary">
+				<div id="header" class="d-flex align-items-center sticky-top bg-white border-bottom border-secondary px-5" 
+					 style="height: ${ROW_HEIGHT_PX};">
+					<div class="col-6">Titolo</div>
+					<div class="col-6 d-flex justify-content-center">Range</div>
 				</div>
-				<div id="ganttView" class="col-9 p-0 d-flex flex-column">
-					<time-line></time-line>
-					<project-phase-row></project-phase-row>
-				</div>
-         </div>
-        `;
+				<side-gantt-list/>
+			</div>
+			<div id="ganttView" class="col-9 p-0 d-flex flex-column">
+				<time-line></time-line>
+				<project-phase-row></project-phase-row>
+			</div>
+		`;
+
+		this.appendChild(container);
+
+		if (!this.projectData) return;
+
+		const sideGanttList = this.querySelector(
+			"side-gantt-list"
+		) as SideGanttList;
+		sideGanttList.loadProjectData(this.projectData.phases);
+
+		const projectPhaseRow = this.querySelector(
+			"project-phase-row"
+		) as ProjectPhaseRow;
+		projectPhaseRow.loadProjectData(
+			this.projectData.phases,
+			this.dateTime || new Date()
+		);
+
+		const timeLine = this.querySelector("time-line") as TimeLine;
+		timeLine.loadProjectData(this.dateTime || new Date());
 	}
 
 	getListBody(view: "USER" | "TIME") {
@@ -139,37 +207,6 @@ class ViewToggler extends HTMLElement {
 				listBlock.loadData(this.sortedActivities);
 			}
 			return listBlock;
-		}
-	}
-
-	syncGanttScroll() {
-		const ganttView = document.getElementById("ganttView");
-		const listView = document.getElementById("listView");
-
-		let isSyncingScroll = false;
-
-		if (ganttView && listView) {
-			ganttView.addEventListener("scroll", () => {
-				if (!isSyncingScroll) {
-					isSyncingScroll = true;
-					listView.scrollTop = ganttView.scrollTop;
-					requestAnimationFrame(() => {
-						isSyncingScroll = false;
-					});
-				}
-			});
-
-			listView.addEventListener("scroll", () => {
-				if (!isSyncingScroll) {
-					isSyncingScroll = true;
-					ganttView.scrollTop = listView.scrollTop;
-					requestAnimationFrame(() => {
-						isSyncingScroll = false;
-					});
-				}
-			});
-		} else {
-			console.error("Elementi per sincronizzare lo scroll non trovati");
 		}
 	}
 
@@ -214,8 +251,6 @@ class ViewToggler extends HTMLElement {
 		} else {
 			listBtn.classList.add("fw-light");
 			ganttBtn.classList.add("fw-bold");
-
-			this.syncGanttScroll();
 		}
 	}
 
@@ -231,8 +266,21 @@ class ViewToggler extends HTMLElement {
 
 			return data;
 		} catch (error) {
-			console.error(error);
-			console.warn("Failed to get data, please try again");
+			console.warn("Failed to get data:", error);
+			const errorContainer = document.createElement("div");
+			errorContainer.className = "container-fluid p-3";
+
+			errorContainer.innerHTML = `
+				<div class="alert alert-danger d-flex align-items-center" role="alert">
+					<i class="bi bi-exclamation-triangle-fill me-2"></i>
+					<div>
+						Unable to load project data. 
+						<button class="btn btn-link p-0 ms-2" onclick="location.reload()">Try again</button>
+					</div>
+				</div>
+			`;
+			this.appendChild(errorContainer);
+
 			return null;
 		}
 	}
@@ -264,68 +312,6 @@ class ViewToggler extends HTMLElement {
 		});
 
 		return allActivities;
-	}
-
-	loadData() {
-		if (!this.projectData) return;
-		const usersAvaiable = this.projectData.users.map(
-			(user: User) => user.name
-		);
-
-		const projectSettings = document.querySelector(
-			"project-settings"
-		) as ProjectSettings;
-		if (projectSettings) {
-			projectSettings.loadData(
-				this.projectData.summary,
-				this.projectData._id,
-				this.projectData.users
-			);
-		}
-
-		const addFormComponent = document.querySelector(
-			"add-form-component"
-		) as AddForm;
-		if (addFormComponent) {
-			addFormComponent.loadProjectData(
-				this.projectData._id,
-				this.projectData.phases,
-				usersAvaiable
-			);
-		}
-
-		const activityForm = document.querySelector(
-			"activity-form"
-		) as ActivityForm;
-		if (activityForm) {
-			activityForm.loadData(this.sortedActivities, usersAvaiable);
-		}
-
-		const sideGanttList = document.querySelector(
-			"side-gantt-list"
-		) as SideGanttList;
-		if (sideGanttList) {
-			sideGanttList.loadProjectData(this.projectData.phases);
-		}
-
-		const projectPhaseRow = document.querySelector(
-			"project-phase-row"
-		) as ProjectPhaseRow;
-		if (projectPhaseRow) {
-			projectPhaseRow.loadProjectData(
-				this.projectData.phases,
-				new Date()
-			);
-		}
-
-		const timeLine = document.querySelector("time-line") as TimeLine;
-		if (timeLine) {
-			// Passa la data dateTime se presente, altrimenti usa new Date()
-			timeLine.loadData(this.dateTime ? this.dateTime : new Date());
-		}
-
-		const mainTitle = document.getElementById("mainTitle");
-		if (mainTitle) mainTitle.textContent = this.projectData.summary;
 	}
 }
 
