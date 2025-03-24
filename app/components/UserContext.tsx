@@ -11,7 +11,6 @@ type ReducedUser = {
 	email: string;
 	birthDay: string;
 	userStatus: string;
-	profilePic: string;
 	pomodoro: PomodoroSettings;
 	previews: {
 		calendar: {

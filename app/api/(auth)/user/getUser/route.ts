@@ -22,7 +22,6 @@ type ReducedUser = {
 	email: string;
 	birthDay: string;
 	userStatus: string;
-	profilePic: string;
 	pomodoro: PomodoroSettings;
 	previews: {
 		calendar: {
@@ -81,7 +80,6 @@ export const GET = async (request: NextRequest) => {
 		email: userObj.email,
 		birthDay: userObj.birthDay,
 		userStatus: userObj.userStatus,
-		profilePic: userObj.profilePic,
 		pomodoro: userObj.pomodoro,
 		previews: userObj.previews,
 		alarmPreferences: userObj.alarmPreferences

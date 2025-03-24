@@ -4,7 +4,6 @@ export type UserElement = {
 	_id: string;
 	username: string;
 	userStatus: string;
-	profilePic: string;
 };
 
 export type ChatEntry = {

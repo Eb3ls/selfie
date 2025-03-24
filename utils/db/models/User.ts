@@ -15,7 +15,6 @@ export interface User {
 	password: string;
 	birthDay: Date | null;		// Se non messa è null, altrimenti l'utente sarebbe nato il giorno del signup
 	userStatus: string;			// Attivo, Disattivo
-	profilePic: string;			// Path dell'immagine di profilo
 	isResource: boolean;		// Se l'utente è una risorsa - es. un luogo specifico
 	pomodoro: PomodoroSettings;	// Setting iniziale per il pomodoro
 	subscriptionList: {
@@ -53,7 +52,6 @@ export function createUser({
 	password = "",
 	birthDay = null,
 	userStatus = "Attivo",
-	profilePic = "/images/?.png",
 	isResource = false,
 	pomodoro = createPomodoroSettings({}),
 	subscriptionList = [],
@@ -81,7 +79,6 @@ export function createUser({
 		password: password,
 		birthDay: birthDay,
 		userStatus: userStatus,
-		profilePic: profilePic,
 		isResource: isResource,
 		pomodoro: pomodoro,
 		subscriptionList: subscriptionList,

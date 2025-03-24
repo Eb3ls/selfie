@@ -24,7 +24,6 @@ type UserElement = {
 	_id: string;
 	username: string;
 	userStatus: string;
-	profilePic: string;
 };
 
 type ChatEntry = {
@@ -47,8 +46,7 @@ function getUserElement(user: StringUser): UserElement {
 	return {
 		_id: user._id!,
 		username: user.username,
-		userStatus: user.userStatus,
-		profilePic: user.profilePic
+		userStatus: user.userStatus
 	};
 }
 

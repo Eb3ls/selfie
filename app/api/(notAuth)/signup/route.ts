@@ -1,4 +1,3 @@
-import { DEFAULT_PROFILE_URL } from "@/app/constants";
 import {
 	generateMessageResponse,
 	generateStringModel,
@@ -64,9 +63,6 @@ export const POST = async (request: NextRequest) => {
 
 	// Creaiamo un nuovo utente con quei campi
 	const newUser: StringUser = generateStringModel(newBody, "User");
-
-	// Aggiungo profilePic di default
-	newUser.profilePic = DEFAULT_PROFILE_URL;
 
 	const passwordEncrypted: string = crypto
 		.createHash("sha256")
