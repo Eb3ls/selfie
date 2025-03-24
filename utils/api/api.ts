@@ -595,7 +595,6 @@ export async function getNameFromId(userId: string): Promise<string> {
 		throw new Error(`Errore nel recupero dell'utente con ID ${userId}`);
 	} else {
 		const user = await outUser.json();
-		console.log(user[0].username);
 		// Ritorna il nome dell'utente
 		return user[0].username;
 	}

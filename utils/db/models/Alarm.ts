@@ -6,7 +6,7 @@ NO COLLECTION
 
 export const ONE_DAY_BEFORE = "-PT1D";
 export const ONE_HOUR_BEFORE = "-PT1H";
-export const TEN_MINUTES_BEFORE = "-PT1M";
+export const TEN_MINUTES_BEFORE = "-PT10M";
 export const AT_THE_TIME = "-PT0S";
 
 export type Trigger = typeof ONE_DAY_BEFORE | typeof ONE_HOUR_BEFORE | typeof TEN_MINUTES_BEFORE | typeof AT_THE_TIME;
