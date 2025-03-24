@@ -12,6 +12,7 @@ import {
 	Phase,
 	Project,
 	ProjectActivity,
+	StringProject,
 	findCollectionWrapper,
 	getCollection
 } from "@/utils/db/db";
@@ -107,10 +108,15 @@ export const GET = async (
 		return outProject;
 	}
 
-	const project: Project = (await outProject.json())[0];
+	const project: StringProject = (await outProject.json())[0];
 
 	// Controlla che l'utente dei cookie sia l'owner del progetto
-	if (project.ownerId.toString() !== userId) {
+	if (
+		project.ownerId.toString() !== userId &&
+		!project.userIdList.includes(userId)
+	) {
+		console.log("userId: ", userId);
+		console.log("userIdList: ", project.userIdList);
 		return generateMessageResponse("Unauthorized", 401);
 	}
 

@@ -219,7 +219,6 @@ export function createStatusEntry(
 			alert("Errore durante la modifica dello stato");
 			console.error(error);
 		}
-		iconBlock.replaceWith(createStatusIcon(status, activityId));
 	};
 
 	item.appendChild(link);
@@ -240,11 +239,11 @@ export function createStatusList(
 	} else if (currentStatus === "ACTIVE") {
 		statusList = ["SUBMITTED", "DROPPED"];
 	} else if (currentStatus === "SUBMITTED") {
-		statusList = ["REACTIVATED", "COMPLETED", "DROPPED"];
+		statusList = ["REACTIVATED", "COMPLETED"];
 	} else if (currentStatus === "REACTIVATED") {
-		statusList = ["COMPLETED", "DROPPED"];
+		statusList = ["SUBMITTED", "DROPPED"];
 	} else if (currentStatus === "OVERDUE") {
-		statusList = ["COMPLETED", "DROPPED"];
+		statusList = ["SUBMITTED", "DROPPED"];
 	}
 
 	const list = [];
@@ -257,7 +256,9 @@ export function createStatusList(
 // Funzione per ottenere l'icona dello stato
 export function createStatusIcon(
 	status: keyof typeof statusConfig,
-	activityId: string
+	activityId: string,
+	hasPermission: boolean,
+	isOwner: boolean
 ): HTMLElement {
 	const wrapper = document.createElement("div");
 	wrapper.className = "dropdown d-inline-block";
@@ -276,7 +277,14 @@ export function createStatusIcon(
 
 	dropdownButton.appendChild(icon);
 	wrapper.appendChild(dropdownButton);
-	if (status !== "COMPLETED" && status !== "DROPPED") {
+	if (
+		status !== "COMPLETED" &&
+		status !== "DROPPED" &&
+		(hasPermission || isOwner)
+	) {
+		if (status === "SUBMITTED" && !isOwner) {
+			return wrapper;
+		}
 		// Creiamo il dropdown menu
 		dropdownButton.setAttribute("data-bs-toggle", "dropdown");
 		dropdownButton.setAttribute("aria-expanded", "false");

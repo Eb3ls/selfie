@@ -18,6 +18,7 @@ class ActivityForm extends HTMLElement {
 	usersAvaiable: User[];
 	usersList: User[];
 	modifiedLinklist: PartialLink[];
+	isOwner: boolean;
 
 	constructor() {
 		super();
@@ -27,6 +28,7 @@ class ActivityForm extends HTMLElement {
 		this.usersAvaiable = [];
 		this.usersList = [];
 		this.modifiedLinklist = [];
+		this.isOwner = false;
 	}
 
 	// Renderizziamo il componente senza contenuto
@@ -44,12 +46,14 @@ class ActivityForm extends HTMLElement {
 	}
 
 	// Funzione chiamata per fornire i dati generali, chimata da viewToggler
-	public loadData(
+	public loadProjectData(
 		activitiesList: ProjectActivityResponse[],
-		usersAvaiable: User[]
+		usersAvaiable: User[],
+		isOwner: boolean
 	) {
 		this.activitiesList = [...activitiesList];
 		this.usersAvaiable = [...usersAvaiable];
+		this.isOwner = isOwner;
 	}
 
 	// Funzione per fornire i dati dell'activity specifica
@@ -189,6 +193,9 @@ class ActivityForm extends HTMLElement {
                         <span>Activity</span>
                     </h5>
                     <div class="ms-auto">
+						${
+							this.isOwner
+								? `
                         <button type="button" class="btn btn-sm btn-danger me-2" id="deleteBtn">
                             <i class="bi bi-trash"></i>
                             Delete
@@ -201,6 +208,9 @@ class ActivityForm extends HTMLElement {
                             <i class="bi bi-pencil"></i>
                             Modify
                         </button>
+						`
+								: ""
+						}
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                 </div>

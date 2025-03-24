@@ -1,5 +1,6 @@
 import ActivityForm from "./Forms/ActivityForm";
 import AddForm from "./Forms/AddForm";
+import PhaseForm from "./Forms/PhaseForm";
 import ProjectSettings from "./Forms/ProjectSettings";
 import ProjectPhaseRow from "./GanttBody/ProjectPhaseRow";
 import SideGanttList from "./GanttBody/SideGanttList";
@@ -13,7 +14,8 @@ import {
 	ROW_HEIGHT,
 	ROW_HEIGHT_PX,
 	SortedActivity,
-	SubPhaseResponse
+	SubPhaseResponse,
+	User
 } from "./Utils";
 
 class ViewToggler extends HTMLElement {
@@ -25,6 +27,7 @@ class ViewToggler extends HTMLElement {
 	// Salviamo la posizione dello scroll per il gantt
 	ganttPositionY: number;
 	dateTime: Date | null;
+	currentUser: User | null;
 
 	constructor() {
 		super();
@@ -36,6 +39,7 @@ class ViewToggler extends HTMLElement {
 		this.openToggleList = {};
 		this.ganttPositionY = 0;
 		this.dateTime = null;
+		this.currentUser = null;
 	}
 
 	async connectedCallback() {
@@ -84,6 +88,7 @@ class ViewToggler extends HTMLElement {
 	}
 
 	private insertUpperHeader(): void {
+		const isOwner = this.currentUser?.id === this.projectData?.users[0].id;
 		const wrapper = document.createElement("div");
 		wrapper.className = "d-flex border-bottom border-secondary px-3";
 		wrapper.style.minHeight = ROW_HEIGHT_PX;
@@ -95,7 +100,7 @@ class ViewToggler extends HTMLElement {
 					<div class="ms-1">${this.projectData!.summary}</div>
 				</div>
 				<div class="col d-flex justify-content-end align-items-center">
-					<add-form-component></add-form-component>
+					${isOwner ? `<add-form-component></add-form-component> ` : ""}
 					<project-settings></project-settings>
 				</div>
 			</div>
@@ -104,12 +109,18 @@ class ViewToggler extends HTMLElement {
 		this.appendChild(wrapper);
 
 		if (!this.projectData) return;
-		const addForm = this.querySelector("add-form-component") as AddForm;
-		addForm.loadProjectData(
-			this.projectData._id,
-			this.projectData.phases,
-			this.projectData.users
-		);
+
+		if (isOwner) {
+			const addForm = this.querySelector("add-form-component") as AddForm;
+			addForm.loadProjectData(
+				this.projectData._id,
+				this.projectData.phases,
+				this.projectData.users
+			);
+		}
+
+		const phaseForm = document.querySelector("phase-form") as PhaseForm;
+		phaseForm.isOwner = isOwner;
 
 		const projectSettings = this.querySelector(
 			"project-settings"
@@ -117,16 +128,18 @@ class ViewToggler extends HTMLElement {
 		projectSettings.loadProjectData(
 			this.projectData.summary,
 			this.projectData._id,
-			this.projectData.users
+			this.projectData.users,
+			this.currentUser || this.projectData.users[0]
 		);
 
 		const activityForm = document.querySelector(
 			"activity-form"
 		) as ActivityForm;
 		if (activityForm) {
-			activityForm.loadData(
+			activityForm.loadProjectData(
 				this.sortedActivities,
-				this.projectData.users
+				this.projectData.users,
+				isOwner
 			);
 		}
 	}
@@ -198,7 +211,9 @@ class ViewToggler extends HTMLElement {
 		) as SideGanttList;
 		sideGanttList.loadProjectData(
 			this.projectData.phases,
-			this.openToggleList
+			this.openToggleList,
+			this.currentUser || this.projectData.users[0],
+			this.currentUser?.id === this.projectData.users[0].id
 		);
 
 		const projectPhaseRow = this.querySelector(

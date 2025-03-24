@@ -2,7 +2,9 @@
 
 import { GlobalSideBar } from "@/app/components/GlobalSideBar";
 import { useTime } from "@/app/components/TimeContext";
+import { useUser } from "@/app/components/UserContext";
 import { useEffect, useState } from "react";
+import ViewToggler from "./ViewToggler";
 import "./styles.css";
 
 declare global {
@@ -18,6 +20,7 @@ declare global {
 export default function Projects() {
 	const { dateTime } = useTime();
 	const [showContent, setShowContent] = useState(false);
+	const { user } = useUser();
 
 	// Necessario in quanto con il ssr HTMLElement non é definito => non possiamo definire i custom elements
 	useEffect(() => {
@@ -41,11 +44,17 @@ export default function Projects() {
 
 	useEffect(() => {
 		// Assign dateTime to the custom element view-toggler
-		const viewToggler = document.querySelector("view-toggler") as any;
-		if (viewToggler) {
+		const viewToggler = document.querySelector(
+			"view-toggler"
+		) as ViewToggler;
+		if (viewToggler && dateTime && user) {
 			viewToggler.dateTime = dateTime;
+			viewToggler.currentUser = {
+				id: user._id,
+				name: user.username
+			};
 		}
-	}, [dateTime]);
+	}, [dateTime, user]);
 
 	return (
 		<>

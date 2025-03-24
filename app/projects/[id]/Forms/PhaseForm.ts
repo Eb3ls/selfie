@@ -8,6 +8,7 @@ class PhaseForm extends HTMLElement {
 	minOuter: string;
 	maxOuter: string;
 	isEditMode: boolean;
+	isOwner: boolean;
 
 	constructor() {
 		super();
@@ -18,6 +19,7 @@ class PhaseForm extends HTMLElement {
 		this.minOuter = "";
 		this.maxOuter = "";
 		this.isEditMode = false;
+		this.isOwner = false;
 	}
 
 	private createViewTemplate() {
@@ -105,6 +107,9 @@ class PhaseForm extends HTMLElement {
                 <i class="bi bi-info-circle"></i>
                 <span>Phase</span>
                 </h5>
+				${
+					this.isOwner
+						? `
                 <div class="ms-auto">
                 <button type="button" class="btn btn-sm btn-danger me-2" id="deleteBtn">
                     <i class="bi bi-trash"></i>
@@ -113,7 +118,9 @@ class PhaseForm extends HTMLElement {
                 <button type="button" class="btn btn-sm btn-warning me-2" id="toggleEditBtn">
                     <i class="bi bi-pencil"></i>
                     Modify
-                </button>
+                </button> `
+						: ""
+				}
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
             </div>

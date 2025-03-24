@@ -6,6 +6,7 @@ import {
 	ProjectActivityResponse,
 	ROW_HEIGHT_PX,
 	SubPhaseResponse,
+	User,
 	createStatusIcon,
 	formatDate,
 	getToggleState,
@@ -14,18 +15,26 @@ import {
 
 class SideGanttList extends HTMLElement {
 	openToggleList: PhaseToggleMap;
+	currentUser: User | null;
+	isOwner: boolean;
 
 	constructor() {
 		super();
 		this.openToggleList = {};
+		this.currentUser = null;
+		this.isOwner = false;
 	}
 
 	public loadProjectData(
 		phases: PhaseResponse[],
-		openToggleList: PhaseToggleMap
+		openToggleList: PhaseToggleMap,
+		currentUser: User,
+		isOwner: boolean
 	) {
 		if (!phases) return;
 		this.openToggleList = openToggleList;
+		this.currentUser = currentUser;
+		this.isOwner = isOwner;
 
 		const container = document.createElement("div");
 		container.className = "container";
@@ -66,9 +75,14 @@ class SideGanttList extends HTMLElement {
 		activityElement.style.height = `${ROW_HEIGHT_PX}`;
 
 		// Icona
+		const isCurrentUserInvolved = activity.users.some(
+			(user: User) => user.id === this.currentUser?.id
+		);
 		const statusIcon = createStatusIcon(
 			activity.status as any,
-			activity._id
+			activity._id,
+			isCurrentUserInvolved,
+			this.isOwner
 		);
 
 		// Container per le due colonne con titolo e date

@@ -12,6 +12,7 @@ class ProjectSettings extends HTMLElement {
 	id: string;
 	owner: string;
 	users: string[];
+	currentUser: User | null;
 	modifiedUsers: string[];
 
 	constructor() {
@@ -20,6 +21,7 @@ class ProjectSettings extends HTMLElement {
 		this.id = "";
 		this.owner = "";
 		this.users = [];
+		this.currentUser = null;
 		this.modifiedUsers = [];
 	}
 
@@ -38,13 +40,19 @@ class ProjectSettings extends HTMLElement {
         `;
 	}
 
-	public loadProjectData(title: string, id: string, users: User[]) {
+	public loadProjectData(
+		title: string,
+		id: string,
+		users: User[],
+		currentUser: User
+	) {
 		if (!title || !users || !id) return;
 		this.title = title;
 		this.id = id;
 		this.users = users.map((user) => user.name);
 		// Eliminiamo il primo utente che é sempre l'owner del progetto
 		this.owner = this.users.shift() || "";
+		this.currentUser = currentUser;
 		this.updateModalContent("VIEW");
 	}
 
@@ -80,6 +88,10 @@ class ProjectSettings extends HTMLElement {
 		if (userListView) {
 			if (this.users.length > 0) {
 				userListView.innerHTML = "";
+				userListView.innerHTML += `<div class="user-item d-flex align-items-center mb-2 fw-bold">
+					<i class="bi bi-person-fill me-2"></i>
+					${this.owner}
+				</div>`;
 				this.users.forEach((user) => {
 					userListView.innerHTML += `<div class="user-item d-flex align-items-center mb-2">
                         <i class="bi bi-person-fill me-2"></i>
@@ -94,23 +106,30 @@ class ProjectSettings extends HTMLElement {
 	}
 
 	private createViewTemplate() {
+		const isOwner = this.currentUser?.name === this.owner;
 		return `
             <div class="modal-header d-flex align-items-center">
                 <h5 class="modal-title d-flex align-items-center gap-2">
                     <i class="bi bi-info-circle"></i>
                     <span>Impostazioni progetto</span>
                 </h5>
-                <div class="ms-auto">
-                    <button type="button" class="btn btn-sm btn-danger me-2" id="deleteBtn">
-                        <i class="bi bi-trash"></i>
-                        Delete
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-primary me-2" id="editBtn">
-                        <i class="bi bi-pencil"></i>
-                        Modify
-                    </button>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
+				${
+					isOwner
+						? `
+				<div class="ms-auto">
+					<button type="button" class="btn btn-sm btn-danger me-2" id="deleteBtn">
+						<i class="bi bi-trash"></i>
+						Delete
+					</button>
+					<button type="button" class="btn btn-sm btn-outline-primary me-2" id="editBtn">
+						<i class="bi bi-pencil"></i>
+						Modify
+					</button>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+				</div>
+				`
+						: ""
+				}
             </div>
             <div class="modal-body">
                 <div class="mb-4">
