@@ -43,13 +43,11 @@ async function notifyAllActivities(time: Date) {
 	});
 
 	for (const activity of filtered_activities) {
-		// Non facciamo await qui, perché non ci interessa aspettare che la funzione finisca
-		// prima di passare alla prossima iterazione
-		sendTimeMachineNotification(
-			activity.ownerId,
-			"activity",
-			activity.summary
-		);
+		for (const member of activity.userIdList) {
+			// Non facciamo await qui, perché non ci interessa aspettare che la funzione finisca
+			// prima di passare alla prossima iterazione
+			sendTimeMachineNotification(member, "activity", activity.summary);
+		}
 	}
 }
 
@@ -79,9 +77,11 @@ async function notifyAllEvents(time: Date) {
 	});
 
 	for (const event of filtered_events) {
-		// Non facciamo await qui, perché non ci interessa aspettare che la funzione finisca
-		// prima di passare alla prossima iterazione
-		sendTimeMachineNotification(event.ownerId, "event", event.summary);
+		for (const member of event.userIdList) {
+			// Non facciamo await qui, perché non ci interessa aspettare che la funzione finisca
+			// prima di passare alla prossima iterazione
+			sendTimeMachineNotification(member, "event", event.summary);
+		}
 	}
 }
 
@@ -145,13 +145,15 @@ async function notifyAllProjectActivities(time: Date) {
 	);
 
 	for (const projectActivity of filtered_projectActivities) {
-		// Non facciamo await qui, perché non ci interessa aspettare che la funzione finisca
-		// prima di passare alla prossima iterazione
-		sendTimeMachineNotification(
-			projectActivity.ownerId,
-			"projectActivity",
-			projectActivity.summary
-		);
+		for (const member of projectActivity.userIdList) {
+			// Non facciamo await qui, perché non ci interessa aspettare che la funzione finisca
+			// prima di passare alla prossima iterazione
+			sendTimeMachineNotification(
+				member,
+				"projectActivity",
+				projectActivity.summary
+			);
+		}
 	}
 }
 
