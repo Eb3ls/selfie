@@ -1,4 +1,16 @@
-import { StringEvent, StringSession } from "@/utils/db/db";
+import {
+	StringActivity,
+	StringEvent,
+	StringProjectActivity,
+	StringSession
+} from "@/utils/db/db";
+import {
+	AT_THE_TIME,
+	ONE_DAY_BEFORE,
+	ONE_HOUR_BEFORE,
+	TEN_MINUTES_BEFORE,
+	Trigger
+} from "@/utils/db/models/Alarm";
 import { sendNotification } from "@/utils/notification/notification_server";
 import { rrulestr } from "rrule";
 
@@ -86,4 +98,52 @@ export async function sendTimeMachineNotification(
 
 	// Inviamo la notifica
 	await sendNotification(who, notificationData);
+}
+
+function moveDate(date: string, trigger: Trigger): Date {
+	const newDate = new Date(date);
+
+	if (trigger === ONE_DAY_BEFORE) {
+		newDate.setUTCDate(newDate.getUTCDate() - 1);
+	} else if (trigger === ONE_HOUR_BEFORE) {
+		newDate.setUTCHours(newDate.getUTCHours() - 1);
+	} else if (trigger === TEN_MINUTES_BEFORE) {
+		newDate.setUTCMinutes(newDate.getUTCMinutes() - 10);
+	} else if (trigger === AT_THE_TIME) {
+		// Do nothing
+	}
+
+	return newDate;
+}
+
+export function applyAlarmsActivities<
+	T extends StringActivity | StringProjectActivity
+>(activity: T) {
+	const newActivities: T[] = [];
+
+	for (const alarm of activity.alarms) {
+		let newActivity = { ...activity } as any;
+
+		newActivity.due = moveDate(activity.due, alarm.trigger).toISOString();
+
+		newActivities.push(newActivity);
+	}
+
+	return newActivities;
+}
+
+export function applyAlarmsEvents<T extends StringEvent | StringSession>(
+	event: T
+) {
+	const newEvents: T[] = [];
+
+	for (const alarm of event.alarms) {
+		let newEvent = { ...event } as any;
+
+		newEvent.dtStart = moveDate(event.dtStart, alarm.trigger).toISOString();
+
+		newEvents.push(newEvent);
+	}
+
+	return newEvents;
 }

@@ -15,6 +15,8 @@ import {
 	getCollection
 } from "@/utils/db/db";
 import {
+	applyAlarmsActivities,
+	applyAlarmsEvents,
 	areInTheSameMinute,
 	checkIfIsInRecurrence,
 	sendTimeMachineNotification
@@ -37,8 +39,12 @@ async function notifyAllActivities(time: Date) {
 
 	const activities: StringActivity[] = await out.json();
 
+	const expanded_activities = activities.flatMap((activity) => {
+		return applyAlarmsActivities(activity);
+	});
+
 	// Filtriamo le attività che finiscono entro il secondo attuale
-	const filtered_activities = activities.filter((activity) => {
+	const filtered_activities = expanded_activities.filter((activity) => {
 		return areInTheSameMinute(new Date(activity.due), time);
 	});
 
@@ -67,8 +73,12 @@ async function notifyAllEvents(time: Date) {
 
 	const events: StringEvent[] = await out.json();
 
+	const expanded_events = events.flatMap((event) => {
+		return applyAlarmsEvents(event);
+	});
+
 	// Filtriamo gli eventi che finiscono entro il secondo attuale
-	const filtered_events = events.filter((event) => {
+	const filtered_events = expanded_events.filter((event) => {
 		if (event.rrule) {
 			return checkIfIsInRecurrence(event, time);
 		} else {
@@ -101,8 +111,12 @@ async function notifyAllSessions(time: Date) {
 
 	const sessions: StringSession[] = await out.json();
 
+	const expanded_sessions = sessions.flatMap((session) => {
+		return applyAlarmsEvents(session);
+	});
+
 	// Filtriamo le sessioni che finiscono entro il secondo attuale
-	const filtered_sessions = sessions.filter((session) => {
+	const filtered_sessions = expanded_sessions.filter((session) => {
 		if (session.rrule) {
 			return checkIfIsInRecurrence(session, time);
 		} else {
@@ -137,8 +151,14 @@ async function notifyAllProjectActivities(time: Date) {
 
 	const projectActivities: StringProjectActivity[] = await out.json();
 
+	const expanded_projectActivities = projectActivities.flatMap(
+		(projectActivity) => {
+			return applyAlarmsActivities(projectActivity);
+		}
+	);
+
 	// Filtriamo le project activities che finiscono entro il secondo attuale
-	const filtered_projectActivities = projectActivities.filter(
+	const filtered_projectActivities = expanded_projectActivities.filter(
 		(projectActivity) => {
 			return areInTheSameMinute(new Date(projectActivity.due), time);
 		}
