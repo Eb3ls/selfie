@@ -24,6 +24,17 @@ type ReducedUser = {
 	userStatus: string;
 	profilePic: string;
 	pomodoro: PomodoroSettings;
+	previews: {
+		calendar: {
+			activity: boolean;
+			event: boolean;
+			session: boolean;
+			projectActivity: boolean;
+			maxOccurrences: number;
+		};
+		maxChats: number;
+		maxNotes: number;
+	};
 };
 
 export const GET = async (request: NextRequest) => {
@@ -67,7 +78,8 @@ export const GET = async (request: NextRequest) => {
 		birthDay: userObj.birthDay,
 		userStatus: userObj.userStatus,
 		profilePic: userObj.profilePic,
-		pomodoro: userObj.pomodoro
+		pomodoro: userObj.pomodoro,
+		previews: userObj.previews
 	};
 
 	return generateObjectResponse(response, 200);

@@ -23,7 +23,18 @@ const requestTemplate = {
 	email: "",
 	password: "",
 	oldPassword: "",
-	birthDay: ""
+	birthDay: "",
+	previews: {
+		calendar: {
+			activity: true,
+			event: true,
+			session: true,
+			projectActivity: true,
+			maxOccurrences: 10
+		},
+		maxChats: 10,
+		maxNotes: 10
+	}
 };
 
 type RequestType = typeof requestTemplate;
@@ -33,13 +44,15 @@ export const PATCH = async (request: NextRequest) => {
 	const validation = await validate<RequestType>(
 		request,
 		requestTemplate,
-		true
+		false
 	);
 
 	// Se la validazione fallisce, ritorna il messaggio di errore
 	if (validation === null) {
 		return generateMessageResponse("Invalid request", 400);
 	}
+
+	console.log("Validation passed");
 
 	// Estraiamo l'utente e il corpo della richiesta
 	const { user: user, body: newBody } = validation;
@@ -68,7 +81,8 @@ export const PATCH = async (request: NextRequest) => {
 		firstName: newBody.firstName,
 		lastName: newBody.lastName,
 		email: newBody.email,
-		birthDay: newBody.birthDay
+		birthDay: newBody.birthDay,
+		previews: newBody.previews
 	};
 
 	if (

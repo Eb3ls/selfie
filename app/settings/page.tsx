@@ -1,27 +1,16 @@
 "use client";
 
-import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import {
-	Button,
-	Card,
-	Col,
-	Container,
-	Form,
-	Row,
-	Spinner,
-	Stack
-} from "react-bootstrap";
-import { FaImage, FaKey, FaSave, FaUserEdit } from "react-icons/fa";
+import { Card, Col, Container, Row } from "react-bootstrap";
+import { FaUserEdit } from "react-icons/fa";
 import { GlobalSideBar } from "../components/GlobalSideBar";
 import { useUser } from "../components/UserContext";
-import { DEFAULT_PROFILE_PIC } from "../constants";
 import styles from "./SettingsPage.module.css";
+import ProfilePictureUpload from "./components/ProfilePictureUpload";
+import SettingsForm from "./components/SettingsForm";
 
 export default function SettingsPage() {
 	const { user, updateUser } = useUser();
-	const router = useRouter();
 
 	const [formData, setFormData] = useState({
 		username: "",
@@ -30,7 +19,18 @@ export default function SettingsPage() {
 		email: "",
 		birthDay: "",
 		oldPassword: "",
-		newPassword: ""
+		newPassword: "",
+		previews: {
+			calendar: {
+				activity: true,
+				event: true,
+				session: true,
+				projectActivity: true,
+				maxOccurrences: 10
+			},
+			maxChats: 10,
+			maxNotes: 10
+		}
 	});
 
 	const [profilePic, setProfilePic] = useState<string | null>(null);
@@ -39,20 +39,21 @@ export default function SettingsPage() {
 	const [showPasswordFields, setShowPasswordFields] = useState(false);
 	const [errorMessage, setErrorMessage] = useState("");
 	const [successMessage, setSuccessMessage] = useState("");
-	const [errorLoadImage, setErrorLoadImage] = useState<boolean>(false);
 
 	useEffect(() => {
 		const loadUserData = async () => {
 			if (user) {
-				setFormData({
+				setFormData((prev) => ({
+					...prev, // Mantieni le modifiche esistenti
 					username: user.username || "",
 					firstName: user.firstName || "",
 					lastName: user.lastName || "",
 					email: user.email || "",
 					birthDay: user.birthDay?.split("T")[0] || "",
 					oldPassword: "",
-					newPassword: ""
-				});
+					newPassword: "",
+					previews: user.previews
+				}));
 
 				try {
 					const response = await fetch("/api/user/getProfilePic");
@@ -119,22 +120,23 @@ export default function SettingsPage() {
 		}
 
 		try {
+			const body = {
+				username: formData.username,
+				firstName: formData.firstName,
+				lastName: formData.lastName,
+				email: formData.email,
+				birthDay: formData.birthDay,
+				oldPassword: showPasswordFields ? formData.oldPassword : "",
+				password: showPasswordFields ? formData.newPassword : "",
+				previews: formData.previews
+			};
+
+			console.log(JSON.stringify(body));
+
 			const response = await fetch("/api/user/modify", {
 				method: "PATCH",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
-					username: formData.username,
-					firstName: formData.firstName,
-					lastName: formData.lastName,
-					email: formData.email,
-					birthDay: formData.birthDay,
-					oldPassword: showPasswordFields
-						? formData.oldPassword
-						: undefined,
-					password: showPasswordFields
-						? formData.newPassword
-						: undefined
-				})
+				body: JSON.stringify(body)
 			});
 
 			const data = await response.json();
@@ -144,12 +146,12 @@ export default function SettingsPage() {
 					...formData,
 					birthDay: formData.birthDay
 				});
-				setSuccessMessage("Profile updated successfully!");
+				setSuccessMessage("Profilo aggiornato con successo");
 			} else {
-				setErrorMessage(data.message || "Update error");
+				setErrorMessage(data.message || "Errore di aggiornamento");
 			}
 		} catch (error) {
-			setErrorMessage("Connection error");
+			setErrorMessage("Errore di connessione");
 		}
 	};
 
@@ -169,322 +171,32 @@ export default function SettingsPage() {
 
 							<Card.Body className={styles.cardBody}>
 								<Row className="g-4">
-									{/* Profile Picture Section */}
 									<Col
 										md={5}
 										className={styles.profileSection}
 									>
-										<div
-											className={styles.profilePicWrapper}
-										>
-											<div
-												className={
-													styles.profilePicContainer
-												}
-											>
-												<Image
-													src={
-														errorLoadImage
-															? DEFAULT_PROFILE_PIC
-															: profilePic ||
-																DEFAULT_PROFILE_PIC
-													}
-													alt="Profile"
-													width={500}
-													height={500}
-													className={
-														styles.profilePic
-													}
-													onError={() =>
-														setErrorLoadImage(true)
-													}
-												/>
-												{isUploading && (
-													<div
-														className={
-															styles.uploadOverlay
-														}
-													>
-														<Spinner
-															animation="border"
-															variant="light"
-														/>
-													</div>
-												)}
-											</div>
-
-											<input
-												type="file"
-												id="profilePicInput"
-												accept="image/*"
-												onChange={handleImageUpload}
-												hidden
-											/>
-											<Button
-												variant="outline-primary"
-												className={styles.uploadButton}
-												onClick={() =>
-													document
-														.getElementById(
-															"profilePicInput"
-														)
-														?.click()
-												}
-												disabled={isUploading}
-											>
-												<FaImage
-													className={
-														styles.buttonIcon
-													}
-												/>
-												{isUploading
-													? "Caricando..."
-													: " Cambia immagine"}
-											</Button>
-
-											{profilePicError && (
-												<div
-													className={
-														styles.errorMessage
-													}
-												>
-													{profilePicError}
-												</div>
-											)}
-										</div>
+										<ProfilePictureUpload
+											profilePic={profilePic}
+											isUploading={isUploading}
+											profilePicError={profilePicError}
+											onImageUpload={handleImageUpload}
+										/>
 									</Col>
 
-									{/* Settings Form */}
 									<Col md={7}>
-										<Form
+										<SettingsForm
+											formData={formData}
+											setFormData={setFormData}
+											showPasswordFields={
+												showPasswordFields
+											}
+											setShowPasswordFields={
+												setShowPasswordFields
+											}
 											onSubmit={handleSubmit}
-											className={styles.settingsForm}
-										>
-											<Stack gap={3}>
-												<Form.Group controlId="username">
-													<Form.Label>
-														Username
-													</Form.Label>
-													<Form.Control
-														value={
-															formData.username
-														}
-														onChange={(e) =>
-															setFormData({
-																...formData,
-																username:
-																	e.target
-																		.value
-															})
-														}
-														required
-													/>
-												</Form.Group>
-
-												<Row>
-													<Col md={6}>
-														<Form.Group controlId="firstName">
-															<Form.Label>
-																Nome
-															</Form.Label>
-															<Form.Control
-																value={
-																	formData.firstName
-																}
-																onChange={(e) =>
-																	setFormData(
-																		{
-																			...formData,
-																			firstName:
-																				e
-																					.target
-																					.value
-																		}
-																	)
-																}
-															/>
-														</Form.Group>
-													</Col>
-													<Col md={6}>
-														<Form.Group controlId="lastName">
-															<Form.Label>
-																Cognome
-															</Form.Label>
-															<Form.Control
-																value={
-																	formData.lastName
-																}
-																onChange={(e) =>
-																	setFormData(
-																		{
-																			...formData,
-																			lastName:
-																				e
-																					.target
-																					.value
-																		}
-																	)
-																}
-															/>
-														</Form.Group>
-													</Col>
-												</Row>
-
-												<Form.Group controlId="email">
-													<Form.Label>
-														Email
-													</Form.Label>
-													<Form.Control
-														type="email"
-														value={formData.email}
-														onChange={(e) =>
-															setFormData({
-																...formData,
-																email: e.target
-																	.value
-															})
-														}
-														required
-													/>
-												</Form.Group>
-
-												<Form.Group controlId="birthDay">
-													<Form.Label>
-														Data di nascita
-													</Form.Label>
-													<Form.Control
-														type="date"
-														value={
-															formData.birthDay
-														}
-														onChange={(e) =>
-															setFormData({
-																...formData,
-																birthDay:
-																	e.target
-																		.value
-															})
-														}
-													/>
-												</Form.Group>
-
-												<div
-													className={
-														styles.passwordSection
-													}
-												>
-													<Button
-														className={`${styles.passwordToggle} ${showPasswordFields ? styles.active : ""}`}
-														onClick={() =>
-															setShowPasswordFields(
-																!showPasswordFields
-															)
-														}
-													>
-														<FaKey
-															className={
-																styles.buttonIcon
-															}
-														/>
-														{showPasswordFields
-															? " Nascondi cambia password"
-															: " Cambia password"}
-													</Button>
-
-													{showPasswordFields && (
-														<Stack
-															gap={3}
-															className="mt-3"
-														>
-															<Form.Group controlId="oldPassword">
-																<Form.Label>
-																	Current
-																	Password
-																</Form.Label>
-																<Form.Control
-																	type="password"
-																	value={
-																		formData.oldPassword
-																	}
-																	onChange={(
-																		e
-																	) =>
-																		setFormData(
-																			{
-																				...formData,
-																				oldPassword:
-																					e
-																						.target
-																						.value
-																			}
-																		)
-																	}
-																/>
-															</Form.Group>
-															<Form.Group controlId="newPassword">
-																<Form.Label>
-																	New Password
-																</Form.Label>
-																<Form.Control
-																	type="password"
-																	value={
-																		formData.newPassword
-																	}
-																	onChange={(
-																		e
-																	) =>
-																		setFormData(
-																			{
-																				...formData,
-																				newPassword:
-																					e
-																						.target
-																						.value
-																			}
-																		)
-																	}
-																/>
-															</Form.Group>
-														</Stack>
-													)}
-												</div>
-
-												{(errorMessage ||
-													successMessage) && (
-													<div
-														className={
-															errorMessage
-																? styles.errorMessage
-																: styles.successMessage
-														}
-													>
-														{errorMessage ||
-															successMessage}
-													</div>
-												)}
-
-												<div
-													className={
-														styles.buttonGroup
-													}
-												>
-													<Button
-														type="submit"
-														variant="primary"
-														className={
-															styles.primaryButton
-														}
-													>
-														<FaSave
-															className={
-																styles.buttonIcon
-															}
-														/>{" "}
-														Salva
-													</Button>
-												</div>
-											</Stack>
-										</Form>
+											errorMessage={errorMessage}
+											successMessage={successMessage}
+										/>
 									</Col>
 								</Row>
 							</Card.Body>

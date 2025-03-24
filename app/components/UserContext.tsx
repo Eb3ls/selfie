@@ -13,6 +13,17 @@ type ReducedUser = {
 	userStatus: string;
 	profilePic: string;
 	pomodoro: PomodoroSettings;
+	previews: {
+		calendar: {
+			activity: boolean;
+			event: boolean;
+			session: boolean;
+			projectActivity: boolean;
+			maxOccurrences: number;
+		};
+		maxChats: number;
+		maxNotes: number;
+	};
 };
 
 interface UserContextType {
