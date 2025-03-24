@@ -37,10 +37,10 @@ export default function SettingsPage() {
 		}
 	});
 
-	const [profilePic, setProfilePic] = useState<string | null>(null);
-	const [isUploading, setIsUploading] = useState(false);
-	const [profilePicError, setProfilePicError] = useState("");
+	// Password fields
 	const [showPasswordFields, setShowPasswordFields] = useState(false);
+
+	// Response messages
 	const [errorMessage, setErrorMessage] = useState("");
 	const [successMessage, setSuccessMessage] = useState("");
 
@@ -59,52 +59,10 @@ export default function SettingsPage() {
 					previews: user.previews,
 					alarmPreferences: user.alarmPreferences
 				}));
-
-				try {
-					const response = await fetch("/api/user/getProfilePic");
-					if (response.ok) {
-						const data = await response.json();
-						setProfilePic(data.profilePic);
-					}
-				} catch (error) {
-					console.error("Error fetching profile picture:", error);
-				}
 			}
 		};
 		loadUserData();
 	}, [user]);
-
-	const handleImageUpload = async (
-		e: React.ChangeEvent<HTMLInputElement>
-	) => {
-		const file = e.target.files?.[0];
-		if (!file) return;
-
-		setProfilePicError("");
-		setIsUploading(true);
-
-		try {
-			const formData = new FormData();
-			formData.append("profilePic", file);
-
-			const response = await fetch("/api/user/setProfilePic", {
-				method: "POST",
-				body: formData
-			});
-
-			const data = await response.json();
-			if (!response.ok) throw new Error(data.message || "Upload error");
-
-			setProfilePic(data.profilePic);
-			updateUser({ ...user!, profilePic: data.profilePic });
-		} catch (error) {
-			setProfilePicError(
-				error instanceof Error ? error.message : "Connection error"
-			);
-		} finally {
-			setIsUploading(false);
-		}
-	};
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -180,10 +138,7 @@ export default function SettingsPage() {
 										className={styles.profileSection}
 									>
 										<ProfilePictureUpload
-											profilePic={profilePic}
-											isUploading={isUploading}
-											profilePicError={profilePicError}
-											onImageUpload={handleImageUpload}
+											userId={user?._id}
 										/>
 									</Col>
 

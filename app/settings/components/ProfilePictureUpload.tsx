@@ -1,39 +1,92 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Spinner } from "react-bootstrap";
 import { FaImage } from "react-icons/fa";
-import { DEFAULT_PROFILE_PIC } from "../../constants";
+import { DEFAULT_PROFILE_URL } from "../../constants";
 import styles from "../SettingsPage.module.css";
 
+interface ProfilePictureUploadProps {
+	userId: string | undefined;
+}
+
 export default function ProfilePictureUpload({
-	profilePic,
-	isUploading,
-	profilePicError,
-	onImageUpload
-}: {
-	profilePic: string | null;
-	isUploading: boolean;
-	profilePicError: string;
-	onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-}) {
-	const [errorLoadImage, setErrorLoadImage] = useState(false);
+	userId
+}: ProfilePictureUploadProps) {
+	const [myPic, setMyPic] = useState<string | null>(null);
+
+	// Image upload
+	const [isUploading, setIsUploading] = useState(false);
+
+	// Error messages
+	const [fetchImageError, setFetchImageError] = useState(false);
+	const [uploadImageError, setUploadImageError] = useState("");
+
+	useEffect(() => {
+		if (!userId) return;
+		setMyPic(DEFAULT_PROFILE_URL + userId);
+		setFetchImageError(false);
+	}, [userId]);
+
+	async function uploadImage(image: string) {
+		const body = {
+			base64Image: image
+		};
+		const response = await fetch("/api/user/setProfilePic", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify(body)
+		});
+
+		setIsUploading(false);
+
+		if (!response.ok) {
+			setUploadImageError("Errore durante il caricamento dell'immagine.");
+			return;
+		}
+
+		setFetchImageError(false);
+	}
+
+	function handleImageUpload(event: React.ChangeEvent<HTMLInputElement>) {
+		const file = event.target.files?.[0];
+		if (!file) return;
+
+		setIsUploading(true);
+		setUploadImageError("");
+
+		const reader = new FileReader();
+		reader.onload = () => {
+			const result = reader.result as string;
+			uploadImage(result);
+		};
+		reader.onerror = () => {
+			setUploadImageError("Errore durante la lettura del file.");
+			setIsUploading(false);
+		};
+		reader.readAsDataURL(file);
+
+		event.target.value = "";
+	}
 
 	return (
 		<div className={styles.profilePicWrapper}>
 			<div className={styles.profilePicContainer}>
 				<Image
 					src={
-						errorLoadImage
-							? DEFAULT_PROFILE_PIC
-							: profilePic || DEFAULT_PROFILE_PIC
+						fetchImageError
+							? DEFAULT_PROFILE_URL
+							: myPic || DEFAULT_PROFILE_URL
 					}
 					alt="Profile"
 					width={500}
 					height={500}
 					className={styles.profilePic}
-					onError={() => setErrorLoadImage(true)}
+					onError={() => setFetchImageError(true)}
+					unoptimized
 				/>
 				{isUploading && (
 					<div className={styles.uploadOverlay}>
@@ -44,25 +97,25 @@ export default function ProfilePictureUpload({
 
 			<input
 				type="file"
-				id="profilePicInput"
+				id="uploadInput"
 				accept="image/*"
-				onChange={onImageUpload}
+				onChange={handleImageUpload}
 				hidden
 			/>
 			<Button
 				variant="outline-primary"
 				className={styles.uploadButton}
-				onClick={() =>
-					document.getElementById("profilePicInput")?.click()
-				}
 				disabled={isUploading}
+				onClick={() => {
+					document.getElementById("uploadInput")?.click();
+				}}
 			>
 				<FaImage className={styles.buttonIcon} />
 				{isUploading ? "Caricando..." : " Cambia immagine"}
 			</Button>
 
-			{profilePicError && (
-				<div className={styles.errorMessage}>{profilePicError}</div>
+			{uploadImageError && (
+				<div className={styles.errorMessage}>{uploadImageError}</div>
 			)}
 		</div>
 	);

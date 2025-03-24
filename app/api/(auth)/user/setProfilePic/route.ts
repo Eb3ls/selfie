@@ -1,126 +1,66 @@
-import { DEFAULT_PROFILE_PIC } from "@/app/constants";
-import {
-	generateMessageResponse,
-	generateObjectResponse
-} from "@/utils/api/api";
-import {
-	USER_COLLECTION,
-	User,
-	findCollectionWrapper,
-	getCollection,
-	updateCollectionWrapper
-} from "@/utils/db/db";
-import { decrypt } from "@/utils/session/session";
-import fs from "fs";
+import { DEFAULT_PROFILE_FOLDER } from "@/app/constants";
+import { generateMessageResponse, validate } from "@/utils/api/api";
+import { mkdirSync, writeFileSync } from "fs";
 import { NextRequest } from "next/server";
 import path from "path";
 
-// Assicurati che questa funzione esista
-
-export const POST = async (request: NextRequest) => {
-	try {
-		// Estrazione sessione dai cookie
-		const session = await getSession(request.cookies);
-
-		if (
-			!session?.user ||
-			typeof session.user !== "object" ||
-			!("_id" in session.user)
-		) {
-			return generateMessageResponse("Unauthorized", 401);
-		}
-
-		const userId = session.user._id as string;
-
-		// Configurazione cartella upload
-		const uploadDir = path.join(process.cwd(), "public", "profilePics");
-		if (!fs.existsSync(uploadDir)) {
-			fs.mkdirSync(uploadDir, { recursive: true });
-		}
-
-		// Processamento file
-		const formData = await request.formData();
-		const file = formData.get("profilePic");
-
-		if (!(file instanceof File)) {
-			return generateMessageResponse("Nessun file fornito", 400);
-		}
-
-		// Verifiche sul file
-		const buffer = await file.arrayBuffer();
-
-		if (buffer.byteLength > 5 * 1024 * 1024) {
-			return generateMessageResponse("L'immagine supera i 5MB", 400);
-		}
-
-		if (!file.type.startsWith("image/")) {
-			return generateMessageResponse("Formato file non supportato", 400);
-		}
-
-		// Salvataggio file
-		const timestamp = Date.now();
-		const fileExtension = file.name.split(".").pop() || "jpg";
-		const newFilename = `${userId}_${timestamp}.${fileExtension}`;
-		const newFilePath = path.join(uploadDir, newFilename);
-
-		fs.writeFileSync(newFilePath, new Uint8Array(buffer));
-
-		// Recupero utente
-		const client = await getCollection<User>(USER_COLLECTION);
-		const userResult = await findCollectionWrapper(
-			{ _id: userId as string },
-			client
-		);
-
-		if (userResult.status !== 200) {
-			fs.unlinkSync(newFilePath);
-			return generateMessageResponse("Utente non trovato", 404);
-		}
-
-		// Eliminazione vecchia immagine
-		const currentUser = (await userResult.json())[0] as User;
-		if (
-			currentUser.profilePic &&
-			currentUser.profilePic !== DEFAULT_PROFILE_PIC
-		) {
-			const oldPath = path.join(
-				process.cwd(),
-				"public",
-				currentUser.profilePic
-			);
-
-			if (fs.existsSync(oldPath)) {
-				fs.unlinkSync(oldPath);
-			}
-		}
-
-		// Aggiornamento database
-		const newProfilePicPath = `/profilePics/${newFilename}`;
-
-		const updateResult = await updateCollectionWrapper(
-			{ _id: userId },
-			{ $set: { profilePic: newProfilePicPath } } as any,
-			client
-		);
-
-		if (updateResult.status !== 200) {
-			fs.unlinkSync(newFilePath);
-			return updateResult;
-		}
-
-		return generateObjectResponse({ profilePic: newProfilePicPath }, 200);
-	} catch (error) {
-		console.error("[BACKEND] Errore completo:", error);
-		if (error instanceof Error) {
-			console.error("[BACKEND] Dettaglio errore:", error.message);
-		}
-		return generateMessageResponse("Errore interno del server", 500);
-	}
+const requestTemplate = {
+	base64Image: ""
 };
 
-// Funzioni helper per la gestione della sessione
-const getSession = async (cookies: any) => {
-	const session = cookies.get("session")?.value;
-	if (!session) return null;
-	return await decrypt(session);
+type RequestType = typeof requestTemplate;
+
+export const POST = async (request: NextRequest) => {
+	// Validazione della richiesta
+	const validation = await validate<RequestType>(
+		request,
+		requestTemplate,
+		false
+	);
+
+	// Se la validazione fallisce, ritorna il messaggio di errore
+	if (validation === null) {
+		return generateMessageResponse("Invalid request", 400);
+	}
+
+	// Estraiamo l'utente e il corpo della richiesta
+	const { user: user, body: newBody } = validation;
+
+	// Estraiamo l'id dell'utente
+	const userId: string = user._id!;
+
+	// Estraiamo l'immagine base64 dal corpo della richiesta
+	let base64Image: string = newBody.base64Image;
+
+	// Verifichiamo che il base64 sia un immagine
+	if (!base64Image.startsWith("data:image/")) {
+		return generateMessageResponse("Invalid image", 400);
+	}
+
+	// Rimuoviamo l'intestazione dell'immagine
+	base64Image = base64Image.replace("data:image/", "");
+
+	// Otteniamo il tipo di immagine
+	const imageType = base64Image.split(";")[0];
+
+	// Verifichiamo che il tipo sia tra quelli supportati
+	if (!["png", "jpeg", "jpg"].includes(imageType)) {
+		return generateMessageResponse("Invalid image type", 400);
+	}
+
+	// Rimuoviamo il tipo di immagine
+	base64Image = base64Image.replace(imageType + ";base64,", "");
+
+	// Decodifichiamo l'immagine
+	const buffer = Buffer.from(base64Image, "base64");
+
+	// Percorso di salvataggio
+	const uploadDir = path.join(process.cwd(), DEFAULT_PROFILE_FOLDER);
+	mkdirSync(uploadDir, { recursive: true });
+
+	// Salviamo l'immagine
+	const filePath = path.join(uploadDir, userId + "." + imageType);
+	writeFileSync(filePath, new Uint8Array(buffer));
+
+	return generateMessageResponse("Image uploaded", 200);
 };
