@@ -239,7 +239,8 @@ export const POST = async (request: NextRequest) => {
 			dtEnd: new Date(nextOccurrence.getTime() + duration).toISOString(),
 			dtStamp: timeNow.toISOString(),
 			settingsList: [lastSetting],
-			completedCycles: []
+			completedCycles: [],
+			alarms: session.alarms
 		};
 
 		// Inseriamo la nuova sessione

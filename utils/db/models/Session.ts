@@ -1,3 +1,4 @@
+import { Alarm } from "@/utils/db/models/Alarm";
 import { ConvertToString } from "@/utils/db/models/ModelConverter";
 import { StringDayInstance, StringPomodoroSettings } from "@/utils/db/models/Pomodoro";
 import { timeMachine } from "@/utils/timeMachine/timeMachine";
@@ -19,6 +20,7 @@ export interface Session {
 	dtStamp: Date;							// Data di creazione della sessione
 	settingsList: StringPomodoroSettings[]	// Lista delle impostazioni della sessione
 	completedCycles: StringDayInstance[]	// Mappa dei cicli completati in un certo giorno
+	alarms: Alarm[];						// Notifiche associate alla sessione
 }
 
 export type StringSession = ConvertToString<Session>;
@@ -33,7 +35,8 @@ export function createSession({
 	dtEnd = timeMachine.timeMachineTime,
 	dtStamp = timeMachine.timeMachineTime,
 	settingsList = [],
-	completedCycles = []
+	completedCycles = [],
+	alarms = []
 }: Partial<Session>): Session {
 	return {
 		ownerId: ownerId,
@@ -45,6 +48,7 @@ export function createSession({
 		dtEnd: dtEnd,
 		dtStamp: dtStamp,
 		settingsList: settingsList,
-		completedCycles: completedCycles
+		completedCycles: completedCycles,
+		alarms: alarms
 	};
 }
