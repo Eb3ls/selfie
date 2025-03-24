@@ -32,6 +32,7 @@ export interface User {
 			event: boolean;				// Se l'utente vuole vedere gli eventi
 			session: boolean;			// Se l'utente vuole vedere le sessioni
 			projectActivity: boolean;	// Se l'utente vuole vedere le attività dei progetti
+			maxOccurrences: number;		// Numero massimo di occorrenze da mostrare
 		}
 		maxChats: number;				// Numero massimo di chat
 		maxNotes: number;				// Numero massimo di note
@@ -57,7 +58,8 @@ export function createUser({
 			activity: true,
 			event: true,
 			session: true,
-			projectActivity: true
+			projectActivity: true,
+			maxOccurrences: 10
 		},
 		maxChats: 10,
 		maxNotes: 10

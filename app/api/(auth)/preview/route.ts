@@ -22,6 +22,8 @@ import {
 	ProjectActivity,
 	SESSION_COLLECTION,
 	Session,
+	StringEvent,
+	StringSession,
 	USER_COLLECTION,
 	User,
 	findCollectionWrapper,
@@ -98,6 +100,16 @@ interface ReducedCalendar {
 	sessions: ReducedSession[];
 }
 
+type OccurrenceType = "event" | "activity" | "session" | "projectActivity";
+interface Occurrence {
+	type: OccurrenceType;
+	occurrenceDate: Date;
+	_id: string;
+	summary: string;
+	description: string;
+	ownerName: string;
+}
+
 //
 // Risposta finale che ora include anche il ReducedCalendar
 //
@@ -106,6 +118,56 @@ interface PreviewsResponse {
 	projects: ReducedProject[];
 	chats: ReducedChat[];
 	calendar: ReducedCalendar;
+}
+
+async function generateRecurringCalendarEvents(
+	originalEvent: StringEvent | StringSession,
+	eventType: "event" | "session",
+	currentDate: Date
+): Promise<Occurrence[]> {
+	const calendarEvents: Occurrence[] = [];
+	const start = new Date(originalEvent.dtStart);
+	const rrule = originalEvent.rrule;
+
+	// Vogliamo generare tutti gli eventi ricorrenti in un range che va
+	// dal primo del mese corrente all'ultimo del mese successivo
+
+	// Primo giorno del mese precedente
+	const firstDayPrevMonth = new Date(
+		currentDate.getFullYear(),
+		currentDate.getMonth() - 1,
+		1
+	);
+
+	// Ultimo giorno del mese successivo
+	const lastDayNextMonth = new Date(
+		currentDate.getFullYear(),
+		currentDate.getMonth() + 2,
+		0
+	);
+
+	const rule = rrulestr(rrule, { dtstart: new Date(start) });
+
+	const occurrences = rule.between(firstDayPrevMonth, lastDayNextMonth);
+
+	// Per l'evento, prendo l'ownerName
+	const ownerName: string = await getNameFromId(
+		originalEvent.ownerId.toString()
+	);
+
+	occurrences.forEach((date) => {
+		const newEvent: Occurrence = {
+			type: eventType,
+			occurrenceDate: date,
+			_id: originalEvent._id!,
+			summary: originalEvent.summary,
+			description: originalEvent.description,
+			ownerName
+		};
+		calendarEvents.push(newEvent);
+	});
+
+	return calendarEvents;
 }
 
 //
@@ -170,8 +232,6 @@ export const GET = async (request: NextRequest) => {
 		categories: note.categories,
 		dtModified: note.dtModified
 	}));
-
-	console.log("reducedNotes", reducedNotes);
 
 	// ======================
 	// Preview dei PROGETTI
@@ -309,7 +369,7 @@ export const GET = async (request: NextRequest) => {
 	// ======================
 	// Preview del CALENDARIO
 	// ======================
-	// Obiettivo: spedire 10 occorrenze (eventi, attività, sessioni, projectActivity) ordinate per data.
+	// Obiettivo: spedire maxOccurrences occorrenze (eventi, attività, sessioni, projectActivity) ordinate per data.
 	// Per:
 	// - Eventi: se hanno rrule, estrai le occorrenze (altrimenti usa dtStart)
 	// - Attività: usa il campo "due"
@@ -320,15 +380,6 @@ export const GET = async (request: NextRequest) => {
 	const futureLimit = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000); // ad es. 1 anno in avanti
 
 	// Array per raccogliere tutte le occorrenze
-	type OccurrenceType = "event" | "activity" | "session" | "projectActivity";
-	interface Occurrence {
-		type: OccurrenceType;
-		occurrenceDate: Date;
-		_id: string;
-		summary: string;
-		description: string;
-		ownerName: string;
-	}
 	let calendarOccurrences: Occurrence[] = [];
 
 	// --- Attività ---
@@ -403,7 +454,7 @@ export const GET = async (request: NextRequest) => {
 			{ userIdList: { $in: [user._id] } } as any,
 			eventClient
 		);
-		let events: Event[] = [];
+		let events: StringEvent[] = [];
 		if (eventOut.status === 200 && eventOut.body) {
 			events = await eventOut.json();
 		}
@@ -411,22 +462,13 @@ export const GET = async (request: NextRequest) => {
 			try {
 				const ownerName = await getNameFromId(ev.ownerId.toString());
 				if (ev.rrule && ev.rrule.trim() !== "") {
-					// Evento ricorrente: estraiamo le occorrenze a partire da "now"
-					const rule = rrulestr(ev.rrule, {
-						dtstart: new Date(ev.dtStart),
-						forceset: true
-					});
-					const dates = rule.between(now, futureLimit, true);
-					for (const d of dates) {
-						calendarOccurrences.push({
-							type: "event",
-							occurrenceDate: d,
-							_id: ev._id?.toString()!,
-							summary: ev.summary,
-							description: ev.description,
-							ownerName
-						});
-					}
+					// Evento ricorrente: estrai le occorrenze
+					const occurrences = await generateRecurringCalendarEvents(
+						ev,
+						"event",
+						now
+					);
+					calendarOccurrences.push(...occurrences);
 				} else {
 					// Evento non ricorrente: usa dtStart
 					const dtStart = new Date(ev.dtStart);
@@ -452,32 +494,24 @@ export const GET = async (request: NextRequest) => {
 		const sessionClient: Collection<Session> =
 			await getCollection<Session>(SESSION_COLLECTION);
 		const sessionOut = await findCollectionWrapper<Session>(
-			{ userIdList: { $in: [user._id] } } as any,
+			{ ownerId: user._id } as any,
 			sessionClient
 		);
-		let sessions: Session[] = [];
+		let sessions: StringSession[] = [];
 		if (sessionOut.status === 200 && sessionOut.body) {
 			sessions = await sessionOut.json();
 		}
+
 		for (const sess of sessions) {
 			try {
 				const ownerName = await getNameFromId(sess.ownerId.toString());
 				// Le sessioni hanno obbligatoria la rrule
-				const rule = rrulestr(sess.rrule, {
-					dtstart: new Date(sess.dtStart),
-					forceset: true
-				});
-				const dates = rule.between(now, futureLimit, true);
-				for (const d of dates) {
-					calendarOccurrences.push({
-						type: "session",
-						occurrenceDate: d,
-						_id: sess._id?.toString()!,
-						summary: sess.summary,
-						description: sess.description,
-						ownerName
-					});
-				}
+				const occurrences = await generateRecurringCalendarEvents(
+					sess,
+					"session",
+					now
+				);
+				calendarOccurrences.push(...occurrences);
 			} catch (e) {
 				console.error("Error processing session", e);
 			}
@@ -490,7 +524,10 @@ export const GET = async (request: NextRequest) => {
 	);
 
 	// Prendi le prime 10 occorrenze
-	const nextSeven = calendarOccurrences.slice(0, 10);
+	const nextSeven = calendarOccurrences.slice(
+		0,
+		previews.calendar.maxOccurrences
+	);
 
 	// Distribuisci le occorrenze nei rispettivi array in base al tipo
 	let reducedProjectsActivities: ReducedProjectActivity[] = [];
