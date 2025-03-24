@@ -30,6 +30,10 @@ export default function SettingsPage() {
 			},
 			maxChats: 10,
 			maxNotes: 10
+		},
+		alarmPreferences: {
+			email: true,
+			push: true
 		}
 	});
 
@@ -52,7 +56,8 @@ export default function SettingsPage() {
 					birthDay: user.birthDay?.split("T")[0] || "",
 					oldPassword: "",
 					newPassword: "",
-					previews: user.previews
+					previews: user.previews,
+					alarmPreferences: user.alarmPreferences
 				}));
 
 				try {
@@ -128,10 +133,9 @@ export default function SettingsPage() {
 				birthDay: formData.birthDay,
 				oldPassword: showPasswordFields ? formData.oldPassword : "",
 				password: showPasswordFields ? formData.newPassword : "",
-				previews: formData.previews
+				previews: formData.previews,
+				alarmPreferences: formData.alarmPreferences
 			};
-
-			console.log(JSON.stringify(body));
 
 			const response = await fetch("/api/user/modify", {
 				method: "PATCH",

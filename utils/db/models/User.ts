@@ -26,8 +26,8 @@ export interface User {
 			auth: ""
 		}
 	}[];	// Lista di subscription per le notifiche
-	previews:{
-		calendar:{
+	previews: {
+		calendar: {
 			activity: boolean;			// Se l'utente vuole vedere le attività
 			event: boolean;				// Se l'utente vuole vedere gli eventi
 			session: boolean;			// Se l'utente vuole vedere le sessioni
@@ -36,6 +36,10 @@ export interface User {
 		}
 		maxChats: number;				// Numero massimo di chat
 		maxNotes: number;				// Numero massimo di note
+	};
+	alarmPreferences: {
+		email: boolean;
+		push: boolean;
 	}
 }
 
@@ -63,6 +67,10 @@ export function createUser({
 		},
 		maxChats: 10,
 		maxNotes: 10
+	},
+	alarmPreferences = {
+		email: true,
+		push: true
 	}
 }: Partial<User>): User {
 	return {
@@ -77,6 +85,7 @@ export function createUser({
 		isResource: isResource,
 		pomodoro: pomodoro,
 		subscriptionList: subscriptionList,
-		previews: previews
+		previews: previews,
+		alarmPreferences: alarmPreferences
 	};
 }

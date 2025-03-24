@@ -35,6 +35,10 @@ type ReducedUser = {
 		maxChats: number;
 		maxNotes: number;
 	};
+	alarmPreferences: {
+		email: boolean;
+		push: boolean;
+	};
 };
 
 export const GET = async (request: NextRequest) => {
@@ -79,7 +83,8 @@ export const GET = async (request: NextRequest) => {
 		userStatus: userObj.userStatus,
 		profilePic: userObj.profilePic,
 		pomodoro: userObj.pomodoro,
-		previews: userObj.previews
+		previews: userObj.previews,
+		alarmPreferences: userObj.alarmPreferences
 	};
 
 	return generateObjectResponse(response, 200);

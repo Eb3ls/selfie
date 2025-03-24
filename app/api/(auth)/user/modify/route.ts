@@ -34,6 +34,10 @@ const requestTemplate = {
 		},
 		maxChats: 10,
 		maxNotes: 10
+	},
+	alarmPreferences: {
+		email: true,
+		push: true
 	}
 };
 
@@ -51,8 +55,6 @@ export const PATCH = async (request: NextRequest) => {
 	if (validation === null) {
 		return generateMessageResponse("Invalid request", 400);
 	}
-
-	console.log("Validation passed");
 
 	// Estraiamo l'utente e il corpo della richiesta
 	const { user: user, body: newBody } = validation;
@@ -82,7 +84,8 @@ export const PATCH = async (request: NextRequest) => {
 		lastName: newBody.lastName,
 		email: newBody.email,
 		birthDay: newBody.birthDay,
-		previews: newBody.previews
+		previews: newBody.previews,
+		alarmPreferences: newBody.alarmPreferences
 	};
 
 	if (

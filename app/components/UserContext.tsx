@@ -24,6 +24,10 @@ type ReducedUser = {
 		maxChats: number;
 		maxNotes: number;
 	};
+	alarmPreferences: {
+		email: boolean;
+		push: boolean;
+	};
 };
 
 interface UserContextType {

@@ -299,6 +299,45 @@ export default function SettingsForm({
 					</Stack>
 				</Form.Group>
 
+				<hr />
+
+				{/* Sezione Preferenze Allarme */}
+				<Form.Group controlId="alarmPreferences">
+					<Form.Label>
+						<h4>Preferenze Notifiche</h4>
+					</Form.Label>
+					<Stack gap={3}>
+						<Form.Check
+							type="checkbox"
+							label="Email"
+							checked={formData.alarmPreferences.email}
+							onChange={(e) =>
+								setFormData((prev: any) => ({
+									...prev,
+									alarmPreferences: {
+										...prev.alarmPreferences,
+										email: e.target.checked
+									}
+								}))
+							}
+						/>
+						<Form.Check
+							type="checkbox"
+							label="Notifiche Push"
+							checked={formData.alarmPreferences.push}
+							onChange={(e) =>
+								setFormData((prev: any) => ({
+									...prev,
+									alarmPreferences: {
+										...prev.alarmPreferences,
+										push: e.target.checked
+									}
+								}))
+							}
+						/>
+					</Stack>
+				</Form.Group>
+
 				{/* Messaggi di errore/successo */}
 				{(errorMessage || successMessage) && (
 					<div
