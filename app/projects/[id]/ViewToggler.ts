@@ -60,8 +60,7 @@ class ViewToggler extends HTMLElement {
 			this.addEventListeners();
 		} else {
 			this.insertBottomHeader();
-			const body = this.getListBody(this.listViewType);
-			this.appendChild(body);
+			this.insertListBody(this.listViewType);
 			this.addEventListeners();
 		}
 	}
@@ -192,22 +191,25 @@ class ViewToggler extends HTMLElement {
 		timeLine.loadProjectData(this.dateTime || new Date());
 	}
 
-	getListBody(view: "USER" | "TIME") {
-		// Invertiamo la visualizzazione
+	insertListBody(view: "USER" | "TIME"): void {
+		// Impostiamo la nuova vista corrente
 		this.listViewType = view;
+		// Creiamo il container per gestire l'overflow
+		const container = document.createElement("div");
+		container.className = "row overflow-y-auto g-0";
+		container.style.minHeight = `calc(100% - ${ROW_HEIGHT * 2}px)`;
+
 		if (this.listViewType === "USER") {
 			const listBlock = document.createElement("users-list") as UsersList;
-			if (this.projectData) {
-				listBlock.loadData(this.projectData.phases);
-			}
-			return listBlock;
+			listBlock.loadProjectData(this.projectData!.phases);
+			container.appendChild(listBlock);
 		} else {
 			const listBlock = document.createElement("time-list") as TimeList;
-			if (this.projectData) {
-				listBlock.loadData(this.sortedActivities);
-			}
-			return listBlock;
+			listBlock.loadProjectData(this.sortedActivities);
+			container.appendChild(listBlock);
 		}
+
+		this.appendChild(container);
 	}
 
 	addEventListeners() {
@@ -235,18 +237,23 @@ class ViewToggler extends HTMLElement {
 				"#timeSort"
 			) as HTMLButtonElement;
 
+			timeSortBtn.classList.add("fw-light");
+			userSortBtn.classList.add("fw-bold");
+
 			userSortBtn.addEventListener("click", () => {
 				if (this.listViewType === "USER") return;
-				const body = this.querySelector("time-list");
-				if (!body) return;
-				body.replaceWith(this.getListBody("USER"));
+				this.children[this.children.length - 1].remove();
+				this.insertListBody("USER");
+				userSortBtn.classList.replace("fw-light", "fw-bold");
+				timeSortBtn.classList.replace("fw-bold", "fw-light");
 			});
 
 			timeSortBtn.addEventListener("click", () => {
 				if (this.listViewType === "TIME") return;
-				const body = this.querySelector("users-list");
-				if (!body) return;
-				body.replaceWith(this.getListBody("TIME"));
+				this.children[this.children.length - 1].remove();
+				this.insertListBody("TIME");
+				timeSortBtn.classList.replace("fw-light", "fw-bold");
+				userSortBtn.classList.replace("fw-bold", "fw-light");
 			});
 		} else {
 			listBtn.classList.add("fw-light");

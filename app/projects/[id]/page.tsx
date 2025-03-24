@@ -17,8 +17,7 @@ declare global {
 
 export default function Projects() {
 	const { dateTime } = useTime();
-
-	const [componentsLoaded, setComponentsLoaded] = useState(false);
+	const [showContent, setShowContent] = useState(false);
 
 	// Necessario in quanto con il ssr HTMLElement non é definito => non possiamo definire i custom elements
 	useEffect(() => {
@@ -34,34 +33,38 @@ export default function Projects() {
 				import("./ListBody/TimeList"),
 				import("./ListBody/UserList"),
 				import("./ViewToggler")
-			]).then(() => setComponentsLoaded(true));
+			]).then(() => {
+				setTimeout(() => setShowContent(true), 1000);
+			});
 		}
 	}, []);
 
 	useEffect(() => {
-		// Assegna il valore di dateTime al custom element view-toggler
+		// Assign dateTime to the custom element view-toggler
 		const viewToggler = document.querySelector("view-toggler") as any;
 		if (viewToggler) {
 			viewToggler.dateTime = dateTime;
 		}
 	}, [dateTime]);
 
-	if (!componentsLoaded) {
-		return (
-			<div className="d-flex justify-content-center align-items-center vh-100">
-				<div className="spinner-border text-primary" role="status">
-					<span className="visually-hidden">Caricamento...</span>
-				</div>
-			</div>
-		);
-	}
-
 	return (
-		<div className="d-flex flex-column vh-100 vw-100">
-			<GlobalSideBar />
-			<view-toggler />
-			<activity-form />
-			<phase-form />
-		</div>
+		<>
+			{!showContent && (
+				<div className="d-flex justify-content-center align-items-center vh-100">
+					<div className="spinner-border text-primary" role="status">
+						<span className="visually-hidden">Caricamento...</span>
+					</div>
+				</div>
+			)}
+			<div
+				style={{ display: showContent ? "block" : "none" }}
+				className="d-flex flex-column vh-100 vw-100"
+			>
+				<GlobalSideBar />
+				<view-toggler />
+				<activity-form />
+				<phase-form />
+			</div>
+		</>
 	);
 }

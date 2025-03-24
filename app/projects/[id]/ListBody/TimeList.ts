@@ -16,7 +16,7 @@ class TimeList extends HTMLElement {
 		this.sortedActivities = [];
 	}
 
-	loadData(sortedActivities: SortedActivity[]) {
+	loadProjectData(sortedActivities: SortedActivity[]) {
 		if (!sortedActivities) return;
 
 		// Se siamo nella view a lista per utente passiamo direttamente le activities

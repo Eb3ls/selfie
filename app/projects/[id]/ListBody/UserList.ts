@@ -87,7 +87,7 @@ class UsersList extends HTMLElement {
 			const userActivitiesBlock = document.createElement(
 				"time-list"
 			) as TimeList;
-			userActivitiesBlock.loadData(this.data[user]);
+			userActivitiesBlock.loadProjectData(this.data[user]);
 			userActivitiesBlock.id = `collapse${user}`;
 			userActivitiesBlock.className = "collapse";
 
@@ -98,7 +98,7 @@ class UsersList extends HTMLElement {
 		}
 	}
 
-	public loadData(phases: PhaseResponse[]) {
+	public loadProjectData(phases: PhaseResponse[]) {
 		if (!phases) return;
 
 		this.phases = phases;

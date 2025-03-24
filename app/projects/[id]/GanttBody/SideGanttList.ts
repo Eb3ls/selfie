@@ -1,15 +1,29 @@
 import ModifyActivity from "../Forms/ActivityForm";
 import ModifyPhase from "../Forms/PhaseForm";
-import { ROW_HEIGHT_PX, createStatusIcon, formatDate } from "../Utils";
+import {
+	PhaseResponse,
+	ROW_HEIGHT_PX,
+	createStatusIcon,
+	formatDate
+} from "../Utils";
 
 class SideGanttList extends HTMLElement {
 	constructor() {
 		super();
 	}
 
-	public loadProjectData(phases: any) {
+	public loadProjectData(phases: PhaseResponse[]) {
 		if (!phases) return;
-		this.render(phases);
+		const container = document.createElement("div");
+		container.className = "container";
+
+		// Per ogni fase, appendiamo il suo contenuto
+		phases.forEach((phase: any) => {
+			container.appendChild(this.renderPhase(phase, null));
+		});
+
+		this.innerHTML = "";
+		this.appendChild(container);
 	}
 
 	// Funzione per aggiungere i dati al modale
@@ -148,19 +162,6 @@ class SideGanttList extends HTMLElement {
 		}
 
 		return container;
-	}
-
-	render(data: any) {
-		const container = document.createElement("div");
-		container.className = "container";
-
-		// Per ogni fase, appendiamo il suo contenuto
-		data.forEach((phase: any) => {
-			container.appendChild(this.renderPhase(phase, null));
-		});
-
-		this.innerHTML = "";
-		this.appendChild(container);
 	}
 }
 
