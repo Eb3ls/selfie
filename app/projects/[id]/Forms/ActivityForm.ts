@@ -66,6 +66,7 @@ class ActivityForm extends HTMLElement {
 		// Necessario per capire il range di date disponibili
 		this.parentPhase = parentPhase;
 		this.usersList = this.activity.users || [];
+		this.modifiedLinklist = [];
 		for (const link of this.activity.prevLinks) {
 			this.modifiedLinklist.push({ name: link.summary, _id: link._id });
 		}
@@ -186,6 +187,17 @@ class ActivityForm extends HTMLElement {
 				this.updateModalContent("VIEW")
 			);
 		} else {
+			// Mettiamo il bottone per il linking solo se l'attivitá é attivabile o in attesa
+			const linkButton =
+				this.activity.status === "ACTIVABLE" ||
+				this.activity.status === "WAITING"
+					? `<button type="button" class="btn btn-sm btn-outline-primary me-2" id="linkBtn">
+						<i class="bi bi-link
+						"></i>
+						Links
+					</button>`
+					: "";
+
 			modalContent.innerHTML = `
                 <div class="modal-header d-flex align-items-center">
                     <h5 class="modal-title d-flex align-items-center gap-2">
@@ -200,10 +212,7 @@ class ActivityForm extends HTMLElement {
                             <i class="bi bi-trash"></i>
                             Delete
                         </button>
-                        <button type="button" class="btn btn-sm btn-outline-primary me-2" id="linkBtn">
-                            <i class="bi bi-link"></i>
-                            Links
-                        </button>
+						${linkButton}
                         <button type="button" class="btn btn-sm btn-outline-primary me-2" id="editBtn">
                             <i class="bi bi-pencil"></i>
                             Modify
@@ -242,29 +251,36 @@ export default ActivityForm;
 class ActivityLinkForm extends HTMLElement {
 	activity: ProjectActivityResponse;
 	activitiesList: ProjectActivityResponse[];
-	modifiedLinklist: PartialLink[];
+	avaiableActivities: PartialLink[];
+	selectedLinks: PartialLink[];
 
 	constructor() {
 		super();
 		this.activity = {} as ProjectActivityResponse;
 		this.activitiesList = [];
-		this.modifiedLinklist = [];
+		this.avaiableActivities = [];
+		this.selectedLinks = [];
 	}
 
-	private createLinkItems() {
-		const availableActivities = this.getAvailableActivities();
+	private populateAvailableLinks() {
 		const text =
-			availableActivities.length > 0
+			this.avaiableActivities.length > 0
 				? "Select an activity..."
 				: "No available activities";
 
 		let block = `<option value="" disabled selected>${text}</option>`;
-		for (const activity of availableActivities) {
+		for (const activity of this.avaiableActivities) {
 			block += `
-                <option value="${activity._id}">${activity.summary}</option>
+                <option value="${activity._id}">${activity.name}</option>
             `;
 		}
-		return block;
+
+		const select = this.querySelector(
+			"#avaiableLinks"
+		) as HTMLSelectElement;
+		if (select) {
+			select.innerHTML = block;
+		}
 	}
 
 	// Funzione per ottenere le attivitá disponibili per il linking
@@ -279,12 +295,14 @@ class ActivityLinkForm extends HTMLElement {
 				break;
 			}
 
-			// Se l'attivitá é giá collegata o é giá stata selezionata, la saltiamo
+			// Se l'attivitá é giá collegata o é giá stata selezionata o é giá stata attivata, la saltiamo
 			if (
 				this.activity.prevLinks.some(
 					(link) => link._id === activity._id
 				) ||
-				this.modifiedLinklist.some((link) => link._id === activity._id)
+				this.selectedLinks.some((link) => link._id === activity._id) ||
+				(activity.status !== "ACTIVABLE" &&
+					activity.status !== "WAITING")
 			) {
 				continue;
 			}
@@ -297,38 +315,21 @@ class ActivityLinkForm extends HTMLElement {
 			availableActivities.push(activity);
 		}
 
-		return availableActivities;
+		this.avaiableActivities = availableActivities.map((activity) => ({
+			name: activity.summary,
+			_id: activity._id
+		}));
 	}
 
-	private createForm() {
-		return `
-            <div class="modal-body">
-                <div class="mb-4">
-                    <h4 class="mb-3">${this.activity.summary}</h4>
-                    <label class="form-label fw-bold">Link with other Activities</label>
-                    <div class="add-link-form">
-                        <div class="input-group mb-3">
-                            <select class="form-select" id="newLink">
-                                ${this.createLinkItems()}
-                            </select>
-                            <button class="btn btn-primary" type="button" id="addLinkBtn">
-                                <i class="bi bi-plus-lg"></i> Add
-                            </button>
-                        </div>
-                    </div>
-                    <div class="link-list mt-2" id="linkList">
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="submit" class="btn btn-primary">Save Links</button>
-            </div>
-        `;
-	}
-
-	private addItem(item: PartialLink) {
+	// Funzione per aggiungere un item alla lista di link assegnati
+	private addSelectedLink(item: PartialLink) {
 		const list = this.querySelector("#linkList");
 		if (!list) return;
+
+		if (this.selectedLinks.length === 0) {
+			list.innerHTML = '<p class="text-muted">No links selected</p>';
+			return;
+		}
 
 		const itemBlock = document.createElement("div");
 		itemBlock.className =
@@ -336,21 +337,37 @@ class ActivityLinkForm extends HTMLElement {
 		itemBlock.setAttribute("data-link", item._id);
 
 		itemBlock.innerHTML = `
-            <span class="link-name">
-                <i class="bi bi-link-45deg me-2"></i>
-                ${item.name}
-            </span>
-            <button type="button" class="btn btn-danger btn-sm">
-                <i class="bi bi-trash"></i>
-            </button>
-        `;
+			<span class="link-name">
+				<i class="bi bi-link-45deg me-2"></i>
+				${item.name}
+			</span>
+			<button type="button" class="btn btn-danger btn-sm">
+				<i class="bi bi-trash"></i>
+			</button>
+		`;
 
+		// Aggiungiamo l'evento per l'eliminazione dell'elemento
 		itemBlock.querySelector("button")?.addEventListener("click", () => {
-			this.modifiedLinklist = this.modifiedLinklist.filter(
+			// Eliminiamo l'elemento dalla lista
+			this.selectedLinks = this.selectedLinks.filter(
 				(link) => link._id !== item._id
 			);
+			// Aggiorniamo la lista delle attivitá disponibili
+			this.avaiableActivities.push(item);
+			this.populateAvailableLinks();
 			itemBlock.remove();
+
+			// If no links remain, show the message
+			if (this.selectedLinks.length === 0) {
+				list.innerHTML =
+					'<div id="noLinks">Nessuna attivitá associata</div>';
+			}
 		});
+
+		// Clear "no links" message if it exists
+		if (list.querySelector("#noLinks")) {
+			list.innerHTML = "";
+		}
 
 		list.appendChild(itemBlock);
 	}
@@ -360,51 +377,66 @@ class ActivityLinkForm extends HTMLElement {
 		const url = "/api/project/activity/link";
 		const method = "PATCH";
 
-		for (const link of this.modifiedLinklist) {
-			const body = {
-				prevId: link._id,
-				nextId: this.activity._id
-			};
+		const body = {
+			prevIds: this.selectedLinks.map((link) => link._id),
+			nextId: this.activity._id
+		};
 
-			try {
-				// TODO: Controllare
-				const response = await fetcher(method, url, body);
-				console.log(response);
-			} catch (error) {
-				console.error("Error linking activities:", error);
-				alert("Failed to link activities");
-			}
+		try {
+			// TODO: Controllare
+			const response = await fetcher(method, url, body);
+			console.log(response);
+			window.location.reload();
+		} catch (error) {
+			console.error("Error linking activities:", error);
+			alert("Failed to link activities");
 		}
-
-		window.location.reload();
 	}
 
 	private setupEventListeners() {
 		const btn = this.querySelector("#addLinkBtn");
-		const newLink = this.querySelector("#newLink") as HTMLSelectElement;
+		const avaiableLinks = this.querySelector(
+			"#avaiableLinks"
+		) as HTMLSelectElement;
 
-		for (const link of this.modifiedLinklist) {
-			this.addItem(link);
+		// Aggiungiamo gli elementi giá linkati
+		for (const link of this.selectedLinks) {
+			this.addSelectedLink(link);
 		}
+		if (this.selectedLinks.length === 0) {
+			const list = this.querySelector("#linkList");
+			if (list) {
+				list.innerHTML =
+					'<div id="noLinks">Nessuna attivitá associata</div>';
+			}
+		}
+		// Aggiungiamo gli elementi disponibili
+		this.populateAvailableLinks();
 
-		// Link management logic
+		// Bottone per l'aggiunta di un nuovo link
 		btn?.addEventListener("click", () => {
-			const selectedOption = newLink.options[newLink.selectedIndex];
+			const selectedOption =
+				avaiableLinks.options[avaiableLinks.selectedIndex];
 			const value = selectedOption?.value;
 			const name = selectedOption?.textContent;
 
 			if (!value) return;
+			// Rimuoviamo l'elemento dalla lista delle attivitá disponibili
+			this.avaiableActivities = this.avaiableActivities.filter(
+				(activity) => activity._id !== value
+			);
 
+			// Aggiungiamo l'elemento alla lista dei link selezionati
 			const newItem: PartialLink = { name: name || value, _id: value };
-			this.modifiedLinklist.push(newItem);
-			this.addItem(newItem);
+			this.selectedLinks.push(newItem);
+			this.addSelectedLink(newItem);
 
-			newLink.innerHTML = this.createLinkItems();
-			newLink.selectedIndex = 0;
+			this.populateAvailableLinks();
+			avaiableLinks.selectedIndex = 0;
 		});
 
 		const form = this.querySelector("#modifyLinkForm");
-		form?.addEventListener("submit", this.handleSave);
+		form?.addEventListener("submit", (e) => this.handleSave(e));
 	}
 
 	private render() {
@@ -422,18 +454,40 @@ class ActivityLinkForm extends HTMLElement {
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
             </div>
-            <form id="modifyLinkForm">${this.createForm()}</form>
+            <form id="modifyLinkForm">
+				<div class="modal-body">
+					<div class="mb-4">
+						<h4 class="mb-3">${this.activity.summary}</h4>
+						<label class="form-label fw-bold">Link with other Activities</label>
+						<div class="add-link-form">
+							<div class="input-group mb-3">
+								<select class="form-select" id="avaiableLinks">
+								</select>
+								<button class="btn btn-primary" type="button" id="addLinkBtn">
+									<i class="bi bi-plus-lg"></i> Add
+								</button>
+							</div>
+						</div>
+						<div class="link-list mt-2" id="linkList">
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="submit" class="btn btn-primary">Save Links</button>
+				</div>
+			</form>
         `;
 	}
 
 	public initialize(
 		activity: ProjectActivityResponse,
 		activitiesList: ProjectActivityResponse[],
-		modifiedLinklist: PartialLink[]
+		selectedLinks: PartialLink[]
 	) {
 		this.activity = activity;
 		this.activitiesList = activitiesList;
-		this.modifiedLinklist = modifiedLinklist;
+		this.selectedLinks = selectedLinks;
+		this.getAvailableActivities();
 		this.render();
 		this.setupEventListeners();
 	}

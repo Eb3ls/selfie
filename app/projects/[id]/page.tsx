@@ -23,8 +23,9 @@ export default function Projects() {
 	const { user } = useUser();
 
 	// Necessario in quanto con il ssr HTMLElement non é definito => non possiamo definire i custom elements
+	// Importiamo solo dopo che user é definito per evitare di renderizzare il contenuto prima di avere tutti i dati
 	useEffect(() => {
-		if (typeof window !== "undefined") {
+		if (typeof window !== "undefined" && user) {
 			Promise.all([
 				import("./Forms/AddForm"),
 				import("./Forms/ProjectSettings"),
@@ -37,13 +38,13 @@ export default function Projects() {
 				import("./ListBody/UserList"),
 				import("./ViewToggler")
 			]).then(() => {
-				setTimeout(() => setShowContent(true), 1000);
+				setShowContent(true);
 			});
 		}
-	}, []);
+	}, [user]);
 
 	useEffect(() => {
-		// Assign dateTime to the custom element view-toggler
+		if (!showContent) return;
 		const viewToggler = document.querySelector(
 			"view-toggler"
 		) as ViewToggler;
@@ -54,26 +55,24 @@ export default function Projects() {
 				name: user.username
 			};
 		}
-	}, [dateTime, user]);
+	}, [showContent, user, dateTime]);
 
 	return (
 		<>
-			{!showContent && (
+			{!showContent ? (
 				<div className="d-flex justify-content-center align-items-center vh-100">
 					<div className="spinner-border text-primary" role="status">
 						<span className="visually-hidden">Caricamento...</span>
 					</div>
 				</div>
+			) : (
+				<div className="d-flex flex-column vh-100 vw-100">
+					<GlobalSideBar />
+					<view-toggler />
+					<activity-form />
+					<phase-form />
+				</div>
 			)}
-			<div
-				style={{ display: showContent ? "block" : "none" }}
-				className="d-flex flex-column vh-100 vw-100"
-			>
-				<GlobalSideBar />
-				<view-toggler />
-				<activity-form />
-				<phase-form />
-			</div>
 		</>
 	);
 }

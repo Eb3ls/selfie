@@ -15,7 +15,7 @@ import { Collection } from "mongodb";
 import { NextRequest } from "next/server";
 
 const requestTemplate = {
-	prevId: "",
+	prevIds: [],
 	nextId: ""
 };
 
@@ -41,10 +41,10 @@ export const PATCH = async (request: NextRequest) => {
 	const userId: string = user._id!;
 
 	// Estraiamo il prevId e il nextId dal body
-	const prevId: string = newBody.prevId;
+	const prevIds: string[] = newBody.prevIds;
 	const nextId: string = newBody.nextId;
 
-	if (prevId === nextId) {
+	if (prevIds.includes(nextId)) {
 		return generateMessageResponse(
 			"The projectActivities can't be the same",
 			400
@@ -55,18 +55,22 @@ export const PATCH = async (request: NextRequest) => {
 	const projectActivityClient: Collection<ProjectActivity> =
 		await getCollection<ProjectActivity>(PROJECT_ACTIVITY_COLLECTION);
 
-	const prevActivityOut = await findCollectionWrapper<ProjectActivity>(
-		{ _id: prevId },
+	const allActivitiesOut = await findCollectionWrapper<ProjectActivity>(
+		{},
 		projectActivityClient
 	);
 
-	if (prevActivityOut.status !== 200) {
-		return prevActivityOut;
+	if (allActivitiesOut.status !== 200) {
+		return generateMessageResponse("Invalid request", 400);
 	}
 
-	const prevActivity: StringProjectActivity = (
-		await prevActivityOut.json()
-	)[0];
+	const allActivities: StringProjectActivity[] =
+		await allActivitiesOut.json();
+
+	// Selezioniamo le attivitá che ci interessano
+	const prevActivities = allActivities.filter((activity) =>
+		prevIds.includes(activity._id!)
+	);
 
 	const nextActivityOut = await findCollectionWrapper<ProjectActivity>(
 		{ _id: nextId },
@@ -82,33 +86,34 @@ export const PATCH = async (request: NextRequest) => {
 	)[0];
 
 	// Controlliamo che l'owner sia l'utente corrispondente
-	if (prevActivity.ownerId !== userId) {
+	if (prevActivities.some((activity) => activity.ownerId !== userId)) {
 		return generateMessageResponse("Unauthorized", 400);
 	}
 
 	// Controlliamo che appartengano allo stesso progetto
-	if (prevActivity.projectId !== nextActivity.projectId) {
+	if (
+		prevActivities.some(
+			(activity) => activity.projectId !== nextActivity.projectId
+		)
+	) {
 		return generateMessageResponse(
 			"The projectActivities must belong to the same project",
 			400
 		);
 	}
 
-	// Controlliamo se le attività sono già collegate
-	if (prevActivity.nextIdList.includes(nextId)) {
-		return generateMessageResponse("Already linked", 400);
-	}
-
-	// Controlliamo se le attività sono in ordine temporale
-	if (
-		prevActivity.dtStart > nextActivity.dtStart ||
-		prevActivity.due > nextActivity.due
-	) {
-		return generateMessageResponse(
-			"Activities can't be in the same period of time",
-			400
-		);
-	}
+	// Controlliamo se le prevActivities sono prima della nextActivity
+	prevActivities.forEach((activity) => {
+		if (
+			activity.dtStart > nextActivity.dtStart ||
+			activity.due > nextActivity.due
+		) {
+			return generateMessageResponse(
+				"Activities can't be in the same period of time",
+				400
+			);
+		}
+	});
 
 	// Controlliamo se l'attività successiva è già attiva
 	if (
@@ -118,39 +123,43 @@ export const PATCH = async (request: NextRequest) => {
 		return generateMessageResponse("Can't link an active activity", 400);
 	}
 
-	// Inseriamo l'id dell'attività precedente nell'array delle attività precedenti del next
-	let nextModifiedIds = nextActivity.prevIdList;
-	nextModifiedIds.push(prevId);
-
 	// Inseriamo l'id dell'attività successiva nell'array delle attività successive del prev
-	let prevModifiedIds = prevActivity.nextIdList;
-	prevModifiedIds.push(nextId);
+	prevActivities.forEach((activity) => {
+		activity.nextIdList.push(nextId);
+	});
 
-	const prevModifiedOut = await updateCollectionWrapper<ProjectActivity>(
-		{ _id: prevId },
-		{
-			$set: { nextIdList: prevModifiedIds }
-		} as any,
-		projectActivityClient
-	);
-
-	if (prevModifiedOut.status !== 200) {
-		return prevModifiedOut;
+	// Aggiorniamo le attività precedenti
+	for (const activity of prevActivities) {
+		const updateResult = await updateCollectionWrapper<ProjectActivity>(
+			{ _id: activity._id },
+			{
+				$set: { nextIdList: activity.nextIdList }
+			} as any,
+			projectActivityClient
+		);
+		if (updateResult.status !== 200) {
+			return updateResult;
+		}
 	}
 
-	// Controlliamo se l'attività successiva può essere attivabile
+	// Se anche solo una delle attivitá precedenti non é completata, la successiva deve essere in attesa
 	let newStatus = "ACTIVABLE";
-	if (
-		prevActivity.status !== "COMPLETED" ||
-		nextActivity.status === "WAITING"
-	) {
+	for (const activity of prevActivities) {
+		if (activity.status !== "COMPLETED") {
+			newStatus = "WAITING";
+			break;
+		}
+	}
+	if (nextActivity.status === "WAITING") {
 		newStatus = "WAITING";
 	}
 
+	// Aggiorniamo l'attività successiva, la lista di attivitá precedenti é quella passata
+	const prevIdList = prevActivities.map((activity) => activity._id!);
 	const nextModifiedOut = await updateCollectionWrapper<ProjectActivity>(
 		{ _id: nextId },
 		{
-			$set: { prevIdList: nextModifiedIds, status: newStatus }
+			$set: { prevIdList: prevIdList, status: newStatus }
 		} as any,
 		projectActivityClient
 	);
@@ -159,15 +168,5 @@ export const PATCH = async (request: NextRequest) => {
 		return nextModifiedOut;
 	}
 
-	const prevModified: StringProjectActivity = (
-		await prevModifiedOut.json()
-	)[0];
-	const nextModified: StringProjectActivity = (
-		await nextModifiedOut.json()
-	)[0];
-
-	return generateObjectResponse(
-		{ prevData: prevModified, nextData: nextModified },
-		200
-	);
+	return generateObjectResponse("Successfully linked", 200);
 };
