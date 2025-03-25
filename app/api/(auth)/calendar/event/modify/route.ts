@@ -27,7 +27,8 @@ const requestTemplate = {
 	categories: "",
 	location: "",
 	geo: "",
-	usernameList: [""]
+	usernameList: [""],
+	alarms: []
 };
 
 type RequestType = typeof requestTemplate;

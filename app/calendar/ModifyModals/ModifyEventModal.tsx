@@ -1,7 +1,8 @@
 "use client";
 
+import { AlarmSelector } from "@/app/calendar/AlarmSelector";
 import "@/app/calendar/Modal.css";
-import { StringEvent } from "@/utils/db/db";
+import { StringAlarm, StringEvent } from "@/utils/db/db";
 import moment from "moment";
 import React, { useState } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
@@ -63,7 +64,8 @@ export function ModifyEventModal({
 			categories: form.categories,
 			location: form.location,
 			geo: form.geo,
-			usernameList: form.usernameList
+			usernameList: form.usernameList,
+			alarms: form.alarms
 		};
 
 		console.log("Form inviato:", { ...newForm });
@@ -105,6 +107,13 @@ export function ModifyEventModal({
 			window.location.reload();
 		}
 	}
+
+	const handleAlarmsChange = (newAlarms: StringAlarm[]) => {
+		setForm({
+			...form,
+			alarms: newAlarms
+		});
+	};
 
 	return (
 		<>
@@ -213,6 +222,11 @@ export function ModifyEventModal({
 								</ul>
 							)}
 						</Form.Group>
+
+						<AlarmSelector
+							alarms={form.alarms}
+							onChange={handleAlarmsChange}
+						/>
 					</Modal.Body>
 					<Modal.Footer>
 						<Button

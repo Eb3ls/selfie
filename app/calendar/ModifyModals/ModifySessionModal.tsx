@@ -1,7 +1,8 @@
 "use client";
 
+import { AlarmSelector } from "@/app/calendar/AlarmSelector";
 import "@/app/calendar/Modal.css";
-import { StringSession } from "@/utils/db/db";
+import { StringAlarm, StringSession } from "@/utils/db/db";
 import moment from "moment";
 import React, { useState } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
@@ -89,7 +90,8 @@ export function ModifySessionModal({
 					form.settingsList[form.settingsList.length - 1].studyTime,
 				breakTime:
 					form.settingsList[form.settingsList.length - 1].breakTime
-			}
+			},
+			alarms: form.alarms
 		};
 
 		console.log("Primo form inviato:", { ...newForm });
@@ -128,6 +130,13 @@ export function ModifySessionModal({
 	function handleRedirect() {
 		window.location.href = "/pomodoro?id=" + form._id;
 	}
+
+	const handleAlarmsChange = (newAlarms: StringAlarm[]) => {
+		setForm({
+			...form,
+			alarms: newAlarms
+		});
+	};
 
 	return (
 		<>
@@ -272,6 +281,10 @@ export function ModifySessionModal({
 								</Button>
 							</div>
 						</Form.Group>
+						<AlarmSelector
+							alarms={form.alarms}
+							onChange={handleAlarmsChange}
+						/>
 					</Modal.Body>
 					<Modal.Footer>
 						<Button

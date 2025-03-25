@@ -27,7 +27,8 @@ const requestTemplate = {
 		cycles: 0,
 		studyTime: 0,
 		breakTime: 0
-	}
+	},
+	alarms: []
 };
 
 type RequestType = typeof requestTemplate;
