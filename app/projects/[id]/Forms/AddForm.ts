@@ -611,8 +611,9 @@ class AddActivityForm extends HTMLElement {
 		if (!list) return;
 
 		const deleteCallback = (e: any) => {
-			const btn = e.target as HTMLButtonElement;
-			btn.parentElement?.remove();
+			const clickedElement = e.target as HTMLElement;
+			const itemElement = clickedElement.closest(".entry-item");
+			itemElement?.remove();
 			const removedUser = this.users.find((u) => u.name === user.name);
 			this.users = this.users.filter((u) => u.name !== user.name);
 			if (!removedUser) return;

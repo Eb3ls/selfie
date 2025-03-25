@@ -210,7 +210,6 @@ export function createStatusEntry(
 			window.location.reload();
 		} catch (error) {
 			alert("Errore durante la modifica dello stato");
-			console.error(error);
 		}
 	};
 
@@ -395,8 +394,8 @@ export function createLinkEntry(
 		const viewBtn = document.createElement("a");
 		viewBtn.href = `/notepad/${noteId}`;
 		viewBtn.className = "btn btn-primary btn-sm";
-		viewBtn.setAttribute("title", "View note");
-		viewBtn.innerHTML = '<i class="bi bi-eye me-1"></i>View';
+		viewBtn.setAttribute("title", "Link alla nota");
+		viewBtn.innerHTML = '<i class="bi bi-eye me-1"></i>Visualizza';
 		linkEntry.appendChild(viewBtn);
 	}
 	return linkEntry;

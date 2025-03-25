@@ -101,7 +101,7 @@ class ProjectSettings extends HTMLElement {
 			<div class="modal-header">
 				<h5 class="modal-title">
 					<i class="bi bi-info-circle"></i>
-					<span>Impostazioni progetto</span>
+					<span>Impostazioni Progetto</span>
 				</h5>
 				<div class="ms-auto d-flex align-items-center">
 					${
@@ -168,7 +168,6 @@ class ProjectSettings extends HTMLElement {
 			await fetcher(method, url, body);
 			window.location.reload();
 		} catch (error) {
-			console.error("Error modifying project:", error);
 			alert("Errore durante la modifica del progetto");
 		}
 	}
@@ -179,8 +178,9 @@ class ProjectSettings extends HTMLElement {
 		if (!userList) return;
 
 		const deleteCallback = (e: any) => {
-			const btn = e.target as HTMLElement;
-			btn.parentElement?.remove();
+			const clickedElement = e.target as HTMLElement;
+			const itemElement = clickedElement.closest(".entry-item");
+			itemElement?.remove();
 			this.selectedUsers = this.selectedUsers.filter(
 				(u) => u.name !== username
 			);
@@ -260,12 +260,12 @@ class ProjectSettings extends HTMLElement {
             <div class="modal-header">
                 <h5 class="modal-title">
                     <i class="bi bi-pencil-fill"></i>
-                    <span>Modifica progetto</span>
+                    <span>Modifica Progetto</span>
                 </h5>
 				<div class="ms-auto d-flex align-items-center">
                     <button type="button" class="btn btn-sm btn-warning me-2" id="toggleEditBtn">
                         <i class="bi bi-x"></i>
-                        Cancella
+                        Annulla
                     </button>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
@@ -285,16 +285,12 @@ class ProjectSettings extends HTMLElement {
 								<i class="bi bi-plus-lg"></i>
 							</button>
 						</div>
+                        <div class="user-list mt-3" id="userList"></div>
                     </div>
-
-					<div class="mb-4">
-						<label class="form-label mt-2 fw-semibold">Utenti selezionati</label>
-                        <div class="user-list" id="userList"></div>
-					</div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="submit" class="btn btn-primary" id="saveChanges">Salva Modifiche</button>
+                <button type="submit" class="btn btn-primary" id="saveChanges">Salva</button>
             </div>
         `;
 	}
@@ -315,8 +311,7 @@ class ProjectSettings extends HTMLElement {
 				await fetcher(method, url, body);
 				window.location.href = "/projects";
 			} catch (error) {
-				console.error("Error deleting project:", error);
-				alert("Failed to delete project");
+				alert("Impossibile eliminare il progetto");
 			}
 		});
 	}
@@ -331,14 +326,14 @@ class ProjectSettings extends HTMLElement {
                 <div class="ms-auto d-flex align-items-center">
                     <button type="button" class="btn btn-sm btn-warning me-2" id="toggleEditBtn">
                         <i class="bi bi-x"></i>
-                        Cancella
+                        Annulla
                     </button>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
             </div>
             <div class="modal-body">
                 <p class="fs-5">Sei sicuro di voler eliminare il progetto?</p>
-                <p class="text-danger">Questa azione non puó essere annullata!</p>
+                <p class="text-danger">Questa operazione non può essere annullata!</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Elimina Progetto</button>

@@ -93,7 +93,7 @@ class ActivityForm extends HTMLElement {
 			}
 		} else {
 			selectedLinksBlock =
-				'<p class="text-muted">Nessuna attivitá associata</p>';
+				'<p class="text-muted">Nessuna attività associata</p>';
 		}
 
 		// Creiamo il blocco per gli utenti selezionati
@@ -150,7 +150,7 @@ class ActivityForm extends HTMLElement {
 				</div>
 
 				<div class="mb-4">
-					${createLinkEntry("Nota della attivitá", this.activity.noteId!, false, null).outerHTML}
+					${createLinkEntry("Nota della attività", this.activity.noteId!, false, null).outerHTML}
 				</div>
 
 				<div class="mb-4">
@@ -161,14 +161,14 @@ class ActivityForm extends HTMLElement {
 				</div>
 
 				<div class="mb-4">
-					<label class="form-label text-muted small">Attivitá associate</label>
+					<label class="form-label text-muted small">Attività associate</label>
 					<div class="link-list">
 						${selectedLinksBlock}
 					</div>
 				</div>
 			</div>
 			<div class="modal-footer">
-				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
 			</div>
 		`;
 	}
@@ -219,10 +219,10 @@ class ActivityForm extends HTMLElement {
 			const linkButton =
 				this.activity.status === "ACTIVABLE" ||
 				this.activity.status === "WAITING"
-					? `<button type="button" class="btn btn-sm btn-outline-primary me-2" id="linkBtn">
+					? `<button type="button" class="btn btn-sm btn-primary me-2" id="linkBtn">
 						<i class="bi bi-link
 						"></i>
-						Links
+						Associa
 					</button>`
 					: "";
 
@@ -230,7 +230,7 @@ class ActivityForm extends HTMLElement {
 				<div class="modal-header">
 					<h5 class="modal-title">
 						<i class="bi bi-info-circle"></i>
-						<span>Activity</span>
+						<span>Attività</span>
 					</h5>
 					<div class="ms-auto d-flex align-items-center">
 						${
@@ -238,12 +238,12 @@ class ActivityForm extends HTMLElement {
 								? `
 						<button type="button" class="btn btn-sm btn-danger me-2" id="deleteBtn">
 							<i class="bi bi-trash"></i>
-							Delete
+							Elimina
 						</button>
 						${linkButton}
-						<button type="button" class="btn btn-sm btn-outline-primary me-2" id="editBtn">
+						<button type="button" class="btn btn-sm btn-primary me-2" id="editBtn">
 							<i class="bi bi-pencil"></i>
-							Modify
+							Modifica
 						</button>
 						`
 								: ""
@@ -293,8 +293,8 @@ class ActivityLinkForm extends HTMLElement {
 	private populateAvailableLinks() {
 		const text =
 			this.avaiableActivities.length > 0
-				? "Select an activity..."
-				: "No available activities";
+				? "Seleziona un'attività..."
+				: "Nessuna attività disponibile";
 
 		let block = `<option value="" disabled selected>${text}</option>`;
 		for (const activity of this.avaiableActivities) {
@@ -354,14 +354,15 @@ class ActivityLinkForm extends HTMLElement {
 
 		if (this.selectedLinks.length === 0) {
 			list.innerHTML =
-				'<p class="text-muted">Nessun link selezionato</p>';
+				'<p class="text-muted">Nessuna attività associata</p>';
 			return;
 		}
 
 		// Aggiungiamo l'evento per l'eliminazione dell'elemento
 		const deleteCallback = (e: any) => {
-			const btn = e.target as HTMLElement;
-			btn.parentElement?.remove();
+			const clickedElement = e.target as HTMLElement;
+			const itemElement = clickedElement.closest(".entry-item");
+			itemElement?.remove();
 			// Eliminiamo l'elemento dalla lista
 			this.selectedLinks = this.selectedLinks.filter(
 				(link) => link._id !== item._id
@@ -373,11 +374,10 @@ class ActivityLinkForm extends HTMLElement {
 			// If no links remain, show the message
 			if (this.selectedLinks.length === 0) {
 				list.innerHTML =
-					'<div id="noLinks">Nessuna attivitá associata</div>';
+					'<div id="noLinks">Nessuna attività associata</div>';
 			}
 		};
 		const linkBlock = createLinkEntry(item.name, "", true, deleteCallback);
-		linkBlock.setAttribute("data-link", item._id);
 
 		// Se non ci sono elementi nella lista, rimuoviamo il messaggio
 		if (list.querySelector("#noLinks")) {
@@ -398,13 +398,10 @@ class ActivityLinkForm extends HTMLElement {
 		};
 
 		try {
-			// TODO: Controllare
-			const response = await fetcher(method, url, body);
-			console.log(response);
+			await fetcher(method, url, body);
 			window.location.reload();
 		} catch (error) {
-			console.error("Error linking activities:", error);
-			alert("Failed to link activities");
+			alert("Errore nell'associazione delle attività");
 		}
 	}
 
@@ -422,7 +419,7 @@ class ActivityLinkForm extends HTMLElement {
 			const list = this.querySelector("#linkList");
 			if (list) {
 				list.innerHTML =
-					'<div id="noLinks">Nessuna attivitá associata</div>';
+					'<div id="noLinks">Nessuna attività associata</div>';
 			}
 		}
 		// Aggiungiamo gli elementi disponibili
@@ -459,12 +456,12 @@ class ActivityLinkForm extends HTMLElement {
             <div class="modal-header">
                 <h5 class="modal-title">
                     <i class="bi bi-link"></i>
-                    <span>Link Activities</span>
+                    <span>Associa Attività</span>
                 </h5>
                 <div class="ms-auto d-flex align-items-center">
                     <button type="button" class="btn btn-sm btn-warning me-2" id="toggleEditBtn">
                         <i class="bi bi-x"></i>
-                        Cancel
+						Annulla
                     </button>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
@@ -473,13 +470,13 @@ class ActivityLinkForm extends HTMLElement {
 				<div class="modal-body">
 					<div class="mb-4">
 						<h4 class="mb-3">${this.activity.summary}</h4>
-						<label class="form-label fw-bold">Link with other Activities</label>
+						<label class="form-label fw-semibold">Associa</label>
 						<div class="add-link-form">
 							<div class="input-group mb-3">
 								<select class="form-select" id="avaiableLinks">
 								</select>
 								<button class="btn btn-primary" type="button" id="addLinkBtn">
-									<i class="bi bi-plus-lg"></i> Add
+									<i class="bi bi-plus-lg"></i>
 								</button>
 							</div>
 						</div>
@@ -488,7 +485,7 @@ class ActivityLinkForm extends HTMLElement {
 					</div>
 				</div>
 				<div class="modal-footer">
-					<button type="submit" class="btn btn-primary">Save Links</button>
+					<button type="submit" class="btn btn-primary">Salva</button>
 				</div>
 			</form>
         `;
@@ -526,13 +523,10 @@ class ActivityDeleteForm extends HTMLElement {
 		const method = "DELETE";
 
 		try {
-			// TODO: Controllare
-			const response = await fetcher(method, url, body);
-			console.log(response);
+			await fetcher(method, url, body);
 			window.location.reload();
 		} catch (error) {
-			console.error("Error deleting activity:", error);
-			alert("Failed to delete activity");
+			alert("Errore nell'eliminazione dell'attività");
 		}
 	}
 
@@ -547,32 +541,22 @@ class ActivityDeleteForm extends HTMLElement {
             <div class="modal-header">
                 <h5 class="modal-title text-danger">
                     <i class="bi bi-exclamation-triangle-fill"></i>
-                    <span>Delete Activity</span>
+                    <span>Elimina Attività</span>
                 </h5>
                 <div class="ms-auto d-flex align-items-center">
                     <button type="button" class="btn btn-sm btn-warning me-2" id="toggleEditBtn">
                         <i class="bi bi-x"></i>
-                        Cancel
+                        Annulla
                     </button>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
             </div>
             <div class="modal-body">
-                <p class="fs-5">Are you sure you want to delete this activity?</p>
-                <p class="text-danger">This action cannot be undone!</p>
-                <div class="alert alert-warning">
-                    <h6 class="alert-heading">
-                        <i class="bi bi-info-circle me-2"></i>
-                        Activity Details:
-                    </h6>
-                    <p class="mb-0">Title: ${this.activity.summary}</p>
-                    <p class="mb-0">Start Date: ${new Date(this.activity.dtStart).toLocaleDateString()}</p>
-                    <p class="mb-0">Due Date: ${new Date(formatDate(this.activity.due)).toLocaleDateString()}</p>
-                    ${this.activity.isMilestone ? '<p class="mb-0 text-primary"><i class="bi bi-flag-fill"></i> Milestone</p>' : ""}
-                </div>
+                <p class="fs-5">Sei sicuro di voler eliminare l'attività?</p>
+                <p class="text-danger">Questa operazione non può essere annullata!</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete Activity</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Elimina Attività</button>
             </div>
         `;
 	}
@@ -630,8 +614,7 @@ class ActivityModifyForm extends HTMLElement {
 			await fetcher(method, url, data);
 			window.location.reload();
 		} catch (error) {
-			console.error("Error modifying activity:", error);
-			alert("Failed to modify activity");
+			alert("Errore durante la modifica dell'attività");
 		}
 	}
 
@@ -644,8 +627,8 @@ class ActivityModifyForm extends HTMLElement {
 		);
 		const text =
 			availableUsers.length > 0
-				? "Select a user..."
-				: "No available users";
+				? "Seleziona un utente..."
+				: "Nessun utente disponibile";
 
 		let block = `<option value="" disabled selected>${text}</option>`;
 		for (const user of availableUsers) {
@@ -663,7 +646,7 @@ class ActivityModifyForm extends HTMLElement {
 		if (action === "ADD") {
 			if (select.options.length === 1) {
 				select.innerHTML =
-					"<option value='' disabled selected>Select a user...</option>";
+					"<option value='' disabled selected>Seleziona un utente</option>";
 			}
 			select.innerHTML += `<option value="${user.name}">${user.name}</option>`;
 		} else {
@@ -675,69 +658,77 @@ class ActivityModifyForm extends HTMLElement {
 
 			if (select.options.length === 1) {
 				select.innerHTML =
-					'<option value="" disabled selected>No available users</option>';
+					'<option value="" disabled selected>Nessun utente disponibile</option>';
 			}
 		}
 	}
 
 	private createForm() {
 		return `
-            <div class="modal-body">
-                <div class="mb-4">
-                    <label for="summary" class="form-label fw-bold">Title</label>
-                    <input type="text" class="form-control" id="summary" name="summary" 
-                           required value="${this.activity.summary}">
-                </div>
-                
-                <div class="mb-4">
-                    <label for="description" class="form-label fw-bold">Description</label>
-                    <textarea class="form-control" id="description" name="description" 
-                          rows="3">${this.activity.description || ""}</textarea>
-                </div>
+			<div class="modal-body">
+				<div class="mb-4">
+					<div class="row g-3 align-items-end">
+						<div class="col">
+						<label for="summary" class="form-label fw-semibold">Titolo</label>
+						<div class="input-group">
+							<input type="text" class="form-control" id="summary" name="summary" 
+								placeholder="Inserisci titolo attività" required value="${this.activity.summary}">
+							<div class="input-group-text px-2 bg-white">
+							<div class="form-check form-check-inline mb-0">
+								<input type="checkbox" class="form-check-input" id="isMilestone" 
+									name="isMilestone" ${this.activity.isMilestone ? "checked" : ""}>
+								<label class="form-check-label ms-1" for="isMilestone">
+								<i class="bi bi-flag-fill text-primary"></i> Milestone
+								</label>
+							</div>
+							</div>
+						</div>
+						</div>
+					</div>
+				</div>
+				
+				<div class="mb-4">
+					<label for="description" class="form-label fw-semibold">Descrizione</label>
+					<textarea class="form-control" id="description" name="description" 
+						  rows="3" placeholder="Aggiungi una descrizione...">${this.activity.description || ""}</textarea>
+				</div>
 
-                <div class="mb-4 d-flex justify-content-between gap-3">
-                    <div class="flex-grow-1">
-                        <label for="dtStart" class="form-label fw-bold">Start Date</label>
-                        <input type="date" class="form-control" id="dtStart" name="dtStart" 
-                           required value="${formatDate(this.activity.dtStart)}"
-                           min="${this.minDate}" 
-                           max="${this.maxDate}">
-                    </div>
-                    <div class="flex-grow-1">
-                        <label for="due" class="form-label fw-bold">Due Date</label>
-                        <input type="date" class="form-control" id="due" name="due" 
-                           required value="${formatDate(this.activity.due)}"
-                           min="${this.minDate}" 
-                           max="${this.maxDate}">
-                    </div>
-                </div>
+				<div class="mb-4 row">
+					<div class="col-md-6">
+						<label for="dtStart" class="form-label fw-semibold">Data di inizio</label>
+						<input type="date" class="form-control" id="dtStart" name="dtStart" 
+						   required value="${formatDate(this.activity.dtStart)}"
+						   min="${this.minDate}" 
+						   max="${this.maxDate}">
+					</div>
+					<div class="col-md-6">
+						<label for="due" class="form-label fw-semibold">Data di fine</label>
+						<input type="date" class="form-control" id="due" name="due" 
+						   required value="${formatDate(this.activity.due)}"
+						   min="${this.minDate}" 
+						   max="${this.maxDate}">
+					</div>
+				</div>
 
-                <div class="mb-4 form-check">
-                    <input type="checkbox" class="form-check-input" id="isMilestone" 
-                           name="isMilestone" ${this.activity.isMilestone ? "checked" : ""}>
-                    <label class="form-check-label" for="isMilestone">Is Milestone</label>
-                </div>
-
-                <div class="mb-4">
-                    <label class="form-label fw-bold">Assigned Users</label>
-                    <div class="add-user-form">
-                        <div class="input-group">
-                            <select class="form-select" id="newUser">
-                                ${this.createUsersSelect()}
-                            </select>
-                            <button class="btn btn-primary" type="button" id="addUserBtn">
-                                <i class="bi bi-plus-lg"></i> Add
-                            </button>
-                        </div>
-                    </div>
-                    <div class="user-list mt-2" id="userList">
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="submit" class="btn btn-primary">Save Changes</button>
-            </div>
-        `;
+				<div class="mb-4">
+					<label class="form-label fw-semibold">Utenti assegnati</label>
+					<div class="add-user-form">
+						<div class="input-group">
+							<select class="form-select" id="newUser">
+								${this.createUsersSelect()}
+							</select>
+							<button class="btn btn-primary" type="button" id="addUserBtn">
+								<i class="bi bi-plus-lg"></i>
+							</button>
+						</div>
+					</div>
+					<div class="user-list mt-3" id="userList"></div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="submit" class="btn btn-primary">Salva</button>
+			</div>
+		`;
 	}
 
 	// Aggiunge un utente alla lista
@@ -746,8 +737,9 @@ class ActivityModifyForm extends HTMLElement {
 		if (!list) return;
 
 		const deleteCallback = (e: any) => {
-			const btn = e.target as HTMLElement;
-			btn.parentElement?.remove();
+			const clickedElement = e.target as HTMLElement;
+			const itemElement = clickedElement.closest(".entry-item");
+			itemElement?.remove();
 
 			// Troviamo l'utente nella lista modificata e lo rimuoviamo
 			const removedUser = this.modifiedUserlist.find(
@@ -760,7 +752,8 @@ class ActivityModifyForm extends HTMLElement {
 				this.usersAvailable.push(removedUser);
 			}
 			if (this.modifiedUserlist.length === 0) {
-				list.innerHTML = '<p class="text-muted">No users assigned</p>';
+				list.innerHTML =
+					'<p class="text-muted">Nessun utente assegnato</p>';
 			}
 			this.updateUsersSelect(user, "ADD");
 		};
@@ -783,7 +776,7 @@ class ActivityModifyForm extends HTMLElement {
 			const userList = this.querySelector("#userList");
 			if (userList) {
 				userList.innerHTML =
-					'<p class="text-muted">No users assigned</p>';
+					'<p class="text-muted">Nessun utente assegnato</p>';
 			}
 		}
 
@@ -818,12 +811,12 @@ class ActivityModifyForm extends HTMLElement {
             <div class="modal-header">
                 <h5 class="modal-title">
                     <i class="bi bi-pencil-fill"></i>
-                    <span>Modify Activity</span>
+                    <span>Modifica Attività</span>
                 </h5>
                 <div class="ms-auto d-flex align-items-center">
                     <button type="button" class="btn btn-sm btn-warning me-2" id="toggleEditBtn">
                         <i class="bi bi-x"></i>
-                        Cancel
+                        Annulla
                     </button>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
