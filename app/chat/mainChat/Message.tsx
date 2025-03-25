@@ -23,7 +23,16 @@ export function Message({ msg }: { msg: MinMessage }) {
 			{!isOwn && (
 				// Posizionato in basso a sinistra
 				<div className="message-avatar d-flex align-items-end">
-					<div className="avatar-circle" title={msg.owner}>
+					<div
+						title={msg.owner}
+						style={{
+							position: "relative",
+							width: "45px",
+							height: "45px",
+							overflow: "hidden",
+							borderRadius: "50%"
+						}}
+					>
 						<Image
 							src={
 								fetchImageError
@@ -32,14 +41,11 @@ export function Message({ msg }: { msg: MinMessage }) {
 										DEFAULT_PROFILE_URL
 							}
 							alt="Profile"
-							width={45}
-							height={45}
+							sizes="500px"
+							fill
 							onError={() => setFetchImageError(true)}
-							className="me-3 flex-shrink-0 text-primary"
-							layout="intrinsic"
 							style={{
-								minWidth: "45px",
-								transition: "transform 0.2s ease"
+								objectFit: "cover"
 							}}
 						/>
 					</div>

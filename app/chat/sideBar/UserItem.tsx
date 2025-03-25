@@ -39,24 +39,31 @@ export function UserItem({
 		);
 	} else {
 		iconToShow = (
-			<Image
-				src={
-					fetchImageError
-						? DEFAULT_PROFILE_URL
-						: DEFAULT_PROFILE_URL + entry.imageId ||
-							DEFAULT_PROFILE_URL
-				}
-				alt="Profile"
-				width={45}
-				height={45}
-				onError={() => setFetchImageError(true)}
-				className="me-3 flex-shrink-0 text-primary"
-				layout="intrinsic"
+			<div
 				style={{
-					minWidth: "45px",
-					transition: "transform 0.2s ease"
+					position: "relative",
+					width: "45px",
+					height: "45px",
+					overflow: "hidden",
+					borderRadius: "50%"
 				}}
-			/>
+			>
+				<Image
+					src={
+						fetchImageError
+							? DEFAULT_PROFILE_URL
+							: DEFAULT_PROFILE_URL + entry.imageId ||
+								DEFAULT_PROFILE_URL
+					}
+					alt="Profile"
+					sizes="500px"
+					fill
+					onError={() => setFetchImageError(true)}
+					style={{
+						objectFit: "cover"
+					}}
+				/>
+			</div>
 		);
 	}
 
