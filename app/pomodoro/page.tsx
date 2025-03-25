@@ -9,10 +9,11 @@ import { GlobalSideBar } from "../components/GlobalSideBar";
 import { Coffee } from "./Animation/Coffee";
 import { Tree } from "./Animation/Tree";
 import { MusicView } from "./MusicBar/MusicView";
+import "./Pomodoro.css";
 import { Setting } from "./Setting";
 
 async function fetcher(url: string) {
-	console.log("Fetching data from " + url);
+	console.log("Prendo dati da " + url);
 	const response = await fetch(url);
 
 	if (!response.ok) {
@@ -250,16 +251,16 @@ function PomodoroImplementation() {
 		};
 
 		const getMainButtonText = () => {
-			if (!isStarted) return "Start";
-			return isPaused ? "Resume" : "Pause";
+			if (!isStarted) return "Inizia";
+			return isPaused ? "Riprendi" : "Pausa";
 		};
 
 		const renderHandlerButtons = () => {
 			if (isStarted && isPaused) {
 				return (
 					<>
-						{LargeButton("Restart", handleRestart)}
-						{LargeButton("Set Completed", handleSetCompleted)}
+						{LargeButton("Ricomincia", handleRestart)}
+						{LargeButton("Completato", handleSetCompleted)}
 						{LargeButton("Stop", reset)}
 					</>
 				);
@@ -327,7 +328,6 @@ function PomodoroImplementation() {
 								variant="link"
 								onClick={() => {
 									setIsMusicView(!isMusicView);
-									console.log(isMusicView);
 								}}
 								className="p-0 m-0"
 								style={{ zIndex: 1 }}
@@ -376,19 +376,19 @@ function PomodoroImplementation() {
 								{!isStarted && id === null && (
 									<div className="d-flex flex-column justify-content-center m-4">
 										<Setting
-											name="Study Time"
+											name="Tempo di studio (min)"
 											maxValue={600}
 											getter={studyTime}
 											setter={setStudyTime}
 										></Setting>
 										<Setting
-											name="Sessions"
+											name="Sessioni"
 											maxValue={60}
 											getter={sessions}
 											setter={setSessions}
 										></Setting>
 										<Setting
-											name="Break Time"
+											name="Pausa (min)"
 											maxValue={600}
 											getter={breakTime}
 											setter={setBreakTime}

@@ -92,14 +92,14 @@ export function MusicInput({
 		<>
 			<Form.Group className="d-flex flex-column align-items-center mt-4">
 				<Form.Label className="mb-3 fs-5 fw-bold text-primary">
-					Add YouTube Track
+					Aggiungi un video YouTube
 				</Form.Label>
 				<div className="d-flex w-100 shadow-sm position-relative">
 					<Form.Control
 						type="text"
 						value={newVideo}
 						onChange={handleNewVideoChange}
-						placeholder="Paste YouTube URL here..."
+						placeholder="Inserisci il link qui..."
 						className="py-3 border-primary"
 						style={{ borderRadius: "12px 0 0 12px" }}
 						onKeyDown={(e) => {

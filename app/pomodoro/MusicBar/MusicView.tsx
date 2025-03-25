@@ -252,7 +252,7 @@ export function MusicView() {
 			/>
 			<div className="mt-4">
 				<div className="d-flex align-items-center mb-3">
-					<h5 className="m-0 fw-bold text-secondary">Queue</h5>
+					<h5 className="m-0 fw-bold text-secondary">Coda</h5>
 					<span className="ms-2 badge bg-primary rounded-pill">
 						{videoTitleList.length}
 					</span>
@@ -270,7 +270,7 @@ export function MusicView() {
 						)
 					) : (
 						<p className="text-muted text-center p-3">
-							No videos in queue
+							Nessun video in coda
 						</p>
 					)}
 				</div>
