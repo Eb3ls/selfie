@@ -1,5 +1,6 @@
 "use client";
 
+import { DEFAULT_PROFILE_URL } from "@/app/constants";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import React, { useState } from "react";
@@ -64,15 +65,46 @@ const menuItems = [
 ];
 
 // Nuovo componente per le info utente
-const UserInfo = ({ user }: { user: any }) => (
-	<div className="d-flex align-items-center gap-3">
-		<i className="bi bi-person fs-1 me-2"></i>
-		<div className="d-flex flex-column">
-			<span className="fw-bold fs-3">{user?.username}</span>
-			<span className="text-muted small">{user?.email}</span>
+function UserInfo({ user }: { user: any }) {
+	const [fetchImageError, setFetchImageError] = useState(false);
+
+	const iconToShow = (
+		<div
+			style={{
+				position: "relative",
+				width: "50px",
+				height: "50px",
+				overflow: "hidden",
+				borderRadius: "50%"
+			}}
+		>
+			<Image
+				src={
+					fetchImageError || !user?._id
+						? DEFAULT_PROFILE_URL
+						: DEFAULT_PROFILE_URL + user._id || DEFAULT_PROFILE_URL
+				}
+				alt="Profile"
+				sizes="500px"
+				fill
+				onError={() => setFetchImageError(true)}
+				style={{
+					objectFit: "cover"
+				}}
+			/>
 		</div>
-	</div>
-);
+	);
+
+	return (
+		<div className="d-flex align-items-center gap-3">
+			{iconToShow}
+			<div className="d-flex flex-column">
+				<span className="fw-bold fs-3">{user?.username}</span>
+				<span className="text-muted small">{user?.email}</span>
+			</div>
+		</div>
+	);
+}
 
 export function GlobalSideBar() {
 	const [showSidebar, setShowSidebar] = useState(false);
@@ -183,6 +215,7 @@ export function GlobalSideBar() {
 				<Offcanvas.Body className="d-flex flex-column">
 					{/* Aggiunta UserInfo nella sidebar mobile */}
 					<UserInfo user={user} />
+					<br />
 
 					{/* Menu principale */}
 					<div className="flex-grow-1">
