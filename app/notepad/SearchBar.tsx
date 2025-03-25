@@ -19,7 +19,7 @@ export function SearchBar({
 				<Form.Control
 					className={styles.searchInput}
 					type="text"
-					placeholder="Search notes..."
+					placeholder="Cerca note..."
 					aria-label="Search"
 					name="searchBar"
 					onChange={handleSearch}
@@ -29,21 +29,21 @@ export function SearchBar({
 					<FilterModal handleFilters={handleFilters}>
 						<Button variant="outline" className={styles.actionBtn}>
 							<FaFilter className={styles.btnIcon} />
-							<span className={styles.btnText}>Filters</span>
+							<span className={styles.btnText}>Filtri</span>
 						</Button>
 					</FilterModal>
 
 					<SortModal handleSort={handleSort}>
 						<Button variant="outline" className={styles.actionBtn}>
 							<FaSort className={styles.btnIcon} />
-							<span className={styles.btnText}>Sort</span>
+							<span className={styles.btnText}>Ordinamento</span>
 						</Button>
 					</SortModal>
 
 					<AddNoteModal handleAdd={handleAdd}>
 						<Button variant="primary" className={styles.addBtn}>
 							<FaPlus className={styles.btnIcon} />
-							<span className={styles.btnText}>New Note</span>
+							<span className={styles.btnText}>Nuova nota</span>
 						</Button>
 					</AddNoteModal>
 				</div>

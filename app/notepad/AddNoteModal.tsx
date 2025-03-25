@@ -67,7 +67,7 @@ export function AddNoteModal({ children, handleAdd }: any) {
 								name="summary"
 								value={formData.summary}
 								onChange={handleChange}
-								placeholder="Inserisci il riassunto della nota"
+								placeholder="Inserisci il titolo della nota"
 								className="input-field"
 							/>
 						</Form.Group>

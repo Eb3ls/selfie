@@ -38,8 +38,6 @@ export default function Notepad() {
 	function handleFilters(filters: any) {
 		setOldNotes(notes);
 
-		console.log(filters);
-
 		const {
 			creationDateMin,
 			creationDateMax,
@@ -132,8 +130,6 @@ export default function Notepad() {
 	}
 
 	async function handleAdd(note: { summary: string; categories: string }) {
-		console.log(note);
-
 		const response = await fetch("/api/notepad/add", {
 			method: "POST",
 			headers: {
@@ -179,11 +175,11 @@ export default function Notepad() {
 	function getAccessIcon(access: string) {
 		switch (access) {
 			case "PRIVATE":
-				return <FaLock title="Private" />;
+				return <FaLock title="Privata" />;
 			case "INVITED":
-				return <FaUser title="Invited" />;
+				return <FaUser title="A invito" />;
 			case "PUBLIC":
-				return <MdPublic title="Public" />;
+				return <MdPublic title="Pubblica" />;
 			default:
 				return null;
 		}
@@ -212,15 +208,16 @@ export default function Notepad() {
 					/>
 				</div>
 
-				{error && <div>Failed to load</div>}
+				{error && <div>Caricamento fallito</div>}
 				{!data ? (
-					<div className={styles.loadingState}>Loading notes...</div>
+					<div className={styles.loadingState}>Caricamento...</div>
 				) : (
 					<div className={styles.notesGrid}>
 						{notes.length === 0 ? (
 							<div className={styles.emptyState}>
 								<p>
-									No notes found. Start by creating a new one!
+									Nessuna nota trovata. Creane una nuova per
+									cominciare!
 								</p>
 							</div>
 						) : (
@@ -246,7 +243,7 @@ export default function Notepad() {
 											{isOwner(note.ownerId) && (
 												<FaUserShield
 													className={`${styles.icon} ${styles.ownerIcon}`}
-													title="Owner"
+													title="Sei il proprietario"
 												/>
 											)}
 										</div>
@@ -306,8 +303,8 @@ export default function Notepad() {
 														✏️
 													</span>
 													<p>
-														This note is empty.
-														Click to start writing!
+														Questa nota è vuota.
+														Clicca per modificarla.
 													</p>
 												</div>
 											)}

@@ -116,7 +116,7 @@ export default function Note() {
 	};
 
 	if (error) return <div>Errore durante il caricamento della nota.</div>;
-	if (!note) return <div className={styles.loading}>Loading...</div>;
+	if (!note) return <div className={styles.loading}>Caricamento...</div>;
 
 	const sanitizedMarkdown = DOMPurify.sanitize(
 		marked(noteText, { async: false })

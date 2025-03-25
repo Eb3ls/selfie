@@ -16,8 +16,8 @@ export function EditNoteModal({
 		summary: note.summary,
 		categories: note.categories,
 		access: note.access,
-		invitedUser: "", // Per input di aggiunta nuovi utenti
-		userNameList: note.userNameList || [] // Invited users
+		invitedUser: "",
+		userNameList: note.userNameList || []
 	});
 
 	function handleChange(
@@ -54,8 +54,8 @@ export function EditNoteModal({
 		event.preventDefault();
 
 		// Validazione minima degli input
-		if (!formData.summary || !formData.categories) {
-			alert("Titolo e Categorie sono obbligatori.");
+		if (!formData.summary) {
+			alert("Il titolo è obbligatorio");
 			return;
 		}
 
