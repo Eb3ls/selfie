@@ -2,7 +2,7 @@
 .container {
 	background-color: #f8f9fa;
 	min-height: 100vh;
-	padding: 2rem;
+	padding: 0 2rem 2rem; /* Modifica qui */
 }
 
 .header {
@@ -63,6 +63,16 @@
 		Ubuntu, Cantarell;
 	line-height: 1.6;
 	overflow-wrap: break-word;
+	margin-top: -0.5rem;
+}
+
+.previewContent > *:first-child {
+	margin-top: 0 !important;
+	padding-top: 0 !important;
+}
+
+.previewContent p {
+	margin: 0.8rem 0;
 }
 
 .previewContent h1,
