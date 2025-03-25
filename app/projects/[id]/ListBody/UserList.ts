@@ -67,17 +67,24 @@ class UsersList extends HTMLElement {
 			const toggler = document.createElement("div");
 			toggler.className = "d-flex align-items-center";
 
-			// Creiamo l'icona del caret
+			let isAnimating = false; // Variabile per bloccare i click durante l'animazione
+
 			const caretIcon = document.createElement("i");
 			caretIcon.className = "bi bi-caret-right-fill me-3 fs-5";
 			caretIcon.style.transition = "transform 0.2s";
 			caretIcon.setAttribute("data-bs-toggle", "collapse");
 			caretIcon.setAttribute("data-bs-target", `#collapse${user}`);
 			caretIcon.onclick = () => {
-				caretIcon.style.transform =
-					caretIcon.style.transform === "rotate(90deg)"
-						? "rotate(0)"
-						: "rotate(90deg)";
+				// Se l'animazione é in corso non facciamo nulla
+				if (isAnimating) return;
+				isAnimating = true;
+				let animation;
+				if (caretIcon.style.transform === "rotate(90deg)") {
+					animation = "rotate(0)";
+				} else {
+					animation = "rotate(90deg)";
+				}
+				caretIcon.style.transform = animation;
 			};
 			toggler.appendChild(caretIcon);
 
@@ -89,6 +96,18 @@ class UsersList extends HTMLElement {
 			toggler.appendChild(button);
 
 			// Creiamo il blocco collasabile
+			const collapse = document.createElement("div");
+			collapse.id = `collapse${user}`;
+			collapse.className = "collapse ms-3";
+			// Aggiungiamo l'evento per sbloccare il click
+			collapse.addEventListener("shown.bs.collapse", () => {
+				isAnimating = false;
+			});
+
+			collapse.addEventListener("hidden.bs.collapse", () => {
+				isAnimating = false;
+			});
+
 			const userActivitiesBlock = document.createElement(
 				"time-list"
 			) as TimeList;
@@ -97,11 +116,10 @@ class UsersList extends HTMLElement {
 				currentUser,
 				isOwner
 			);
-			userActivitiesBlock.id = `collapse${user}`;
-			userActivitiesBlock.className = "collapse";
+			collapse.appendChild(userActivitiesBlock);
 
 			container.appendChild(toggler);
-			container.appendChild(userActivitiesBlock);
+			container.appendChild(collapse);
 
 			this.appendChild(container);
 		}
