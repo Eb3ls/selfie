@@ -1,10 +1,14 @@
 import { DeleteModal } from "@/app/chat/sideBar/DeleteModal";
 import "@/app/chat/styles.css";
+import { DEFAULT_PROFILE_URL } from "@/app/constants";
+import Image from "next/image";
+import { useState } from "react";
 import { Container, ListGroup } from "react-bootstrap";
-import { IoPersonCircleOutline, IoTrash } from "react-icons/io5";
+import { IoPeopleCircleOutline, IoTrash } from "react-icons/io5";
 
 type SidebarEntry = {
 	_id: string;
+	isGroup: boolean;
 	summary: string;
 	lastMessage: { name: string; content: string } | null;
 	loader: () => void;
@@ -17,22 +21,49 @@ export function UserItem({
 	entry: SidebarEntry;
 	setSelectedChat: any;
 }) {
+	const [fetchImageError, setFetchImageError] = useState(false);
+
+	let iconToShow;
+
+	if (entry.isGroup) {
+		iconToShow = (
+			<IoPeopleCircleOutline
+				size={45}
+				className="me-3 flex-shrink-0 text-primary"
+				style={{
+					minWidth: "45px",
+					transition: "transform 0.2s ease"
+				}}
+			/>
+		);
+	} else {
+		iconToShow = (
+			<Image
+				src={
+					fetchImageError
+						? DEFAULT_PROFILE_URL
+						: DEFAULT_PROFILE_URL + entry._id || DEFAULT_PROFILE_URL
+				}
+				alt="Profile"
+				width={45}
+				height={45}
+				onError={() => setFetchImageError(true)}
+				className="me-3 flex-shrink-0 text-primary"
+				style={{
+					minWidth: "45px",
+					transition: "transform 0.2s ease"
+				}}
+			/>
+		);
+	}
+
 	return (
 		<ListGroup.Item
 			action
 			className={`fw-bold p-3 my-2 rounded-4 border d-flex align-items-center position-relative hover-shadow`}
 			onClick={entry.loader}
 		>
-			<div className="position-relative">
-				<IoPersonCircleOutline
-					size={45}
-					className="me-3 flex-shrink-0 text-primary"
-					style={{
-						minWidth: "45px",
-						transition: "transform 0.2s ease"
-					}}
-				/>
-			</div>
+			<div className="position-relative">{iconToShow}</div>
 
 			<Container className="d-flex flex-column justify-content-center m-0 overflow-hidden py-1">
 				<h5

@@ -166,6 +166,7 @@ export default function ChatMain() {
 
 				filteredChats.push({
 					_id: chat._id,
+					isGroup: chat.isGroup,
 					summary: chat.summary,
 					lastMessage: lastMessageObj,
 					loader: () => loadChat(chat._id)
