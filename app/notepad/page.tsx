@@ -247,15 +247,17 @@ export default function Notepad() {
 												/>
 											)}
 										</div>
-										<Button
-											variant="link"
-											className={styles.deleteBtn}
-											onClick={() =>
-												handleDelete(note._id!)
-											}
-										>
-											<FaTrash />
-										</Button>
+										{note.ownerId === user?._id && (
+											<Button
+												variant="link"
+												className={styles.deleteBtn}
+												onClick={() =>
+													handleDelete(note._id!)
+												}
+											>
+												<FaTrash />
+											</Button>
+										)}
 									</div>
 
 									<Card.Body
