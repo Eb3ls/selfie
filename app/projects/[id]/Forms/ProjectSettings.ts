@@ -108,47 +108,47 @@ class ProjectSettings extends HTMLElement {
 	private createViewTemplate() {
 		const isOwner = this.currentUser?.name === this.owner;
 		return `
-            <div class="modal-header d-flex align-items-center">
-                <h5 class="modal-title d-flex align-items-center gap-2">
-                    <i class="bi bi-info-circle"></i>
-                    <span>Impostazioni progetto</span>
-                </h5>
-				${
-					isOwner
-						? `
-				<div class="ms-auto">
-					<button type="button" class="btn btn-sm btn-danger me-2" id="deleteBtn">
-						<i class="bi bi-trash"></i>
-						Delete
-					</button>
-					<button type="button" class="btn btn-sm btn-outline-primary me-2" id="editBtn">
-						<i class="bi bi-pencil"></i>
-						Modify
-					</button>
+			<div class="modal-header">
+				<h5 class="modal-title">
+					<i class="bi bi-info-circle"></i>
+					<span>Impostazioni progetto</span>
+				</h5>
+				<div class="ms-auto d-flex align-items-center">
+					${
+						isOwner
+							? `
+								<button type="button" class="btn btn-sm btn-danger me-2" id="deleteBtn">
+									<i class="bi bi-trash"></i>
+									Delete
+								</button>
+								<button type="button" class="btn btn-sm btn-outline-primary me-2" id="editBtn">
+									<i class="bi bi-pencil"></i>
+									Modify
+								</button>
+							`
+							: ""
+					}
 					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
 				</div>
-				`
-						: ""
-				}
-            </div>
-            <div class="modal-body">
-                <div class="mb-4">
-                    <label class="form-label text-muted small">Project Title</label>
-                    <h4 id="projectTitleView">${this.title}</h4>
-                </div>
-                
-                <div class="mb-4">
-                    <label class="form-label text-muted small">Project Users</label>
-                    <div class="user-list">
-                        <div id="userListView">
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        `;
+			</div>
+			<div class="modal-body">
+				<div class="mb-4">
+					<label class="form-label text-muted small">Project Title</label>
+					<h4 id="projectTitleView">${this.title}</h4>
+				</div>
+				
+				<div class="mb-4">
+					<label class="form-label text-muted small">Project Users</label>
+					<div class="user-list">
+						<div id="userListView">
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+			</div>
+		`;
 	}
 
 	private async handleModifySubmit(event: Event) {
@@ -282,11 +282,11 @@ class ProjectSettings extends HTMLElement {
 	private createModifyTemplate() {
 		return `
             <div class="modal-header">
-                <h5 class="modal-title d-flex align-items-center gap-2">
+                <h5 class="modal-title">
                     <i class="bi bi-pencil-fill"></i>
                     <span>Modify Project</span>
                 </h5>
-                <div class="ms-auto">
+				<div class="ms-auto d-flex align-items-center">
                     <button type="button" class="btn btn-sm btn-warning me-2" id="toggleEditBtn">
                         <i class="bi bi-x"></i>
                         Cancel
@@ -346,11 +346,11 @@ class ProjectSettings extends HTMLElement {
 	private createDeleteTemplate() {
 		return `
             <div class="modal-header">
-                <h5 class="modal-title text-danger d-flex align-items-center gap-2">
+                <h5 class="modal-title text-danger">
                     <i class="bi bi-exclamation-triangle-fill"></i>
                     <span>Delete Project</span>
                 </h5>
-                <div class="ms-auto">
+                <div class="ms-auto d-flex align-items-center">
                     <button type="button" class="btn btn-sm btn-warning me-2" id="toggleEditBtn">
                         <i class="bi bi-x"></i>
                         Cancel

@@ -2,6 +2,8 @@ import {
 	PhaseResponse,
 	ProjectActivityResponse,
 	User,
+	createLinkEntry,
+	createUserEntry,
 	fetcher,
 	formatDate
 } from "../Utils";
@@ -68,81 +70,107 @@ class ActivityForm extends HTMLElement {
 		this.usersList = this.activity.users || [];
 		this.selectedLinks = [];
 		for (const link of this.activity.prevLinks) {
-			this.selectedLinks.push({ name: link.summary, _id: link._id });
+			this.selectedLinks.push({
+				name: link.summary,
+				_id: link._id
+			});
 		}
 		this.updateModalContent("VIEW");
 	}
 
 	private createViewTemplate() {
-		return `
-            <div class="modal-body">
-                <div class="mb-4">
-                    <label class="form-label text-muted small">Title</label>
-                    <h4>${this.activity.summary}</h4>
-                </div>
-                
-                <div class="mb-4">
-                    <label class="form-label text-muted small">Description</label>
-                    <p class="fs-5">${this.activity.description || "No description provided."}</p>
-                </div>
+		// Creiamo il blocco per le attivitá associate
+		let selectedLinksBlock = "";
+		if (this.activity.prevLinks.length > 0) {
+			for (const link of this.activity.prevLinks) {
+				const linkBlock = createLinkEntry(
+					link.summary,
+					link.noteId,
+					false,
+					null
+				);
+				selectedLinksBlock += linkBlock.outerHTML;
+			}
+		} else {
+			selectedLinksBlock =
+				'<p class="text-muted">Nessuna attivitá associata</p>';
+		}
 
-                <div class="mb-4">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <label class="form-label text-muted small">Start Date</label>
-                            <h5>${new Date(this.activity.dtStart).toLocaleDateString()}</h5>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label text-muted small">Due Date</label>
-                            <h5>${new Date(formatDate(this.activity.due)).toLocaleDateString()}</h5>
-                        </div>
-                    </div>
-                </div>
+		// Creiamo il blocco per gli utenti selezionati
+		let selectedUsersBlock = "";
+		if (this.usersList.length > 0) {
+			for (const user of this.usersList) {
+				const userBlock = createUserEntry(user, false, null);
+				selectedUsersBlock += userBlock.outerHTML;
+			}
+		} else {
+			selectedUsersBlock =
+				'<p class="text-muted">Nessun utente assegnato</p>';
+		}
 
-                ${
+		const titleBlock = `
+			<div class="d-flex align-items-start gap-3 mb-4">
+				<div class="flex-grow-1">
+					<label class="form-label text-muted small">Title</label>
+					<h4 class="mb-0 text-break">${this.activity.summary}</h4>
+				</div>
+				${
 					this.activity.isMilestone
-						? `
-                <div class="mb-4">
-                    <span class="badge bg-primary">
-                        <i class="bi bi-flag-fill me-1"></i>
-                        Milestone
-                    </span>
-                </div>
-                `
+						? `<div class="flex-shrink-0">
+							<span class="badge bg-primary fs-6 d-inline-flex align-items-center">
+								<i class="bi bi-flag-fill me-1"></i>
+								Milestone
+							</span>
+						</div>`
 						: ""
 				}
+			</div>
+		`;
 
-                <div class="mb-4">
-                    <label class="form-label text-muted small">Assigned Users</label>
-                    <div class="user-list">
-                        ${
-							this.activity.users?.length > 0
-								? this.activity.users
-										.map(
-											(user: User) => `
-                                        <div class="user-item d-flex align-items-center mb-2">
-                                            <i class="bi bi-person-fill me-2"></i>
-                                            ${user.name}
-                                        </div>
-                                    `
-										)
-										.join("")
-								: '<p class="text-muted">No users assigned</p>'
-						}
-                    </div>
-                </div>
+		return `
+			<div class="modal-body">
+				${titleBlock}
+				
+				<div class="mb-4">
+					<label class="form-label text-muted small">Description</label>
+					<p class="fs-5">${this.activity.description || "No description provided."}</p>
+				</div>
 
-                <div class="mb-4">
-                    <label class="form-label text-muted small">Associated Note</label>
-                    <a href="/notepad/${this.activity.noteId}" class="btn btn-outline-info">
-                        Access Note
-                    </a>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        `;
+				<div class="mb-4">
+					<div class="row">
+						<div class="col-md-6">
+							<label class="form-label text-muted small">Start Date</label>
+							<h5>${new Date(this.activity.dtStart).toLocaleDateString()}</h5>
+						</div>
+						<div class="col-md-6">
+							<label class="form-label text-muted small">Due Date</label>
+							<h5>${new Date(formatDate(this.activity.due)).toLocaleDateString()}</h5>
+						</div>
+					</div>
+				</div>
+
+				<div class="mb-4">
+					${createLinkEntry("Nota della attivitá", this.activity.noteId!, false, null).outerHTML}
+				</div>
+
+				<div class="mb-4">
+					<label class="form-label text-muted small">Utenti assegnati</label>
+					<div class="user-list">
+						${selectedUsersBlock}
+					</div>
+				</div>
+
+				<div class="mb-4">
+					<label class="form-label text-muted small">Attivitá associate</label>
+					<div class="link-list">
+						${selectedLinksBlock}
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+			</div>
+		`;
 	}
 
 	private updateModalContent(mode: "VIEW" | "EDIT" | "LINK" | "DELETE") {
@@ -199,32 +227,32 @@ class ActivityForm extends HTMLElement {
 					: "";
 
 			modalContent.innerHTML = `
-                <div class="modal-header d-flex align-items-center">
-                    <h5 class="modal-title d-flex align-items-center gap-2">
-                        <i class="bi bi-info-circle"></i>
-                        <span>Activity</span>
-                    </h5>
-                    <div class="ms-auto">
+				<div class="modal-header">
+					<h5 class="modal-title">
+						<i class="bi bi-info-circle"></i>
+						<span>Activity</span>
+					</h5>
+					<div class="ms-auto d-flex align-items-center">
 						${
 							this.isOwner
 								? `
-                        <button type="button" class="btn btn-sm btn-danger me-2" id="deleteBtn">
-                            <i class="bi bi-trash"></i>
-                            Delete
-                        </button>
+						<button type="button" class="btn btn-sm btn-danger me-2" id="deleteBtn">
+							<i class="bi bi-trash"></i>
+							Delete
+						</button>
 						${linkButton}
-                        <button type="button" class="btn btn-sm btn-outline-primary me-2" id="editBtn">
-                            <i class="bi bi-pencil"></i>
-                            Modify
-                        </button>
+						<button type="button" class="btn btn-sm btn-outline-primary me-2" id="editBtn">
+							<i class="bi bi-pencil"></i>
+							Modify
+						</button>
 						`
 								: ""
 						}
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                </div>
-                ${this.createViewTemplate()}
-            `;
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+				</div>
+				${this.createViewTemplate()}
+			`;
 
 			const deleteBtn = modalContent.querySelector("#deleteBtn");
 			deleteBtn?.addEventListener("click", () =>
@@ -325,27 +353,15 @@ class ActivityLinkForm extends HTMLElement {
 		if (!list) return;
 
 		if (this.selectedLinks.length === 0) {
-			list.innerHTML = '<p class="text-muted">No links selected</p>';
+			list.innerHTML =
+				'<p class="text-muted">Nessun link selezionato</p>';
 			return;
 		}
 
-		const itemBlock = document.createElement("div");
-		itemBlock.className =
-			"user-item d-flex justify-content-between align-items-center bg-light";
-		itemBlock.setAttribute("data-link", item._id);
-
-		itemBlock.innerHTML = `
-			<span class="link-name">
-				<i class="bi bi-link-45deg me-2"></i>
-				${item.name}
-			</span>
-			<button type="button" class="btn btn-danger btn-sm">
-				<i class="bi bi-trash"></i>
-			</button>
-		`;
-
 		// Aggiungiamo l'evento per l'eliminazione dell'elemento
-		itemBlock.querySelector("button")?.addEventListener("click", () => {
+		const deleteCallback = (e: any) => {
+			const btn = e.target as HTMLElement;
+			btn.parentElement?.remove();
 			// Eliminiamo l'elemento dalla lista
 			this.selectedLinks = this.selectedLinks.filter(
 				(link) => link._id !== item._id
@@ -353,21 +369,22 @@ class ActivityLinkForm extends HTMLElement {
 			// Aggiorniamo la lista delle attivitá disponibili
 			this.avaiableActivities.push(item);
 			this.populateAvailableLinks();
-			itemBlock.remove();
 
 			// If no links remain, show the message
 			if (this.selectedLinks.length === 0) {
 				list.innerHTML =
 					'<div id="noLinks">Nessuna attivitá associata</div>';
 			}
-		});
+		};
+		const linkBlock = createLinkEntry(item.name, "", true, deleteCallback);
+		linkBlock.setAttribute("data-link", item._id);
 
-		// Clear "no links" message if it exists
+		// Se non ci sono elementi nella lista, rimuoviamo il messaggio
 		if (list.querySelector("#noLinks")) {
 			list.innerHTML = "";
 		}
 
-		list.appendChild(itemBlock);
+		list.appendChild(linkBlock);
 	}
 
 	private async handleSave(e: Event) {
@@ -444,7 +461,7 @@ class ActivityLinkForm extends HTMLElement {
                     <i class="bi bi-link"></i>
                     <span>Link Activities</span>
                 </h5>
-                <div class="ms-auto">
+                <div class="ms-auto d-flex align-items-center">
                     <button type="button" class="btn btn-sm btn-warning me-2" id="toggleEditBtn">
                         <i class="bi bi-x"></i>
                         Cancel
@@ -528,11 +545,11 @@ class ActivityDeleteForm extends HTMLElement {
 	private render() {
 		this.innerHTML = `
             <div class="modal-header">
-                <h5 class="modal-title text-danger d-flex align-items-center gap-2">
+                <h5 class="modal-title text-danger">
                     <i class="bi bi-exclamation-triangle-fill"></i>
                     <span>Delete Activity</span>
                 </h5>
-                <div class="ms-auto">
+                <div class="ms-auto d-flex align-items-center">
                     <button type="button" class="btn btn-sm btn-warning me-2" id="toggleEditBtn">
                         <i class="bi bi-x"></i>
                         Cancel
@@ -639,7 +656,7 @@ class ActivityModifyForm extends HTMLElement {
 		return block;
 	}
 
-	private updateUsersSelect(user: string, action: "ADD" | "REMOVE") {
+	private updateUsersSelect(user: User, action: "ADD" | "REMOVE") {
 		const select = this.querySelector("#newUser") as HTMLSelectElement;
 		if (!select) return;
 
@@ -648,10 +665,10 @@ class ActivityModifyForm extends HTMLElement {
 				select.innerHTML =
 					"<option value='' disabled selected>Select a user...</option>";
 			}
-			select.innerHTML += `<option value="${user}">${user}</option>`;
+			select.innerHTML += `<option value="${user.name}">${user.name}</option>`;
 		} else {
 			select.querySelectorAll("option").forEach((option) => {
-				if (option.value === user) {
+				if (option.value === user.name) {
 					option.remove();
 				}
 			});
@@ -724,31 +741,20 @@ class ActivityModifyForm extends HTMLElement {
 	}
 
 	// Aggiunge un utente alla lista
-	private addUser(name: string) {
+	private addUser(user: User) {
 		const list = this.querySelector("#userList");
 		if (!list) return;
 
-		const itemBlock = document.createElement("div");
-		itemBlock.className =
-			"user-item d-flex justify-content-between align-items-center bg-light";
+		const deleteCallback = (e: any) => {
+			const btn = e.target as HTMLElement;
+			btn.parentElement?.remove();
 
-		itemBlock.innerHTML = `
-        <span class="user-name">
-            <i class="bi bi-person-fill me-2"></i>
-            ${name}
-        </span>
-        <button type="button" class="btn btn-danger btn-sm">
-            <i class="bi bi-trash"></i>
-        </button>
-        `;
-
-		itemBlock.querySelector("button")?.addEventListener("click", () => {
-			itemBlock.remove();
+			// Troviamo l'utente nella lista modificata e lo rimuoviamo
 			const removedUser = this.modifiedUserlist.find(
-				(user) => user.name === name
+				(u) => u.name === user.name
 			);
 			this.modifiedUserlist = this.modifiedUserlist.filter(
-				(user) => user.name !== name
+				(u) => u.name !== user.name
 			);
 			if (removedUser) {
 				this.usersAvailable.push(removedUser);
@@ -756,10 +762,12 @@ class ActivityModifyForm extends HTMLElement {
 			if (this.modifiedUserlist.length === 0) {
 				list.innerHTML = '<p class="text-muted">No users assigned</p>';
 			}
-			this.updateUsersSelect(name, "ADD");
-		});
+			this.updateUsersSelect(user, "ADD");
+		};
 
-		list.appendChild(itemBlock);
+		const userBlock = createUserEntry(user, true, deleteCallback);
+
+		list.appendChild(userBlock);
 	}
 
 	// Funzione per l'aggiunta e l'eliminazione degli utenti
@@ -768,7 +776,7 @@ class ActivityModifyForm extends HTMLElement {
 		const newUser = this.querySelector("#newUser") as HTMLSelectElement;
 
 		for (const user of this.modifiedUserlist) {
-			this.addUser(user.name);
+			this.addUser(user);
 		}
 
 		if (this.modifiedUserlist.length === 0) {
@@ -779,6 +787,7 @@ class ActivityModifyForm extends HTMLElement {
 			}
 		}
 
+		// Bottone per l'aggiunta di un nuovo utente
 		btn?.addEventListener("click", () => {
 			const name = newUser.value;
 			if (!name) return;
@@ -790,13 +799,13 @@ class ActivityModifyForm extends HTMLElement {
 				}
 			}
 
-			this.updateUsersSelect(name, "REMOVE");
 			const selectedUser = this.usersAvailable.find(
 				(user) => user.name === name
 			);
 			if (!selectedUser) return;
+			this.updateUsersSelect(selectedUser, "REMOVE");
 			this.modifiedUserlist.push(selectedUser);
-			this.addUser(name);
+			this.addUser(selectedUser);
 			newUser.value = "";
 		});
 
@@ -806,12 +815,12 @@ class ActivityModifyForm extends HTMLElement {
 
 	render() {
 		this.innerHTML = `
-            <div class="modal-header d-flex align-items-center">
-                <h5 class="modal-title d-flex align-items-center gap-2">
+            <div class="modal-header">
+                <h5 class="modal-title">
                     <i class="bi bi-pencil-fill"></i>
                     <span>Modify Activity</span>
                 </h5>
-                <div class="ms-auto">
+                <div class="ms-auto d-flex align-items-center">
                     <button type="button" class="btn btn-sm btn-warning me-2" id="toggleEditBtn">
                         <i class="bi bi-x"></i>
                         Cancel

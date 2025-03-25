@@ -54,6 +54,7 @@ export interface Link {
 	_id: string;
 	summary: string;
 	date: string;
+	noteId: string;
 }
 
 export interface ProjectActivityResponse {
@@ -324,4 +325,86 @@ export async function fetcher(
 	} else {
 		throw new Error(response.statusText);
 	}
+}
+
+// Funzione per creare una singola entry generica
+
+function createEntry(summary: string, startIcon: string): HTMLElement {
+	const item = document.createElement("div");
+	// Entry item usato per rimuovere l'elemento
+	item.className =
+		"d-flex justify-content-between align-items-center p-2 mb-1 rounded border entry-item";
+
+	const span = document.createElement("span");
+	span.className = "d-flex align-items-center";
+
+	const icon = document.createElement("i");
+	icon.className = startIcon + " me-2 text-secondary";
+
+	span.appendChild(icon);
+	span.appendChild(document.createTextNode(summary));
+	item.appendChild(span);
+
+	return item;
+}
+
+// Utenti
+
+// Funzione per creare una singola entry per la lista degli utenti
+export function createUserEntry(
+	user: User,
+	hasDeleteBtn: boolean,
+	deleteCallback: any
+): HTMLElement {
+	const userEntry = createEntry(user.name, "bi bi-person");
+
+	if (hasDeleteBtn) {
+		const deleteBtn = document.createElement("button");
+		deleteBtn.type = "button";
+		deleteBtn.className = "btn btn-danger btn-sm";
+		deleteBtn.setAttribute("title", "Rimuovi l'utente");
+
+		const trashIcon = document.createElement("i");
+		trashIcon.className = "bi bi-trash";
+		deleteBtn.appendChild(trashIcon);
+
+		deleteBtn.onclick = deleteCallback;
+		userEntry.appendChild(deleteBtn);
+	}
+
+	return userEntry;
+}
+
+// Link
+
+// Funzione per generare una singola entry per la lista dei link, o ha il pulsante di eliminazione oppure quello per andare alla nota
+export function createLinkEntry(
+	summary: string,
+	noteId: string,
+	isDeleteBtn: boolean,
+	deleteCallback: any
+): HTMLElement {
+	const linkEntry = createEntry(summary, "bi bi-link-45deg");
+
+	if (isDeleteBtn) {
+		const deleteBtn = document.createElement("button");
+		deleteBtn.type = "button";
+		deleteBtn.className = "btn btn-danger btn-sm";
+		deleteBtn.setAttribute("title", "Rimuovi il link");
+
+		const trashIcon = document.createElement("i");
+		trashIcon.className = "bi bi-trash";
+		deleteBtn.appendChild(trashIcon);
+
+		deleteBtn.onclick = deleteCallback;
+		linkEntry.appendChild(deleteBtn);
+	} else {
+		const viewBtn = document.createElement("a");
+		viewBtn.href = `/notepad/${noteId}`;
+		viewBtn.className = "btn btn-primary btn-sm";
+		viewBtn.setAttribute("title", "View note");
+		viewBtn.innerHTML = '<i class="bi bi-eye me-1"></i>View';
+		linkEntry.appendChild(viewBtn);
+	}
+	return linkEntry;
 }

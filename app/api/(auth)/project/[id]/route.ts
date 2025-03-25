@@ -51,6 +51,7 @@ interface Link {
 	_id: string;
 	summary: string;
 	date: string;
+	noteId: string;
 }
 
 interface ProjectActivityResponse {
@@ -115,8 +116,6 @@ export const GET = async (
 		project.ownerId.toString() !== userId &&
 		!project.userIdList.includes(userId)
 	) {
-		console.log("userId: ", userId);
-		console.log("userIdList: ", project.userIdList);
 		return generateMessageResponse("Unauthorized", 401);
 	}
 
@@ -284,14 +283,16 @@ export const GET = async (
 									activity.prevIdList?.map((id) => ({
 										_id: id.toString(),
 										summary: "", // Temporaneo, verrà popolato dopo
-										date: "" // Temporaneo, verrà popolato dopo
+										date: "", // Temporaneo, verrà popolato dopo
+										noteId: ""
 									})) || [],
 								prevMaxDue: "",
 								nextLinks:
 									activity.nextIdList?.map((id) => ({
 										_id: id.toString(),
 										summary: "", // Temporaneo, verrà popolato dopo
-										date: "" // Temporaneo, verrà popolato dopo
+										date: "", // Temporaneo, verrà popolato dopo
+										noteId: ""
 									})) || [],
 								nextMinStart: "",
 								alarms: activity.alarms,
@@ -362,14 +363,16 @@ export const GET = async (
 							activity.prevIdList?.map((id) => ({
 								_id: id.toString(),
 								summary: "", // Temporaneo, verrà popolato dopo
-								date: "" // Temporaneo, verrà popolato dopo
+								date: "", // Temporaneo, verrà popolato dopo
+								noteId: ""
 							})) || [],
 						prevMaxDue: "",
 						nextLinks:
 							activity.nextIdList?.map((id) => ({
 								_id: id.toString(),
 								summary: "", // Temporaneo, verrà popolato dopo
-								date: "" // Temporaneo, verrà popolato dopo
+								date: "", // Temporaneo, verrà popolato dopo
+								noteId: ""
 							})) || [],
 						nextMinStart: "",
 						alarms: activity.alarms,
@@ -398,7 +401,8 @@ export const GET = async (
 						? {
 								_id: link._id,
 								summary: linkedActivity.summary,
-								date: linkedActivity.due
+								date: linkedActivity.due,
+								noteId: linkedActivity.noteId
 							}
 						: null;
 				})
@@ -412,7 +416,8 @@ export const GET = async (
 						? {
 								_id: link._id,
 								summary: linkedActivity.summary,
-								date: linkedActivity.dtStart
+								date: linkedActivity.dtStart,
+								noteId: linkedActivity.noteId
 							}
 						: null;
 				})

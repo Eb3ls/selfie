@@ -3,6 +3,7 @@ import {
 	SubPhaseResponse,
 	User,
 	checkDate,
+	createUserEntry,
 	fetcher,
 	formatDate
 } from "../Utils";
@@ -605,37 +606,26 @@ class AddActivityForm extends HTMLElement {
 	}
 
 	// Aggiunge un utente alla lista
-	private addUser(name: string) {
+	private addUser(user: User) {
 		const list = this.querySelector("#userList");
 		if (!list) return;
 
-		const itemBlock = document.createElement("div");
-		itemBlock.className =
-			"user-item d-flex justify-content-between align-items-center bg-light";
-
-		itemBlock.innerHTML = `
-        <span class="user-name">
-            <i class="bi bi-person-fill me-2"></i>
-            ${name}
-        </span>
-        <button type="button" class="btn btn-danger btn-sm">
-            <i class="bi bi-trash"></i>
-        </button>
-        `;
-
-		itemBlock.querySelector("button")?.addEventListener("click", () => {
-			itemBlock.remove();
-			const removedUser = this.users.find((user) => user.name === name);
-			this.users = this.users.filter((user) => user.name !== name);
+		const deleteCallback = (e: any) => {
+			const btn = e.target as HTMLButtonElement;
+			btn.parentElement?.remove();
+			const removedUser = this.users.find((u) => u.name === user.name);
+			this.users = this.users.filter((u) => u.name !== user.name);
 			if (!removedUser) return;
 			this.avaiableUsers.push(removedUser);
 			if (this.users.length === 0) {
 				list.innerHTML = '<p class="text-muted">No users assigned</p>';
 			}
-			this.updateUsersSelect(name, "ADD");
-		});
+			this.updateUsersSelect(user.name, "ADD");
+		};
 
-		list.appendChild(itemBlock);
+		const userBlock = createUserEntry(user, true, deleteCallback);
+
+		list.appendChild(userBlock);
 	}
 
 	private render() {
@@ -744,7 +734,7 @@ class AddActivityForm extends HTMLElement {
 				const newUser = this.avaiableUsers.find((u) => u.name === user);
 				if (!newUser) return;
 				this.users.push(newUser);
-				this.addUser(user);
+				this.addUser(newUser);
 				newUserSelect.value = "";
 			});
 		}

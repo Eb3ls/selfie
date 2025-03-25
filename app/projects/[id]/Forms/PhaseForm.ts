@@ -102,30 +102,30 @@ class PhaseForm extends HTMLElement {
             `;
 		} else {
 			return `
-            <div class="modal-header d-flex align-items-center">
-                <h5 class="modal-title d-flex align-items-center gap-2">
-                <i class="bi bi-info-circle"></i>
-                <span>Phase</span>
-                </h5>
-				${
-					this.isOwner
-						? `
-                <div class="ms-auto">
-                <button type="button" class="btn btn-sm btn-danger me-2" id="deleteBtn">
-                    <i class="bi bi-trash"></i>
-                    Delete
-                </button>
-                <button type="button" class="btn btn-sm btn-warning me-2" id="toggleEditBtn">
-                    <i class="bi bi-pencil"></i>
-                    Modify
-                </button> `
-						: ""
-				}
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-            </div>
-            ${this.createViewTemplate()}
-            `;
+			<div class="modal-header">
+				<h5 class="modal-title">
+					<i class="bi bi-info-circle"></i>
+					<span>Phase</span>
+				</h5>
+				<div class="ms-auto d-flex align-items-center">
+					${
+						this.isOwner
+							? `
+					<button type="button" class="btn btn-sm btn-danger me-2" id="deleteBtn">
+						<i class="bi bi-trash"></i>
+						Delete
+					</button>
+					<button type="button" class="btn btn-sm btn-warning me-2" id="toggleEditBtn">
+						<i class="bi bi-pencil"></i>
+						Modify
+					</button>`
+							: ""
+					}
+					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+				</div>
+			</div>
+			${this.createViewTemplate()}
+			`;
 		}
 	}
 
