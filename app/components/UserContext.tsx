@@ -32,7 +32,7 @@ type ReducedUser = {
 interface UserContextType {
 	user: ReducedUser | null;
 	loading: boolean;
-	error: Error | null;
+	error: string | null;
 	fetchUser: () => void;
 	logOut: () => void;
 	updateUser: (user: ReducedUser) => void;
@@ -43,7 +43,7 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export function UserProvider({ children }: { children: React.ReactNode }) {
 	const [userData, setUserData] = useState<ReducedUser | null>(null);
 	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState<Error | null>(null);
+	const [error, setError] = useState<string | null>(null);
 
 	// Funzione per aggiornare lo stato dell'utente
 	const updateUser = (newUserData: ReducedUser) => {
@@ -54,29 +54,33 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 		try {
 			setLoading(true);
 			const response = await fetch("/api/user/getUser");
-			if (!response.ok) {
+
+			if (!response.ok || response.redirected) {
 				throw new Error("Failed to fetch user data");
 			}
+
 			const data: ReducedUser = await response.json();
 			setUserData(data);
-		} catch (error) {
-			setError(error as Error);
+		} catch (error: any) {
+			setError(error.message);
 		}
 		setLoading(false);
 	}
 
 	async function logOutFunction() {
 		try {
-			await fetch("/api/user/logout", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" }
-			});
+			const response = await fetch("/api/user/logout");
+
+			if (!response.ok || response.redirected) {
+				alert("Logout failed!");
+				throw new Error("Failed to logout");
+			}
+
 			setUserData(null);
 			alert("Logout successful!");
 			window.location.href = "/";
-		} catch (error) {
-			setError(error as Error);
-			alert("Logout failed!");
+		} catch (error: any) {
+			setError(error.message);
 		}
 	}
 
