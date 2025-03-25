@@ -164,9 +164,19 @@ export default function ChatMain() {
 						}
 					: null;
 
+				// imageId non dovrebbe esistere nei gruppi, perciò risulta undefined
+				// È possibile controllare se è un gruppo controllando il campo isGroup
+				// per evitare di utilizzare un imageId inesistente
+				const imageId = chat.isGroup
+					? undefined
+					: chat.userIdList.find(
+							(id) => id !== chatResponse?.whoAmI._id
+						);
+
 				filteredChats.push({
 					_id: chat._id,
 					isGroup: chat.isGroup,
+					imageId: imageId,
 					summary: chat.summary,
 					lastMessage: lastMessageObj,
 					loader: () => loadChat(chat._id)
@@ -217,6 +227,7 @@ export default function ChatMain() {
 			return {
 				_id: index++,
 				owner: newOwner,
+				ownerId: message.ownerId,
 				content: message.content,
 				sentAt: message.sentAt
 			};

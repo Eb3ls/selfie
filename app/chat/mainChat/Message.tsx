@@ -1,13 +1,19 @@
+import { DEFAULT_PROFILE_URL } from "@/app/constants";
+import Image from "next/image";
+import { useState } from "react";
 import "./Message.css";
 
 type MinMessage = {
 	_id: number;
 	owner: string;
+	ownerId: string;
 	content: string;
 	sentAt: string;
 };
 
 export function Message({ msg }: { msg: MinMessage }) {
+	const [fetchImageError, setFetchImageError] = useState(false);
+
 	const isOwn = msg.owner === "Io";
 
 	return (
@@ -18,7 +24,23 @@ export function Message({ msg }: { msg: MinMessage }) {
 				// Posizionato in basso a sinistra
 				<div className="message-avatar d-flex align-items-end">
 					<div className="avatar-circle" title={msg.owner}>
-						<small>{msg.owner[0]}</small>
+						<Image
+							src={
+								fetchImageError
+									? DEFAULT_PROFILE_URL
+									: DEFAULT_PROFILE_URL + msg.ownerId ||
+										DEFAULT_PROFILE_URL
+							}
+							alt="Profile"
+							width={45}
+							height={45}
+							onError={() => setFetchImageError(true)}
+							className="me-3 flex-shrink-0 text-primary"
+							style={{
+								minWidth: "45px",
+								transition: "transform 0.2s ease"
+							}}
+						/>
 					</div>
 				</div>
 			)}

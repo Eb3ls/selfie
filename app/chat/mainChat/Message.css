@@ -19,7 +19,6 @@
 	width: 35px;
 	height: 35px;
 	border-radius: 50%;
-	background-color: var(--bs-secondary);
 	display: flex;
 	align-items: center;
 	justify-content: center;

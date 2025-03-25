@@ -9,6 +9,7 @@ import { IoPeopleCircleOutline, IoTrash } from "react-icons/io5";
 type SidebarEntry = {
 	_id: string;
 	isGroup: boolean;
+	imageId: string | undefined;
 	summary: string;
 	lastMessage: { name: string; content: string } | null;
 	loader: () => void;
@@ -42,7 +43,8 @@ export function UserItem({
 				src={
 					fetchImageError
 						? DEFAULT_PROFILE_URL
-						: DEFAULT_PROFILE_URL + entry._id || DEFAULT_PROFILE_URL
+						: DEFAULT_PROFILE_URL + entry.imageId ||
+							DEFAULT_PROFILE_URL
 				}
 				alt="Profile"
 				width={45}
