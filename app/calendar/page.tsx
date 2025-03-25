@@ -38,7 +38,7 @@ const ListView = ({ events }: { events: CalendarEvent[] }) => {
 										"dddd D MMMM YYYY - HH:mm"
 									)}
 								</div>
-								<div className="list-title text-truncate">
+								<div className="list-title">
 									{event.title}
 									{event.isRecurring && (
 										<span className="recurring-badge">
