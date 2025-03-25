@@ -10,6 +10,7 @@ import { CalendarEvent } from "@/app/calendar/calendarUtils/calendarTypes";
 import { GlobalSideBar } from "@/app/components/GlobalSideBar";
 import { useTime } from "@/app/components/TimeContext";
 import moment from "moment";
+import "moment/locale/it";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Calendar, View, momentLocalizer } from "react-big-calendar";
@@ -19,6 +20,7 @@ import useSWR from "swr";
 import "./calendar.css";
 
 const localizer = momentLocalizer(moment);
+moment.locale("it");
 
 const ListView = ({ events }: { events: CalendarEvent[] }) => {
 	return (

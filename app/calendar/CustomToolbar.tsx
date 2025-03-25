@@ -105,7 +105,11 @@ export function CustomToolbar({
 				>
 					{["month", "week", "day"].map((view) => (
 						<option key={view} value={view}>
-							{view.charAt(0).toUpperCase() + view.slice(1)}
+							{view === "month"
+								? "Mese"
+								: view === "week"
+									? "Settimana"
+									: "Giorno"}
 						</option>
 					))}
 				</select>

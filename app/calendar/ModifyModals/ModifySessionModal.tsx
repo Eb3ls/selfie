@@ -22,7 +22,11 @@ export function ModifySessionModal({
 
 	console.log("Session:", newSession);
 
-	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+	const handleChange = (
+		e: React.ChangeEvent<
+			HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+		>
+	) => {
 		setForm({
 			...form,
 			[e.target.name]: e.target.value
@@ -178,16 +182,18 @@ export function ModifySessionModal({
 								required
 							/>
 							<Form.Label>Stato</Form.Label>
-							<Form.Control
-								type="text"
+							<Form.Select
 								name="status"
 								value={form.status}
 								onChange={handleChange}
-								placeholder="Inserisci stato"
 								className="input-field"
 								required
-							/>
-							<Form.Label>Data di inizio?</Form.Label>
+							>
+								<option value="CONFIRMED">Confermato</option>
+								<option value="TENTATIVE">Provvisorio</option>
+								<option value="CANCELLED">Cancellato</option>
+							</Form.Select>
+							<Form.Label>Data di inizio</Form.Label>
 							<Form.Control
 								type="datetime-local"
 								name="dtStart"

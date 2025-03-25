@@ -38,7 +38,11 @@ export function ModifyActivityModal({
 
 	console.log("Activity:", newActivity);
 
-	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+	const handleChange = (
+		e: React.ChangeEvent<
+			HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+		>
+	) => {
 		setForm({
 			...form,
 			[e.target.name]: e.target.value
@@ -152,15 +156,18 @@ export function ModifyActivityModal({
 								required
 							/>
 							<Form.Label>Stato</Form.Label>
-							<Form.Control
-								type="text"
+							<Form.Select
 								name="status"
 								value={form.status}
 								onChange={handleChange}
-								placeholder="Inserisci stato"
 								className="input-field"
 								required
-							/>
+							>
+								<option value="NEEDS-ACTION">Da fare</option>
+								<option value="COMPLETED">Completata</option>
+								<option value="IN-PROCESS">In corso</option>
+								<option value="CANCELLED">Cancellata</option>
+							</Form.Select>
 							<Form.Label>Data di fine</Form.Label>
 							<Form.Control
 								type="datetime-local"
