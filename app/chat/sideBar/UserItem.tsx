@@ -51,6 +51,7 @@ export function UserItem({
 				height={45}
 				onError={() => setFetchImageError(true)}
 				className="me-3 flex-shrink-0 text-primary"
+				layout="intrinsic"
 				style={{
 					minWidth: "45px",
 					transition: "transform 0.2s ease"
