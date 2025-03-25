@@ -119,83 +119,68 @@ export function EditNoteModal({
 								className="input-field"
 							/>
 						</Form.Group>
+						<Form.Group className="mb-4" controlId="formAccess">
+							<Form.Label>
+								<strong>Permessi</strong>
+							</Form.Label>
+							<Form.Select
+								name="access"
+								value={formData.access}
+								onChange={handleChange}
+							>
+								<option value="PRIVATE">Privata</option>
+								<option value="INVITED">A invito</option>
+								<option value="PUBLIC">Pubblica</option>
+							</Form.Select>
+						</Form.Group>
 
-						{note.ownerId.toString() === currentUserId && (
-							<>
+						{formData.access === "INVITED" && (
+							<div className="invited-section">
 								<Form.Group
 									className="mb-4"
-									controlId="formAccess"
+									controlId="formInvitedUsers"
 								>
 									<Form.Label>
-										<strong>Permessi</strong>
+										<strong>Utenti invitati</strong>
 									</Form.Label>
-									<Form.Select
-										name="access"
-										value={formData.access}
+									<ul>
+										{formData.userNameList.map(
+											(userId: any, index: number) => (
+												<li key={userId.toString()}>
+													<Button
+														variant="danger"
+														size="sm"
+														className="me-2"
+														onClick={() =>
+															handleRemoveUser(
+																index
+															)
+														}
+													>
+														<FaTrash />
+													</Button>
+													{userId.toString()}
+												</li>
+											)
+										)}
+									</ul>
+									<Form.Control
+										type="text"
+										name="invitedUser"
+										value={formData.invitedUser}
 										onChange={handleChange}
+										placeholder="Aggiungi un utente per username"
+										className="input-field"
+									/>
+									<Button
+										variant="secondary"
+										onClick={handleAddUser}
+										className="add-user-button mt-2"
 									>
-										<option value="PRIVATE">Privata</option>
-										<option value="INVITED">
-											A invito
-										</option>
-										<option value="PUBLIC">Pubblica</option>
-									</Form.Select>
+										Aggiungi Utente
+									</Button>
 								</Form.Group>
-
-								{formData.access === "INVITED" && (
-									<div className="invited-section">
-										<Form.Group
-											className="mb-4"
-											controlId="formInvitedUsers"
-										>
-											<Form.Label>
-												<strong>Utenti invitati</strong>
-											</Form.Label>
-											<ul>
-												{formData.userNameList.map(
-													(
-														userId: any,
-														index: number
-													) => (
-														<li
-															key={userId.toString()}
-														>
-															<Button
-																variant="danger"
-																size="sm"
-																className="me-2"
-																onClick={() =>
-																	handleRemoveUser(
-																		index
-																	)
-																}
-															>
-																<FaTrash />
-															</Button>
-															{userId.toString()}
-														</li>
-													)
-												)}
-											</ul>
-											<Form.Control
-												type="text"
-												name="invitedUser"
-												value={formData.invitedUser}
-												onChange={handleChange}
-												placeholder="Aggiungi un utente per username"
-												className="input-field"
-											/>
-											<Button
-												variant="secondary"
-												onClick={handleAddUser}
-												className="add-user-button mt-2"
-											>
-												Aggiungi Utente
-											</Button>
-										</Form.Group>
-									</div>
-								)}
-							</>
+							</div>
 						)}
 					</Modal.Body>
 					<Modal.Footer>

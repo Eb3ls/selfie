@@ -6,11 +6,14 @@ import {
 	Event,
 	INVITATION_COLLECTION,
 	Invitation,
+	NOTE_COLLECTION,
+	Note,
 	SESSION_COLLECTION,
 	Session,
 	StringActivity,
 	StringEvent,
 	StringInvitation,
+	StringNote,
 	StringSession,
 	addCollectionWrapper,
 	deleteCollectionWrapper,
@@ -71,7 +74,7 @@ export const POST = async (request: NextRequest) => {
 	// Se arriviamo a questo punto l'invito esiste e possiamo procedere con l'accettazione.
 	// Per accettarlo dobbiamo aggiungere l'utente alla lista degli utenti che hanno accesso al targetId dell'invito.
 	// Prima di tutto capiamo di che tipo è l'invito.
-	// Ci sono 3 tipi di inviti: "ACTIVITY" | "EVENT" | "SESSION" | "PROJECT".
+	// Ci sono 5 tipi di inviti: "ACTIVITY" | "EVENT" | "SESSION" | "PROJECT" | "NOTE"
 
 	const type: string = invitation.type;
 	const targetId: string = invitation.targetId;
@@ -82,7 +85,8 @@ export const POST = async (request: NextRequest) => {
 		type !== "ACTIVITY" &&
 		type !== "EVENT" &&
 		type !== "SESSION" &&
-		type !== "PROJECT"
+		type !== "PROJECT" &&
+		type !== "NOTE"
 	) {
 		return generateMessageResponse("Invalid type", 400);
 	}
@@ -266,6 +270,50 @@ export const POST = async (request: NextRequest) => {
 		return generateMessageResponse("Invito accettato", 200);
 	} else if (type === "PROJECT") {
 		// TODO
+	} else if (type === "NOTE") {
+		// Ottieni la collezione delle note
+		const noteClient: Collection<Note> =
+			await getCollection<Note>(NOTE_COLLECTION);
+
+		// Ottieniamo la nota
+		const outNote = await findCollectionWrapper<Note>(
+			{
+				_id: targetId
+			},
+			noteClient
+		);
+
+		if (outNote.status !== 200) {
+			return outNote;
+		}
+
+		const note: StringNote = (await outNote.json())[0];
+
+		// Aggiungiamo l'utente alla lista degli utenti che hanno accesso alla nota
+		note.userIdList.push(userId);
+
+		// Aggiorniamo la nota
+		const updateOut = await updateCollectionWrapper<Note>(
+			{ _id: note._id },
+			{ $set: { userIdList: note.userIdList } } as any,
+			noteClient
+		);
+
+		if (updateOut.status !== 200) {
+			return updateOut;
+		}
+
+		// Eliminiamo l'invito
+		const deleteOut = await deleteCollectionWrapper<Invitation>(
+			{ _id: invitationId },
+			invitationClient
+		);
+
+		if (deleteOut.status !== 200) {
+			return deleteOut;
+		}
+
+		return generateMessageResponse("Invito accettato", 200);
 	}
 
 	return generateMessageResponse("Not yet implemented", 400);

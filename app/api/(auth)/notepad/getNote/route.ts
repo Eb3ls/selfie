@@ -1,4 +1,4 @@
-import { idListToNameList } from "@/utils/api/api";
+import { idListToNameList, validate } from "@/utils/api/api";
 import {
 	generateMessageResponse,
 	generateObjectResponse,
@@ -7,6 +7,7 @@ import {
 import {
 	NOTE_COLLECTION,
 	Note,
+	StringNote,
 	findCollectionWrapper,
 	getCollection
 } from "@/utils/db/db";
@@ -15,6 +16,19 @@ import { NextRequest } from "next/server";
 
 export const GET = async (request: NextRequest) => {
 	// Validazione della richiesta
+	const validation = await validate<{}>(request, {}, false);
+
+	// Se la validazione fallisce, ritorna il messaggio di errore
+	if (validation === null) {
+		return generateMessageResponse("Invalid request", 400);
+	}
+
+	// Estraiamo l'utente e il corpo della richiesta
+	const { user, body: newBody } = validation;
+
+	// Estraiamo l'ID dell'utente
+	const userId: string = user._id!;
+
 	const { searchParams } = new URL(request.url);
 	const noteId = searchParams.get("id");
 
@@ -42,13 +56,28 @@ export const GET = async (request: NextRequest) => {
 		return generateMessageResponse("Note not found", 404);
 	}
 
-	let note = await outNote.json();
+	let note: StringNote[] = await outNote.json();
 
 	// Verifica che la lista userIdList esista nella nota
 	if (!note[0].userIdList || !Array.isArray(note[0].userIdList)) {
 		return generateMessageResponse(
 			"Invalid or missing userIdList in note",
 			400
+		);
+	}
+
+	if (note[0].access === "PRIVATE" && note[0].ownerId !== userId) {
+		return generateMessageResponse(
+			"User not authorized to access note",
+			403
+		);
+	}
+
+	// Verifichiamo che l'utente appartenga alla lista di userIdList
+	if (note[0].access === "INVITED" && !note[0].userIdList.includes(userId)) {
+		return generateMessageResponse(
+			"User not authorized to access note",
+			403
 		);
 	}
 
@@ -63,12 +92,12 @@ export const GET = async (request: NextRequest) => {
 		);
 	}
 
-	// Aggiungiamo la lista di nomi utente alla nota
-	note[0].userNameList = idConversionResult.userNameList;
-
-	// Rimuoviamo la lista di userIdList per evitare di esporla
-	delete note[0].userIdList;
+	const { userIdList, ...noteData } = note[0];
+	const noteDataWithNames = {
+		...noteData,
+		userNameList: idConversionResult.userNameList
+	};
 
 	// Restituiamo la nota aggiornata
-	return generateObjectResponse(note[0], 200);
+	return generateObjectResponse(noteDataWithNames, 200);
 };

@@ -603,7 +603,7 @@ export async function getNameFromId(userId: string): Promise<string> {
 // Funzione per invitare una lista di utenti ad un particolare evento (target in generale)
 export async function addInvitations(
 	userIdList: string[],
-	type: "ACTIVITY" | "EVENT" | "SESSION" | "PROJECT",
+	type: "ACTIVITY" | "EVENT" | "SESSION" | "PROJECT" | "NOTE",
 	targetId: string
 ) {
 	// Otteniamo la collezione delle invitation
@@ -642,7 +642,7 @@ export async function addInvitations(
 
 // Funzione per rimuovere gli inviti relativi ad un particolare evento (target in generale)
 export async function removeInvitations(
-	type: "ACTIVITY" | "EVENT" | "SESSION" | "PROJECT",
+	type: "ACTIVITY" | "EVENT" | "SESSION" | "PROJECT" | "NOTE",
 	targetId: string
 ) {
 	// Otteniamo la collezione delle invitation

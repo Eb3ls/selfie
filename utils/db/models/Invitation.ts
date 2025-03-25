@@ -6,10 +6,10 @@ COLLECTION
 */
 
 export interface Invitation {
-	_id?: ObjectId;											// ID dell'invito
-	userId: ObjectId;										// ID dell'utente che ha ricevuto l'invito
-	type: "ACTIVITY" | "EVENT" | "SESSION" | "PROJECT";		// Tipo di invito
-	targetId: ObjectId;										// ID della risorsa a cui è rivolto l'invito
+	_id?: ObjectId;														// ID dell'invito
+	userId: ObjectId;													// ID dell'utente che ha ricevuto l'invito
+	type: "ACTIVITY" | "EVENT" | "SESSION" | "PROJECT" | "NOTE";		// Tipo di invito
+	targetId: ObjectId;													// ID della risorsa a cui è rivolto l'invito
 }
 
 export type StringInvitation = ConvertToString<Invitation>;

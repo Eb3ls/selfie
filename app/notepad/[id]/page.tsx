@@ -140,15 +140,17 @@ export default function Note() {
 
 					<div className={styles.headerRight}>
 						<div className={styles.buttonGroup}>
-							<EditNoteModal
-								note={note}
-								currentUserId={user?._id}
-								handleEdit={handleEdit}
-							>
-								<button className={styles.editButton}>
-									<FaEdit size={24} />
-								</button>
-							</EditNoteModal>
+							{note.ownerId.toString() === user?._id && (
+								<EditNoteModal
+									note={note}
+									currentUserId={user?._id}
+									handleEdit={handleEdit}
+								>
+									<button className={styles.editButton}>
+										<FaEdit size={24} />
+									</button>
+								</EditNoteModal>
+							)}
 							<Button
 								variant="primary"
 								onClick={handleSave}

@@ -1,4 +1,5 @@
 import {
+	addInvitations,
 	generateMessageResponse,
 	generateObjectResponse,
 	usernameListToIds,
@@ -14,7 +15,6 @@ import {
 } from "@/utils/db/db";
 import { Collection } from "mongodb";
 import { NextRequest } from "next/server";
-import { BiBody } from "react-icons/bi";
 
 // TODO: Validare l'access per invited da progetti
 
@@ -74,45 +74,42 @@ export const PATCH = async (request: NextRequest) => {
 	const note: StringNote[] = await noteOut.json();
 
 	// Controlliamo che l'owner sia l'utente corrispondente
-	if (note[0].ownerId !== userId && note[0].access == "PRIVATE") {
+	if (note[0].ownerId !== userId) {
 		return generateMessageResponse("Unauthorized", 400);
 	}
 
-	// Controlliamo caso invited
-	if (note[0].access == "INVITED" && note[0].userIdList.includes(userId)) {
-		if (newBody.access !== "INVITED" && note[0].ownerId !== userId) {
-			return generateMessageResponse("Unauthorized", 400);
-		}
+	// Creiamo un oggetto senza il campo id
+	const { _id, ...newFields } = newBody;
 
-		if (userIdList.length !== note[0].userIdList.length) {
-			return generateMessageResponse("Unauthorized", 400);
-		}
+	// Sostituiamo la lista degli username con quella degli id, rimuovendo usernameList
+	const { usernameList: _, ...smallBody } = newFields;
+	const convertedBody = { userIdList: userIdList, ...smallBody };
 
-		let unauthorized: boolean = false;
+	// Otteniamo la lista di utenti partecipanti prima della modifica
+	const userListBefore = note[0].userIdList;
+	// Otteniamo la lista di utenti partecipanti con la modifica richiesta
+	const userListAfter = convertedBody.userIdList;
 
-		for (let i = 0; i < userIdList.length; i++) {
-			if (!note[0].userIdList.includes(userIdList[i])) {
-				unauthorized = true;
-			}
-		}
-		if (unauthorized) {
-			return generateMessageResponse("Unauthorized", 400);
-		}
-	}
+	// Otteniamo i nuovi utenti
+	const newUsers = userListAfter.filter(
+		(userId: string) => !userListBefore.includes(userId)
+	);
 
-	// Creiamo un oggetto con i campi da modificare
+	// Otteniamo gli utenti rimossi
+	const removedUsers = userListBefore.filter(
+		(userId: string) => !userListAfter.includes(userId)
+	);
 
-	const newFields: Partial<StringNote> = {
-		summary: newBody.summary,
-		categories: newBody.categories,
-		access: newBody.access as "PRIVATE" | "INVITED" | "PUBLIC",
-		userIdList: userIdList
-	};
+	// Impostiamo gli utenti partecipanti come prima della modifica
+	// ma rimuovendo quelli rimossi
+	convertedBody.userIdList = userListBefore.filter(
+		(userId: string) => !removedUsers.includes(userId)
+	);
 
 	// Modifichiamo la nota
 	const updateOut = await updateCollectionWrapper<Note>(
 		{ _id: noteId },
-		{ $set: newFields } as any,
+		{ $set: convertedBody } as any,
 		client
 	);
 
@@ -121,6 +118,13 @@ export const PATCH = async (request: NextRequest) => {
 	}
 
 	const updatedNote: StringNote = (await updateOut.json())[0];
+
+	// Invitiamo i nuovi utenti
+	const inviteOut = await addInvitations(newUsers, "NOTE", noteId);
+
+	if (inviteOut.status !== 200) {
+		return inviteOut;
+	}
 
 	return generateObjectResponse(updatedNote, 200);
 };
