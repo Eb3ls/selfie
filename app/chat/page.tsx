@@ -267,7 +267,12 @@ export default function ChatMain() {
 					<Fragment key={message._id}>
 						{newDate && (
 							<div className="d-flex justify-content-center text-muted my-2">
-								{messageDate.toDateString()}
+								{messageDate.toLocaleDateString("it-IT", {
+									weekday: "long",
+									day: "numeric",
+									month: "long",
+									year: "numeric"
+								})}
 							</div>
 						)}
 						<Message msg={message} />
