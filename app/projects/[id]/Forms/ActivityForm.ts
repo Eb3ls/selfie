@@ -675,11 +675,11 @@ class ActivityModifyForm extends HTMLElement {
 								placeholder="Inserisci titolo attività" required value="${this.activity.summary}">
 							<div class="input-group-text px-2 bg-white">
 							<div class="form-check form-check-inline mb-0">
+								<label class="form-check-label ms-1" for="isMilestone">
+									Milestone <i class="bi bi-flag-fill text-primary"></i>
+								</label>
 								<input type="checkbox" class="form-check-input" id="isMilestone" 
 									name="isMilestone" ${this.activity.isMilestone ? "checked" : ""}>
-								<label class="form-check-label ms-1" for="isMilestone">
-								<i class="bi bi-flag-fill text-primary"></i> Milestone
-								</label>
 							</div>
 							</div>
 						</div>

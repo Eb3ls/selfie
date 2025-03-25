@@ -36,18 +36,18 @@ class AddForm extends HTMLElement {
 	connectedCallback() {
 		this.innerHTML = `
 			<button type="button rounded-pill" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#AddForm">
-				Add new
+				Aggiungi
 			</button>
 			
 			<div class="modal fade" id="AddForm" aria-labelledby="FormLabel" aria-hidden="true">
-				<div class="modal-dialog">
+				<div class="modal-dialog modal-lg">
 					<div class="modal-content">
 						<div class="modal-header d-flex justify-content-between align-items-center">
 							<h5 class="modal-title mb-0"></h5>
 							<div class="btn-group" role="group" aria-label="Form type selection">
-								<button class="btn btn-outline-primary active" id="phase-tab">Phase</button>
-								<button class="btn btn-outline-primary" id="subphase-tab">SubPhase</button>
-								<button class="btn btn-outline-primary" id="activity-tab">Activity</button>
+								<button class="btn btn-outline-primary active" id="phase-tab">Fase</button>
+								<button class="btn btn-outline-primary" id="subphase-tab">Sottofase</button>
+								<button class="btn btn-outline-primary" id="activity-tab">Attività</button>
 							</div>
 						</div>
 						<div class="modal-body"></div>
@@ -64,19 +64,19 @@ class AddForm extends HTMLElement {
 		if (!modalTitle || !modalBody) return;
 
 		if (type === "PHASE") {
-			modalTitle.innerText = "Add new Phase";
+			modalTitle.innerText = "Aggiungi nuova Fase";
 			modalBody.innerHTML = "";
 			const phaseForm = new AddPhaseForm();
 			phaseForm.initialize(this.projectId);
 			modalBody.appendChild(phaseForm);
 		} else if (type === "SUBPHASE") {
-			modalTitle.innerText = "Add new SubPhase";
+			modalTitle.innerText = "Aggiungi nuova Sottofase";
 			modalBody.innerHTML = "";
 			const subPhaseForm = new AddSubPhaseForm();
 			subPhaseForm.initialize(this.projectId, this.phaseList);
 			modalBody.appendChild(subPhaseForm);
 		} else if (type === "ACTIVITY") {
-			modalTitle.innerText = "Add new Activity";
+			modalTitle.innerText = "Aggiungi nuova Attività";
 			modalBody.innerHTML = "";
 			const activityForm = new AddActivityForm();
 			activityForm.initialize(this.phaseList, this.avaiableUsers);
@@ -158,7 +158,7 @@ class AddPhaseForm extends HTMLElement {
 			await fetcher(method, url, body);
 			window.location.reload();
 		} catch (error) {
-			console.error(error);
+			alert("Errore nella creazione della fase");
 		}
 	}
 
@@ -166,24 +166,24 @@ class AddPhaseForm extends HTMLElement {
 		this.innerHTML = `
 			<form id="phaseForm">
 				<div class="modal-body">
-					<div class="mb-3">
-						<label for="Title" class="form-label">Title</label>
+					<div class="mb-4">
+						<label for="Title" class="form-label fw-semibold">Titolo</label>
 						<input type="text" required name="Title" class="form-control" id="Title">
 					</div>
-					<div class="mb-3 d-flex justify-content-between">
-						<div>
-							<label for="Start" class="form-label">Start</label>
-							<input type="date" required name="Start" class="form-control" id="Start">
+					<div class="mb-4 row">
+						<div class="col-md-6">
+							<label for="Start" class="form-label fw-semibold">Data d'inizio</label>
+							<input type="date" class="form-control" id="Start" name="Start" required">
 						</div>
-						<div>
-							<label for="Due" class="form-label">Due</label>
-							<input type="date" required name="Due" class="form-control" id="Due">
+						<div class="col-md-6">
+							<label for="Due" class="form-label fw-semibold">Data di fine</label>
+							<input type="date" class="form-control" id="Due" name="Due" required">
 						</div>
 					</div>
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-					<button type="submit" class="btn btn-primary">Add</button>
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+					<button type="submit" class="btn btn-primary">Aggiungi</button>
 				</div>
 			</form>
 		`;
@@ -236,7 +236,7 @@ class AddSubPhaseForm extends HTMLElement {
 			await fetcher(method, url, body);
 			window.location.reload();
 		} catch (error) {
-			console.error(error);
+			alert("Errore nella creazione della sottofase");
 		}
 	}
 
@@ -258,14 +258,14 @@ class AddSubPhaseForm extends HTMLElement {
 		if (this.phaseList.length === 0) {
 			option += `
 				<option value="" disabled selected>
-					No phases available
+					Nessuna fase disponibile
 				</option>
 			`;
 			return option;
 		} else {
 			option += `
 				<option value="" disabled selected>
-					Select a phase
+					Seleziona una fase
 				</option>
 			`;
 		}
@@ -317,32 +317,32 @@ class AddSubPhaseForm extends HTMLElement {
 		this.innerHTML = `
 			<form id="subphaseForm">
 				<div class="modal-body">
-					<div class="mb-3">
-						<label for="Phase" class="form-label">Main Phase</label>
+					<div class="mb-4">
+						<label for="Phase" class="form-label fw-semibold">Fase principale</label>
 						<select name="Phase" class="form-select" id="Phase" required>
 							${this.createOptions()}
 						</select>
 					</div>
 					<div id="hiddenBody" style="display: none;">
-						<div class="mb-3">
-							<label for="Title" class="form-label">Title</label>
+						<div class="mb-4">
+							<label for="Title" class="form-label fw-semibold">Titolo</label>
 							<input type="text" required name="Title" class="form-control" id="Title">
 						</div>
-						<div class="mb-3 d-flex justify-content-between">
-							<div>
-								<label for="Start" class="form-label">Start</label>
-								<input type="date" required name="Start" class="form-control" id="Start">
+						<div class="mb-4 row">
+							<div class="col-md-6">
+								<label for="Start" class="form-label fw-semibold">Data d'inizio</label>
+								<input type="date" class="form-control" id="Start" name="Start" required">
 							</div>
-							<div>
-								<label for="Due" class="form-label">Due</label>
-								<input type="date" required name="Due" class="form-control" id="Due">
+							<div class="col-md-6">
+								<label for="Due" class="form-label fw-semibold">Data di fine</label>
+								<input type="date" class="form-control" id="Due" name="Due" required">
 							</div>
 						</div>
 					</div>
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-					<button type="submit" class="btn btn-primary">Add</button>
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+					<button type="submit" class="btn btn-primary">Aggiungi</button>
 				</div>
 			</form>
 		`;
@@ -419,7 +419,7 @@ class AddActivityForm extends HTMLElement {
 			await fetcher(method, url, body);
 			window.location.reload();
 		} catch (error) {
-			console.error(error);
+			alert("Errore nella creazione dell'attività");
 		}
 	}
 
@@ -440,14 +440,14 @@ class AddActivityForm extends HTMLElement {
 		if (phases.length === 0) {
 			option += `
 				<option value="" disabled selected>
-					No phases available
+					Nessuna fase disponibile
 				</option>
 			`;
 			return option;
 		} else {
 			option += `
 				<option value="" disabled selected>
-					Select a phase
+					Seleziona una fase
 				</option>
 			`;
 		}
@@ -557,14 +557,14 @@ class AddActivityForm extends HTMLElement {
 		if (this.avaiableUsers.length === 0) {
 			option += `
 				<option value="" disabled selected>
-					No users available
+					Nessun utente disponibile
 				</option>
 			`;
 			return option;
 		} else {
 			option += `
 				<option value="" disabled selected>
-					Select a user
+					Seleziona un utente
 				</option>
 			`;
 		}
@@ -588,7 +588,7 @@ class AddActivityForm extends HTMLElement {
 		if (action === "ADD") {
 			if (select.options.length === 1) {
 				select.innerHTML =
-					"<option value='' disabled selected>Select a user...</option>";
+					"<option value='' disabled selected>Seleziona un utente</option>";
 			}
 			select.innerHTML += `<option value="${user}">${user}</option>`;
 		} else {
@@ -600,7 +600,7 @@ class AddActivityForm extends HTMLElement {
 
 			if (select.options.length === 1) {
 				select.innerHTML =
-					'<option value="" disabled selected>No available users</option>';
+					'<option value="" disabled selected>Nessun utente disponibile</option>';
 			}
 		}
 	}
@@ -619,7 +619,8 @@ class AddActivityForm extends HTMLElement {
 			if (!removedUser) return;
 			this.avaiableUsers.push(removedUser);
 			if (this.users.length === 0) {
-				list.innerHTML = '<p class="text-muted">No users assigned</p>';
+				list.innerHTML =
+					'<p class="text-muted">Nessun utente assegnato</p>';
 			}
 			this.updateUsersSelect(user.name, "ADD");
 		};
@@ -634,58 +635,68 @@ class AddActivityForm extends HTMLElement {
 			<form id="activityForm" >
 				<div class="modal-body">
 					<div class="mb-3">
-						<label for="MainPhase" class="form-label">Main Phase</label>
+						<label for="MainPhase" class="form-label fw-semibold">Fase principale</label>
 						<select name="MainPhase" class="form-select" id="MainPhase" required>
 							${this.createOptions(true)}
 						</select>
 					</div>
 					<div id="hiddenSubphase" class="mb-3" style="display: none;">
-						<label for="SubPhase" class="form-label">Sub Phase</label>
+						<label for="SubPhase" class="form-label fw-semibold">Sottofase</label>
 						<select required name="SubPhase" class="form-select" id="SubPhase">
 						</select>
 					</div>
 					<div id="hiddenBody" style="display: none;">
-						<div class="mb-3">
-							<label for="Title" class="form-label">Title</label>
-							<input type="text" required name="Title" class="form-control" id="Title">
+						<div class="mb-4">
+							<div class="row g-3 align-items-end">
+								<div class="col">
+								<label for="Title" class="form-label fw-semibold">Titolo</label>
+								<div class="input-group">
+									<input type="text" required name="Title" class="form-control" id="Title">
+									<div class="input-group-text px-2 bg-white">
+									<div class="form-check form-check-inline mb-0">
+										<label for="MilestoneCheck" class="form-check-label me-1">
+											Milestone <i class="bi bi-flag-fill text-primary"></i>
+										</label>
+										<input type="checkbox" name="isMilestone" class="form-check-input" id="MilestoneCheck">
+									</div>
+									</div>
+								</div>
+								</div>
+							</div>
 						</div>
-						<div class="mb-3">
-							<label for="Description" class="form-label">Description</label>
+						<div class="mb-4">
+							<label for="Description" class="form-label fw-semibold">Descrizione</label>
 							<textarea id="Description" name="Description" class="form-control" aria-describedby="Description" cols="30" row="10"></textarea>
 						</div>
-						<div class="mb-5 d-flex justify-content-between">
-							<div>
-								<label for="Start" class="form-label">Start</label>
-								<input type="date" required name="Start" class="form-control" id="Start">
+						<div class="mb-4 row">
+							<div class="col-md-6">
+								<label for="Start" class="form-label fw-semibold">Data d'inizio</label>
+								<input type="date" class="form-control" id="Start" name="Start" required">
 							</div>
-							<div>
-								<label for="Due" class="form-label">Due</label>
-								<input type="date" required name="Due" class="form-control" id="Due">
+							<div class="col-md-6">
+								<label for="Due" class="form-label fw-semibold">Data di fine</label>
+								<input type="date" class="form-control" id="Due" name="Due" required">
 							</div>
 						</div>
-						<div class="mb-3 d-flex justify-content-center">
-							<label for="MilestoneCheck" class="form-label me-3">Is Milestone?</label>
-							<input type="checkbox" name="isMilestone" class="form-check" id="MilestoneCheck">
-						</div>
-						<label class="form-label fw-bold">Assigned Users</label>
+						<label class="form-label fw-bold">Utenti assegnati</label>
 						<div class="add-user-form">
 							<div class="input-group">
 								<select class="form-select" id="newUser">
 									${this.createUsersSelect()}
 								</select>
 								<button class="btn btn-primary" type="button" id="addUserBtn">
-									<i class="bi bi-plus-lg"></i> Add
+									<i class="bi bi-plus-lg"></i>
 								</button>
 							</div>
 						</div>
-						<div class="user-list mt-2" id="userList">
-							<p class="text-muted">No users assigned</p>
+						<div class="user-list mt-3" id="userList">
+							<p class="text-muted">Nessun utente assegnato</p>
 						</div>
 					</div>
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-					<button type="submit" class="btn btn-primary">Add</button>
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+					<button type="submit" class="btn btn-primary">Aggiungi</button>
 				</div>
 			</form >
 		`;
