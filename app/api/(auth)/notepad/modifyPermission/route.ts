@@ -80,7 +80,7 @@ export const PATCH = async (request: NextRequest) => {
 
 	// Controlliamo caso invited
 	if (note[0].access == "INVITED" && note[0].userIdList.includes(userId)) {
-		if (newBody.access !== "INVITED") {
+		if (newBody.access !== "INVITED" && note[0].ownerId !== userId) {
 			return generateMessageResponse("Unauthorized", 400);
 		}
 
