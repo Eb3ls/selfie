@@ -9,8 +9,6 @@ import { useUser } from "../components/UserContext";
 import styles from "./Projects.module.css";
 import { SearchBar } from "./SearchBar";
 
-// Importa il router di Next.js
-
 export interface Project {
 	_id: string; // ID del progetto (stringa)
 	summary: string; // Titolo del progetto
@@ -91,8 +89,6 @@ export default function ProjectPage() {
 	}
 
 	async function handleAdd(project: { summary: string }) {
-		console.log(project);
-
 		const response = await fetch("/api/project/add", {
 			method: "POST",
 			headers: {
@@ -167,9 +163,7 @@ export default function ProjectPage() {
 				<div className={styles.projectsGrid}>
 					{projects.length === 0 ? (
 						<div className={styles.emptyState}>
-							<p>
-								No projects found. Start by creating a new one!
-							</p>
+							<p>Nessun progetto trovato</p>
 						</div>
 					) : (
 						projects.map((project) => (
@@ -209,7 +203,7 @@ export default function ProjectPage() {
 									<Card.Subtitle
 										className={styles.cardSubtitle}
 									>
-										Owner: {project.ownerName}
+										Proprietario: {project.ownerName}
 									</Card.Subtitle>
 
 									{project.userNameList.length > 0 && (
@@ -227,7 +221,7 @@ export default function ProjectPage() {
 												handleNoteClick(project.noteId);
 											}}
 										>
-											Open Note 📝
+											Apri nota 📝
 										</span>
 									</div>
 								</Card.Body>

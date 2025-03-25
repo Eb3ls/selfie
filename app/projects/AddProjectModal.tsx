@@ -21,7 +21,7 @@ export function AddProjectModal({ children, handleAdd }: any) {
 
 		// Validazione minima degli input
 		if (!formData.summary) {
-			alert("Entrambi i campi sono obbligatori.");
+			alert("Il titolo è obbligatorio");
 			return;
 		}
 
