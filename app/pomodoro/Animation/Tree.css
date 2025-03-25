@@ -69,7 +69,8 @@
 	left: 50%;
 	aspect-ratio: 18/9;
 	clip-path: polygon(50% 0%, 10% 85%, 40% 100%, 100% 90%);
-	background: linear-gradient(180deg, #125c32bd 30%, #2be780a9 100%),
+	background:
+		linear-gradient(180deg, #125c32bd 30%, #2be780a9 100%),
 		linear-gradient(100deg, #2e8b57 46%, #3cb371 30%);
 }
 
