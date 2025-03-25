@@ -17,7 +17,7 @@ class ActivityForm extends HTMLElement {
 	activitiesList: ProjectActivityResponse[];
 	usersAvaiable: User[];
 	usersList: User[];
-	modifiedLinklist: PartialLink[];
+	selectedLinks: PartialLink[];
 	isOwner: boolean;
 
 	constructor() {
@@ -27,7 +27,7 @@ class ActivityForm extends HTMLElement {
 		this.activitiesList = [];
 		this.usersAvaiable = [];
 		this.usersList = [];
-		this.modifiedLinklist = [];
+		this.selectedLinks = [];
 		this.isOwner = false;
 	}
 
@@ -66,9 +66,9 @@ class ActivityForm extends HTMLElement {
 		// Necessario per capire il range di date disponibili
 		this.parentPhase = parentPhase;
 		this.usersList = this.activity.users || [];
-		this.modifiedLinklist = [];
+		this.selectedLinks = [];
 		for (const link of this.activity.prevLinks) {
-			this.modifiedLinklist.push({ name: link.summary, _id: link._id });
+			this.selectedLinks.push({ name: link.summary, _id: link._id });
 		}
 		this.updateModalContent("VIEW");
 	}
@@ -178,7 +178,7 @@ class ActivityForm extends HTMLElement {
 			body.initialize(
 				this.activity,
 				this.activitiesList,
-				this.modifiedLinklist
+				this.selectedLinks
 			);
 			modalContent.appendChild(body);
 
@@ -503,8 +503,9 @@ class ActivityDeleteForm extends HTMLElement {
 		this.activity = {} as ProjectActivityResponse;
 	}
 
-	async handleDelete(e: Event) {
+	async handleDelete() {
 		const url = "/api/project/activity/delete";
+		console.log("Activity: ", this.activity);
 		const body = {
 			_id: this.activity._id
 		};
@@ -524,7 +525,7 @@ class ActivityDeleteForm extends HTMLElement {
 	private setUpEventListeners() {
 		const confirmBtn = this.querySelector("#confirmDeleteBtn");
 
-		confirmBtn?.addEventListener("click", this.handleDelete);
+		confirmBtn?.addEventListener("click", () => this.handleDelete());
 	}
 
 	private render() {
@@ -576,6 +577,8 @@ class ActivityModifyForm extends HTMLElement {
 	parentPhase: PhaseResponse;
 	usersAvailable: User[];
 	modifiedUserlist: User[];
+	minDate: string;
+	maxDate: string;
 
 	constructor() {
 		super();
@@ -583,6 +586,8 @@ class ActivityModifyForm extends HTMLElement {
 		this.parentPhase = {} as PhaseResponse;
 		this.usersAvailable = [];
 		this.modifiedUserlist = [];
+		this.minDate = "";
+		this.maxDate = "";
 	}
 
 	private async handleSubmit(event: Event) {
@@ -681,15 +686,15 @@ class ActivityModifyForm extends HTMLElement {
                         <label for="dtStart" class="form-label fw-bold">Start Date</label>
                         <input type="date" class="form-control" id="dtStart" name="dtStart" 
                            required value="${formatDate(this.activity.dtStart)}"
-                           min="${formatDate(this.parentPhase.dtStart)}" 
-                           max="${formatDate(this.parentPhase.due)}">
+                           min="${this.minDate}" 
+                           max="${this.maxDate}">
                     </div>
                     <div class="flex-grow-1">
                         <label for="due" class="form-label fw-bold">Due Date</label>
                         <input type="date" class="form-control" id="due" name="due" 
                            required value="${formatDate(this.activity.due)}"
-                           min="${formatDate(this.parentPhase.dtStart)}" 
-                           max="${formatDate(this.parentPhase.due)}">
+                           min="${this.minDate}" 
+                           max="${this.maxDate}">
                     </div>
                 </div>
 
@@ -821,6 +826,45 @@ class ActivityModifyForm extends HTMLElement {
         `;
 	}
 
+	addDays(dateStr: string, num: number): string {
+		console.log("Date: " + dateStr);
+		const date = new Date(dateStr);
+		date.setDate(date.getDate() + num);
+		return date.toISOString();
+	}
+
+	calculateMinAndMaxDate() {
+		this.minDate = formatDate(this.parentPhase.dtStart);
+		this.maxDate = formatDate(this.parentPhase.due);
+
+		if (this.activity.prevMaxDue) {
+			const correctPrevMaxDue = this.addDays(this.activity.prevMaxDue, 1);
+			if (correctPrevMaxDue > this.minDate) {
+				this.minDate = formatDate(correctPrevMaxDue);
+			}
+		}
+
+		if (this.activity.nextMinStart) {
+			const correctNextMinStart = this.addDays(
+				this.activity.nextMinStart,
+				-1
+			);
+			if (correctNextMinStart < this.maxDate) {
+				this.maxDate = formatDate(correctNextMinStart);
+			}
+		}
+
+		console.log("Min and Max: " + this.minDate, this.maxDate);
+		console.log(
+			"Parent Min and Max: " + this.parentPhase.dtStart,
+			this.parentPhase.due
+		);
+		console.log(
+			"Activity Min and Max: " + this.activity.prevMaxDue,
+			this.activity.nextMinStart
+		);
+	}
+
 	public initialize(
 		activity: ProjectActivityResponse,
 		parentPhase: PhaseResponse,
@@ -831,6 +875,7 @@ class ActivityModifyForm extends HTMLElement {
 		this.parentPhase = parentPhase;
 		this.modifiedUserlist = [...usersList];
 		this.usersAvailable = [...usersAvailable];
+		this.calculateMinAndMaxDate();
 		this.render();
 		this.setupItemManagement();
 	}

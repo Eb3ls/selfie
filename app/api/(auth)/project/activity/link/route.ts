@@ -122,11 +122,33 @@ export const PATCH = async (request: NextRequest) => {
 	) {
 		return generateMessageResponse("Can't link an active activity", 400);
 	}
+	// Rimuoviamo l'id dell'attività successiva dalle attività che erano precedentemente collegate
+	const oldPrevIdList = allActivities.filter((activity) =>
+		activity.nextIdList.includes(nextId)
+	);
+	oldPrevIdList.forEach((activity) => {
+		activity.nextIdList = activity.nextIdList.filter((id) => id !== nextId);
+	});
 
 	// Inseriamo l'id dell'attività successiva nell'array delle attività successive del prev
-	prevActivities.forEach((activity) => {
-		activity.nextIdList.push(nextId);
-	});
+	for (const activity of prevActivities) {
+		if (!activity.nextIdList.includes(nextId)) {
+			activity.nextIdList.push(nextId);
+		}
+	}
+
+	for (const activity of oldPrevIdList) {
+		const updateResult = await updateCollectionWrapper<ProjectActivity>(
+			{ _id: activity._id },
+			{
+				$set: { nextIdList: activity.nextIdList }
+			} as any,
+			projectActivityClient
+		);
+		if (updateResult.status !== 200) {
+			return updateResult;
+		}
+	}
 
 	// Aggiorniamo le attività precedenti
 	for (const activity of prevActivities) {
