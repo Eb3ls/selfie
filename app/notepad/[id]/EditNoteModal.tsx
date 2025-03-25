@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
-import { FaEdit, FaTrash } from "react-icons/fa";
+import { FaEdit, FaTrash, FaUserPlus } from "react-icons/fa";
 import "../GenericModal.css";
 
 export function EditNoteModal({
@@ -146,7 +146,10 @@ export function EditNoteModal({
 									<ul>
 										{formData.userNameList.map(
 											(userId: any, index: number) => (
-												<li key={userId.toString()}>
+												<li
+													key={userId.toString()}
+													className="mb-2"
+												>
 													<Button
 														variant="danger"
 														size="sm"
@@ -164,21 +167,23 @@ export function EditNoteModal({
 											)
 										)}
 									</ul>
-									<Form.Control
-										type="text"
-										name="invitedUser"
-										value={formData.invitedUser}
-										onChange={handleChange}
-										placeholder="Aggiungi un utente per username"
-										className="input-field"
-									/>
-									<Button
-										variant="secondary"
-										onClick={handleAddUser}
-										className="add-user-button mt-2"
-									>
-										Aggiungi Utente
-									</Button>
+									<div className="d-flex align-items-center mt-2">
+										<Form.Control
+											type="text"
+											name="invitedUser"
+											value={formData.invitedUser}
+											onChange={handleChange}
+											placeholder="Aggiungi un utente per username"
+											className="input-field me-2"
+										/>
+										<Button
+											variant="success"
+											onClick={handleAddUser}
+											className="add-user-button"
+										>
+											<FaUserPlus />
+										</Button>
+									</div>
 								</Form.Group>
 							</div>
 						)}
