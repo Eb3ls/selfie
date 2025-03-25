@@ -61,7 +61,7 @@ export const PATCH = async (request: NextRequest) => {
 	);
 
 	if (allActivitiesOut.status !== 200) {
-		return generateMessageResponse("Invalid request", 400);
+		return allActivitiesOut;
 	}
 
 	const allActivities: StringProjectActivity[] =
@@ -167,13 +167,10 @@ export const PATCH = async (request: NextRequest) => {
 	// Se anche solo una delle attivitá precedenti non é completata, la successiva deve essere in attesa
 	let newStatus = "ACTIVABLE";
 	for (const activity of prevActivities) {
-		if (activity.status !== "COMPLETED") {
+		if (activity.status !== "COMPLETED" && activity.status !== "DROPPED") {
 			newStatus = "WAITING";
 			break;
 		}
-	}
-	if (nextActivity.status === "WAITING") {
-		newStatus = "WAITING";
 	}
 
 	// Aggiorniamo l'attività successiva, la lista di attivitá precedenti é quella passata

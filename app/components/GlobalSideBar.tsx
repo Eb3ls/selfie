@@ -220,10 +220,9 @@ export function GlobalSideBar() {
 				<Offcanvas.Body className="d-flex flex-column">
 					{/* Aggiunta UserInfo nella sidebar mobile */}
 					<UserInfo user={user} />
-					<br />
 
 					{/* Menu principale */}
-					<div className="flex-grow-1">
+					<div className="flex-grow-1 pt-4">
 						{menuItems.map((section, idx) => (
 							<div key={idx} className="mb-4">
 								<h6 className="text-muted px-3 mb-2">

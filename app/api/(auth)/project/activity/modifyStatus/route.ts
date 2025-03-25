@@ -162,61 +162,57 @@ export const PATCH = async (request: NextRequest) => {
 		return updateOut;
 	}
 
-	if (newStatus === "COMPLETED") {
-		// Prendiamo la lista delle attività successive linkate
-		const nextActivitiesOut = await findCollectionWrapper<ProjectActivity>(
-			{ prevIdList: [activityId] }, // Verificare se funziona, forse dovremmo usare $in
+	if (
+		newStatus === "COMPLETED" ||
+		(newStatus === "DROPPED" && projectActivity.nextIdList.length > 0)
+	) {
+		// Prendiamo tutte le activity
+		const allActivitiesOut = await findCollectionWrapper<ProjectActivity>(
+			{},
 			projectActivityClient
 		);
 
-		if (nextActivitiesOut.status === 500) {
-			return nextActivitiesOut;
+		if (allActivitiesOut.status !== 200) {
+			return allActivitiesOut;
 		}
 
-		if (nextActivitiesOut.status === 200) {
-			const nextActivities: StringProjectActivity[] =
-				await nextActivitiesOut.json();
+		const allActivities: StringProjectActivity[] =
+			await allActivitiesOut.json();
 
-			// Per ogni attività successiva, controlliamo se tutte le attività precedenti sono completate
-			for (const nextActivity of nextActivities) {
-				const prevNextIds: string[] = nextActivity.prevIdList;
-				let allCompleted = true;
+		// Prendiamo le attivitá successive
+		const nextActivities = allActivities.filter((activity) =>
+			projectActivity.nextIdList.includes(activity._id!)
+		);
 
-				// Per ogni attività precedente linkata alla successiva
-				for (const prevNextId of prevNextIds) {
-					const prevNextActivityOut =
-						await findCollectionWrapper<ProjectActivity>(
-							{ _id: prevNextId },
-							projectActivityClient
-						);
+		// Per ogni attività successiva, controlliamo se tutte le attività precedenti sono completate
+		for (const nextActivity of nextActivities) {
+			const prevNextActivities = allActivities.filter((activity) =>
+				activity.nextIdList.includes(nextActivity._id!)
+			);
+			let allCompleted = true;
 
-					if (prevNextActivityOut.status !== 200) {
-						return prevNextActivityOut;
-					}
-
-					// Controlliamo che l'attività precedente sia completata
-					const prevNextActivity: StringProjectActivity = (
-						await prevNextActivityOut.json()
-					)[0];
-
-					if (prevNextActivity.status !== "COMPLETED") {
-						allCompleted = false;
-						break;
-					}
+			// Per ogni attività precedente linkata alla successiva
+			for (const prevNextActivity of prevNextActivities) {
+				if (
+					prevNextActivity.status !== "COMPLETED" &&
+					prevNextActivity.status !== "DROPPED"
+				) {
+					allCompleted = false;
+					break;
 				}
+			}
 
-				// Se tutte le attività precedenti sono completate, settiamo la successiva come attivabile
-				if (allCompleted) {
-					const updateOut =
-						await updateCollectionWrapper<ProjectActivity>(
-							{ _id: nextActivity._id },
-							{ $set: { status: "ACTIVABLE" } } as any,
-							projectActivityClient
-						);
+			// Se tutte le attività precedenti sono completate, settiamo la successiva come attivabile
+			if (allCompleted) {
+				const updateOut =
+					await updateCollectionWrapper<ProjectActivity>(
+						{ _id: nextActivity._id },
+						{ $set: { status: "ACTIVABLE" } } as any,
+						projectActivityClient
+					);
 
-					if (updateOut.status !== 200) {
-						return updateOut;
-					}
+				if (updateOut.status !== 200) {
+					return updateOut;
 				}
 			}
 		}

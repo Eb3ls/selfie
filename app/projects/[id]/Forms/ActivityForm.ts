@@ -300,9 +300,7 @@ class ActivityLinkForm extends HTMLElement {
 				this.activity.prevLinks.some(
 					(link) => link._id === activity._id
 				) ||
-				this.selectedLinks.some((link) => link._id === activity._id) ||
-				(activity.status !== "ACTIVABLE" &&
-					activity.status !== "WAITING")
+				this.selectedLinks.some((link) => link._id === activity._id)
 			) {
 				continue;
 			}
@@ -505,7 +503,6 @@ class ActivityDeleteForm extends HTMLElement {
 
 	async handleDelete() {
 		const url = "/api/project/activity/delete";
-		console.log("Activity: ", this.activity);
 		const body = {
 			_id: this.activity._id
 		};
@@ -827,7 +824,6 @@ class ActivityModifyForm extends HTMLElement {
 	}
 
 	addDays(dateStr: string, num: number): string {
-		console.log("Date: " + dateStr);
 		const date = new Date(dateStr);
 		date.setDate(date.getDate() + num);
 		return date.toISOString();
@@ -853,16 +849,6 @@ class ActivityModifyForm extends HTMLElement {
 				this.maxDate = formatDate(correctNextMinStart);
 			}
 		}
-
-		console.log("Min and Max: " + this.minDate, this.maxDate);
-		console.log(
-			"Parent Min and Max: " + this.parentPhase.dtStart,
-			this.parentPhase.due
-		);
-		console.log(
-			"Activity Min and Max: " + this.activity.prevMaxDue,
-			this.activity.nextMinStart
-		);
 	}
 
 	public initialize(

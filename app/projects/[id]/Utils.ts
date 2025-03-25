@@ -186,7 +186,6 @@ export const statusConfig = {
 // Funzione per creare una singola entry per la lista di stati
 export function createStatusEntry(
 	status: keyof typeof statusConfig,
-	iconBlock: HTMLElement,
 	activityId: string
 ): HTMLElement {
 	const item = document.createElement("li");
@@ -228,13 +227,17 @@ export function createStatusEntry(
 // Funzione per creare la lista di stati coerenti con l'attuale
 export function createStatusList(
 	currentStatus: keyof typeof statusConfig,
-	iconBlock: HTMLElement,
 	activityId: string
 ): HTMLElement[] {
 	let statusList: (keyof typeof statusConfig)[] = [];
 	if (currentStatus === "WAITING") {
-		statusList = ["ACTIVABLE", "DROPPED"];
-	} else if (currentStatus === "ACTIVABLE") {
+		const div = document.createElement("div");
+		div.className = "dropdown-item-text";
+		div.textContent = "Attendi il completamento delle attività precedenti";
+		return [div];
+	}
+
+	if (currentStatus === "ACTIVABLE") {
 		statusList = ["ACTIVE", "DROPPED"];
 	} else if (currentStatus === "ACTIVE") {
 		statusList = ["SUBMITTED", "DROPPED"];
@@ -248,7 +251,7 @@ export function createStatusList(
 
 	const list = [];
 	for (const status of statusList) {
-		list.push(createStatusEntry(status, iconBlock, activityId));
+		list.push(createStatusEntry(status, activityId));
 	}
 	return list;
 }
@@ -293,7 +296,7 @@ export function createStatusIcon(
 		menu.className = "dropdown-menu p-0 shadow";
 
 		// Creiamo gli elementi coerenti con lo stato attuale
-		const statusEntries = createStatusList(status, wrapper, activityId);
+		const statusEntries = createStatusList(status, activityId);
 		for (const entry of statusEntries) {
 			menu.appendChild(entry);
 		}
