@@ -29,26 +29,26 @@ const ListView = ({ events }: { events: CalendarEvent[] }) => {
 			</div>
 			{events
 				.filter((event) => event.typology === "activity") // Filtra solo le attività
-				.map((event, index) => (
-					<div key={index} className="list-event">
-						<div className="list-date">
-							{moment(event.start).format(
-								"dddd D MMMM YYYY - HH:mm"
-							)}
-						</div>
-						<div className="list-title">
-							{event.title}
-							{event.isRecurring && (
-								<span className="recurring-badge">
-									Ricorrente
-								</span>
-							)}
-						</div>
-						<div className={`list-type ${event.typology}`}>
-							Attività
-						</div>
-					</div>
-				))}
+				.map(
+					(event, index) =>
+						event.originalElement.status !== "COMPLETED" && (
+							<div key={index} className="list-event">
+								<div className="list-date">
+									{moment(event.start).format(
+										"dddd D MMMM YYYY - HH:mm"
+									)}
+								</div>
+								<div className="list-title text-truncate">
+									{event.title}
+									{event.isRecurring && (
+										<span className="recurring-badge">
+											Ricorrente
+										</span>
+									)}
+								</div>
+							</div>
+						)
+				)}
 		</div>
 	);
 };
