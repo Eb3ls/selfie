@@ -3,7 +3,7 @@
 import { DEFAULT_PROFILE_URL } from "@/app/constants";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
 	Button,
 	Container,
@@ -68,32 +68,36 @@ const menuItems = [
 function UserInfo({ user }: { user: any }) {
 	const [fetchImageError, setFetchImageError] = useState(false);
 
-	const iconToShow = (
-		<div
-			style={{
-				position: "relative",
-				width: "50px",
-				height: "50px",
-				overflow: "hidden",
-				borderRadius: "50%"
-			}}
-		>
-			<Image
-				src={
-					fetchImageError || !user?._id
-						? DEFAULT_PROFILE_URL
-						: DEFAULT_PROFILE_URL + user._id || DEFAULT_PROFILE_URL
-				}
-				alt="Profile"
-				sizes="500px"
-				fill
-				onError={() => setFetchImageError(true)}
+	const iconToShow = useMemo(
+		() => (
+			<div
 				style={{
-					objectFit: "cover"
+					position: "relative",
+					width: "50px",
+					height: "50px",
+					overflow: "hidden",
+					borderRadius: "50%"
 				}}
-				unoptimized
-			/>
-		</div>
+			>
+				<Image
+					src={
+						fetchImageError || !user?._id
+							? DEFAULT_PROFILE_URL
+							: DEFAULT_PROFILE_URL + user._id ||
+								DEFAULT_PROFILE_URL
+					}
+					alt="Profile"
+					sizes="500px"
+					fill
+					onError={() => setFetchImageError(true)}
+					style={{
+						objectFit: "cover"
+					}}
+					unoptimized
+				/>
+			</div>
+		),
+		[user, fetchImageError]
 	);
 
 	return (
