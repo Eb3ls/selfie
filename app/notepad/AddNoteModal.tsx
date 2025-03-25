@@ -21,8 +21,8 @@ export function AddNoteModal({ children, handleAdd }: any) {
 		event.preventDefault();
 
 		// Validazione minima degli input
-		if (!formData.summary || !formData.categories) {
-			alert("Entrambi i campi sono obbligatori.");
+		if (!formData.summary) {
+			alert("Il titolo della nota è obbligatorio!");
 			return;
 		}
 
