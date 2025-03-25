@@ -12,6 +12,7 @@ type SidebarEntry = {
 	imageId: string | undefined;
 	summary: string;
 	lastMessage: { name: string; content: string } | null;
+	canIDelete: boolean;
 	loader: () => void;
 };
 
@@ -30,7 +31,7 @@ export function UserItem({
 		iconToShow = (
 			<IoPeopleCircleOutline
 				size={45}
-				className="me-3 flex-shrink-0 text-primary"
+				className="flex-shrink-0 text-primary"
 				style={{
 					minWidth: "45px",
 					transition: "transform 0.2s ease"
@@ -97,15 +98,17 @@ export function UserItem({
 				)}
 			</Container>
 
-			<DeleteModal
-				chat_id={entry._id}
-				setSelectedChat={setSelectedChat}
-				className="ms-3"
-			>
-				<Container className="rounded-circle p-2 delete-btn">
-					<IoTrash className="icon text-danger" size={24} />
-				</Container>
-			</DeleteModal>
+			{entry.canIDelete && (
+				<DeleteModal
+					chat_id={entry._id}
+					setSelectedChat={setSelectedChat}
+					className="ms-3"
+				>
+					<Container className="rounded-circle p-2 delete-btn">
+						<IoTrash className="icon text-danger" size={24} />
+					</Container>
+				</DeleteModal>
+			)}
 		</ListGroup.Item>
 	);
 }

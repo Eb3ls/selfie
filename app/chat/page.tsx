@@ -173,12 +173,20 @@ export default function ChatMain() {
 							(id) => id !== chatResponse?.whoAmI._id
 						);
 
+				// Se la chat è privata, l'utente può eliminarla
+				// Se la chat è un gruppo, l'utente può eliminarla solo se è l'admin
+				// ovvero il primo utente nella userIdList
+				const canIDelete = chat.isGroup
+					? chat.userIdList[0] === chatResponse?.whoAmI._id
+					: true;
+
 				filteredChats.push({
 					_id: chat._id,
 					isGroup: chat.isGroup,
 					imageId: imageId,
 					summary: chat.summary,
 					lastMessage: lastMessageObj,
+					canIDelete: canIDelete,
 					loader: () => loadChat(chat._id)
 				});
 			}
