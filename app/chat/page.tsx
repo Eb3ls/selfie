@@ -18,7 +18,7 @@ import useSWR from "swr";
 async function fetcher(url: string) {
 	const response = await fetch(url);
 	if (!response.ok) {
-		alert("Errore durante il fetch delle note!");
+		alert("Errore nell'ottenimento dei dati delle chat");
 	}
 	return response.json();
 }

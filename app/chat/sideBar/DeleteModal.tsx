@@ -22,14 +22,13 @@ export function DeleteModal({ chat_id, setSelectedChat, children }: any) {
 			body: JSON.stringify({ _id: chat_id })
 		});
 
-		if (response.status === 200) {
-			alert("Successful!");
-			window.location.reload();
-		} else {
-			alert("Failed! Status code: " + response.status);
+		if (!response.ok) {
+			alert("Operazione fallita! Codice di stato: " + response.status);
+			return;
 		}
 
-		setShow(false);
+		alert("Chat eliminata con successo!");
+		window.location.reload();
 	};
 
 	const handleClick = (e: React.MouseEvent) => {

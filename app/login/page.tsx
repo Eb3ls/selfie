@@ -39,7 +39,6 @@ function CompleteFormComponent() {
 	// Gestisce il submit del form
 	const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
-		console.log("Form inviato:", formData);
 
 		const response = await fetch("/api/signin", {
 			method: "POST",
@@ -49,15 +48,12 @@ function CompleteFormComponent() {
 			body: JSON.stringify(formData)
 		});
 
-		if (response.status === 200) {
-			const fetched_data = await response.json();
-			alert("Successful: " + fetched_data.message);
-			window.location.href = "/home";
-		} else if (response.status === 400) {
-			alert("Failed! Wrong username or password!");
-		} else {
-			alert("Failed! Status code: " + response.status);
+		if (!response.ok) {
+			alert("Operazione fallita! Codice di stato: " + response.status);
+			return;
 		}
+
+		window.location.href = "/home";
 	};
 
 	return (
@@ -65,11 +61,11 @@ function CompleteFormComponent() {
 			{/* Campo Username */}
 			<Form.Group className="mb-4" controlId="formBasicUsername">
 				<Form.Label className="fw-semibold">
-					<i className="bi bi-person me-2"></i>Username
+					<i className="bi bi-person me-2"></i>Nome utente
 				</Form.Label>
 				<Form.Control
 					type="text"
-					placeholder="Inserisci il tuo username"
+					placeholder="Inserisci il tuo nome utente"
 					name="username"
 					value={formData.username}
 					onChange={handleUsernameChange}
@@ -134,7 +130,7 @@ function CompleteFormComponent() {
 					e.currentTarget.style.backgroundColor = greenColor;
 				}}
 			>
-				Sign in
+				Accedi
 			</Button>
 		</Form>
 	);
@@ -160,11 +156,11 @@ export default function Login() {
 									className="order-2 order-md-1 d-flex flex-column"
 								>
 									<h1 className="mb-4 fw-bold">
-										Welcome Back!
+										Bentornato!
 									</h1>
 									<CompleteFormComponent />
 									<p className="text-center mb-0">
-										Needs to create an account?{" "}
+										Vuoi creare un account?{" "}
 										<Link
 											href="/register"
 											className="ms-1 text-decoration-none"
@@ -181,7 +177,7 @@ export default function Login() {
 													"1";
 											}}
 										>
-											Sign up
+											Registrati
 										</Link>
 									</p>
 								</Col>

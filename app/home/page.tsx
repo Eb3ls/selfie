@@ -12,13 +12,7 @@ import {
 	Row,
 	Stack
 } from "react-bootstrap";
-import {
-	FaBook,
-	FaCoffee,
-	FaRedoAlt,
-	FaRegClock,
-	FaStickyNote
-} from "react-icons/fa";
+import { FaBook, FaCoffee, FaRedoAlt, FaStickyNote } from "react-icons/fa";
 import { GlobalSideBar } from "../components/GlobalSideBar";
 import { useUser } from "../components/UserContext";
 
@@ -404,12 +398,24 @@ export default function Home() {
 	const { user } = useUser();
 
 	useEffect(() => {
-		fetch("/api/preview")
-			.then((res) => res.json())
-			.then((data: PreviewsResponse) => setPreviews(data))
-			.catch((error) =>
-				console.error("Error fetching preview data:", error)
-			);
+		async function fetchPreviews() {
+			try {
+				const response = await fetch("/api/preview");
+
+				if (!response.ok) {
+					throw new Error(
+						"Errore nell'ottenimento dei dati di preview"
+					);
+				}
+
+				const data: PreviewsResponse = await response.json();
+				setPreviews(data);
+			} catch (error) {
+				console.error("Errore nell'ottenimento dei dati di preview");
+			}
+		}
+
+		fetchPreviews();
 	}, []);
 
 	return (

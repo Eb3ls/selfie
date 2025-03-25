@@ -21,7 +21,6 @@ export function GroupChatModal({ children }: any) {
 	// Gestisce il submit del form
 	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
-		console.log("Form inviato:", groupName, users);
 
 		const response = await fetch("/api/chat/addGroup", {
 			method: "POST",
@@ -31,21 +30,13 @@ export function GroupChatModal({ children }: any) {
 			body: JSON.stringify({ summary: groupName, usernameList: users })
 		});
 
-		if (response.status === 200) {
-			alert("Successful!");
-			window.location.reload();
-		} else if (response.status === 400) {
-			const out = await response.json();
-			if (out.message === undefined) {
-				alert(
-					"Failed! Users not found:" + users.map((user) => " " + user)
-				);
-			} else {
-				alert("Failed! " + out.message);
-			}
-		} else {
-			alert("Failed! Status code: " + response.status);
+		if (!response.ok) {
+			alert("Operazione fallita! Codice di stato: " + response.status);
+			return;
 		}
+
+		alert("Gruppo creato con successo!");
+		window.location.reload();
 	};
 
 	const handleAddUser = () => {

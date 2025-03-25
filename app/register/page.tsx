@@ -89,14 +89,17 @@ function CompleteFormComponent() {
 			})
 		});
 
-		const data = await response.json();
-		alert(data.message);
+		if (!response.ok) {
+			alert("Operazione fallita! Codice di stato: " + response.status);
+			return;
+		}
+
+		alert("Email inviata con successo!");
 	};
 
 	// Gestisce il submit del form
 	const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
-		console.log("Form inviato:", formData);
 
 		const response = await fetch("/api/signup", {
 			method: "POST",
@@ -106,15 +109,12 @@ function CompleteFormComponent() {
 			body: JSON.stringify(formData)
 		});
 
-		if (response.status === 200) {
-			const fetched_data = await response.json();
-			alert("Successful: " + fetched_data.username);
-			window.location.href = "/login";
-		} else if (response.status === 400) {
-			alert("Failed! Wrong username or password!");
-		} else {
-			alert("Failed! Status code: " + response.status);
+		if (!response.ok) {
+			alert("Operazione fallita! Codice di stato: " + response.status);
+			return;
 		}
+
+		window.location.href = "/login";
 	};
 
 	return (
@@ -124,11 +124,11 @@ function CompleteFormComponent() {
 				<div className="col-12">
 					<Form.Group controlId="formBasicUsername">
 						<Form.Label className="fw-semibold mb-2">
-							<i className="bi bi-person me-2"></i>Username
+							<i className="bi bi-person me-2"></i>Nome utente
 						</Form.Label>
 						<Form.Control
 							type="text"
-							placeholder="Inserisci il tuo username"
+							placeholder="Inserisci il tuo nome utente"
 							name="username"
 							value={formData.username}
 							onChange={handleUsernameChange}
@@ -307,7 +307,7 @@ function CompleteFormComponent() {
 					e.currentTarget.style.backgroundColor = greenColor;
 				}}
 			>
-				Sign up
+				Registrati
 			</Button>
 		</Form>
 	);
@@ -335,11 +335,11 @@ export default function Register() {
 									className="order-2 order-lg-1 d-flex flex-column"
 								>
 									<h1 className="mb-4 fw-bold">
-										Create Account
+										Crea un account
 									</h1>
 									<CompleteFormComponent />
 									<p className="text-center mb-0">
-										Already have an account?{" "}
+										Hai già un account?{" "}
 										<Link
 											href="/login"
 											className="ms-1 text-decoration-none"
@@ -356,7 +356,7 @@ export default function Register() {
 													"1";
 											}}
 										>
-											Sign in
+											Accedi
 										</Link>
 									</p>
 								</Col>
@@ -368,8 +368,8 @@ export default function Register() {
 									<Image
 										src="/Sloth.png"
 										alt="Logo"
-										width={280}
-										height={280}
+										width={400}
+										height={400}
 										priority={true}
 										draggable={false}
 										className="img-fluid"

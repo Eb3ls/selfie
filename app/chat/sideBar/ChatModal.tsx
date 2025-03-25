@@ -20,7 +20,6 @@ export function ChatModal({ children }: any) {
 	// Gestisce il submit del form
 	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
-		console.log("Form inviato:", form);
 
 		const response = await fetch("/api/chat/add", {
 			method: "POST",
@@ -30,19 +29,13 @@ export function ChatModal({ children }: any) {
 			body: JSON.stringify({ receiver: form.username })
 		});
 
-		if (response.status === 200) {
-			alert("Successful!");
-			window.location.reload();
-		} else if (response.status === 400) {
-			const out = await response.json();
-			if (out.message === undefined) {
-				alert("Failed! User not found: " + out.users[0]);
-			} else {
-				alert("Failed! " + out.message);
-			}
-		} else {
-			alert("Failed! Status code: " + response.status);
+		if (!response.ok) {
+			alert("Operazione fallita! Codice di stato: " + response.status);
+			return;
 		}
+
+		alert("Chat creata con successo!");
+		window.location.reload();
 	};
 
 	return (
