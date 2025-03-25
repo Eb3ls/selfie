@@ -187,7 +187,7 @@ export function GlobalSideBar() {
 					position: "fixed",
 					top: "1rem",
 					left: "1rem",
-					zIndex: 0,
+					zIndex: 1000,
 					padding: "0.5rem",
 					display: showSidebar ? "none" : "block"
 				}}

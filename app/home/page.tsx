@@ -416,7 +416,7 @@ export default function Home() {
 		<main>
 			<GlobalSideBar />
 			<Container fluid className="mt-3 px-3 overflow-hidden">
-				<Row className="gx-3 mt-5 mt-lg-0">
+				<Row className="gx-3">
 					<Col xs={12} lg={3} className="mb-3">
 						<PreviewBox
 							title="Chat"

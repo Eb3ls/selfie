@@ -16,7 +16,7 @@ export function Header({
 	return (
 		<div
 			className="text-dark p-3 border-bottom d-flex align-items-center justify-content-end bg-light"
-			style={{ zIndex: 100 }}
+			style={{ zIndex: 2000 }}
 		>
 			<Button
 				variant="link"
