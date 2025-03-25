@@ -26,25 +26,25 @@ class PhaseForm extends HTMLElement {
 		return `
             <div class="modal-body">
                 <div class="mb-4">
-                    <label class="form-label text-muted small">Title</label>
+                    <label class="form-label text-muted small">Titolo</label>
                     <h4>${this.phaseData.summary}</h4>
                 </div>
                 
                 <div class="mb-4">
                     <div class="row">
                         <div class="col-md-6">
-                            <label class="form-label text-muted small">Start Date</label>
+                            <label class="form-label text-muted small">Data d'inizio</label>
                             <h5>${new Date(this.phaseData.dtStart).toLocaleDateString()}</h5>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label text-muted small">Due Date</label>
+                            <label class="form-label text-muted small">Data di fine</label>
                             <h5>${new Date(formatDate(this.phaseData.due)).toLocaleDateString()}</h5>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
             </div>
         `;
 	}
@@ -55,45 +55,36 @@ class PhaseForm extends HTMLElement {
                 <div class="modal-header">
                     <h5 class="modal-title text-danger">
                         <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                        Delete Phase
+						Elimina Fase
                     </h5>
-                    <div class="ms-auto">
-                        <button type="button" class="btn btn-sm btn-outline-primary me-2" id="toggleEditBtn">
+                    <div class="ms-auto d-flex align-items-center">
+                        <button type="button" class="btn btn-sm btn-warning me-2" id="toggleEditBtn">
                             <i class="bi bi-x"></i>
-                            Cancel
+                            Annulla
                         </button>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                 </div>
                 <div class="modal-body">
-                    <p class="fs-5">Are you sure you want to delete this phase?</p>
-                    <p class="text-danger">This action cannot be undone! All activities and sub-phases will be deleted.</p>
-                    <div class="alert alert-warning">
-                        <h6 class="alert-heading">
-                            <i class="bi bi-info-circle me-2"></i>
-                            Phase Details:
-                        </h6>
-                        <p class="mb-0">Title: ${this.phaseData.summary}</p>
-                        <p class="mb-0">Start Date: ${new Date(this.phaseData.dtStart).toLocaleDateString()}</p>
-                        <p class="mb-0">Due Date: ${new Date(formatDate(this.phaseData.due)).toLocaleDateString()}</p>
-                    </div>
+                    <p class="fs-5">Sei sicuro di voler eliminare la Fase?</p>
+                    <p class="text-danger">Questa operazione non puó essere annullata! Tutte le attività e le sottofasi verranno cancellate! </p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete Phase</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Elimina Fase</button>
                 </div>
             `;
 		}
 		if (mode === "EDIT") {
 			return `
-            <div class="modal-header d-flex align-items-center">
-                <h5 class="modal-title d-flex align-items-center gap-2">
+            <div class="modal-header">
+                <h5 class="modal-title">
                 <i class="bi bi-pencil-fill"></i>
-                <span>Modify Phase</span>
+                <span>Modifica Fase</span>
                 </h5>
-                <div class="ms-auto">
-                <button type="button" class="btn btn-sm btn-outline-primary me-2" id="toggleEditBtn">
+                <div class="ms-auto d-flex align-items-center">
+                <button type="button" class="btn btn-sm btn-warning me-2" id="toggleEditBtn">
                     <i class="bi bi-x"></i>
-                    Cancel
+                    Annulla
                 </button>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
@@ -105,7 +96,7 @@ class PhaseForm extends HTMLElement {
 			<div class="modal-header">
 				<h5 class="modal-title">
 					<i class="bi bi-info-circle"></i>
-					<span>Phase</span>
+					<span>Fase</span>
 				</h5>
 				<div class="ms-auto d-flex align-items-center">
 					${
@@ -113,11 +104,11 @@ class PhaseForm extends HTMLElement {
 							? `
 					<button type="button" class="btn btn-sm btn-danger me-2" id="deleteBtn">
 						<i class="bi bi-trash"></i>
-						Delete
+						Elimina
 					</button>
-					<button type="button" class="btn btn-sm btn-warning me-2" id="toggleEditBtn">
+					<button type="button" class="btn btn-sm btn-primary me-2" id="toggleEditBtn">
 						<i class="bi bi-pencil"></i>
-						Modify
+						Modifica
 					</button>`
 							: ""
 					}
@@ -190,8 +181,7 @@ class PhaseForm extends HTMLElement {
 					throw new Error("Failed to delete phase");
 				}
 			} catch (error) {
-				console.error("Error deleting phase:", error);
-				alert("Failed to delete phase");
+				alert("Errore nell'eliminazione della fase");
 			}
 		});
 	}
@@ -227,8 +217,7 @@ class PhaseForm extends HTMLElement {
 				throw new Error("Failed to update activity");
 			}
 		} catch (error) {
-			console.error("Error updating activity:", error);
-			alert("Failed to update activity");
+			alert("Errore nell'aggiornamento della fase");
 		}
 	}
 
@@ -249,54 +238,29 @@ class PhaseForm extends HTMLElement {
 		return `
             <div class="modal-body">
                 <div class="mb-4">
-                    <label for="summary" class="form-label fw-bold">Title</label>
-                    <input type="text" class="form-control" id="summary" name="summary" 
-                           required value="${this.phaseData.summary}">
+                    <label for="summary" class="form-label fw-bold">Titolo</label>
+                    <input type="text" class="form-control" id="summary" name="summary" required value="${this.phaseData.summary}">
                 </div>
                 
                 <div class="mb-4">
                     <div class="d-flex justify-content-between gap-3">
                         <div class="flex-grow-1">
-                            <label for="dtStart" class="form-label fw-bold">Start Date</label>
-                            ${
-								this.minInner
-									? `
-                            <div class="small text-muted mb-1">
-                                <i class="bi bi-info-circle"></i>
-                                Max: ${this.minInner}
-                            </div>
-                            `
-									: ""
-							}
-                            <input type="date" class="form-control ${this.minInner ? "border-bottom border-danger border-bottom-2" : ""}" 
-                                   id="dtStart" name="dtStart" 
-                                   required value="${formatDate(this.phaseData.dtStart)}"
-                                   min="${this.minOuter}" 
-                                   max="${this.maxOuter}">
+                            <label for="dtStart" class="form-label fw-bold">Data d'inizio</label>
+                            <input type="date" class="form-control" id="dtStart" name="dtStart" required value="${formatDate(this.phaseData.dtStart)}"
+								min="${this.minOuter}" 
+								max="${this.minInner}">
                         </div>
                         <div class="flex-grow-1">
-                            <label for="due" class="form-label fw-bold">Due Date</label>
-                            ${
-								this.maxInner
-									? `
-                            <div class="small text-muted mb-1">
-                                <i class="bi bi-info-circle"></i>
-                                Min: ${this.maxInner}
-                            </div>
-                            `
-									: ""
-							}
-                            <input type="date" class="form-control ${this.maxInner ? "border-bottom border-danger border-bottom-2" : ""}" 
-                                   id="due" name="due" 
-                                   required value="${formatDate(this.phaseData.due)}"
-                                   min="${this.minOuter}" 
-                                   max="${this.maxOuter}">
+                            <label for="due" class="form-label fw-bold">Data di fine</label>
+                            <input type="date" class="form-control" id="due" name="due" required value="${formatDate(this.phaseData.due)}"
+								min="${this.maxInner}" 
+								max="${this.maxOuter}">
                         </div>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <button type="submit" class="btn btn-primary">Salva</button>
             </div>
         `;
 	}
@@ -341,22 +305,10 @@ class PhaseForm extends HTMLElement {
 
 		// NB: Necessario formattarlo prima perché 23:59:59.999Z lo considera il giorno dopo
 		if (this.minInner !== "") {
-			this.minInner = new Date(
-				formatDate(this.minInner)
-			).toLocaleDateString("en-GB", {
-				day: "2-digit",
-				month: "2-digit",
-				year: "numeric"
-			});
+			this.minInner = formatDate(this.minInner);
 		}
 		if (this.maxInner !== "") {
-			this.maxInner = new Date(
-				formatDate(this.maxInner)
-			).toLocaleDateString("en-GB", {
-				day: "2-digit",
-				month: "2-digit",
-				year: "numeric"
-			});
+			this.maxInner = formatDate(this.maxInner);
 		}
 	}
 

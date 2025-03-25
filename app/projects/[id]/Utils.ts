@@ -395,7 +395,7 @@ export function createLinkEntry(
 		viewBtn.href = `/notepad/${noteId}`;
 		viewBtn.className = "btn btn-primary btn-sm";
 		viewBtn.setAttribute("title", "Link alla nota");
-		viewBtn.innerHTML = '<i class="bi bi-eye me-1"></i>Visualizza';
+		viewBtn.innerHTML = 'Visualizza <i class="ms-1 bi bi-eye me-1"></i>';
 		linkEntry.appendChild(viewBtn);
 	}
 	return linkEntry;

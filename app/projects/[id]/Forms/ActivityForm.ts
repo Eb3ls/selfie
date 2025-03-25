@@ -111,7 +111,7 @@ class ActivityForm extends HTMLElement {
 		const titleBlock = `
 			<div class="d-flex align-items-start gap-3 mb-4">
 				<div class="flex-grow-1">
-					<label class="form-label text-muted small">Title</label>
+					<label class="form-label text-muted small">Titolo</label>
 					<h4 class="mb-0 text-break">${this.activity.summary}</h4>
 				</div>
 				${
@@ -132,18 +132,18 @@ class ActivityForm extends HTMLElement {
 				${titleBlock}
 				
 				<div class="mb-4">
-					<label class="form-label text-muted small">Description</label>
-					<p class="fs-5">${this.activity.description || "No description provided."}</p>
+					<label class="form-label text-muted small">Descrizione</label>
+					<p class="fs-5">${this.activity.description || "Nessuna descrizione fornita"}</p>
 				</div>
 
 				<div class="mb-4">
 					<div class="row">
 						<div class="col-md-6">
-							<label class="form-label text-muted small">Start Date</label>
+							<label class="form-label text-muted small">Data d'inizio</label>
 							<h5>${new Date(this.activity.dtStart).toLocaleDateString()}</h5>
 						</div>
 						<div class="col-md-6">
-							<label class="form-label text-muted small">Due Date</label>
+							<label class="form-label text-muted small">Data di fine</label>
 							<h5>${new Date(formatDate(this.activity.due)).toLocaleDateString()}</h5>
 						</div>
 					</div>
@@ -695,7 +695,7 @@ class ActivityModifyForm extends HTMLElement {
 
 				<div class="mb-4 row">
 					<div class="col-md-6">
-						<label for="dtStart" class="form-label fw-semibold">Data di inizio</label>
+						<label for="dtStart" class="form-label fw-semibold">Data d'inizio</label>
 						<input type="date" class="form-control" id="dtStart" name="dtStart" 
 						   required value="${formatDate(this.activity.dtStart)}"
 						   min="${this.minDate}" 
