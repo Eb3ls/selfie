@@ -88,7 +88,10 @@ export default function CalendarPage() {
 			return;
 		}
 
-		setSelectedCalendarEvent(event);
+		const selectedEvent: CalendarEvent = {
+			...event
+		};
+		setSelectedCalendarEvent(selectedEvent);
 		setShowModal(true);
 	};
 
@@ -131,6 +134,7 @@ export default function CalendarPage() {
 
 				{selectedCalendarEvent && (
 					<GenericModifyModal
+						key={selectedCalendarEvent.id}
 						calendarEvent={selectedCalendarEvent}
 						showModal={showModal}
 						setShowModal={setShowModal}
