@@ -36,7 +36,6 @@ export interface ProjectActivity {
 	userIdList: ObjectId[];			// Utenti dell'attività, sottoinsieme degli utenti del progetto
 	alarms: Alarm[];				// Notifiche associate all'attività
 	noteId: ObjectId;				// Nota assoiciata all'attività - può non esserci
-	noteLink: string | null;
 }
 
 export type StringProjectActivity = ConvertToString<ProjectActivity>;
@@ -58,7 +57,6 @@ export function createProjectActivity({
 	userIdList = [],
 	alarms = [],
 	noteId = new ObjectId(),
-	noteLink = null
 }: Partial<ProjectActivity>): ProjectActivity {
 	return {
 		summary: summary,
@@ -77,6 +75,5 @@ export function createProjectActivity({
 		userIdList: userIdList,
 		alarms: alarms,
 		noteId: noteId,
-		noteLink: noteLink
 	};
 }

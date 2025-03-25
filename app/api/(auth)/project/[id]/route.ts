@@ -70,7 +70,6 @@ interface ProjectActivityResponse {
 	nextMinStart: string;
 	alarms: Alarm[];
 	noteId?: string;
-	noteLink: string | null;
 }
 
 export const GET = async (
@@ -296,8 +295,7 @@ export const GET = async (
 									})) || [],
 								nextMinStart: "",
 								alarms: activity.alarms,
-								noteId: activity.noteId?.toString(),
-								noteLink: activity.noteLink
+								noteId: activity.noteId?.toString()
 							};
 
 							allActivitiesMap.set(
@@ -376,8 +374,7 @@ export const GET = async (
 							})) || [],
 						nextMinStart: "",
 						alarms: activity.alarms,
-						noteId: activity.noteId?.toString(),
-						noteLink: activity.noteLink
+						noteId: activity.noteId?.toString()
 					};
 
 					allActivitiesMap.set(

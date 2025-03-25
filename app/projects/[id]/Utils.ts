@@ -73,7 +73,6 @@ export interface ProjectActivityResponse {
 	nextMinStart: string;
 	alarms: Alarm[];
 	noteId?: string;
-	noteLink: string | null;
 }
 // Interfaccia per le attivitá ordinate, aggiungiamo il riferimento alla fase genitore
 export interface SortedActivity extends ProjectActivityResponse {
@@ -123,12 +122,6 @@ export function formatDate(date: string): string {
 	return date.split("T")[0];
 }
 
-export function validateUsername(username: string): boolean {
-	if (!username) return false;
-	const usernameRegex = /^[a-zA-Z0-9_-]{3,20}$/;
-	return usernameRegex.test(username);
-}
-
 export function validateLength(
 	item: string,
 	min: number,
@@ -158,7 +151,7 @@ export function calculateCells(element: HTMLElement): number {
 
 export function showError(inputElement: HTMLElement, message: string) {
 	const errorDiv = document.createElement("div");
-	errorDiv.className = "invalid-feedback d-block";
+	errorDiv.className = "invalid-feedback";
 	errorDiv.textContent = message;
 	inputElement.classList.add("is-invalid");
 	inputElement.parentElement?.appendChild(errorDiv);
@@ -333,10 +326,10 @@ function createEntry(summary: string, startIcon: string): HTMLElement {
 	const item = document.createElement("div");
 	// Entry item usato per rimuovere l'elemento
 	item.className =
-		"d-flex justify-content-between align-items-center p-2 mb-1 rounded border entry-item";
+		"mt-2 d-flex justify-content-between align-items-center p-2 mb-1 rounded border entry-item";
 
 	const span = document.createElement("span");
-	span.className = "d-flex align-items-center";
+	span.className = "d-flex align-items-center text-truncate me-4";
 
 	const icon = document.createElement("i");
 	icon.className = startIcon + " me-2 text-secondary";
