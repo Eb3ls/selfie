@@ -91,6 +91,7 @@ function UserInfo({ user }: { user: any }) {
 				style={{
 					objectFit: "cover"
 				}}
+				unoptimized
 			/>
 		</div>
 	);

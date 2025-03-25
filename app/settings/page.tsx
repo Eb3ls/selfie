@@ -10,7 +10,7 @@ import ProfilePictureUpload from "./components/ProfilePictureUpload";
 import SettingsForm from "./components/SettingsForm";
 
 export default function SettingsPage() {
-	const { user, updateUser } = useUser();
+	const { user, updateUser, fetchUser } = useUser();
 
 	const [formData, setFormData] = useState({
 		username: "",
@@ -139,6 +139,7 @@ export default function SettingsPage() {
 									>
 										<ProfilePictureUpload
 											userId={user?._id}
+											fetchUser={fetchUser}
 										/>
 									</Col>
 

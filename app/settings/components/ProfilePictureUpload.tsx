@@ -9,10 +9,12 @@ import styles from "../SettingsPage.module.css";
 
 interface ProfilePictureUploadProps {
 	userId: string | undefined;
+	fetchUser: () => void;
 }
 
 export default function ProfilePictureUpload({
-	userId
+	userId,
+	fetchUser
 }: ProfilePictureUploadProps) {
 	const [myPic, setMyPic] = useState<string | null>(null);
 
@@ -49,6 +51,7 @@ export default function ProfilePictureUpload({
 		}
 
 		setFetchImageError(false);
+		fetchUser();
 	}
 
 	function handleImageUpload(event: React.ChangeEvent<HTMLInputElement>) {

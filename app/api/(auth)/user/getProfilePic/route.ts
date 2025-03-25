@@ -19,11 +19,14 @@ export const GET = async (request: NextRequest) => {
 
 	const URL_ID = request.nextUrl.searchParams.get("ID");
 
-	// Estraiamo l'id dall'URL. Se non è presente, usiamo l'id dell'utente
-	const userId: string = URL_ID || user._id!;
+	// Estraiamo l'id dall'URL. Se non è presente, usiamo l'immagine di default
+	const userId: string = URL_ID || DEFAULT_PROFILE_IMAGE;
 
 	// Controlliamo che l'id sia valido
-	if (ObjectId.isValid(userId) === false) {
+	if (
+		ObjectId.isValid(userId) === false &&
+		userId !== DEFAULT_PROFILE_IMAGE
+	) {
 		return generateMessageResponse("Invalid user ID", 400);
 	}
 
