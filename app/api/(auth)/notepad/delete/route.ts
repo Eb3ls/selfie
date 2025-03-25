@@ -1,4 +1,8 @@
-import { generateMessageResponse, validate } from "@/utils/api/api";
+import {
+	generateMessageResponse,
+	removeInvitations,
+	validate
+} from "@/utils/api/api";
 import {
 	NOTE_COLLECTION,
 	Note,
@@ -99,6 +103,13 @@ export const DELETE = async (request: NextRequest) => {
 	// Controlliamo che l'owner sia l'utente corrispondente
 	if (note[0].ownerId !== userId) {
 		return generateMessageResponse("Unauthorized", 400);
+	}
+
+	// Rimuoviamo gli inviti associati alla nota
+	const inviteOut = await removeInvitations("NOTE", noteId);
+
+	if (inviteOut.status !== 200) {
+		return inviteOut;
 	}
 
 	return await deleteCollectionWrapper<Note>({ _id: noteId }, noteClient);
