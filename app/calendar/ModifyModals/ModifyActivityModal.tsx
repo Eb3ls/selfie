@@ -205,6 +205,11 @@ export function ModifyActivityModal({
 						<TimezoneSelector
 							regularTimezone={form.geo}
 							setRegularTimezone={handleTimezoneChange}
+							firstDateToConvert={{
+								text: "Consegna",
+								date: form.due
+							}}
+							secondDateToConvert={undefined}
 						/>
 
 						{/* Nuovo Form.Group per aggiungere inviti */}

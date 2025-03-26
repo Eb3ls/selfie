@@ -32,13 +32,22 @@ function generateTimezoneOptions() {
 	return timezones;
 }
 
+type ToConvert = {
+	text: string;
+	date: string;
+};
+
 interface TimezoneSelectorProps {
 	regularTimezone: string;
+	firstDateToConvert: ToConvert | undefined;
+	secondDateToConvert: ToConvert | undefined;
 	setRegularTimezone: (timezone: string) => void;
 }
 
 export function TimezoneSelector({
 	regularTimezone,
+	firstDateToConvert,
+	secondDateToConvert,
 	setRegularTimezone
 }: TimezoneSelectorProps) {
 	const [timezone, setTimezone] = useState(regularTimezone);
@@ -55,6 +64,21 @@ export function TimezoneSelector({
 		if (isValidTimezone(e.target.value)) {
 			setRegularTimezone(e.target.value);
 		}
+	}
+
+	function generateConversionProps(toConvert: ToConvert | undefined) {
+		if (!toConvert) return <></>;
+		if (toConvert.date === "") return <></>;
+		if (regularTimezone === "") return <></>;
+
+		return (
+			<p className="text-muted m-0 p-0">
+				{toConvert.text}:{" "}
+				{moment(toConvert.date)
+					.tz(regularTimezone)
+					.format("YYYY-MM-DD HH:mm")}
+			</p>
+		);
 	}
 
 	return (
@@ -82,6 +106,9 @@ export function TimezoneSelector({
 					</option>
 				))}
 			</datalist>
+
+			{generateConversionProps(firstDateToConvert)}
+			{generateConversionProps(secondDateToConvert)}
 		</Form.Group>
 	);
 }

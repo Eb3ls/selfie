@@ -505,6 +505,14 @@ export function AddEventModal({ children }: any) {
 						<TimezoneSelector
 							regularTimezone={form.geo}
 							setRegularTimezone={handleTimezoneChange}
+							firstDateToConvert={{
+								text: "Data di inizio",
+								date: form.dtStart
+							}}
+							secondDateToConvert={{
+								text: "Data di fine",
+								date: form.dtEnd
+							}}
 						/>
 
 						{/* Nuovo Form.Group per aggiungere inviti */}
