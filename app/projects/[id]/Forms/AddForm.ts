@@ -4,6 +4,7 @@ import {
 	User,
 	checkDate,
 	createUserEntry,
+	escapeHTML,
 	fetcher,
 	formatDate
 } from "../Utils";
@@ -271,7 +272,7 @@ class AddSubPhaseForm extends HTMLElement {
 		this.phaseList.forEach((phase) => {
 			option += `
 				<option value="${phase._id}">
-					${phase.summary}
+					${escapeHTML(phase.summary)}
 				</option>
 			`;
 		});
@@ -450,7 +451,7 @@ class AddActivityForm extends HTMLElement {
 		phases.forEach((phase) => {
 			option += `
 				<option value="${phase._id}">
-					${phase.summary}
+					${escapeHTML(phase.summary)}
 				</option>
 			`;
 		});
@@ -565,7 +566,7 @@ class AddActivityForm extends HTMLElement {
 		this.avaiableUsers.forEach((user) => {
 			option += `
 				<option value="${user.name}">
-					${user.name}
+					${escapeHTML(user.name)}
 				</option>
 			`;
 		});
@@ -583,7 +584,7 @@ class AddActivityForm extends HTMLElement {
 				select.innerHTML =
 					"<option value='' disabled selected>Seleziona un utente</option>";
 			}
-			select.innerHTML += `<option value="${user}">${user}</option>`;
+			select.innerHTML += `<option value="${user}">${escapeHTML(user)}</option>`;
 		} else {
 			select.querySelectorAll("option").forEach((option) => {
 				if (option.value === user) {

@@ -4,6 +4,7 @@ import {
 	User,
 	createLinkEntry,
 	createUserEntry,
+	escapeHTML,
 	fetcher,
 	formatDate
 } from "../Utils";
@@ -112,7 +113,7 @@ class ActivityForm extends HTMLElement {
 			<div class="d-flex align-items-start gap-3 mb-4">
 				<div class="flex-grow-1">
 					<label class="form-label text-muted small">Titolo</label>
-					<h4 class="mb-0 text-break">${this.activity.summary}</h4>
+					<h4 class="mb-0 text-break">${escapeHTML(this.activity.summary)}</h4>
 				</div>
 				${
 					this.activity.isMilestone
@@ -133,7 +134,7 @@ class ActivityForm extends HTMLElement {
 				
 				<div class="mb-4">
 					<label class="form-label text-muted small">Descrizione</label>
-					<p class="fs-5">${this.activity.description || "Nessuna descrizione fornita"}</p>
+					<p class="fs-5">${escapeHTML(this.activity.description || "Nessuna descrizione fornita")}</p>
 				</div>
 
 				<div class="mb-4">
@@ -299,7 +300,7 @@ class ActivityLinkForm extends HTMLElement {
 		let block = `<option value="" disabled selected>${text}</option>`;
 		for (const activity of this.avaiableActivities) {
 			block += `
-                <option value="${activity._id}">${activity.name}</option>
+                <option value="${activity._id}">${escapeHTML(activity.name)}</option>
             `;
 		}
 
@@ -469,7 +470,7 @@ class ActivityLinkForm extends HTMLElement {
             <form id="modifyLinkForm">
 				<div class="modal-body">
 					<div class="mb-4">
-						<h4 class="mb-3">${this.activity.summary}</h4>
+						<h4 class="mb-3">${escapeHTML(this.activity.summary)}</h4>
 						<label class="form-label fw-semibold">Associa</label>
 						<div class="add-link-form">
 							<div class="input-group mb-3">
@@ -633,7 +634,7 @@ class ActivityModifyForm extends HTMLElement {
 		let block = `<option value="" disabled selected>${text}</option>`;
 		for (const user of availableUsers) {
 			block += `
-                <option value="${user.name}">${user.name}</option>
+                <option value="${user.name}">${escapeHTML(user.name)}</option>
             `;
 		}
 		return block;
@@ -648,7 +649,7 @@ class ActivityModifyForm extends HTMLElement {
 				select.innerHTML =
 					"<option value='' disabled selected>Seleziona un utente</option>";
 			}
-			select.innerHTML += `<option value="${user.name}">${user.name}</option>`;
+			select.innerHTML += `<option value="${user.name}">${escapeHTML(user.name)}</option>`;
 		} else {
 			select.querySelectorAll("option").forEach((option) => {
 				if (option.value === user.name) {

@@ -299,6 +299,8 @@ export function createStatusIcon(
 	return wrapper;
 }
 
+// Altro
+
 export async function fetcher(
 	method: "GET" | "POST" | "PATCH" | "DELETE",
 	url: string,
@@ -317,6 +319,12 @@ export async function fetcher(
 	} else {
 		throw new Error(response.statusText);
 	}
+}
+
+export function escapeHTML(text: string): string {
+	const div = document.createElement("div");
+	div.textContent = text;
+	return div.innerHTML;
 }
 
 // Funzione per creare una singola entry generica

@@ -1,4 +1,4 @@
-import { formatDate } from "../Utils";
+import { escapeHTML, formatDate } from "../Utils";
 
 class PhaseForm extends HTMLElement {
 	parentData: any;
@@ -24,29 +24,29 @@ class PhaseForm extends HTMLElement {
 
 	private createViewTemplate() {
 		return `
-            <div class="modal-body">
-                <div class="mb-4">
-                    <label class="form-label text-muted small">Titolo</label>
-                    <h4>${this.phaseData.summary}</h4>
-                </div>
-                
-                <div class="mb-4">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <label class="form-label text-muted small">Data d'inizio</label>
-                            <h5>${new Date(this.phaseData.dtStart).toLocaleDateString()}</h5>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label text-muted small">Data di fine</label>
-                            <h5>${new Date(formatDate(this.phaseData.due)).toLocaleDateString()}</h5>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
-            </div>
-        `;
+			<div class="modal-body">
+				<div class="mb-4">
+					<label class="form-label text-muted small">Titolo</label>
+					<h4>${escapeHTML(this.phaseData.summary)}</h4>
+				</div>
+				
+				<div class="mb-4">
+					<div class="row">
+						<div class="col-md-6">
+							<label class="form-label text-muted small">Data d'inizio</label>
+							<h5>${new Date(this.phaseData.dtStart).toLocaleDateString()}</h5>
+						</div>
+						<div class="col-md-6">
+							<label class="form-label text-muted small">Data di fine</label>
+							<h5>${new Date(formatDate(this.phaseData.due)).toLocaleDateString()}</h5>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+			</div>
+		`;
 	}
 
 	private createModalContent(mode: "VIEW" | "EDIT" | "DELETE") {

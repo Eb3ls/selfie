@@ -2,6 +2,7 @@ import {
 	User,
 	clearError,
 	createUserEntry,
+	escapeHTML,
 	fetcher,
 	showError,
 	validateLength
@@ -124,7 +125,7 @@ class ProjectSettings extends HTMLElement {
 			<div class="modal-body">
 				<div class="mb-4">
 					<label class="form-label text-muted small">Titolo</label>
-					<h4>${this.projectTitle}</h4>
+					<h4>${escapeHTML(this.projectTitle)}</h4>
 				</div>
 				
 				<div class="mb-4">

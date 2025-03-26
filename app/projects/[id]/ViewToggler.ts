@@ -15,7 +15,8 @@ import {
 	ROW_HEIGHT_PX,
 	SortedActivity,
 	SubPhaseResponse,
-	User
+	User,
+	escapeHTML
 } from "./Utils";
 
 class ViewToggler extends HTMLElement {
@@ -99,7 +100,7 @@ class ViewToggler extends HTMLElement {
 					<a class="btn text-secondary me-1 p-0" href="/projects">
 						Dashboard /
 					</a>
-					<div class="ms-1">${this.projectData!.summary}</div>
+					${escapeHTML(this.projectData!.summary)}
 				</div>
 				<div class="col d-flex justify-content-end align-items-center">
 					${this.isOwner ? `<add-form-component></add-form-component> ` : ""}

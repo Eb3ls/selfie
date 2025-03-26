@@ -11,7 +11,6 @@ import {
 	PROJECT_COLLECTION,
 	Project,
 	ProjectActivity,
-	StringNote,
 	StringProject,
 	StringProjectActivity,
 	findCollectionWrapper,
