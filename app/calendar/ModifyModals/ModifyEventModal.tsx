@@ -2,6 +2,7 @@
 
 import { AlarmSelector } from "@/app/calendar/AlarmSelector";
 import "@/app/calendar/Modal.css";
+import { TimezoneSelector } from "@/app/calendar/TimezoneSelector";
 import { StringAlarm, StringEvent } from "@/utils/db/db";
 import moment from "moment";
 import React, { useState } from "react";
@@ -119,6 +120,13 @@ export function ModifyEventModal({
 		});
 	};
 
+	const handleTimezoneChange = (timezone: string) => {
+		setForm({
+			...form,
+			geo: timezone
+		});
+	};
+
 	return (
 		<>
 			<Modal
@@ -195,6 +203,11 @@ export function ModifyEventModal({
 								required
 							/>
 						</Form.Group>
+
+						<TimezoneSelector
+							regularTimezone={form.geo}
+							setRegularTimezone={handleTimezoneChange}
+						/>
 
 						{/* Nuovo Form.Group per aggiungere inviti */}
 						<Form.Group className="mb-3" controlId="formUsernames">

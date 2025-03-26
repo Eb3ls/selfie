@@ -209,11 +209,7 @@ export function AddSessionModal({ children }: any) {
 								type="text"
 								name="summary"
 								value={form.summary}
-								onChange={(e) =>
-									handleChange(
-										e as React.ChangeEvent<HTMLInputElement>
-									)
-								}
+								onChange={handleChange}
 								placeholder="Inserisci titolo"
 								className="input-field"
 								required
@@ -226,14 +222,10 @@ export function AddSessionModal({ children }: any) {
 						>
 							<Form.Label>Descrizione</Form.Label>
 							<Form.Control
-								type="text"
+								as="textarea"
 								name="description"
 								value={form.description}
-								onChange={(e) =>
-									handleChange(
-										e as unknown as React.ChangeEvent<HTMLSelectElement>
-									)
-								}
+								onChange={handleChange}
 								placeholder="Inserisci descrizione"
 								className="input-field"
 								required
@@ -245,13 +237,8 @@ export function AddSessionModal({ children }: any) {
 							<Form.Select
 								name="status"
 								value={form.status}
-								onChange={(e) =>
-									handleChange(
-										e as React.ChangeEvent<
-											HTMLInputElement | HTMLSelectElement
-										>
-									)
-								}
+								onChange={handleChange}
+								className="input-field"
 								required
 							>
 								<option value="CONFIRMED">Confermato</option>

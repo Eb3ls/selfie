@@ -1,7 +1,10 @@
 "use client";
 
+import { AlarmSelector } from "@/app/calendar/AlarmSelector";
 import "@/app/calendar/Modal.css";
+import { TimezoneSelector } from "@/app/calendar/TimezoneSelector";
 import { useTime } from "@/app/components/TimeContext";
+import { StringAlarm } from "@/utils/db/db";
 import React, { useState } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
 
@@ -16,7 +19,7 @@ export function AddActivityModal({ children }: any) {
 		geo: "",
 		parentActivityId: "",
 		usernameList: [] as string[],
-		alarms: []
+		alarms: [] as StringAlarm[]
 	});
 	const { dateTime } = useTime();
 
@@ -79,6 +82,20 @@ export function AddActivityModal({ children }: any) {
 		} else {
 			alert("Failed! Status code: " + response.status);
 		}
+	};
+
+	const handleAlarmsChange = (newAlarms: StringAlarm[]) => {
+		setForm({
+			...form,
+			alarms: newAlarms
+		});
+	};
+
+	const handleTimezoneChange = (timezone: string) => {
+		setForm({
+			...form,
+			geo: timezone
+		});
 	};
 
 	return (
@@ -159,17 +176,10 @@ export function AddActivityModal({ children }: any) {
 							/>
 						</Form.Group>
 
-						<Form.Group className="mb-3" controlId="formLocation">
-							<Form.Label>Luogo</Form.Label>
-							<Form.Control
-								type="text"
-								name="location"
-								value={form.location}
-								onChange={handleChange}
-								placeholder="Inserisci luogo"
-								className="input-field"
-							/>
-						</Form.Group>
+						<TimezoneSelector
+							regularTimezone={form.geo}
+							setRegularTimezone={handleTimezoneChange}
+						/>
 
 						{/* Nuovo Form.Group per aggiungere inviti */}
 						<Form.Group className="mb-3" controlId="formUsernames">
@@ -203,6 +213,11 @@ export function AddActivityModal({ children }: any) {
 								</ul>
 							)}
 						</Form.Group>
+
+						<AlarmSelector
+							alarms={form.alarms}
+							onChange={handleAlarmsChange}
+						/>
 					</Modal.Body>
 					<Modal.Footer>
 						<Button
