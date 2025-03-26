@@ -37,8 +37,6 @@ export function ModifyEventModal({
 		setUsernameInput("");
 	};
 
-	console.log("Event:", newEvent);
-
 	const handleChange = (
 		e: React.ChangeEvent<
 			HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
@@ -201,6 +199,17 @@ export function ModifyEventModal({
 								placeholder="Inserisci data di fine"
 								className="input-field"
 								required
+							/>
+							<Form.Label>
+								Categorie (separate da virgola)
+							</Form.Label>
+							<Form.Control
+								type="text"
+								name="categories"
+								value={form.categories}
+								onChange={handleChange}
+								placeholder="Inserisci categorie"
+								className="input-field"
 							/>
 						</Form.Group>
 

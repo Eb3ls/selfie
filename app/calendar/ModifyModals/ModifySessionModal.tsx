@@ -20,8 +20,6 @@ export function ModifySessionModal({
 	const [form, setForm] = useState(newSession);
 	const [userToInvite, setUserToInvite] = useState("");
 
-	console.log("Session:", newSession);
-
 	const handleChange = (
 		e: React.ChangeEvent<
 			HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
@@ -76,9 +74,14 @@ export function ModifySessionModal({
 	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 
-		// Converti le date in formato ISO
-		form.dtStart = new Date(form.dtStart).toISOString();
-		form.dtEnd = new Date(form.dtEnd).toISOString();
+		const startDateTime = new Date(form.dtStart);
+		const pomodoroDuration =
+			form.settingsList[form.settingsList.length - 1].cycles *
+			(form.settingsList[form.settingsList.length - 1].studyTime +
+				form.settingsList[form.settingsList.length - 1].breakTime);
+		const endDateTime = new Date(
+			startDateTime.getTime() + pomodoroDuration * 60000
+		);
 
 		const newForm = {
 			_id: form._id,
@@ -86,8 +89,8 @@ export function ModifySessionModal({
 			description: form.description,
 			status: form.status,
 			rrule: form.rrule,
-			dtStart: form.dtStart,
-			dtEnd: form.dtEnd,
+			dtStart: startDateTime.toISOString(),
+			dtEnd: endDateTime.toISOString(),
 			newSetting: {
 				cycles: form.settingsList[form.settingsList.length - 1].cycles,
 				studyTime:
@@ -205,19 +208,7 @@ export function ModifySessionModal({
 								className="input-field"
 								required
 							/>
-							<Form.Label>Data di fine</Form.Label>
-							<Form.Control
-								type="datetime-local"
-								name="dtEnd"
-								value={moment(form.dtEnd).format(
-									"YYYY-MM-DDTHH:mm"
-								)}
-								onChange={handleChange}
-								placeholder="Inserisci data di fine"
-								className="input-field"
-								required
-							/>
-							<br />
+
 							<p>Sezione pomodoro:</p>
 							<Form.Label>Cicli pomodoro</Form.Label>
 							<Form.Control

@@ -37,8 +37,6 @@ export function ModifyActivityModal({
 		setUsernameInput("");
 	};
 
-	console.log("Activity:", newActivity);
-
 	const handleChange = (
 		e: React.ChangeEvent<
 			HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
@@ -176,7 +174,7 @@ export function ModifyActivityModal({
 								<option value="IN-PROCESS">In corso</option>
 								<option value="CANCELLED">Cancellata</option>
 							</Form.Select>
-							<Form.Label>Data di fine</Form.Label>
+							<Form.Label>Consegna</Form.Label>
 							<Form.Control
 								type="datetime-local"
 								name="due"
@@ -184,9 +182,23 @@ export function ModifyActivityModal({
 									"YYYY-MM-DDTHH:mm"
 								)}
 								onChange={handleChange}
-								placeholder="Inserisci data di fine"
+								placeholder="Inserisci consegna"
 								className="input-field"
 								required
+							/>
+						</Form.Group>
+
+						<Form.Group className="mb-3" controlId="formCategories">
+							<Form.Label>
+								Categorie (separate da virgola)
+							</Form.Label>
+							<Form.Control
+								type="text"
+								name="categories"
+								value={form.categories}
+								onChange={handleChange}
+								placeholder="Inserisci categorie"
+								className="input-field"
 							/>
 						</Form.Group>
 

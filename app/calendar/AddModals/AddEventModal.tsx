@@ -489,9 +489,6 @@ export function AddEventModal({ children }: any) {
 									)}
 								</div>
 							)}
-						</Form.Group>
-
-						<Form.Group className="mb-3" controlId="formCategories">
 							<Form.Label>
 								Categorie (separate da virgola)
 							</Form.Label>

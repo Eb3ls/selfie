@@ -1,6 +1,8 @@
 "use client";
 
+import { AlarmSelector } from "@/app/calendar/AlarmSelector";
 import "@/app/calendar/Modal.css";
+import { StringAlarm } from "@/utils/db/db";
 import React, { useState } from "react";
 import { Button, Col, Form, Modal, Row } from "react-bootstrap";
 
@@ -38,20 +40,25 @@ export function AddSessionModal({ children }: any) {
 	const [weeklyDays, setWeeklyDays] = useState<string[]>([]);
 	const [monthlyDays, setMonthlyDays] = useState<number[]>([]);
 	const [yearlyMonths, setYearlyMonths] = useState<string[]>([]);
+	const [recurrenceEnd, setRecurrenceEnd] = useState<
+		"NEVER" | "UNTIL_EVENT_END" | "COUNT"
+	>("NEVER"); // Fine della ripetizione
 	const [recurrenceEndDate, setRecurrenceEndDate] = useState("");
+	const [recurrenceCount, setRecurrenceCount] = useState<number>(1);
 
 	const [form, setForm] = useState({
 		summary: "",
 		description: "",
 		status: "CONFIRMED",
 		rrule: "",
-		dtStartDate: "",
-		dtStartTime: "",
+		dtStart: "",
+		dtEnd: "",
 		settings: {
 			cycles: 0,
 			studyTime: 1,
 			breakTime: 1
-		}
+		},
+		alarms: [] as StringAlarm[]
 	});
 
 	const generateRRule = () => {
@@ -65,12 +72,10 @@ export function AddSessionModal({ children }: any) {
 			rrule += `;BYMONTH=${yearlyMonths.join(",")}`;
 		}
 
-		if (recurrenceEndDate) {
-			const untilDate = new Date(`${recurrenceEndDate}T23:59:59`);
-			const untilString =
-				untilDate.toISOString().replace(/[-:]/g, "").split(".")[0] +
-				"Z";
-			rrule += `;UNTIL=${untilString}`;
+		if (recurrenceEnd === "COUNT") {
+			rrule += `;COUNT=${recurrenceCount}`;
+		} else if (recurrenceEnd === "UNTIL_EVENT_END" && recurrenceEndDate) {
+			rrule += `;UNTIL=${new Date(recurrenceEndDate).toISOString().replace(/[-:]/g, "").split(".")[0]}Z`;
 		}
 
 		return rrule;
@@ -132,9 +137,7 @@ export function AddSessionModal({ children }: any) {
 	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 
-		const startDateTime = new Date(
-			`${form.dtStartDate}T${form.dtStartTime}`
-		);
+		const startDateTime = new Date(form.dtStart);
 		const pomodoroDuration =
 			form.settings.cycles *
 			(form.settings.studyTime + form.settings.breakTime);
@@ -153,7 +156,8 @@ export function AddSessionModal({ children }: any) {
 				cycles: form.settings.cycles,
 				studyTime: form.settings.studyTime,
 				breakTime: form.settings.breakTime
-			}
+			},
+			alarms: form.alarms
 		};
 
 		console.log("Form inviato:", formData);
@@ -179,6 +183,13 @@ export function AddSessionModal({ children }: any) {
 		} else {
 			alert("Failed! Status code: " + response.status);
 		}
+	};
+
+	const handleAlarmsChange = (newAlarms: StringAlarm[]) => {
+		setForm({
+			...form,
+			alarms: newAlarms
+		});
 	};
 
 	return (
@@ -253,24 +264,9 @@ export function AddSessionModal({ children }: any) {
 						>
 							<Form.Label>Data di inizio</Form.Label>
 							<Form.Control
-								type="date"
-								name="dtStartDate"
-								value={form.dtStartDate}
-								onChange={handleChange}
-								className="input-field"
-								required
-							/>
-						</Form.Group>
-
-						<Form.Group
-							className="mb-3"
-							controlId="formDtStartTime"
-						>
-							<Form.Label>Orario di inizio</Form.Label>
-							<Form.Control
-								type="time"
-								name="dtStartTime"
-								value={form.dtStartTime}
+								type="datetime-local"
+								name="dtStart"
+								value={form.dtStart}
 								onChange={handleChange}
 								className="input-field"
 								required
@@ -399,14 +395,54 @@ export function AddSessionModal({ children }: any) {
 							className="mb-3"
 							controlId="formRecurrenceEnd"
 						>
-							<Form.Label>Fine ricorrenza (opzionale)</Form.Label>
-							<Form.Control
-								type="date"
-								value={recurrenceEndDate}
+							<Form.Label>Fine della ripetizione</Form.Label>
+							<Form.Select
+								value={recurrenceEnd}
 								onChange={(e) =>
-									setRecurrenceEndDate(e.target.value)
+									setRecurrenceEnd(e.target.value as any)
 								}
-							/>
+								className="input-field"
+							>
+								<option value="NEVER">Mai</option>
+								<option value="UNTIL_EVENT_END">
+									Fino a data di fine
+								</option>
+								<option value="COUNT">
+									Dopo un numero di occorrenze
+								</option>
+							</Form.Select>
+
+							{recurrenceEnd === "UNTIL_EVENT_END" && (
+								<div className="mt-3">
+									<Form.Label>Fine ricorrenza</Form.Label>
+									<Form.Control
+										type="date"
+										value={recurrenceEndDate}
+										onChange={(e) =>
+											setRecurrenceEndDate(e.target.value)
+										}
+									/>
+								</div>
+							)}
+
+							{recurrenceEnd === "COUNT" && (
+								<div className="mt-3">
+									<Form.Label>
+										Numero di occorrenze
+									</Form.Label>
+									<Form.Control
+										type="number"
+										value={recurrenceCount}
+										onChange={(e) =>
+											setRecurrenceCount(
+												parseInt(e.target.value)
+											)
+										}
+										min="1"
+										className="input-field"
+									/>
+								</div>
+							)}
 						</Form.Group>
 
 						<Form.Group className="mb-3">
@@ -444,6 +480,11 @@ export function AddSessionModal({ children }: any) {
 								required
 							/>
 						</Form.Group>
+
+						<AlarmSelector
+							alarms={form.alarms}
+							onChange={handleAlarmsChange}
+						/>
 					</Modal.Body>
 					<Modal.Footer>
 						<Button
