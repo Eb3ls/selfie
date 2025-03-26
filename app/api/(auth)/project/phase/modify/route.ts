@@ -48,6 +48,14 @@ export const PATCH = async (request: NextRequest) => {
 	// Estraiamo l'id dal body
 	const phaseId: string = newBody._id!;
 
+	// Controlliamo che dtStart sia minore di due
+	if (new Date(newBody.dtStart) >= new Date(newBody.due)) {
+		return generateMessageResponse(
+			"Activity start date is greater than or equal to due date",
+			400
+		);
+	}
+
 	// Otteniamo la collezione delle fasi
 	const phaseClient: Collection<Phase> =
 		await getCollection<Phase>(PHASE_COLLECTION);
@@ -56,14 +64,12 @@ export const PATCH = async (request: NextRequest) => {
 		{ _id: phaseId },
 		phaseClient
 	);
-	console.log(phaseOut);
 
 	if (phaseOut.status !== 200) {
 		return phaseOut;
 	}
 
 	const phase: StringPhase[] = await phaseOut.json();
-	console.log(phase);
 
 	// Controlliamo che l'owner sia l'utente corrispondente
 	if (phase[0].ownerId !== userId) {

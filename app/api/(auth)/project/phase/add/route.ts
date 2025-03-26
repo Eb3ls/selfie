@@ -54,6 +54,14 @@ export const POST = async (request: NextRequest) => {
 	//Estraiamo il parentId dal body
 	const parentId: string = newBody.parentId;
 
+	// Controlliamo che dtStart sia minore di due
+	if (new Date(newBody.dtStart) >= new Date(newBody.due)) {
+		return generateMessageResponse(
+			"Activity start date is greater than or equal to due date",
+			400
+		);
+	}
+
 	// Otteniamo la collezione dei progetti
 	const projectClient: Collection<Project> =
 		await getCollection<Project>(PROJECT_COLLECTION);
@@ -112,7 +120,6 @@ export const POST = async (request: NextRequest) => {
 			{ parentActivityId: parentId },
 			activitiesClient
 		);
-		console.log(activitiesOut);
 
 		if (activitiesOut.status !== 404) {
 			return generateMessageResponse("Parent phase has activities", 400);

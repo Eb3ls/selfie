@@ -173,11 +173,11 @@ class AddPhaseForm extends HTMLElement {
 					<div class="mb-4 row">
 						<div class="col-md-6">
 							<label for="Start" class="form-label fw-semibold">Data d'inizio</label>
-							<input type="date" class="form-control" id="Start" name="Start" required">
+							<input type="date" class="form-control" id="Start" name="Start" required>
 						</div>
 						<div class="col-md-6">
 							<label for="Due" class="form-label fw-semibold">Data di fine</label>
-							<input type="date" class="form-control" id="Due" name="Due" required">
+							<input type="date" class="form-control" id="Due" name="Due" required>
 						</div>
 					</div>
 				</div>
@@ -329,11 +329,11 @@ class AddSubPhaseForm extends HTMLElement {
 						<div class="mb-4 row">
 							<div class="col-md-6">
 								<label for="Start" class="form-label fw-semibold">Data d'inizio</label>
-								<input type="date" class="form-control" id="Start" name="Start" required">
+								<input type="date" class="form-control" id="Start" name="Start" required>
 							</div>
 							<div class="col-md-6">
 								<label for="Due" class="form-label fw-semibold">Data di fine</label>
-								<input type="date" class="form-control" id="Due" name="Due" required">
+								<input type="date" class="form-control" id="Due" name="Due" required>
 							</div>
 						</div>
 					</div>
@@ -664,11 +664,11 @@ class AddActivityForm extends HTMLElement {
 						<div class="mb-4 row">
 							<div class="col-md-6">
 								<label for="Start" class="form-label fw-semibold">Data d'inizio</label>
-								<input type="date" class="form-control" id="Start" name="Start" required">
+								<input type="date" class="form-control" id="Start" name="Start" required>
 							</div>
 							<div class="col-md-6">
 								<label for="Due" class="form-label fw-semibold">Data di fine</label>
-								<input type="date" class="form-control" id="Due" name="Due" required">
+								<input type="date" class="form-control" id="Due" name="Due" required>
 							</div>
 						</div>
 						<label class="form-label fw-bold">Utenti assegnati</label>

@@ -97,12 +97,21 @@ export const PATCH = async (request: NextRequest) => {
 		return;
 	}
 
+	// Otteniamo la collezione delle note
+	const noteClient: Collection<Note> =
+		await getCollection<Note>(NOTE_COLLECTION);
+
 	if (projectActivityOut.status === 200) {
 		const projectActivities: StringProjectActivity[] =
 			await projectActivityOut.json();
 
-		// Eliminiamo le persone che non fanno più parte del progetto dalle attività
-		for (const activity of projectActivities) {
+		// Troviamo le activity che hanno associato un utente che non fa più parte del progetto
+		const activitiesToUpdate = projectActivities.filter((activity) =>
+			activity.userIdList.some((id) => !userIdList.includes(id))
+		);
+
+		// Eliminiamo le persone che non fanno più parte del progetto dalle attività e dalle note associate
+		for (const activity of activitiesToUpdate) {
 			const newUserIdList = activity.userIdList.filter((id) =>
 				userIdList.includes(id)
 			);
@@ -115,6 +124,16 @@ export const PATCH = async (request: NextRequest) => {
 
 			if (updateOut.status !== 200) {
 				return updateOut;
+			}
+
+			const updateNoteOut = await updateCollectionWrapper<Note>(
+				{ _id: activity.noteId },
+				{ $set: { userIdList: newUserIdList } } as any,
+				noteClient
+			);
+
+			if (updateNoteOut.status !== 200) {
+				return updateNoteOut;
 			}
 		}
 	}
@@ -138,39 +157,18 @@ export const PATCH = async (request: NextRequest) => {
 
 	const updatedProject: StringProject = (await updateOut.json())[0];
 
-	// Dopo aver aggiornato il progetto, aggiungiamo la parte per aggiornare le note
-	const noteClient: Collection<Note> =
-		await getCollection<Note>(NOTE_COLLECTION);
+	// Togliamo il primo utente che é l'owner
+	userIdList.shift();
 
-	// Otteniamo l'elenco degli ID delle note associate al progetto
-	const noteId: string = updatedProject.noteId;
+	// Aggiungiamo gli utenti alla lista di persone invitate della nota
+	const updateNoteOut = await updateCollectionWrapper<Note>(
+		{ _id: updatedProject.noteId },
+		{ $set: { userIdList: userIdList } } as any,
+		noteClient
+	);
 
-	// Controlliamo se il progetto ha delle note associate
-	if (noteId.length > 0) {
-		// Otteniamo le note utilizzando gli ID presenti in noteId
-		const noteOut = await findCollectionWrapper<Note>(
-			{ _id: noteId },
-			noteClient
-		);
-
-		if (noteOut.status !== 200) {
-			return noteOut;
-		}
-
-		const notes: StringNote[] = await noteOut.json();
-
-		// Aggiungiamo gli utenti alla lista delle note
-		for (const note of notes) {
-			const updateNoteOut = await updateCollectionWrapper<Note>(
-				{ _id: note._id },
-				{ $set: { userIdList: userIdList } } as any,
-				noteClient
-			);
-
-			if (updateNoteOut.status !== 200) {
-				return updateNoteOut;
-			}
-		}
+	if (updateNoteOut.status !== 200) {
+		return updateNoteOut;
 	}
 
 	return generateObjectResponse(updatedProject, 200);

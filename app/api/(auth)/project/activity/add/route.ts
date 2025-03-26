@@ -58,6 +58,14 @@ export const POST = async (request: NextRequest) => {
 	// Estriamo la lista degli username dal body
 	const usernameList: string[] = newBody.usernameList;
 
+	// Controlliamo che dtStart sia minore di due
+	if (new Date(newBody.dtStart) >= new Date(newBody.due)) {
+		return generateMessageResponse(
+			"Activity start date is greater than or equal to due date",
+			400
+		);
+	}
+
 	// Convertiamo lo username in id e aggiungiamo lo userId come primo elemento
 	const convertionOut = await usernameListToIds(usernameList, userId, false);
 

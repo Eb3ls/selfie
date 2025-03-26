@@ -5,6 +5,8 @@ import {
 	validate
 } from "@/utils/api/api";
 import {
+	NOTE_COLLECTION,
+	Note,
 	PHASE_COLLECTION,
 	PROJECT_ACTIVITY_COLLECTION,
 	PROJECT_COLLECTION,
@@ -57,6 +59,14 @@ export const PATCH = async (request: NextRequest) => {
 
 	// Estriamo la lista degli username dal body
 	const usernameList: string[] = newBody.usernameList;
+
+	// Controlliamo che dtStart sia minore di due
+	if (new Date(newBody.dtStart) > new Date(newBody.due)) {
+		return generateMessageResponse(
+			"dtStart cannot be greater than due",
+			400
+		);
+	}
 
 	// Convertiamo lo username in id e aggiungiamo lo userId come primo elemento
 	const convertionOut = await usernameListToIds(usernameList, userId, false);
@@ -181,6 +191,29 @@ export const PATCH = async (request: NextRequest) => {
 		}
 	}
 
+	// Controlliamo se la lista degli utenti é diversa da quella attuale
+	if (
+		userIdList.length !== projectActivity[0].userIdList.length ||
+		userIdList.some(
+			(userId) => !projectActivity[0].userIdList.includes(userId)
+		)
+	) {
+		// Aggiorniamo la lista degli utenti della nota
+		const noteClient: Collection<Note> =
+			await getCollection<Note>(NOTE_COLLECTION);
+
+		const noteOut = await updateCollectionWrapper<Note>(
+			{ _id: projectActivity[0].noteId },
+			{ $set: { userIdList: userIdList } } as any,
+			noteClient
+		);
+
+		if (noteOut.status !== 200) {
+			return noteOut;
+		}
+	}
+
+	// Aggiorniamo l'attività
 	const updateOut = await updateCollectionWrapper<ProjectActivity>(
 		{ _id: activityId },
 		{
