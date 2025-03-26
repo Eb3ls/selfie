@@ -103,7 +103,14 @@ class ViewToggler extends HTMLElement {
 					<span class="text-truncate">${escapeHTML(this.projectData!.summary)}</span>
 				</div>
 				<div class="col d-flex justify-content-end align-items-center">
-					${this.isOwner ? `<add-form-component></add-form-component> ` : ""}
+					${
+						this.isOwner
+							? `
+						<handle-overdue></handle-overdue>	
+						<add-form-component></add-form-component>		
+					`
+							: ""
+					}
 					<project-settings></project-settings>
 				</div>
 			</div>
