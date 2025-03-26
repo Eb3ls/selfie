@@ -15,7 +15,7 @@ import {
 	findCollectionWrapper,
 	getCollection
 } from "@/utils/db/db";
-import { EventAttributes, GeoCoordinates, createEvents } from "ics";
+import { EventAttributes, createEvents } from "ics";
 import { Collection } from "mongodb";
 import { NextRequest } from "next/server";
 
@@ -146,17 +146,6 @@ export const GET = async (request: NextRequest) => {
 			location = item.location;
 		}
 
-		let geo: GeoCoordinates | undefined = undefined;
-		if ("geo" in item) {
-			const [lat, long] = item.geo.split(";");
-			if (lat !== "" && long !== "") {
-				geo = {
-					lat: parseFloat(lat),
-					lon: parseFloat(long)
-				};
-			}
-		}
-
 		const out: EventAttributes = {
 			title: item.summary,
 			description: item.description,
@@ -176,8 +165,7 @@ export const GET = async (request: NextRequest) => {
 				end.getMinutes()
 			],
 			categories: categories,
-			location: location,
-			geo: geo
+			location: location
 		};
 
 		return out;
