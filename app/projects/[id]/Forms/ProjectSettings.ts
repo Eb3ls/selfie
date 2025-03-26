@@ -304,7 +304,7 @@ class ProjectSettings extends HTMLElement {
 
 		const confirmBtn = this.querySelector("#confirmDeleteBtn");
 		confirmBtn?.addEventListener("click", async () => {
-			const url = `/api/project/delete/${this.projectId}`;
+			const url = `/api/project/delete`;
 			const method = "DELETE";
 			const body = { _id: this.projectId };
 			try {

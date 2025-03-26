@@ -244,8 +244,6 @@ class AddSubPhaseForm extends HTMLElement {
 		return phaseList.filter((phase) => {
 			// Se ci sono attivitá nella fase la saltiamo
 			if (phase.activities.length > 0) return false;
-			// Se la fase è scaduta la saltiamo
-			if (new Date(phase.due) < new Date()) return false;
 			return true;
 		});
 	}
@@ -431,9 +429,6 @@ class AddActivityForm extends HTMLElement {
 		} else {
 			phases = this.mainPhaseSelected?.subPhases || [];
 		}
-		phases = phases.filter((phase) => {
-			return new Date(phase.due) >= new Date();
-		});
 
 		let option = ``;
 
@@ -509,9 +504,7 @@ class AddActivityForm extends HTMLElement {
 		this.mainPhaseSelected = phase;
 
 		// Se la fase non ha sottofasi o ha attivitá, nascondiamo il selettore sottofasi
-		const subPhases = phase.subPhases.filter((subPhase) => {
-			return new Date(subPhase.due) >= new Date();
-		});
+		const subPhases = phase.subPhases;
 
 		const subPhaseSelect = this.querySelector(
 			"#SubPhase"

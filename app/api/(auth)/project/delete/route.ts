@@ -99,8 +99,7 @@ export const DELETE = async (request: NextRequest) => {
 				return deletedPhase;
 			}
 		}
-	}
-	if (phaseOut.status === 500) {
+	} else if (phaseOut.status === 500) {
 		return;
 	}
 

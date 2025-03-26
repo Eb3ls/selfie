@@ -371,14 +371,30 @@ export async function deleteProjectActivity(
 	// Rimuoviamo l'attività dai nextIdList delle attività precedenti
 	const prevIdList = projectActivity.prevIdList;
 	for (const prevId of prevIdList) {
-		const prevActivityOut = await updateCollectionWrapper<ProjectActivity>(
+		const prevActivityOut = await findCollectionWrapper<ProjectActivity>(
 			{ _id: prevId },
-			{ $pull: { nextIdList: activityId } } as any,
 			projectActivityClient
 		);
 
 		if (prevActivityOut.status !== 200) {
 			return prevActivityOut;
+		}
+
+		const prevActivity: StringProjectActivity[] =
+			await prevActivityOut.json();
+
+		const prevNextIdList = prevActivity[0].nextIdList.filter(
+			(prevNextId) => prevNextId !== activityId
+		);
+
+		const updateOut = await updateCollectionWrapper<ProjectActivity>(
+			{ _id: prevId },
+			{ $set: { nextIdList: prevNextIdList } } as any,
+			projectActivityClient
+		);
+
+		if (updateOut.status !== 200) {
+			return updateOut;
 		}
 	}
 
