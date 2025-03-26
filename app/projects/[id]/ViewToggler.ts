@@ -151,7 +151,7 @@ class ViewToggler extends HTMLElement {
 		const headerBottom =
 			this.viewType === "GANTT"
 				? `
-			<div class="col-9 d-flex flex-row justify-content-between">
+			<div class="col-7 col-xxl-9 d-flex flex-row justify-content-between">
 				<button class="btn p-0 me-2" id="leftScroll">
 				<i class="bi bi-chevron-left"></i>
 				</button>
@@ -164,7 +164,7 @@ class ViewToggler extends HTMLElement {
 				</button>
 			</div>`
 				: `
-			<div class="col-9 d-flex justify-content-end">
+			<div class="col-7 col-xxl-9 d-flex justify-content-end">
 				<button class="btn" id="userSort">Attore</button>
 				<button class="btn" id="timeSort">Temporalmente</button>
 			</div>`;
@@ -174,7 +174,7 @@ class ViewToggler extends HTMLElement {
 			"d-flex flex-row border-bottom border-secondary align-items-center px-3";
 		container.style.minHeight = ROW_HEIGHT_PX;
 		container.innerHTML = `
-			<div class="col-3 d-flex align-items-center">
+			<div class="col-5 col-xxl-3 d-flex align-items-center">
 				<button class="btn me-2 p-0" id="renderGantt">Gantt</button>
 				<button class="btn ms-2 p-0" id="renderList">List</button>
 			</div>
@@ -191,15 +191,15 @@ class ViewToggler extends HTMLElement {
 		container.id = "ganttContainer";
 
 		container.innerHTML = `
-			<div id="listView" class="col-3 p-0 border-end border-secondary">
+			<div id="listView" class="col-5 col-xxl-3 p-0 border-end border-secondary">
 				<div id="header" class="d-flex align-items-center sticky-top bg-white border-bottom border-secondary px-5" 
 					 style="height: ${ROW_HEIGHT_PX};">
-					<div class="col-6">Titolo</div>
-					<div class="col-6 d-flex justify-content-center">Range</div>
+					<div class="col ms-4">Titolo</div>
+					<div class="col d-none d-lg-flex justify-content-end">Range</div>
 				</div>
 				<side-gantt-list/>
 			</div>
-			<div id="ganttView" class="col-9 p-0 d-flex flex-column">
+			<div id="ganttView" class="col-7 col-xxl-9 p-0 d-flex flex-column">
 				<time-line></time-line>
 				<project-phase-row></project-phase-row>
 			</div>

@@ -1,3 +1,4 @@
+import { stat } from "fs";
 import ModifyActivity from "../Forms/ActivityForm";
 import {
 	ProjectActivityResponse,
@@ -68,15 +69,15 @@ class TimeList extends HTMLElement {
 		const end = new Date(formatDate(act.due)).toLocaleDateString();
 
 		const summaryCol = document.createElement("div");
-		summaryCol.className = "col-4 fw-bold";
+		summaryCol.className = "col-4 fw-bold text-truncate";
 		summaryCol.textContent = act.summary;
 
 		const startCol = document.createElement("div");
-		startCol.className = "col-4 text-muted";
+		startCol.className = "col-4 text-muted text-center";
 		startCol.textContent = `${start}`;
 
 		const dueCol = document.createElement("div");
-		dueCol.className = "col-4 text-muted";
+		dueCol.className = "col-4 text-muted text-center";
 		dueCol.textContent = `${end}`;
 
 		clickableArea.appendChild(summaryCol);
@@ -84,7 +85,8 @@ class TimeList extends HTMLElement {
 		clickableArea.appendChild(dueCol);
 
 		const statusCol = document.createElement("div");
-		statusCol.className = "col-3";
+		statusCol.className =
+			"col-3 d-flex align-items-center justify-content-center";
 
 		// Creiamo il blocco per lo status
 		const hasPermission = act.users.some(
@@ -96,8 +98,12 @@ class TimeList extends HTMLElement {
 			hasPermission,
 			this.isOwner
 		);
+
+		const statusText = document.createElement("div");
+		statusText.className = "ms-2";
+		statusText.textContent = act.status;
 		statusCol.appendChild(statusBlock);
-		statusCol.appendChild(document.createTextNode(act.status));
+		statusCol.appendChild(statusText);
 
 		block.appendChild(clickableArea);
 		block.appendChild(statusCol);
@@ -122,17 +128,17 @@ class TimeList extends HTMLElement {
 		header.appendChild(summaryHeader);
 
 		const startHeader = document.createElement("div");
-		startHeader.className = "col-3 fw-bold";
+		startHeader.className = "ps-0 col-3 fw-bold text-center";
 		startHeader.textContent = "Start Date";
 		header.appendChild(startHeader);
 
 		const dueHeader = document.createElement("div");
-		dueHeader.className = "col-3 fw-bold";
+		dueHeader.className = "ps-0 col-3 fw-bold text-center";
 		dueHeader.textContent = "Due Date";
 		header.appendChild(dueHeader);
 
 		const statusHeader = document.createElement("div");
-		statusHeader.className = "col-3 fw-bold";
+		statusHeader.className = "col-3 fw-bold text-center";
 		statusHeader.textContent = "Status";
 		header.appendChild(statusHeader);
 

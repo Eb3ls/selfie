@@ -33,7 +33,7 @@ class PhaseForm extends HTMLElement {
 			<div class="modal-body">
 				<div class="mb-4">
 					<label class="form-label text-muted small">Titolo</label>
-					<h4>${escapeHTML(this.phaseData.summary)}</h4>
+					<h4 class="text-break">${escapeHTML(this.phaseData.summary)}</h4>
 				</div>
 				
 				<div class="mb-4">

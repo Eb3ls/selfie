@@ -71,7 +71,7 @@ class SideGanttList extends HTMLElement {
 		phaseData: PhaseResponse | SubPhaseResponse
 	): HTMLElement {
 		const activityElement = document.createElement("div");
-		activityElement.className = "d-flex align-items-center ms-5";
+		activityElement.className = "d-flex align-items-center ps-5 w-100";
 		activityElement.style.height = `${ROW_HEIGHT_PX}`;
 
 		// Icona
@@ -85,16 +85,18 @@ class SideGanttList extends HTMLElement {
 			this.isOwner
 		);
 
+		statusIcon.style.width = "20px";
+		statusIcon.style.flexShrink = "0";
+
 		// Container per le due colonne con titolo e date
 		const columnsContainer = document.createElement("div");
-		columnsContainer.className =
-			"d-flex flex-grow-1 justify-content-between";
+		columnsContainer.className = "d-flex ps-3 gap-3";
+		columnsContainer.style.width = `calc(100% - 40px)`;
 
 		// Prima colonna con il titolo
 		const firstCol = document.createElement("div");
-		firstCol.className = "col d-flex align-items-center";
-		const summaryText = document.createTextNode(activity.summary);
-		firstCol.appendChild(summaryText);
+		firstCol.className = "d-flex text-truncate flex-grow-1";
+		firstCol.textContent = activity.summary;
 		if (activity.isMilestone) {
 			const flag = document.createElement("i");
 			flag.className = "bi bi-flag-fill ms-2";
@@ -103,10 +105,12 @@ class SideGanttList extends HTMLElement {
 
 		// Seconda colonna con le date
 		const secondCol = document.createElement("div");
+		secondCol.className =
+			"flex-shrink-0 d-none d-lg-flex align-items-center justify-content-end";
 		secondCol.textContent = `
-			${new Date(formatDate(activity.dtStart)).toLocaleDateString()}
+			${new Date(formatDate(activity.dtStart)).getDate()} ${new Date(formatDate(activity.dtStart)).toLocaleString("default", { month: "short" })}
 			-
-			${new Date(formatDate(activity.due)).toLocaleDateString()}
+			${new Date(formatDate(activity.due)).getDate()} ${new Date(formatDate(activity.due)).toLocaleString("default", { month: "short" })}
 		`;
 
 		columnsContainer.appendChild(firstCol);

@@ -167,7 +167,7 @@ class ActivityForm extends HTMLElement {
 
 				<div class="mb-4">
 					<label class="form-label text-muted small">Attività associate</label>
-					<div class="link-list">
+					<div class="user-list">
 						${selectedLinksBlock}
 					</div>
 				</div>
@@ -485,7 +485,7 @@ class ActivityLinkForm extends HTMLElement {
 								</button>
 							</div>
 						</div>
-						<div class="link-list mt-2" id="linkList">
+						<div class="user-list" id="linkList">
 						</div>
 					</div>
 				</div>

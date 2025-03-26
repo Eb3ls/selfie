@@ -146,7 +146,7 @@ export function checkDate(date: string, start: string, due: string): boolean {
 export function calculateCells(element: HTMLElement): number {
 	const width = element.clientWidth || element.getBoundingClientRect().width;
 	const cols = Math.floor(width / CELL_WIDTH) * 2;
-	return Math.max(cols, 18);
+	return Math.max(cols, 25);
 }
 
 export function showError(inputElement: HTMLElement, message: string) {
@@ -263,7 +263,7 @@ export function createStatusIcon(
 	dropdownButton.className = "btn btn-link p-0 border-0";
 
 	const icon = document.createElement("i");
-	icon.className = "bi bi-circle-fill fs-5 me-3";
+	icon.className = "bi bi-circle-fill fs-5";
 
 	const currentStatus = statusConfig[status];
 	if (currentStatus) {
