@@ -176,7 +176,7 @@ export function ModifySessionModal({
 							/>
 							<Form.Label>Descrizione</Form.Label>
 							<Form.Control
-								type="text"
+								as="textarea"
 								name="description"
 								value={form.description}
 								onChange={handleChange}
@@ -192,8 +192,8 @@ export function ModifySessionModal({
 								className="input-field"
 								required
 							>
-								<option value="CONFIRMED">Confermato</option>
 								<option value="TENTATIVE">Provvisorio</option>
+								<option value="CONFIRMED">Confermato</option>
 								<option value="CANCELLED">Cancellato</option>
 							</Form.Select>
 							<Form.Label>Data di inizio</Form.Label>

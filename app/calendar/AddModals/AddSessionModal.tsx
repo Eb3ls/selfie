@@ -252,9 +252,8 @@ export function AddSessionModal({ children }: any) {
 								className="input-field"
 								required
 							>
-								<option value="CONFIRMED">Confermato</option>
 								<option value="TENTATIVE">Provvisorio</option>
-								<option value="CANCELLED">Cancellato</option>
+								<option value="CONFIRMED">Confermato</option>
 							</Form.Select>
 						</Form.Group>
 

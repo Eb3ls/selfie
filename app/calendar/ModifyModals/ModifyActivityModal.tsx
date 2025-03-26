@@ -153,7 +153,7 @@ export function ModifyActivityModal({
 							/>
 							<Form.Label>Descrizione</Form.Label>
 							<Form.Control
-								type="text"
+								as="textarea"
 								name="description"
 								value={form.description}
 								onChange={handleChange}
