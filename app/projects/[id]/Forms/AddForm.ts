@@ -1,12 +1,16 @@
+import { validate } from "@/utils/api/api";
 import {
 	PhaseResponse,
 	SubPhaseResponse,
 	User,
 	checkDate,
+	clearError,
 	createUserEntry,
 	escapeHTML,
 	fetcher,
-	formatDate
+	formatDate,
+	showError,
+	validateLength
 } from "../Utils";
 
 class AddForm extends HTMLElement {
@@ -145,6 +149,17 @@ class AddPhaseForm extends HTMLElement {
 		const formData = new FormData(form);
 		const data = Object.fromEntries(formData.entries());
 
+		const titleBlock = this.querySelector("#Title") as HTMLInputElement;
+
+		clearError(titleBlock);
+		if (!validateLength(titleBlock.value, 3, 50)) {
+			showError(
+				titleBlock,
+				"Il titolo deve essere lungo tra 3 e 50 caratteri"
+			);
+			return;
+		}
+
 		const method = "POST";
 		const url = "/api/project/phase/add";
 		const body = {
@@ -222,6 +237,17 @@ class AddSubPhaseForm extends HTMLElement {
 		const form = event.target as HTMLFormElement;
 		const formData = new FormData(form);
 		const data = Object.fromEntries(formData.entries());
+
+		const titleBlock = this.querySelector("#Title") as HTMLInputElement;
+
+		clearError(titleBlock);
+		if (!validateLength(titleBlock.value, 3, 50)) {
+			showError(
+				titleBlock,
+				"Il titolo deve essere lungo tra 3 e 50 caratteri"
+			);
+			return;
+		}
 
 		const method = "POST";
 		const url = "/api/project/phase/add";
@@ -401,6 +427,17 @@ class AddActivityForm extends HTMLElement {
 		const form = event.target as HTMLFormElement;
 		const formData = new FormData(form);
 		const data = Object.fromEntries(formData.entries());
+
+		const titleBlock = this.querySelector("#Title") as HTMLInputElement;
+
+		clearError(titleBlock);
+		if (!validateLength(titleBlock.value, 3, 50)) {
+			showError(
+				titleBlock,
+				"Il titolo deve essere lungo tra 3 e 50 caratteri"
+			);
+			return;
+		}
 
 		const method = "POST";
 		const url = "/api/project/activity/add";

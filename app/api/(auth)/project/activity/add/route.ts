@@ -66,6 +66,11 @@ export const POST = async (request: NextRequest) => {
 		);
 	}
 
+	// Se il titolo non é tra le 3 e le 50 lettere, ritorna un errore
+	if (newBody.summary.length < 3 || newBody.summary.length > 50) {
+		return generateMessageResponse("Invalid summary length", 400);
+	}
+
 	// Convertiamo lo username in id e aggiungiamo lo userId come primo elemento
 	const convertionOut = await usernameListToIds(usernameList, userId, false);
 

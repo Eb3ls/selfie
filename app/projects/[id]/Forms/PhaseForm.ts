@@ -1,4 +1,10 @@
-import { escapeHTML, formatDate } from "../Utils";
+import {
+	clearError,
+	escapeHTML,
+	formatDate,
+	showError,
+	validateLength
+} from "../Utils";
 
 class PhaseForm extends HTMLElement {
 	parentData: any;
@@ -191,9 +197,22 @@ class PhaseForm extends HTMLElement {
 		const form = event.target as HTMLFormElement;
 		const formData = new FormData(form);
 
+		const summary = formData.get("summary") as string;
+		const summaryBlock = this.querySelector("#summary") as HTMLInputElement;
+
+		clearError(summaryBlock);
+
+		if (!validateLength(summary, 3, 50)) {
+			showError(
+				summaryBlock,
+				"Il titolo deve essere lungo tra 3 e 50 caratteri"
+			);
+			return;
+		}
+
 		const data = {
 			_id: this.phaseData._id,
-			summary: formData.get("summary") as string,
+			summary: summary,
 			dtStart: new Date(
 				(formData.get("dtStart") as string) + "T00:00:00.000Z"
 			).toISOString(),

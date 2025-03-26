@@ -149,10 +149,12 @@ class ProjectSettings extends HTMLElement {
 		) as HTMLInputElement;
 		const projectTitle = projectTitleInput.value.trim();
 
-		if (!validateLength(projectTitle, 3, 100)) {
+		clearError(projectTitleInput);
+
+		if (!validateLength(projectTitle, 3, 50)) {
 			showError(
 				projectTitleInput,
-				"Il titolo deve essere tra 3 e 100 caratteri"
+				"Il titolo deve essere tra 3 e 50 caratteri"
 			);
 			return;
 		}

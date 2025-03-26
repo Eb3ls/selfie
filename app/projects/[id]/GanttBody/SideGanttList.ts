@@ -103,7 +103,6 @@ class SideGanttList extends HTMLElement {
 
 		// Seconda colonna con le date
 		const secondCol = document.createElement("div");
-		secondCol.className = "col";
 		secondCol.textContent = `
 			${new Date(formatDate(activity.dtStart)).toLocaleDateString()}
 			-
@@ -163,7 +162,7 @@ class SideGanttList extends HTMLElement {
 
 		const button = document.createElement("button");
 		button.className =
-			"btn btn-primary rounded-3 px-4 py-2 flex-grow-1 text-start";
+			"btn btn-primary text-truncate rounded-3 px-4 py-2 flex-grow-1 text-start";
 		button.textContent = data.summary;
 		// Impostiamo data-bs-toggle e data-bs-target per il modale
 		button.setAttribute("data-bs-toggle", "modal");

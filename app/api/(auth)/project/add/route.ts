@@ -41,6 +41,11 @@ export const POST = async (request: NextRequest) => {
 	// Estraiamo l'id dell'utente
 	const userId = user._id!;
 
+	// Se il titolo non é tra le 3 e le 50 lettere, ritorna un errore
+	if (newBody.summary.length < 3 || newBody.summary.length > 50) {
+		return generateMessageResponse("Invalid summary length", 400);
+	}
+
 	// Creiamo la nota associata al progetto
 	const newNote: StringNote = generateStringModel<StringNote>(
 		{

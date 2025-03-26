@@ -207,7 +207,9 @@ export default function ProjectPage() {
 									</Card.Subtitle>
 
 									{project.userNameList.length > 0 && (
-										<div className={styles.projectUsers}>
+										<div
+											className={`${styles.projectUsers} text-truncate`}
+										>
 											<span>Collaboratori: </span>
 											{project.userNameList.join(", ")}
 										</div>

@@ -2,11 +2,14 @@ import {
 	PhaseResponse,
 	ProjectActivityResponse,
 	User,
+	clearError,
 	createLinkEntry,
 	createUserEntry,
 	escapeHTML,
 	fetcher,
-	formatDate
+	formatDate,
+	showError,
+	validateLength
 } from "../Utils";
 
 interface PartialLink {
@@ -134,7 +137,8 @@ class ActivityForm extends HTMLElement {
 				
 				<div class="mb-4">
 					<label class="form-label text-muted small">Descrizione</label>
-					<p class="fs-5">${escapeHTML(this.activity.description || "Nessuna descrizione fornita")}</p>
+					<p class="fs-5" style="max-height: 200px; overflow-y: auto"
+					>${escapeHTML(this.activity.description || "Nessuna descrizione fornita")}</p>
 				</div>
 
 				<div class="mb-4">
@@ -594,9 +598,22 @@ class ActivityModifyForm extends HTMLElement {
 		const form = event.target as HTMLFormElement;
 		const formData = new FormData(form);
 
+		const summary = formData.get("summary") as string;
+		const summaryInput = this.querySelector("#summary") as HTMLInputElement;
+
+		clearError(summaryInput);
+
+		if (!validateLength(summary, 3, 50)) {
+			showError(
+				summaryInput,
+				"Il titolo deve essere lungo tra 3 e 50 caratteri"
+			);
+			return;
+		}
+
 		const data: any = {
 			_id: this.activity._id,
-			summary: formData.get("summary") as string,
+			summary: summary,
 			description: formData.get("description") as string,
 			dtStart: new Date(
 				(formData.get("dtStart") as string) + "T00:00:00.000Z"

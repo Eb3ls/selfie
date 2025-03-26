@@ -96,11 +96,11 @@ class ViewToggler extends HTMLElement {
 		wrapper.className = "d-flex border-bottom border-secondary px-3";
 		wrapper.style.minHeight = ROW_HEIGHT_PX;
 		wrapper.innerHTML = `
-				<div class="col d-flex align-items-center">
-					<a class="btn text-secondary me-1 p-0" href="/projects">
+				<div class="col d-flex align-items-center text-truncate">
+					<a class="btn text-secondary me-1 p-0 text-nowrap" href="/projects">
 						Dashboard /
 					</a>
-					${escapeHTML(this.projectData!.summary)}
+					<span class="text-truncate">${escapeHTML(this.projectData!.summary)}</span>
 				</div>
 				<div class="col d-flex justify-content-end align-items-center">
 					${this.isOwner ? `<add-form-component></add-form-component> ` : ""}

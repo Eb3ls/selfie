@@ -56,6 +56,11 @@ export const PATCH = async (request: NextRequest) => {
 		);
 	}
 
+	// Se il titolo non é tra le 3 e le 50 lettere, ritorna un errore
+	if (newBody.summary.length < 3 || newBody.summary.length > 50) {
+		return generateMessageResponse("Invalid summary length", 400);
+	}
+
 	// Otteniamo la collezione delle fasi
 	const phaseClient: Collection<Phase> =
 		await getCollection<Phase>(PHASE_COLLECTION);
