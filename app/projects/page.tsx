@@ -104,35 +104,6 @@ export default function ProjectPage() {
 		}
 	}
 
-	async function handleDelete(id: string) {
-		const conf = confirm("Sicuro di voler eliminare?");
-		if (!conf) return;
-
-		try {
-			const response = await fetch("/api/project/delete", {
-				method: "DELETE",
-				headers: {
-					"Content-Type": "application/json"
-				},
-				body: JSON.stringify({ _id: id })
-			});
-
-			if (response.ok) {
-				alert("Progetto eliminato con successo!");
-
-				// Aggiorna lo stato dei progetti rimuovendo quello eliminato
-				setProjects((prevProjects) =>
-					prevProjects.filter((project) => project._id !== id)
-				);
-			} else {
-				alert("Errore durante l'eliminazione del progetto!");
-			}
-		} catch (error) {
-			console.error("Errore durante la cancellazione:", error);
-			alert("Errore durante la cancellazione!");
-		}
-	}
-
 	// Controlla se l'utente è il proprietario del progetto
 	function isOwner(ownerName: string) {
 		return ownerName === user?._id;
@@ -180,17 +151,6 @@ export default function ProjectPage() {
 											/>
 										)}
 									</div>
-									{isOwner(project.ownerName) && (
-										<Button
-											variant="link"
-											className={styles.deleteBtn}
-											onClick={() =>
-												handleDelete(project._id)
-											}
-										>
-											<FaTrash />
-										</Button>
-									)}
 								</div>
 
 								<Card.Body
