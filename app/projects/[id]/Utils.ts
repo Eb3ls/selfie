@@ -22,13 +22,18 @@ export interface User {
 	id: string;
 	name: string;
 }
+export interface overdueToHandle {
+	_id: string;
+	summary: string;
+}
 export interface ProjectResponse {
 	_id: string;
 	summary: string;
-	owner: User;
-	users: User[];
+	owner: { id: string; name: string };
+	users: { id: string; name: string }[];
 	noteId: string;
 	phases: PhaseResponse[];
+	overduesToHandle: overdueToHandle[];
 }
 
 export interface PhaseResponse {

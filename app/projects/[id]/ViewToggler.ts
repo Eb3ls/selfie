@@ -1,5 +1,6 @@
 import ActivityForm from "./Forms/ActivityForm";
 import AddForm from "./Forms/AddForm";
+import HandleOverdue from "./Forms/HandleOverdue";
 import PhaseForm from "./Forms/PhaseForm";
 import ProjectSettings from "./Forms/ProjectSettings";
 import ProjectPhaseRow from "./GanttBody/ProjectPhaseRow";
@@ -92,6 +93,23 @@ class ViewToggler extends HTMLElement {
 	}
 
 	private insertUpperHeader(): void {
+		let block = "";
+		if (this.isOwner) {
+			// Se ci sono attività in ritardo da gestire
+			if (this.projectData!.overduesToHandle.length !== 0) {
+				block += `
+					<handle-overdue></handle-overdue>
+				`;
+			}
+			// Se siamo l'owner aggiungiamo il form per aggiungere gli elementi
+			block += `
+				<add-form-component></add-form-component>
+			`;
+		}
+		block += `
+			<project-settings></project-settings>
+		`;
+
 		const wrapper = document.createElement("div");
 		wrapper.className = "d-flex border-bottom border-secondary px-3";
 		wrapper.style.minHeight = ROW_HEIGHT_PX;
@@ -103,15 +121,7 @@ class ViewToggler extends HTMLElement {
 					<span class="text-truncate">${escapeHTML(this.projectData!.summary)}</span>
 				</div>
 				<div class="col d-flex justify-content-end align-items-center">
-					${
-						this.isOwner
-							? `
-						<handle-overdue></handle-overdue>	
-						<add-form-component></add-form-component>		
-					`
-							: ""
-					}
-					<project-settings></project-settings>
+					${block}
 				</div>
 			</div>
 		`;
@@ -121,6 +131,15 @@ class ViewToggler extends HTMLElement {
 		if (!this.projectData) return;
 
 		if (this.isOwner) {
+			if (this.projectData.overduesToHandle.length !== 0) {
+				const handleOverdue = document.querySelector(
+					"handle-overdue"
+				) as HandleOverdue;
+				handleOverdue.loadProjectData(
+					this.projectData.overduesToHandle
+				);
+			}
+
 			const addForm = this.querySelector("add-form-component") as AddForm;
 			addForm.loadProjectData(
 				this.projectData._id,

@@ -16,7 +16,7 @@ import {
 	findCollectionWrapper,
 	getCollection
 } from "@/utils/db/db";
-import { Collection, ObjectId } from "mongodb";
+import { Collection } from "mongodb";
 import { NextRequest } from "next/server";
 
 interface ProjectResponse {

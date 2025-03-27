@@ -1,7 +1,7 @@
-import { ProjectActivityResponse } from "../Utils";
+import { ProjectActivityResponse, fetcher, overdueToHandle } from "../Utils";
 
 class HandleOverdue extends HTMLElement {
-	overdueActivities: ProjectActivityResponse[];
+	overdueActivities: overdueToHandle[];
 
 	constructor() {
 		super();
@@ -9,16 +9,11 @@ class HandleOverdue extends HTMLElement {
 	}
 
 	connectedCallback() {
-		const badgeCount = this.overdueActivities.length + 100;
 		this.innerHTML = `
-            <button type="button" 
-            class="btn btn-warning position-relative d-flex align-items-center me-4" 
-            data-bs-toggle="modal" 
-            data-bs-target="#handleOverdueModal"
-            title="${badgeCount} overdue activities need attention">
+            <button type="button" class="btn btn-warning position-relative d-flex align-items-center me-4" 
+            data-bs-toggle="modal" data-bs-target="#handleOverdueModal" overdue activities need attention">
             <i class="bi bi-exclamation-triangle-fill"></i>
-            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                ${badgeCount}
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="overdueCount">
                 <span class="visually-hidden">overdue items</span>
             </span>
             </button>
@@ -42,32 +37,87 @@ class HandleOverdue extends HTMLElement {
                 </div>
             </div>
         `;
-		this.render();
 	}
 
-	loadProjectData(overdueActivities: ProjectActivityResponse[]) {
+	loadProjectData(overdueActivities: overdueToHandle[]) {
 		if (!overdueActivities) return;
 		this.overdueActivities = overdueActivities;
+		const overdueCount = document.getElementById("overdueCount");
+		if (overdueCount)
+			overdueCount.textContent = overdueActivities.length.toString();
 		this.render();
 	}
 
-	renderTraslaBtn(): HTMLElement {
-		const translateBtn = document.createElement("button");
-		translateBtn.className = "btn btn-outline-primary btn-sm";
-		translateBtn.style.minWidth = "150px";
-		translateBtn.innerHTML = '<i class="bi bi-arrow-right"></i> Trasla';
-		return translateBtn;
+	renderBtn(color: string, icon: string, text: string): HTMLElement {
+		const btn = document.createElement("button");
+		btn.className = `btn btn-${color} btn-sm`;
+		btn.style.minWidth = "150px";
+		btn.innerHTML = `<i class="bi bi-${icon}"></i> ${text}`;
+		return btn;
 	}
 
-	renderContraiBtn(): HTMLElement {
-		const contractBtn = document.createElement("button");
-		contractBtn.className = "btn btn-outline-success btn-sm";
-		contractBtn.style.minWidth = "150px";
-		contractBtn.innerHTML = '<i class="bi bi-arrows-collapse"></i> Contrai';
-		return contractBtn;
+	// Creiamo i bottoni base per ogni attività
+	renderBaseButtons(id: string): HTMLElement {
+		const buttonGroup = document.createElement("div");
+		buttonGroup.id = "buttonGroup";
+		buttonGroup.className = "btn-group ms-3";
+
+		const translateBtn = this.renderBtn(
+			"outline-primary",
+			"arrow-right",
+			"Trasla"
+		);
+		translateBtn.addEventListener("click", () => {
+			this.renderConfirmButtons(id, true, buttonGroup);
+		});
+		const contractBtn = this.renderBtn(
+			"outline-success",
+			"arrows-collapse",
+			"Contrai"
+		);
+		contractBtn.addEventListener("click", () => {
+			this.renderConfirmButtons(id, false, buttonGroup);
+		});
+
+		buttonGroup.appendChild(translateBtn);
+		buttonGroup.appendChild(contractBtn);
+		return buttonGroup;
 	}
 
-	createSingleElement(activity: ProjectActivityResponse): HTMLElement {
+	// Sostituiamo i bottoni base con i bottoni di conferma
+	renderConfirmButtons(
+		id: string,
+		toShift: boolean,
+		buttonGroup: HTMLElement
+	): HTMLElement {
+		buttonGroup.innerHTML = "";
+
+		const cancelBtn = this.renderBtn("secondary", "x", "Annulla");
+		cancelBtn.addEventListener("click", () => {
+			const newButtonGroup = this.renderBaseButtons(id);
+			buttonGroup.replaceWith(newButtonGroup);
+		});
+
+		const confirmBtn = this.renderBtn("primary", "check", "Conferma");
+		confirmBtn.addEventListener("click", async () => {
+			try {
+				await fetcher("PATCH", "/api/project/activity/handleOverdue", {
+					_id: id,
+					shifting: toShift ? "TOSHIFT" : "FIXED"
+				});
+				window.location.reload();
+			} catch (error) {
+				alert("Errore durante la richiesta");
+			}
+		});
+
+		buttonGroup.appendChild(cancelBtn);
+		buttonGroup.appendChild(confirmBtn);
+		return buttonGroup;
+	}
+
+	// Creiamo un elemento per ogni attività in ritardo
+	createSingleElement(activity: overdueToHandle): HTMLElement {
 		const element = document.createElement("div");
 		element.className =
 			"d-flex justify-content-between align-items-center p-2 rounded border mt-2";
@@ -76,103 +126,17 @@ class HandleOverdue extends HTMLElement {
 		summary.className = "flex-grow-1";
 		summary.textContent = activity.summary;
 
-		const buttonGroup = document.createElement("div");
-		buttonGroup.className = "btn-group ms-3";
+		const buttonGroup = this.renderBaseButtons(activity._id);
 
-		const translateBtn = this.renderTraslaBtn();
-		const contractBtn = this.renderContraiBtn();
-
-		const resetButtons = () => {
-			translateBtn.innerHTML = '<i class="bi bi-arrow-right"></i> Trasla';
-			translateBtn.className = "btn btn-outline-primary btn-sm";
-			contractBtn.innerHTML =
-				'<i class="bi bi-arrows-collapse"></i> Contrai';
-			contractBtn.className = "btn btn-outline-success btn-sm";
-		};
-
-		const setConfirmState = () => {
-			translateBtn.innerHTML = '<i class="bi bi-x"></i> Annulla';
-			translateBtn.className = "btn btn-secondary btn-sm";
-			contractBtn.innerHTML = '<i class="bi bi-check"></i> Conferma';
-			contractBtn.className = "btn btn-primary btn-sm";
-		};
-
-		const createCancelHandler = (
-			oldTranslateClick: any,
-			oldContractClick: any
-		) => {
-			return () => {
-				resetButtons();
-				translateBtn.onclick = oldTranslateClick;
-				contractBtn.onclick = oldContractClick;
-			};
-		};
-
-		const translateToConfirm = () => {
-			const oldTranslateClick = translateBtn.onclick;
-			const oldContractClick = contractBtn.onclick;
-
-			setConfirmState();
-			translateBtn.onclick = createCancelHandler(
-				oldTranslateClick,
-				oldContractClick
-			);
-			contractBtn.onclick = () =>
-				alert(`Selezionato ${activity.summary} per traslare`);
-		};
-
-		const contractToConfirm = () => {
-			const oldTranslateClick = translateBtn.onclick;
-			const oldContractClick = contractBtn.onclick;
-
-			setConfirmState();
-			translateBtn.onclick = createCancelHandler(
-				oldTranslateClick,
-				oldContractClick
-			);
-			contractBtn.onclick = () =>
-				alert(`Selezionato ${activity.summary} per contrarre`);
-		};
-
-		translateBtn.onclick = translateToConfirm;
-		contractBtn.onclick = contractToConfirm;
-
-		buttonGroup.appendChild(translateBtn);
-		buttonGroup.appendChild(contractBtn);
 		element.appendChild(summary);
 		element.appendChild(buttonGroup);
 
 		return element;
 	}
 
-	createRandomActivities(count: number): ProjectActivityResponse[] {
-		const activities: ProjectActivityResponse[] = [];
-		for (let i = 0; i < count; i++) {
-			activities.push({
-				_id: i.toString(),
-				summary: `Activity ${i}`,
-				description: `Description for activity ${i}`,
-				status: "overdue",
-				dtStart: new Date().toISOString(),
-				due: new Date().toISOString(),
-				isMilestone: false,
-				owner: { id: "1", name: "Default User" },
-				users: [],
-				prevLinks: [],
-				prevMaxDue: new Date().toISOString(),
-				nextLinks: [],
-				nextMinStart: new Date().toISOString(),
-				alarms: []
-			});
-		}
-		return activities;
-	}
-
 	render() {
 		const modalBody = this.querySelector(".modal-body");
 		if (!modalBody) return;
-		modalBody.innerHTML = "";
-		this.overdueActivities = this.createRandomActivities(3);
 		for (const activity of this.overdueActivities) {
 			modalBody.appendChild(this.createSingleElement(activity));
 		}
