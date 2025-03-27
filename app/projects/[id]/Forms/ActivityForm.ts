@@ -621,7 +621,6 @@ class ActivityModifyForm extends HTMLElement {
 			due: new Date(
 				(formData.get("due") as string) + "T23:59:59.999Z"
 			).toISOString(),
-			isMilestone: formData.get("isMilestone") === "on",
 			usernameList: this.modifiedUserlist.map((user) => user.name)
 		};
 
@@ -688,19 +687,8 @@ class ActivityModifyForm extends HTMLElement {
 					<div class="row g-3 align-items-end">
 						<div class="col">
 						<label for="summary" class="form-label fw-semibold">Titolo</label>
-						<div class="input-group">
 							<input type="text" class="form-control" id="summary" name="summary" 
 								placeholder="Inserisci titolo attività" required value="${this.activity.summary}">
-							<div class="input-group-text px-2 bg-white">
-							<div class="form-check form-check-inline mb-0">
-								<label class="form-check-label ms-1" for="isMilestone">
-									Milestone <i class="bi bi-flag-fill text-primary"></i>
-								</label>
-								<input type="checkbox" class="form-check-input" id="isMilestone" 
-									name="isMilestone" ${this.activity.isMilestone ? "checked" : ""}>
-							</div>
-							</div>
-						</div>
 						</div>
 					</div>
 				</div>

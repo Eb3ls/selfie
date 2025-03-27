@@ -29,7 +29,6 @@ const requestTemplate = {
 	description: "",
 	dtStart: "",
 	due: "",
-	isMilestone: false,
 	usernameList: []
 };
 
@@ -227,7 +226,6 @@ export const PATCH = async (request: NextRequest) => {
 				description: newBody.description,
 				dtStart: newBody.dtStart,
 				due: newBody.due,
-				isMilestone: newBody.isMilestone,
 				userIdList: userIdList
 			}
 		} as any,

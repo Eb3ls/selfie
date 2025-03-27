@@ -173,6 +173,8 @@ export const POST = async (request: NextRequest) => {
 
 	const note: StringNote = await noteOut.json();
 
+	const shiftingMode = newBody.isMilestone ? "FIXED" : "NONE";
+
 	// Creiamo l'attività
 	const newActivity: StringProjectActivity =
 		generateStringModel<StringProjectActivity>(
@@ -184,6 +186,7 @@ export const POST = async (request: NextRequest) => {
 				ownerId: userId,
 				phaseId: newBody.phaseId,
 				isMilestone: newBody.isMilestone,
+				shifting: shiftingMode,
 				projectId: project[0]._id,
 				userIdList: userIdList,
 				noteId: note._id
