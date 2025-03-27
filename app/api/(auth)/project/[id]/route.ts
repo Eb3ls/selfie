@@ -26,6 +26,12 @@ interface ProjectResponse {
 	users: { id: string; name: string }[];
 	noteId: string;
 	phases: PhaseResponse[];
+	overduesToHandle: overdueToHandle[];
+}
+
+interface overdueToHandle {
+	_id: string;
+	summary: string;
 }
 
 interface PhaseResponse {
@@ -145,7 +151,8 @@ export const GET = async (
 			name: userConversion.userNameList![index]
 		})),
 		noteId: project.noteId.toString(),
-		phases: []
+		phases: [],
+		overduesToHandle: []
 	};
 
 	// Otteniamo le fasi del progetto
@@ -298,6 +305,19 @@ export const GET = async (
 								noteId: activity.noteId?.toString()
 							};
 
+							if (
+								activity.status === "OVERDUE" &&
+								activity.shifting === "NONE"
+							) {
+								const overdueToHandle: overdueToHandle = {
+									_id: activity._id!.toString(),
+									summary: activity.summary
+								};
+								projectResponse.overduesToHandle.push(
+									overdueToHandle
+								);
+							}
+
 							allActivitiesMap.set(
 								activityResponse._id,
 								activityResponse
@@ -376,6 +396,17 @@ export const GET = async (
 						alarms: activity.alarms,
 						noteId: activity.noteId?.toString()
 					};
+
+					if (
+						activity.status === "OVERDUE" &&
+						activity.shifting === "NONE"
+					) {
+						const overdueToHandle: overdueToHandle = {
+							_id: activity._id!.toString(),
+							summary: activity.summary
+						};
+						projectResponse.overduesToHandle.push(overdueToHandle);
+					}
 
 					allActivitiesMap.set(
 						activityResponse._id,
@@ -468,6 +499,8 @@ export const GET = async (
 			});
 		});
 	}
+
+	console.log(projectResponse);
 
 	return generateObjectResponse(projectResponse, 200);
 };
