@@ -32,6 +32,7 @@ interface ProjectResponse {
 interface overdueToHandle {
 	_id: string;
 	summary: string;
+	shifting: string;
 }
 
 interface PhaseResponse {
@@ -311,7 +312,8 @@ export const GET = async (
 							) {
 								const overdueToHandle: overdueToHandle = {
 									_id: activity._id!.toString(),
-									summary: activity.summary
+									summary: activity.summary,
+									shifting: activity.shifting
 								};
 								projectResponse.overduesToHandle.push(
 									overdueToHandle
@@ -403,7 +405,8 @@ export const GET = async (
 					) {
 						const overdueToHandle: overdueToHandle = {
 							_id: activity._id!.toString(),
-							summary: activity.summary
+							summary: activity.summary,
+							shifting: activity.shifting
 						};
 						projectResponse.overduesToHandle.push(overdueToHandle);
 					}
