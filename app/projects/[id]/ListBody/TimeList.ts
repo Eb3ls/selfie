@@ -92,11 +92,13 @@ class TimeList extends HTMLElement {
 		const hasPermission = act.users.some(
 			(user: User) => user.id === this.currentUser?.id
 		);
+		const toHandle = act.status === "OVERDUE" && act.shifting === "NONE";
 		const statusBlock = createStatusIcon(
 			act.status as any,
 			act._id,
 			hasPermission,
-			this.isOwner
+			this.isOwner,
+			toHandle
 		);
 
 		const statusText = document.createElement("div");

@@ -70,6 +70,7 @@ export interface ProjectActivityResponse {
 	dtStart: string;
 	due: string;
 	isMilestone: boolean;
+	shifting: string;
 	owner: User;
 	users: User[];
 	prevLinks: Link[];
@@ -225,13 +226,21 @@ export function createStatusEntry(
 // Funzione per creare la lista di stati coerenti con l'attuale
 export function createStatusList(
 	currentStatus: keyof typeof statusConfig,
-	activityId: string
+	activityId: string,
+	toHandle: boolean
 ): HTMLElement[] {
 	let statusList: (keyof typeof statusConfig)[] = [];
 	if (currentStatus === "WAITING") {
 		const div = document.createElement("div");
 		div.className = "dropdown-item-text";
 		div.textContent = "Attendi il completamento delle attività precedenti";
+		return [div];
+	}
+	if (currentStatus === "OVERDUE" && toHandle) {
+		const div = document.createElement("div");
+		div.className = "dropdown-item-text";
+		div.textContent =
+			"Attendi la decisione su come gestire il ritardo del capo progetto";
 		return [div];
 	}
 
@@ -259,7 +268,8 @@ export function createStatusIcon(
 	status: keyof typeof statusConfig,
 	activityId: string,
 	hasPermission: boolean,
-	isOwner: boolean
+	isOwner: boolean,
+	toHandle: boolean
 ): HTMLElement {
 	const wrapper = document.createElement("div");
 	wrapper.className = "dropdown d-inline-block";
@@ -294,7 +304,7 @@ export function createStatusIcon(
 		menu.className = "dropdown-menu p-0 shadow";
 
 		// Creiamo gli elementi coerenti con lo stato attuale
-		const statusEntries = createStatusList(status, activityId);
+		const statusEntries = createStatusList(status, activityId, toHandle);
 		for (const entry of statusEntries) {
 			menu.appendChild(entry);
 		}

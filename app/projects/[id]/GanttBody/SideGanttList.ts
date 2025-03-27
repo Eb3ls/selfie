@@ -78,11 +78,14 @@ class SideGanttList extends HTMLElement {
 		const isCurrentUserInvolved = activity.users.some(
 			(user: User) => user.id === this.currentUser?.id
 		);
+		const toHandle =
+			activity.status === "OVERDUE" && activity.shifting === "NONE";
 		const statusIcon = createStatusIcon(
 			activity.status as any,
 			activity._id,
 			isCurrentUserInvolved,
-			this.isOwner
+			this.isOwner,
+			toHandle
 		);
 
 		statusIcon.style.width = "20px";
