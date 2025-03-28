@@ -18,16 +18,12 @@ export interface ProjectActivity {
 		| "SUBMITTED"
 		| "COMPLETED"
 		| "REACTIVATED"
-		| "OVERDUE"
 		| "DROPPED";
 	dtStart: Date;					// Data di inizio dell'attività - coincide con dtStamp, le attività hanno solo scadenza
 	due: Date;						// Data di scadenza dell'attività
 	dtStamp: Date;					// Data di creazione dell'attività
 	isMilestone: boolean;			// Se è una milestone
-	shifting: 
-		| "TOSHIFT"
-		| "FIXED"
-		| "NONE";
+	isOverdue: boolean;				// Se è in ritardo
 	ownerId: ObjectId;				// Proprietario dell'progetto
 	prevIdList: ObjectId[];
 	nextIdList: ObjectId[];
@@ -48,7 +44,7 @@ export function createProjectActivity({
 	due = timeMachine.timeMachineTime,
 	dtStamp = timeMachine.timeMachineTime,
 	isMilestone = false,
-	shifting = "NONE",
+	isOverdue = false,
 	ownerId = new ObjectId(),
 	prevIdList = [],
 	nextIdList = [],
@@ -66,7 +62,7 @@ export function createProjectActivity({
 		due: due,
 		dtStamp: dtStamp,
 		isMilestone: isMilestone,
-		shifting: shifting,
+		isOverdue: isOverdue,
 		ownerId: ownerId,
 		prevIdList: prevIdList,
 		nextIdList: nextIdList,

@@ -20,6 +20,7 @@ import {
 	getCollection,
 	updateCollectionWrapper
 } from "@/utils/db/db";
+import { timeMachine } from "@/utils/timeMachine/timeMachine";
 import { Collection } from "mongodb";
 import { NextRequest } from "next/server";
 
@@ -217,6 +218,8 @@ export const PATCH = async (request: NextRequest) => {
 		}
 	}
 
+	const currentDate = timeMachine.timeMachineTime;
+
 	// Aggiorniamo l'attività
 	const updateOut = await updateCollectionWrapper<ProjectActivity>(
 		{ _id: activityId },
@@ -226,6 +229,7 @@ export const PATCH = async (request: NextRequest) => {
 				description: newBody.description,
 				dtStart: newBody.dtStart,
 				due: newBody.due,
+				isOverdue: new Date(newBody.due) <= currentDate,
 				userIdList: userIdList
 			}
 		} as any,

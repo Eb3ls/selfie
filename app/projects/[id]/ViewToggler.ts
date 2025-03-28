@@ -1,6 +1,10 @@
+import {
+	PhaseResponse,
+	ProjectResponse,
+	SubPhaseResponse
+} from "@/app/api/(auth)/project/[id]/route";
 import ActivityForm from "./Forms/ActivityForm";
 import AddForm from "./Forms/AddForm";
-import HandleOverdue from "./Forms/HandleOverdue";
 import PhaseForm from "./Forms/PhaseForm";
 import ProjectSettings from "./Forms/ProjectSettings";
 import ProjectPhaseRow from "./GanttBody/ProjectPhaseRow";
@@ -9,13 +13,10 @@ import TimeLine from "./GanttBody/TimeLine";
 import TimeList from "./ListBody/TimeList";
 import UsersList from "./ListBody/UserList";
 import {
-	PhaseResponse,
 	PhaseToggleMap,
-	ProjectResponse,
 	ROW_HEIGHT,
 	ROW_HEIGHT_PX,
 	SortedActivity,
-	SubPhaseResponse,
 	User,
 	escapeHTML
 } from "./Utils";
@@ -95,12 +96,6 @@ class ViewToggler extends HTMLElement {
 	private insertUpperHeader(): void {
 		let block = "";
 		if (this.isOwner) {
-			// Se ci sono attività in ritardo da gestire
-			if (this.projectData!.overduesToHandle.length !== 0) {
-				block += `
-					<handle-overdue></handle-overdue>
-				`;
-			}
 			// Se siamo l'owner aggiungiamo il form per aggiungere gli elementi
 			block += `
 				<add-form-component></add-form-component>
@@ -131,15 +126,6 @@ class ViewToggler extends HTMLElement {
 		if (!this.projectData) return;
 
 		if (this.isOwner) {
-			if (this.projectData.overduesToHandle.length !== 0) {
-				const handleOverdue = document.querySelector(
-					"handle-overdue"
-				) as HandleOverdue;
-				handleOverdue.loadProjectData(
-					this.projectData.overduesToHandle
-				);
-			}
-
 			const addForm = this.querySelector("add-form-component") as AddForm;
 			addForm.loadProjectData(
 				this.projectData._id,

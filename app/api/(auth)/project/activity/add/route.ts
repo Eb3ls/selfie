@@ -21,6 +21,7 @@ import {
 	findCollectionWrapper,
 	getCollection
 } from "@/utils/db/db";
+import { timeMachine } from "@/utils/timeMachine/timeMachine";
 import { Collection } from "mongodb";
 import { NextRequest } from "next/server";
 
@@ -173,7 +174,7 @@ export const POST = async (request: NextRequest) => {
 
 	const note: StringNote = await noteOut.json();
 
-	const shiftingMode = newBody.isMilestone ? "FIXED" : "NONE";
+	const currentDate = timeMachine.timeMachineTime;
 
 	// Creiamo l'attività
 	const newActivity: StringProjectActivity =
@@ -186,7 +187,7 @@ export const POST = async (request: NextRequest) => {
 				ownerId: userId,
 				phaseId: newBody.phaseId,
 				isMilestone: newBody.isMilestone,
-				shifting: shiftingMode,
+				isOverdue: new Date(newBody.due) <= currentDate,
 				projectId: project[0]._id,
 				userIdList: userIdList,
 				noteId: note._id

@@ -1,11 +1,13 @@
+import {
+	PhaseResponse,
+	ProjectActivityResponse,
+	SubPhaseResponse
+} from "@/app/api/(auth)/project/[id]/route";
 import ModifyActivity from "../Forms/ActivityForm";
 import ModifyPhase from "../Forms/PhaseForm";
 import {
-	PhaseResponse,
 	PhaseToggleMap,
-	ProjectActivityResponse,
 	ROW_HEIGHT_PX,
-	SubPhaseResponse,
 	User,
 	createStatusIcon,
 	formatDate,
@@ -78,14 +80,11 @@ class SideGanttList extends HTMLElement {
 		const isCurrentUserInvolved = activity.users.some(
 			(user: User) => user.id === this.currentUser?.id
 		);
-		const toHandle =
-			activity.status === "OVERDUE" && activity.shifting === "NONE";
 		const statusIcon = createStatusIcon(
 			activity.status as any,
 			activity._id,
 			isCurrentUserInvolved,
-			this.isOwner,
-			toHandle
+			this.isOwner
 		);
 
 		statusIcon.style.width = "20px";
@@ -115,6 +114,10 @@ class SideGanttList extends HTMLElement {
 			-
 			${new Date(formatDate(activity.due)).getDate()} ${new Date(formatDate(activity.due)).toLocaleString("default", { month: "short" })}
 		`;
+
+		if (activity.isOverdue) {
+			secondCol.classList.add("text-danger");
+		}
 
 		columnsContainer.appendChild(firstCol);
 		columnsContainer.appendChild(secondCol);

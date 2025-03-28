@@ -19,22 +19,16 @@ import {
 import { Collection } from "mongodb";
 import { NextRequest } from "next/server";
 
-interface ProjectResponse {
+export interface ProjectResponse {
 	_id: string;
 	summary: string;
 	owner: { id: string; name: string };
 	users: { id: string; name: string }[];
 	noteId: string;
 	phases: PhaseResponse[];
-	overduesToHandle: overdueToHandle[];
 }
 
-interface overdueToHandle {
-	_id: string;
-	summary: string;
-}
-
-interface PhaseResponse {
+export interface PhaseResponse {
 	_id: string;
 	summary: string;
 	owner: { id: string; name: string };
@@ -44,7 +38,7 @@ interface PhaseResponse {
 	activities: ProjectActivityResponse[];
 }
 
-interface SubPhaseResponse {
+export interface SubPhaseResponse {
 	_id: string;
 	summary: string;
 	owner: { id: string; name: string };
@@ -53,14 +47,14 @@ interface SubPhaseResponse {
 	activities: ProjectActivityResponse[];
 }
 
-interface Link {
+export interface Link {
 	_id: string;
 	summary: string;
 	date: string;
 	noteId: string;
 }
 
-interface ProjectActivityResponse {
+export interface ProjectActivityResponse {
 	_id: string;
 	summary: string;
 	description: string;
@@ -75,7 +69,7 @@ interface ProjectActivityResponse {
 	nextLinks: Link[];
 	nextMinStart: string;
 	alarms: Alarm[];
-	shifting: string;
+	isOverdue: boolean;
 	noteId?: string;
 }
 
@@ -152,8 +146,7 @@ export const GET = async (
 			name: userConversion.userNameList![index]
 		})),
 		noteId: project.noteId.toString(),
-		phases: [],
-		overduesToHandle: []
+		phases: []
 	};
 
 	// Otteniamo le fasi del progetto
@@ -274,6 +267,7 @@ export const GET = async (
 									activity.dtStart
 								).toISOString(),
 								due: new Date(activity.due).toISOString(),
+								isOverdue: activity.isOverdue,
 								isMilestone: activity.isMilestone,
 								owner: {
 									id: activity.ownerId.toString(),
@@ -303,22 +297,8 @@ export const GET = async (
 									})) || [],
 								nextMinStart: "",
 								alarms: activity.alarms,
-								shifting: activity.shifting,
 								noteId: activity.noteId?.toString()
 							};
-
-							if (
-								activity.status === "OVERDUE" &&
-								activity.shifting === "NONE"
-							) {
-								const overdueToHandle: overdueToHandle = {
-									_id: activity._id!.toString(),
-									summary: activity.summary
-								};
-								projectResponse.overduesToHandle.push(
-									overdueToHandle
-								);
-							}
 
 							allActivitiesMap.set(
 								activityResponse._id,
@@ -370,6 +350,7 @@ export const GET = async (
 						status: activity.status,
 						dtStart: new Date(activity.dtStart).toISOString(),
 						due: new Date(activity.due).toISOString(),
+						isOverdue: activity.isOverdue,
 						isMilestone: activity.isMilestone,
 						owner: {
 							id: activity.ownerId.toString(),
@@ -396,20 +377,8 @@ export const GET = async (
 							})) || [],
 						nextMinStart: "",
 						alarms: activity.alarms,
-						shifting: activity.shifting,
 						noteId: activity.noteId?.toString()
 					};
-
-					if (
-						activity.status === "OVERDUE" &&
-						activity.shifting === "NONE"
-					) {
-						const overdueToHandle: overdueToHandle = {
-							_id: activity._id!.toString(),
-							summary: activity.summary
-						};
-						projectResponse.overduesToHandle.push(overdueToHandle);
-					}
 
 					allActivitiesMap.set(
 						activityResponse._id,

@@ -1,11 +1,13 @@
 import {
+	PhaseResponse,
+	ProjectActivityResponse,
+	SubPhaseResponse
+} from "@/app/api/(auth)/project/[id]/route";
+import {
 	CELL_WIDTH,
 	CELL_WIDTH_PX,
-	PhaseResponse,
 	PhaseToggleMap,
-	ProjectActivityResponse,
 	ROW_HEIGHT_PX,
-	SubPhaseResponse,
 	calculateCells,
 	formatDate,
 	getToggleState,
@@ -201,11 +203,17 @@ class ProjectPhaseRow extends HTMLElement {
 		if (data.activities.length > 0) {
 			hasDataInside = true;
 			for (const activity of data.activities) {
-				const row = this.createRow(
-					activity,
-					statusConfig[activity.status as keyof typeof statusConfig]
-						.color
-				);
+				let color = "";
+				if (activity.isOverdue) {
+					color = "red";
+				} else {
+					color =
+						statusConfig[
+							activity.status as keyof typeof statusConfig
+						].color;
+				}
+
+				const row = this.createRow(activity, color);
 				collapse.appendChild(row);
 			}
 		}

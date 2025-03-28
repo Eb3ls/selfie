@@ -1,6 +1,8 @@
 import {
 	PhaseResponse,
-	ProjectActivityResponse,
+	ProjectActivityResponse
+} from "@/app/api/(auth)/project/[id]/route";
+import {
 	User,
 	clearError,
 	createLinkEntry,
@@ -474,7 +476,7 @@ class ActivityLinkForm extends HTMLElement {
             <form id="modifyLinkForm">
 				<div class="modal-body">
 					<div class="mb-4">
-						<h4 class="mb-3">${escapeHTML(this.activity.summary)}</h4>
+						<h4 class="mb-3 text-break">${escapeHTML(this.activity.summary)}</h4>
 						<label class="form-label fw-semibold">Associa</label>
 						<div class="add-link-form">
 							<div class="input-group mb-3">

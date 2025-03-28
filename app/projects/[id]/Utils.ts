@@ -1,4 +1,7 @@
-import { Alarm } from "@/utils/db/models/Alarm";
+import {
+	PhaseResponse,
+	ProjectActivityResponse
+} from "@/app/api/(auth)/project/[id]/route";
 
 export const ROW_HEIGHT_PX = "70px";
 export const CELL_WIDTH_PX = "200px";
@@ -11,7 +14,6 @@ export const active_color = "#007bff";
 export const submitted_color = "#28a745";
 export const completed_color = "#17a2b8";
 export const reactivated_color = "#6610f2";
-export const overdue_color = "#dc3545";
 export const dropped_color = "#343a40";
 
 export const timeFormat = "en-US";
@@ -21,64 +23,6 @@ export const timeFormat = "en-US";
 export interface User {
 	id: string;
 	name: string;
-}
-export interface overdueToHandle {
-	_id: string;
-	summary: string;
-}
-export interface ProjectResponse {
-	_id: string;
-	summary: string;
-	owner: { id: string; name: string };
-	users: { id: string; name: string }[];
-	noteId: string;
-	phases: PhaseResponse[];
-	overduesToHandle: overdueToHandle[];
-}
-
-export interface PhaseResponse {
-	_id: string;
-	summary: string;
-	owner: { id: string; name: string };
-	dtStart: string;
-	due: string;
-	subPhases: SubPhaseResponse[];
-	activities: ProjectActivityResponse[];
-}
-
-export interface SubPhaseResponse {
-	_id: string;
-	summary: string;
-	owner: User;
-	dtStart: string;
-	due: string;
-	activities: ProjectActivityResponse[];
-}
-
-export interface Link {
-	_id: string;
-	summary: string;
-	date: string;
-	noteId: string;
-}
-
-export interface ProjectActivityResponse {
-	_id: string;
-	summary: string;
-	description: string;
-	status: string;
-	dtStart: string;
-	due: string;
-	isMilestone: boolean;
-	shifting: string;
-	owner: User;
-	users: User[];
-	prevLinks: Link[];
-	prevMaxDue: string;
-	nextLinks: Link[];
-	nextMinStart: string;
-	alarms: Alarm[];
-	noteId?: string;
 }
 // Interfaccia per le attivitá ordinate, aggiungiamo il riferimento alla fase genitore
 export interface SortedActivity extends ProjectActivityResponse {
@@ -177,7 +121,6 @@ export const statusConfig = {
 	SUBMITTED: { color: submitted_color, text: "Consegnato" },
 	COMPLETED: { color: completed_color, text: "Completato" },
 	REACTIVATED: { color: reactivated_color, text: "Riattivato" },
-	OVERDUE: { color: overdue_color, text: "Scaduto" },
 	DROPPED: { color: dropped_color, text: "Abbandonato" }
 };
 
@@ -226,21 +169,13 @@ export function createStatusEntry(
 // Funzione per creare la lista di stati coerenti con l'attuale
 export function createStatusList(
 	currentStatus: keyof typeof statusConfig,
-	activityId: string,
-	toHandle: boolean
+	activityId: string
 ): HTMLElement[] {
 	let statusList: (keyof typeof statusConfig)[] = [];
 	if (currentStatus === "WAITING") {
 		const div = document.createElement("div");
 		div.className = "dropdown-item-text";
 		div.textContent = "Attendi il completamento delle attività precedenti";
-		return [div];
-	}
-	if (currentStatus === "OVERDUE" && toHandle) {
-		const div = document.createElement("div");
-		div.className = "dropdown-item-text";
-		div.textContent =
-			"Attendi la decisione su come gestire il ritardo del capo progetto";
 		return [div];
 	}
 
@@ -251,8 +186,6 @@ export function createStatusList(
 	} else if (currentStatus === "SUBMITTED") {
 		statusList = ["REACTIVATED", "COMPLETED"];
 	} else if (currentStatus === "REACTIVATED") {
-		statusList = ["SUBMITTED", "DROPPED"];
-	} else if (currentStatus === "OVERDUE") {
 		statusList = ["SUBMITTED", "DROPPED"];
 	}
 
@@ -268,8 +201,7 @@ export function createStatusIcon(
 	status: keyof typeof statusConfig,
 	activityId: string,
 	hasPermission: boolean,
-	isOwner: boolean,
-	toHandle: boolean
+	isOwner: boolean
 ): HTMLElement {
 	const wrapper = document.createElement("div");
 	wrapper.className = "dropdown d-inline-block";
@@ -304,7 +236,7 @@ export function createStatusIcon(
 		menu.className = "dropdown-menu p-0 shadow";
 
 		// Creiamo gli elementi coerenti con lo stato attuale
-		const statusEntries = createStatusList(status, activityId, toHandle);
+		const statusEntries = createStatusList(status, activityId);
 		for (const entry of statusEntries) {
 			menu.appendChild(entry);
 		}

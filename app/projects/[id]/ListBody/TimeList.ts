@@ -1,12 +1,6 @@
-import { stat } from "fs";
+import { ProjectActivityResponse } from "@/app/api/(auth)/project/[id]/route";
 import ModifyActivity from "../Forms/ActivityForm";
-import {
-	ProjectActivityResponse,
-	SortedActivity,
-	User,
-	createStatusIcon,
-	formatDate
-} from "../Utils";
+import { SortedActivity, User, createStatusIcon, formatDate } from "../Utils";
 
 class TimeList extends HTMLElement {
 	sortedActivities: SortedActivity[];
@@ -71,14 +65,23 @@ class TimeList extends HTMLElement {
 		const summaryCol = document.createElement("div");
 		summaryCol.className = "col-4 fw-bold text-truncate";
 		summaryCol.textContent = act.summary;
+		if (act.isMilestone) {
+			const flag = document.createElement("i");
+			flag.className = "bi bi-flag-fill ms-2";
+			summaryCol.appendChild(flag);
+		}
 
 		const startCol = document.createElement("div");
-		startCol.className = "col-4 text-muted text-center";
+		startCol.className = "col-4 text-center";
 		startCol.textContent = `${start}`;
 
 		const dueCol = document.createElement("div");
-		dueCol.className = "col-4 text-muted text-center";
+		dueCol.className = "col-4 text-center";
 		dueCol.textContent = `${end}`;
+		if (act.isOverdue) {
+			startCol.classList.add("text-danger");
+			dueCol.classList.add("text-danger");
+		}
 
 		clickableArea.appendChild(summaryCol);
 		clickableArea.appendChild(startCol);
@@ -92,13 +95,11 @@ class TimeList extends HTMLElement {
 		const hasPermission = act.users.some(
 			(user: User) => user.id === this.currentUser?.id
 		);
-		const toHandle = act.status === "OVERDUE" && act.shifting === "NONE";
 		const statusBlock = createStatusIcon(
 			act.status as any,
 			act._id,
 			hasPermission,
-			this.isOwner,
-			toHandle
+			this.isOwner
 		);
 
 		const statusText = document.createElement("div");

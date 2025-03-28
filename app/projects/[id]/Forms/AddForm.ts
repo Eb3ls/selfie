@@ -1,7 +1,8 @@
-import { validate } from "@/utils/api/api";
 import {
 	PhaseResponse,
-	SubPhaseResponse,
+	SubPhaseResponse
+} from "@/app/api/(auth)/project/[id]/route";
+import {
 	User,
 	checkDate,
 	clearError,
@@ -184,7 +185,7 @@ class AddPhaseForm extends HTMLElement {
 				<div class="modal-body">
 					<div class="mb-4">
 						<label for="Title" class="form-label fw-semibold">Titolo</label>
-						<input type="text" required name="Title" class="form-control" id="Title">
+						<input type="text" required name="Title" class="form-control" id="Title" autocomplete="off">
 					</div>
 					<div class="mb-4 row">
 						<div class="col-md-6">
@@ -351,7 +352,7 @@ class AddSubPhaseForm extends HTMLElement {
 					<div id="hiddenBody" style="display: none;">
 						<div class="mb-4">
 							<label for="Title" class="form-label fw-semibold">Titolo</label>
-							<input type="text" required name="Title" class="form-control" id="Title">
+							<input type="text" required name="Title" class="form-control" id="Title" autocomplete="off">
 						</div>
 						<div class="mb-4 row">
 							<div class="col-md-6">
@@ -682,7 +683,7 @@ class AddActivityForm extends HTMLElement {
 								<div class="col">
 								<label for="Title" class="form-label fw-semibold">Titolo</label>
 								<div class="input-group">
-									<input type="text" required name="Title" class="form-control" id="Title">
+									<input type="text" required name="Title" class="form-control" id="Title" autocomplete="off">
 									<div class="input-group-text px-2 bg-white">
 									<div class="form-check form-check-inline mb-0">
 										<label for="MilestoneCheck" class="form-check-label me-1">

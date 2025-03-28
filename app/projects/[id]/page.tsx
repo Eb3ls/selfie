@@ -36,7 +36,6 @@ export default function Projects() {
 				import("./GanttBody/TimeLine"),
 				import("./ListBody/TimeList"),
 				import("./ListBody/UserList"),
-				import("./Forms/HandleOverdue"),
 				import("./ViewToggler")
 			]).then(() => {
 				setShowContent(true);

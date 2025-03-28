@@ -92,8 +92,7 @@ export const PATCH = async (request: NextRequest) => {
 			case "SUBMITTED":
 				if (
 					activityStatus !== "ACTIVE" &&
-					activityStatus !== "REACTIVATED" &&
-					activityStatus !== "OVERDUE"
+					activityStatus !== "REACTIVATED"
 				) {
 					return generateMessageResponse(
 						"Status should be active or reactivated",
