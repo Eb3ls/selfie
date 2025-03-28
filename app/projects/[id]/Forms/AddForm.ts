@@ -41,7 +41,7 @@ class AddForm extends HTMLElement {
 
 	connectedCallback() {
 		this.innerHTML = `
-			<button type="button rounded-pill" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#AddForm">
+			<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#AddForm">
 				Aggiungi
 			</button>
 			

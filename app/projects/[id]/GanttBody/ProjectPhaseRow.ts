@@ -246,6 +246,7 @@ class ProjectPhaseRow extends HTMLElement {
 	}
 
 	public render(currentDate: Date) {
+		this.rowsArray = [];
 		this.cellsNumber = calculateCells(this);
 		this.firstDate.setDate(
 			currentDate.getDate() - Math.floor(this.cellsNumber / 2)

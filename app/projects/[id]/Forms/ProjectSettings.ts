@@ -14,7 +14,9 @@ class ProjectSettings extends HTMLElement {
 	owner: User;
 	users: User[];
 	currentUser: User | null;
-	selectedUsers: User[];
+	// Lista degli utenti da mantenere
+	selectedUser: User[];
+	usersToInvite: string[];
 
 	constructor() {
 		super();
@@ -23,7 +25,8 @@ class ProjectSettings extends HTMLElement {
 		this.owner = { name: "", id: "" };
 		this.users = [];
 		this.currentUser = null;
-		this.selectedUsers = [];
+		this.selectedUser = [];
+		this.usersToInvite = [];
 	}
 
 	connectedCallback() {
@@ -57,7 +60,7 @@ class ProjectSettings extends HTMLElement {
 		this.updateModalContent("VIEW");
 	}
 
-	private updateModalContent(type: "VIEW" | "EDIT" | "DELETE") {
+	private updateModalContent(type: "VIEW" | "EDIT" | "DELETE" | "INVITE") {
 		const modalContent = this.querySelector(".modal-content");
 		if (!modalContent) return;
 
@@ -65,12 +68,15 @@ class ProjectSettings extends HTMLElement {
 			modalContent.innerHTML = this.createViewTemplate();
 			this.setupViewEventListeners();
 		} else if (type === "EDIT") {
-			this.selectedUsers = [...this.users];
+			this.selectedUser = this.users;
 			modalContent.innerHTML = this.createModifyTemplate();
 			this.setupModifyEventListeners();
 		} else if (type === "DELETE") {
 			modalContent.innerHTML = this.createDeleteTemplate();
 			this.setupDeleteEventListeners();
+		} else if (type === "INVITE") {
+			modalContent.innerHTML = this.createInviteTemplate();
+			this.setupInviteEventListeners();
 		}
 	}
 
@@ -83,6 +89,11 @@ class ProjectSettings extends HTMLElement {
 		const deleteBtn = this.querySelector("#deleteBtn");
 		deleteBtn?.addEventListener("click", () =>
 			this.updateModalContent("DELETE")
+		);
+
+		const inviteBtn = this.querySelector("#inviteBtn");
+		inviteBtn?.addEventListener("click", () =>
+			this.updateModalContent("INVITE")
 		);
 
 		const userListView = this.querySelector("#userListView");
@@ -115,6 +126,10 @@ class ProjectSettings extends HTMLElement {
 								<button type="button" class="btn btn-sm btn-primary me-2" id="editBtn">
 									<i class="bi bi-pencil"></i>
 									Modifica
+								</button>
+								<button type="button" class="btn btn-sm btn-success me-2" id="inviteBtn">
+									<i class="bi bi-person-plus"></i>
+									Invita utenti
 								</button>
 							`
 							: ""
@@ -164,7 +179,7 @@ class ProjectSettings extends HTMLElement {
 		const body: any = {
 			_id: this.projectId,
 			summary: projectTitle,
-			usernameList: this.selectedUsers.map((user) => user.name)
+			usernameList: this.selectedUser.map((user) => user.name)
 		};
 
 		try {
@@ -175,80 +190,7 @@ class ProjectSettings extends HTMLElement {
 		}
 	}
 
-	// Aggiunge un utente alla lista di quelli selezionati
-	private addUser(username: string) {
-		const userList = this.querySelector("#userList");
-		if (!userList) return;
-
-		const deleteCallback = (e: any) => {
-			const clickedElement = e.target as HTMLElement;
-			const itemElement = clickedElement.closest(".entry-item");
-			itemElement?.remove();
-			this.selectedUsers = this.selectedUsers.filter(
-				(u) => u.name !== username
-			);
-			if (this.selectedUsers.length === 0) {
-				userList.innerHTML =
-					'<p class="text-muted">Nessun utente invitato</p>';
-			}
-		};
-
-		const userBlock = createUserEntry(
-			{ name: username, id: "" },
-			true,
-			deleteCallback
-		);
-
-		userList.appendChild(userBlock);
-	}
-
 	private setupModifyEventListeners() {
-		// Aggiungiamo gli utenti già presenti
-		for (const user of this.selectedUsers) {
-			this.addUser(user.name);
-		}
-
-		if (this.selectedUsers.length === 0) {
-			const userList = this.querySelector("#userList");
-			if (userList) {
-				userList.innerHTML =
-					'<p class="text-muted">Nessun utente invitato</p>';
-			}
-		}
-
-		const addUserBtn = this.querySelector("#addUserBtn");
-		const newUserInput = this.querySelector("#newUser") as HTMLInputElement;
-
-		// Aggiungiamo l'evento per l'aggiunta di un nuovo utente alla lista
-		addUserBtn?.addEventListener("click", () => {
-			const username = newUserInput?.value.trim();
-			if (!username) return;
-			clearError(newUserInput);
-
-			if (this.owner.name === username) {
-				showError(
-					newUserInput,
-					`L'utente è già il proprietario del progetto`
-				);
-				return;
-			}
-
-			if (this.selectedUsers.some((u) => u.name === username)) {
-				showError(newUserInput, "Utente già presente");
-				return;
-			}
-
-			if (this.selectedUsers.length === 0) {
-				const userList = this.querySelector("#userList");
-				if (userList) {
-					userList.innerHTML = "";
-				}
-			}
-			this.selectedUsers.push({ name: username, id: "" });
-			this.addUser(username);
-			newUserInput.value = "";
-		});
-
 		const saveBtn = this.querySelector("#saveChanges");
 		saveBtn?.addEventListener("click", (e) => this.handleModifySubmit(e));
 
@@ -256,6 +198,26 @@ class ProjectSettings extends HTMLElement {
 		cancelBtn?.addEventListener("click", () =>
 			this.updateModalContent("VIEW")
 		);
+
+		// Populate current users list in modify view
+		const userList = this.querySelector("#userListModify");
+		if (userList) {
+			userList.innerHTML = "";
+			const ownerBlock = createUserEntry(this.owner, false, null);
+			userList.appendChild(ownerBlock);
+			this.users.forEach((user) => {
+				const deleteCallback = (e: any) => {
+					const clickedElement = e.target as HTMLElement;
+					const itemElement = clickedElement.closest(".entry-item");
+					itemElement?.remove();
+					this.selectedUser = this.selectedUser.filter(
+						(selected) => selected.name !== user.name
+					);
+				};
+				const userBlock = createUserEntry(user, true, deleteCallback);
+				userList.appendChild(userBlock);
+			});
+		}
 	}
 
 	private createModifyTemplate() {
@@ -279,16 +241,10 @@ class ProjectSettings extends HTMLElement {
                         <label class="form-label fw-semibold">Titolo Progetto</label>
                         <input type="text" class="form-control" id="projectTitle" value="${this.projectTitle}" required>
                     </div>
-                    
                     <div class="mb-4">
-						<label class="form-label fw-semibold" for="newUser">Aggiungi un utente</label>
-						<div class="input-group">
-							<input type="text" class="form-control" id="newUser" placeholder="Scrivi il nome utente">
-							<button type="button" class="btn btn-primary rounded-end-2" id="addUserBtn" aria-label="Aggiungi utente">
-								<i class="bi bi-plus-lg"></i>
-							</button>
-						</div>
-                        <div class="user-list mt-3" id="userList"></div>
+                        <label class="form-label text-muted small">Utenti attuali</label>
+                        <div class="user-list" id="userListModify">
+                        </div>
                     </div>
                 </form>
             </div>
@@ -296,6 +252,117 @@ class ProjectSettings extends HTMLElement {
                 <button type="submit" class="btn btn-primary" id="saveChanges">Salva</button>
             </div>
         `;
+	}
+
+	private setupInviteEventListeners() {
+		const addInviteUserBtn = this.querySelector("#addInviteUserBtn");
+		const inviteInput = this.querySelector(
+			"#inviteName"
+		) as HTMLInputElement;
+		const inviteUserList = this.querySelector("#inviteUserList");
+
+		addInviteUserBtn?.addEventListener("click", () => {
+			const username = inviteInput?.value.trim();
+			if (!username) return;
+			clearError(inviteInput);
+			if (this.owner.name === username) {
+				showError(
+					inviteInput,
+					`L'utente è già il proprietario del progetto`
+				);
+				return;
+			}
+
+			if (this.users.some((user) => user.name === username)) {
+				showError(inviteInput, "Utente già presente nel progetto!");
+				return;
+			}
+			if (this.usersToInvite.includes(username)) {
+				showError(inviteInput, "Utente già presente nella lista!");
+				return;
+			}
+
+			if (
+				inviteUserList &&
+				inviteUserList.innerHTML.includes("Nessun utente da invitare!")
+			) {
+				inviteUserList.innerHTML = "";
+			}
+
+			this.usersToInvite.push(username);
+
+			const deleteCallback = (e: any) => {
+				const clickedElement = e.target as HTMLElement;
+				const itemElement = clickedElement.closest(".entry-item");
+				itemElement?.remove();
+
+				this.usersToInvite = this.usersToInvite.filter(
+					(user) => user !== username
+				);
+				if (inviteUserList && inviteUserList.children.length === 0) {
+					inviteUserList.innerHTML =
+						'<p class="text-muted">Nessun utente da invitare!</p>';
+				}
+			};
+			const userEntry = createUserEntry(
+				{ name: username, id: "" },
+				true,
+				deleteCallback
+			);
+			inviteUserList?.appendChild(userEntry);
+			inviteInput.value = "";
+		});
+
+		const saveBtn = this.querySelector("#saveChanges");
+		saveBtn?.addEventListener("click", (e) => {
+			e.preventDefault();
+			alert("Invitando i seguenti utenti: " + this.usersToInvite);
+		});
+
+		const cancelBtn = this.querySelector("#toggleEditBtn");
+		cancelBtn?.addEventListener("click", () =>
+			this.updateModalContent("VIEW")
+		);
+	}
+
+	private createInviteTemplate() {
+		return `
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-person-plus-fill"></i>
+                    <span>Invita Utenti</span>
+                </h5>
+				<div class="ms-auto d-flex align-items-center">
+                    <button type="button" class="btn btn-sm btn-warning me-2" id="toggleEditBtn">
+                        <i class="bi bi-x"></i>
+                        Annulla
+                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <form id="inviteForm">
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold" for="inviteName">Nome utente</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="inviteName" placeholder="Scrivi il nome utente">
+                            <button type="button" class="btn btn-primary rounded-end-3" id="addInviteUserBtn">
+                                <i class="bi bi-plus-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label text-muted small">Utenti da invitare</label>
+                        <div class="user-list" id="inviteUserList">
+                            <p class="text-muted">Nessun utente da invitare!</p>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" id="saveChanges">Salva</button>
+            </div>
+		`;
 	}
 
 	// Blocco per l'eliminazione del progetto
