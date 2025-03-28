@@ -15,7 +15,7 @@ export function Header({
 }: HeaderProps) {
 	return (
 		<div
-			className="text-dark p-3 border-bottom d-flex align-items-center justify-content-end bg-light"
+			className="text-dark p-3 border-bottom d-flex align-items-center justify-content-start bg-light position-relative"
 			style={{ zIndex: 1000 }}
 		>
 			<Button
@@ -28,7 +28,7 @@ export function Header({
 			>
 				<FaArrowLeft fill="black" size={28}></FaArrowLeft>
 			</Button>
-			<h3 className="text-center m-0 mx-3 fw-bold flex-grow-1">
+			<h3 className="text-center fw-bold flex-grow-1 position-absolute top-50 start-50 translate-middle">
 				{chatSummary}
 			</h3>
 		</div>
