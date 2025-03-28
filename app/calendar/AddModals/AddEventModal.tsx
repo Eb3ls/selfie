@@ -1,6 +1,7 @@
 "use client";
 
 import { AlarmSelector } from "@/app/calendar/AlarmSelector";
+import { InvitationComponent } from "@/app/calendar/InvitationComponent";
 import "@/app/calendar/Modal.css";
 import { TimezoneSelector } from "@/app/calendar/TimezoneSelector";
 import { StringAlarm } from "@/utils/db/db";
@@ -62,9 +63,6 @@ export function AddEventModal({ children }: any) {
 		alarms: [] as StringAlarm[]
 	});
 
-	// Aggiunta dello state per il nome utente corrente
-	const [usernameInput, setUsernameInput] = useState("");
-
 	const handleChange = (
 		e: React.ChangeEvent<
 			HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
@@ -75,16 +73,6 @@ export function AddEventModal({ children }: any) {
 			...form,
 			[name]: value
 		});
-	};
-
-	// Nuova funzione per aggiungere username alla lista
-	const handleAddUsername = () => {
-		if (!usernameInput.trim()) return;
-		setForm({
-			...form,
-			usernameList: [...form.usernameList, usernameInput.trim()]
-		});
-		setUsernameInput("");
 	};
 
 	const handleRecurrenceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -202,6 +190,13 @@ export function AddEventModal({ children }: any) {
 		setForm({
 			...form,
 			geo: timezone
+		});
+	};
+
+	const handleUsernameListChange = (newUsernameList: string[]) => {
+		setForm({
+			...form,
+			usernameList: newUsernameList
 		});
 	};
 
@@ -515,38 +510,11 @@ export function AddEventModal({ children }: any) {
 							}}
 						/>
 
-						{/* Nuovo Form.Group per aggiungere inviti */}
-						<Form.Group className="mb-3" controlId="formUsernames">
-							<Form.Label>Inviti</Form.Label>
-							<div className="d-flex">
-								<Form.Control
-									type="text"
-									value={usernameInput}
-									onChange={(e) =>
-										setUsernameInput(e.target.value)
-									}
-									placeholder="Inserisci nome utente"
-									className="input-field"
-								/>
-								<Button
-									variant="success"
-									onClick={handleAddUsername}
-									style={{ marginLeft: "10px" }}
-									type="button"
-								>
-									+
-								</Button>
-							</div>
-							{form.usernameList.length > 0 && (
-								<ul>
-									{form.usernameList.map(
-										(username, index) => (
-											<li key={index}>{username}</li>
-										)
-									)}
-								</ul>
-							)}
-						</Form.Group>
+						<InvitationComponent
+							mainId={"42"}
+							usernameList={form.usernameList}
+							setUsernameList={handleUsernameListChange}
+						/>
 
 						<AlarmSelector
 							alarms={form.alarms}

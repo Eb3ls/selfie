@@ -326,6 +326,11 @@ export const GET = async (request: NextRequest) => {
 
 		try {
 			const summary = groupChat.summary;
+
+			if (groupChat.messages.length === 0) {
+				continue; // Se non ci sono messaggi, salta
+			}
+
 			const lastMessageOwnerId =
 				groupChat.messages[groupChat.messages.length - 1].ownerId;
 			let lastMessageOwner: string = "Tu";
