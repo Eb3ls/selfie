@@ -154,7 +154,7 @@ export const PATCH = async (request: NextRequest) => {
 		);
 	}
 
-	// Controlliamo che la dtStart sia maggiore delle due di tutte le prev
+	// Controlliamo che la dtStart sia maggiore delle due di tutte le prev e che nessuna sia droppata
 	for (const elemId of projectActivity[0].prevIdList) {
 		const prevOut = await findCollectionWrapper<ProjectActivity>(
 			{ _id: elemId },
@@ -170,6 +170,13 @@ export const PATCH = async (request: NextRequest) => {
 		if (newBody.dtStart < prev.due) {
 			return generateMessageResponse(
 				"The new dtStart is not greater than a previus activity due",
+				400
+			);
+		}
+
+		if (prev.status === "DROPPED") {
+			return generateMessageResponse(
+				"The previous activity is dropped",
 				400
 			);
 		}

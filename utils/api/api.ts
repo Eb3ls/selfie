@@ -10,6 +10,8 @@ import {
 	INVITATION_COLLECTION,
 	Invitation,
 	Note,
+	PHASE_COLLECTION,
+	PROJECT_ACTIVITY_COLLECTION,
 	Phase,
 	ProjectActivity,
 	StringInvitation,
@@ -44,6 +46,7 @@ import { JWTPayload } from "jose";
 import { ObjectId } from "mongodb";
 import { Collection } from "mongodb";
 import { NextRequest, NextResponse } from "next/server";
+import { timeMachine } from "../timeMachine/timeMachine";
 
 export { generateObjectResponse, generateMessageResponse, stringsToObjectId };
 
@@ -361,13 +364,13 @@ export function generateStringModel<T>(obj: Object, type: names): T {
 	return fromModelToStringModel(generatedModel);
 }
 
-export async function deleteProjectActivity(
+export async function detachProjectActivity(
 	projectActivity: StringProjectActivity,
-	projectActivityClient: Collection<ProjectActivity>,
-	noteClient: Collection<Note>
-): Promise<Response> {
+	projectActivityClient: Collection<ProjectActivity>
+): Promise<NextResponse> {
 	// Otteniamo l'id dell'attività
 	const activityId = projectActivity._id;
+
 	// Rimuoviamo l'attività dai nextIdList delle attività precedenti
 	const prevIdList = projectActivity.prevIdList;
 	for (const prevId of prevIdList) {
@@ -463,12 +466,47 @@ export async function deleteProjectActivity(
 			{ $pull: { prevIdList: activityId } } as any,
 			projectActivityClient
 		);
+
+		if (updateOut.status !== 200) {
+			return updateOut;
+		}
 	}
+
+	// Rimuoviamo prevIdList e nextIdList dall'attività
+	const updateOut = await updateCollectionWrapper<ProjectActivity>(
+		{ _id: activityId },
+		{
+			$set: {
+				prevIdList: [],
+				nextIdList: []
+			}
+		} as any,
+		projectActivityClient
+	);
+	return updateOut;
+}
+
+export async function deleteProjectActivity(
+	projectActivity: StringProjectActivity,
+	projectActivityClient: Collection<ProjectActivity>,
+	noteClient: Collection<Note>
+): Promise<Response> {
+	// Otteniamo l'id dell'attività
+	const activityId = projectActivity._id;
 
 	const noteOut = await deleteCollectionWrapper<Note>(
 		{ _id: projectActivity.noteId },
 		noteClient
 	);
+
+	const detachedOut = await detachProjectActivity(
+		projectActivity,
+		projectActivityClient
+	);
+
+	if (detachedOut.status !== 200) {
+		return detachedOut;
+	}
 
 	if (noteOut.status !== 200) {
 		return noteOut;
@@ -676,4 +714,283 @@ export async function removeInvitations(
 	}
 
 	return generateMessageResponse("Invitations removed", 200);
+}
+
+async function checkAndUpdatePhase(
+	phaseId: string,
+	newDue: Date,
+	phaseClient: Collection<Phase>
+): Promise<NextResponse> {
+	// Prendiamo la fase padre
+	const parentPhaseOut = await findCollectionWrapper<Phase>(
+		{ _id: phaseId },
+		phaseClient
+	);
+
+	if (parentPhaseOut.status !== 200) {
+		return parentPhaseOut;
+	}
+
+	const phase: StringPhase = (await parentPhaseOut.json())[0];
+
+	// Controlliamo se la fase contiene la sottofase
+	if (new Date(phase.due) < newDue) {
+		// Se la fase padre ha una data di scadenza maggiore della sottophase, aggiorniamo la data di scadenza della fase padre
+		await updateCollectionWrapper<Phase>(
+			{ _id: phase._id },
+			{ $set: { due: newDue.toISOString() } } as any,
+			phaseClient
+		);
+
+		// Controlliamo se la fase padre è una sottofase
+		if (phase.parentId !== phase.projectId) {
+			return checkAndUpdatePhase(phase.parentId, newDue, phaseClient);
+		}
+	}
+
+	return generateMessageResponse("Phase updated", 200);
+}
+
+export async function dropProjectActivity(
+	activity: StringProjectActivity,
+	client: Collection<ProjectActivity>
+): Promise<NextResponse> {
+	const detachedOut = await detachProjectActivity(activity, client);
+
+	if (detachedOut.status !== 200) {
+		return detachedOut;
+	}
+
+	const updateOut = await updateCollectionWrapper<ProjectActivity>(
+		{ _id: activity._id },
+		{ $set: { status: "DROPPED" } } as any,
+		client
+	);
+
+	return updateOut;
+}
+
+async function updateNextActivitiesDates(
+	activity: StringProjectActivity,
+	today: Date,
+	projectActivityClient: Collection<ProjectActivity>,
+	phaseClient: Collection<Phase>
+): Promise<NextResponse> {
+	// La scolleghiamo dalle attività precedenti e successive e la impostiamo a dropped
+	if (activity.isMilestone) {
+		const dropProjectActivityOut = await dropProjectActivity(
+			activity,
+			projectActivityClient
+		);
+
+		if (dropProjectActivityOut.status !== 200) {
+			return dropProjectActivityOut;
+		}
+	} else {
+		// Controlliamo le attività successive
+		for (const nextActivityId of activity.nextIdList) {
+			const nextActivityOut =
+				await findCollectionWrapper<ProjectActivity>(
+					{ _id: nextActivityId },
+					projectActivityClient
+				);
+			if (nextActivityOut.status !== 200) {
+				return nextActivityOut;
+			}
+
+			const nextActivity: StringProjectActivity = (
+				await nextActivityOut.json()
+			)[0];
+			// Se doveva iniziare oggi la spostiamo a domani
+			const tomorrow = new Date(today);
+			tomorrow.setDate(tomorrow.getDate() + 1);
+			if (
+				nextActivity.isMilestone &&
+				new Date(nextActivity.dtStart) <= today
+			) {
+				// Se doveva ANCHE finire oggi la droppiamo
+				if (new Date(nextActivity.due) <= tomorrow) {
+					const dropProjectActivityOut = await dropProjectActivity(
+						nextActivity,
+						projectActivityClient
+					);
+
+					if (dropProjectActivityOut.status !== 200) {
+						return dropProjectActivityOut;
+					}
+				} else {
+					// Altrimenti spostiamo solo l'inizio a domani
+					const updateOut =
+						await updateCollectionWrapper<ProjectActivity>(
+							{ _id: nextActivity._id },
+							{
+								$set: {
+									dtStart: tomorrow.toISOString()
+								}
+							} as any,
+							projectActivityClient
+						);
+					if (updateOut.status !== 200) {
+						return updateOut;
+					}
+					// Aggiorniamo le fasi in cui é contenuta nel caso
+					const checkOut = await checkAndUpdatePhase(
+						nextActivity.phaseId,
+						tomorrow,
+						phaseClient
+					);
+
+					if (checkOut.status !== 200) {
+						return checkOut;
+					}
+				}
+			} else {
+				if (new Date(nextActivity.dtStart) <= today) {
+					// Aumentiamo il due per mantenere il range
+					const newDue = new Date(nextActivity.due);
+					newDue.setDate(newDue.getDate() + 1);
+
+					// Aggiorniamo il dtStart e il due
+					const updateOut =
+						await updateCollectionWrapper<ProjectActivity>(
+							{ _id: nextActivity._id },
+							{
+								$set: {
+									dtStart: tomorrow.toISOString(),
+									due: newDue.toISOString()
+								}
+							} as any,
+							projectActivityClient
+						);
+					if (updateOut.status !== 200) {
+						return updateOut;
+					}
+					// Aggiorniamo le fasi in cui é contenuta nel caso
+					const checkOut = await checkAndUpdatePhase(
+						nextActivity.phaseId,
+						newDue,
+						phaseClient
+					);
+
+					if (checkOut.status !== 200) {
+						return checkOut;
+					}
+
+					// Modifichiamo il due per essere l'inizio del giorno
+					newDue.setHours(2, 0, 0, 0);
+
+					// Spostando il due richiamiamo la funzione per controllare se le attività successive sono tutte completate
+					const nextUpdateOut = await updateNextActivitiesDates(
+						nextActivity,
+						newDue,
+						projectActivityClient,
+						phaseClient
+					);
+
+					if (nextUpdateOut.status !== 200) {
+						return nextUpdateOut;
+					}
+				}
+			}
+		}
+	}
+	return generateMessageResponse("Next activities dates updated", 200);
+}
+
+export async function handleOverdues() {
+	// Otteniamo la collezione delle project activities
+	const projectActivityClient: Collection<ProjectActivity> =
+		await getCollection<ProjectActivity>(PROJECT_ACTIVITY_COLLECTION);
+
+	// Otteniamo la collezione delle fasi
+	const phaseClient: Collection<Phase> =
+		await getCollection<Phase>(PHASE_COLLECTION);
+
+	// Prendiamo tutte le project activities
+	const allActivitiesOut = await findCollectionWrapper<ProjectActivity>(
+		{},
+		projectActivityClient
+	);
+
+	if (allActivitiesOut.status !== 200) {
+		return allActivitiesOut;
+	}
+
+	const allActivities: StringProjectActivity[] =
+		await allActivitiesOut.json();
+
+	const today = timeMachine.timeMachineTime;
+	// Prendiamo il timestamp di oggi a mezzanotte
+	// Creare nuovo valore perché é per riferimento
+	console.log("today ", today.toISOString());
+	today.setHours(2, 0, 0, 0);
+	console.log("today ", today.toISOString());
+	today.setDate(today.getDate() + 1);
+	console.log("tomorrow ", today.toISOString());
+
+	// Filtriamo le attività scadute
+	const overdueActivities = allActivities.filter((activity) => {
+		return (
+			new Date(activity.due) <= today &&
+			activity.status !== "COMPLETED" &&
+			activity.status !== "DROPPED"
+		);
+	});
+
+	for (const activity of overdueActivities) {
+		// Se non é una milestone dobbiamo aggiornare solo il due, dentro ad updateNextActivitiesDates
+		// modificheremo anche il dtStart
+		if (!activity.isMilestone) {
+			const newDue = new Date(activity.due);
+			newDue.setDate(newDue.getDate() + 1);
+			const updateOut = await updateCollectionWrapper<ProjectActivity>(
+				{ _id: activity._id },
+				{
+					$set: {
+						due: today.toISOString()
+					}
+				} as any,
+				projectActivityClient
+			);
+			if (updateOut.status !== 200) {
+				return updateOut;
+			}
+			// Aggiorniamo le fasi in cui é contenuta nel caso
+			const checkOut = await checkAndUpdatePhase(
+				activity.phaseId,
+				newDue,
+				phaseClient
+			);
+
+			if (checkOut.status !== 200) {
+				return checkOut;
+			}
+		}
+
+		const updateNextActivitiesDatesOut = await updateNextActivitiesDates(
+			activity,
+			today,
+			projectActivityClient,
+			phaseClient
+		);
+
+		if (updateNextActivitiesDatesOut.status !== 200) {
+			return updateNextActivitiesDatesOut;
+		}
+
+		// Se l´attivitá non é giá in overdue la impostiamo a overdue
+		if (!activity.isOverdue && !activity.isMilestone) {
+			const updateOut = await updateCollectionWrapper<ProjectActivity>(
+				{ _id: activity._id },
+				{ $set: { isOverdue: true } } as any,
+				projectActivityClient
+			);
+
+			if (updateOut.status !== 200) {
+				return updateOut;
+			}
+		}
+	}
+
+	return generateMessageResponse("Overdue activities updated", 200);
 }

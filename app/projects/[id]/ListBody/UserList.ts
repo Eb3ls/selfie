@@ -1,9 +1,8 @@
 import {
 	PhaseResponse,
-	SortedActivity,
-	SubPhaseResponse,
-	User
-} from "../Utils";
+	SubPhaseResponse
+} from "@/app/api/(auth)/project/[id]/route";
+import { SortedActivity, User } from "../Utils";
 import TimeList from "./TimeList";
 
 class UsersList extends HTMLElement {

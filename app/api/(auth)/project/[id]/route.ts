@@ -472,7 +472,5 @@ export const GET = async (
 		});
 	}
 
-	console.log(projectResponse);
-
 	return generateObjectResponse(projectResponse, 200);
 };
