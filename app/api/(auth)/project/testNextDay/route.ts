@@ -1,8 +1,5 @@
-import {
-	generateMessageResponse,
-	handleOverdues,
-	validate
-} from "@/utils/api/api";
+import { generateMessageResponse, validate } from "@/utils/api/api";
+import { handleOverdues } from "@/utils/projects/projects";
 import { NextRequest } from "next/server";
 
 export const GET = async (request: NextRequest) => {

@@ -1,5 +1,4 @@
 import { generateMessageResponse, validate } from "@/utils/api/api";
-import { deleteProjectActivity } from "@/utils/api/api";
 import {
 	NOTE_COLLECTION,
 	Note,
@@ -9,6 +8,7 @@ import {
 	findCollectionWrapper,
 	getCollection
 } from "@/utils/db/db";
+import { deleteProjectActivity } from "@/utils/projects/projects";
 import { Collection } from "mongodb";
 import { NextRequest } from "next/server";
 

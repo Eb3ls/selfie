@@ -1,5 +1,4 @@
 import {
-	dropProjectActivity,
 	generateMessageResponse,
 	generateObjectResponse,
 	validate
@@ -12,6 +11,7 @@ import {
 	getCollection,
 	updateCollectionWrapper
 } from "@/utils/db/db";
+import { dropProjectActivity } from "@/utils/projects/projects";
 import { Collection } from "mongodb";
 import { NextRequest } from "next/server";
 
