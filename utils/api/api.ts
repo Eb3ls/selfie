@@ -804,10 +804,13 @@ async function updateNextActivitiesDates(
 			// Se doveva iniziare oggi la spostiamo a domani
 			const tomorrow = new Date(today);
 			tomorrow.setDate(tomorrow.getDate() + 1);
-			if (
-				nextActivity.isMilestone &&
-				new Date(nextActivity.dtStart) <= today
-			) {
+
+			if (new Date(nextActivity.dtStart) > today) {
+				// Se l'inizio dell'attività successiva è maggiore di oggi, non facciamo nulla
+				continue;
+			}
+
+			if (nextActivity.isMilestone) {
 				// Se doveva ANCHE finire oggi la droppiamo
 				if (new Date(nextActivity.due) <= tomorrow) {
 					const dropProjectActivityOut = await dropProjectActivity(
@@ -845,51 +848,49 @@ async function updateNextActivitiesDates(
 					}
 				}
 			} else {
-				if (new Date(nextActivity.dtStart) <= today) {
-					// Aumentiamo il due per mantenere il range
-					const newDue = new Date(nextActivity.due);
-					newDue.setDate(newDue.getDate() + 1);
+				// Aumentiamo il due per mantenere il range
+				const newDue = new Date(nextActivity.due);
+				newDue.setDate(newDue.getDate() + 1);
 
-					// Aggiorniamo il dtStart e il due
-					const updateOut =
-						await updateCollectionWrapper<ProjectActivity>(
-							{ _id: nextActivity._id },
-							{
-								$set: {
-									dtStart: tomorrow.toISOString(),
-									due: newDue.toISOString()
-								}
-							} as any,
-							projectActivityClient
-						);
-					if (updateOut.status !== 200) {
-						return updateOut;
-					}
-					// Aggiorniamo le fasi in cui é contenuta nel caso
-					const checkOut = await checkAndUpdatePhase(
-						nextActivity.phaseId,
-						newDue,
-						phaseClient
+				// Aggiorniamo il dtStart e il due
+				const updateOut =
+					await updateCollectionWrapper<ProjectActivity>(
+						{ _id: nextActivity._id },
+						{
+							$set: {
+								dtStart: tomorrow.toISOString(),
+								due: newDue.toISOString()
+							}
+						} as any,
+						projectActivityClient
 					);
+				if (updateOut.status !== 200) {
+					return updateOut;
+				}
+				// Aggiorniamo le fasi in cui é contenuta nel caso
+				const checkOut = await checkAndUpdatePhase(
+					nextActivity.phaseId,
+					newDue,
+					phaseClient
+				);
 
-					if (checkOut.status !== 200) {
-						return checkOut;
-					}
+				if (checkOut.status !== 200) {
+					return checkOut;
+				}
 
-					// Modifichiamo il due per essere l'inizio del giorno
-					newDue.setHours(2, 0, 0, 0);
+				// Modifichiamo il due per essere l'inizio del giorno
+				newDue.setHours(2, 0, 0, 0);
 
-					// Spostando il due richiamiamo la funzione per controllare se le attività successive sono tutte completate
-					const nextUpdateOut = await updateNextActivitiesDates(
-						nextActivity,
-						newDue,
-						projectActivityClient,
-						phaseClient
-					);
+				// Spostando il due richiamiamo la funzione per controllare se le attività successive sono tutte completate
+				const nextUpdateOut = await updateNextActivitiesDates(
+					nextActivity,
+					newDue,
+					projectActivityClient,
+					phaseClient
+				);
 
-					if (nextUpdateOut.status !== 200) {
-						return nextUpdateOut;
-					}
+				if (nextUpdateOut.status !== 200) {
+					return nextUpdateOut;
 				}
 			}
 		}
