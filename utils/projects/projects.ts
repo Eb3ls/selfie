@@ -115,7 +115,7 @@ export async function detachProjectActivity(
 		// Rimuoviamo l'attività dai prevIdList delle attività successive
 		const updateOut = await updateCollectionWrapper<ProjectActivity>(
 			{ _id: nextId },
-			{ $pull: { prevIdList: activityId } } as any,
+			{ $set: { prevIdList: nextPrevIdList } } as any,
 			projectActivityClient
 		);
 
