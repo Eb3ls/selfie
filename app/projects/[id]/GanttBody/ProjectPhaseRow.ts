@@ -21,7 +21,7 @@ interface RowReference {
 		startDate: Date;
 		dueDate: Date;
 		statusColor: string;
-		isMilstone: boolean;
+		isMilestone: boolean;
 	};
 }
 
@@ -66,7 +66,7 @@ class ProjectPhaseRow extends HTMLElement {
 				startDate: new Date(data.dtStart),
 				dueDate: new Date(data.due),
 				statusColor: color,
-				isMilstone: "isMilestone" in data ? data.isMilestone : false
+				isMilestone: "isMilestone" in data ? data.isMilestone : false
 			}
 		});
 	}
@@ -132,16 +132,19 @@ class ProjectPhaseRow extends HTMLElement {
 		phasePill.style.left = `${left + 10}px`;
 
 		const textElement = document.createElement("span");
-		textElement.innerText = text;
-		textElement.className = "fw-bold text-truncate";
+		textElement.className = "fw-bold text-truncate me-2";
 		textElement.style.whiteSpace = "nowrap";
 		textElement.style.overflow = "hidden";
 
 		if (isMilestone) {
 			const flag = document.createElement("i");
-			flag.className = "bi bi-flag-fill ms-2";
+			flag.className = "bi bi-flag-fill mx-2";
 			textElement.appendChild(flag);
 		}
+
+		const textSpan = document.createElement("span");
+		textSpan.innerText = text;
+		textElement.appendChild(textSpan);
 
 		phasePill.appendChild(textElement);
 		return phasePill;
@@ -159,7 +162,7 @@ class ProjectPhaseRow extends HTMLElement {
 		const pill = this.createPill(
 			data.summary,
 			color,
-			false,
+			"isMilestone" in data ? data.isMilestone : false,
 			data.dtStart,
 			data.due
 		);
@@ -236,7 +239,7 @@ class ProjectPhaseRow extends HTMLElement {
 			const pill = this.createPill(
 				ref.data.summary,
 				ref.data.statusColor,
-				ref.data.isMilstone,
+				ref.data.isMilestone,
 				ref.data.startDate.toISOString(),
 				ref.data.dueDate.toISOString()
 			);

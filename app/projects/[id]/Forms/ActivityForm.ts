@@ -238,6 +238,15 @@ class ActivityForm extends HTMLElement {
 					</button>`
 					: "";
 
+			const modifyButton =
+				this.activity.status !== "COMPLETED" &&
+				this.activity.status !== "DROPPED"
+					? `<button type="button" class="btn btn-sm btn-primary me-2" id="editBtn">
+					<i class="bi bi-pencil"></i>
+					Modifica
+				</button>`
+					: "";
+
 			modalContent.innerHTML = `
 				<div class="modal-header">
 					<h5 class="modal-title">
@@ -252,11 +261,7 @@ class ActivityForm extends HTMLElement {
 							<i class="bi bi-trash"></i>
 							Elimina
 						</button>
-						${linkButton}
-						<button type="button" class="btn btn-sm btn-primary me-2" id="editBtn">
-							<i class="bi bi-pencil"></i>
-							Modifica
-						</button>
+						${linkButton + modifyButton}
 						`
 								: ""
 						}

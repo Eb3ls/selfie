@@ -115,13 +115,20 @@ class SideGanttList extends HTMLElement {
 
 		// Prima colonna con il titolo
 		const firstCol = document.createElement("div");
-		firstCol.className = "d-flex text-truncate flex-grow-1";
-		firstCol.textContent = activity.summary;
+		firstCol.className = "d-flex flex-grow-1";
+		// Flex applica min-width: auto
+		firstCol.style.minWidth = "0";
+
 		if (activity.isMilestone) {
 			const flag = document.createElement("i");
-			flag.className = "bi bi-flag-fill ms-2";
+			flag.className = "bi bi-flag-fill me-2";
 			firstCol.appendChild(flag);
 		}
+
+		const text = document.createElement("span");
+		text.className = "text-truncate";
+		text.textContent = activity.summary;
+		firstCol.appendChild(text);
 
 		// Seconda colonna con le date
 		const secondCol = document.createElement("div");
