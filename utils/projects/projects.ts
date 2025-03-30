@@ -23,8 +23,22 @@ export async function detachProjectActivity(
 	// Otteniamo l'id dell'attività
 	const activityId = projectActivity._id;
 
+	// Prendiamo l'attività dal database perchè potrebbe essere cambiata
+	const activityOut = await findCollectionWrapper<ProjectActivity>(
+		{ _id: activityId },
+		projectActivityClient
+	);
+
+	if (activityOut.status !== 200) {
+		return activityOut;
+	}
+
+	const newProjectActivity: StringProjectActivity = (
+		await activityOut.json()
+	)[0];
+
 	// Rimuoviamo l'attività dai nextIdList delle attività precedenti
-	const prevIdList = projectActivity.prevIdList;
+	const prevIdList = newProjectActivity.prevIdList;
 	for (const prevId of prevIdList) {
 		const prevActivityOut = await findCollectionWrapper<ProjectActivity>(
 			{ _id: prevId },
@@ -53,9 +67,8 @@ export async function detachProjectActivity(
 		}
 	}
 
-	const nextIdList = projectActivity.nextIdList;
-
 	// Rimuoviamo l'attività dai prevIdList delle attività successive
+	const nextIdList = newProjectActivity.nextIdList;
 	for (const nextId of nextIdList) {
 		const nextActivityOut = await findCollectionWrapper<ProjectActivity>(
 			{ _id: nextId },
@@ -146,11 +159,6 @@ export async function deleteProjectActivity(
 	// Otteniamo l'id dell'attività
 	const activityId = projectActivity._id;
 
-	const noteOut = await deleteCollectionWrapper<Note>(
-		{ _id: projectActivity.noteId },
-		noteClient
-	);
-
 	const detachedOut = await detachProjectActivity(
 		projectActivity,
 		projectActivityClient
@@ -159,6 +167,11 @@ export async function deleteProjectActivity(
 	if (detachedOut.status !== 200) {
 		return detachedOut;
 	}
+
+	const noteOut = await deleteCollectionWrapper<Note>(
+		{ _id: projectActivity.noteId },
+		noteClient
+	);
 
 	if (noteOut.status !== 200) {
 		return noteOut;
