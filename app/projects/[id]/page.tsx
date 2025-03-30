@@ -49,7 +49,7 @@ export default function Projects() {
 			"view-toggler"
 		) as ViewToggler;
 		if (viewToggler && dateTime && user) {
-			viewToggler.dateTime = dateTime;
+			viewToggler.currentDate = new Date(dateTime);
 			viewToggler.currentUser = {
 				id: user._id,
 				name: user.username

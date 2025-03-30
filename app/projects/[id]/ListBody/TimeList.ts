@@ -117,6 +117,16 @@ class TimeList extends HTMLElement {
 	render() {
 		this.innerHTML = "";
 		this.className = "px-3";
+
+		if (this.sortedActivities.length === 0) {
+			const noActivities = document.createElement("div");
+			noActivities.className = "alert alert-primary text-center m-3";
+			noActivities.innerHTML =
+				'<i class="bi bi-info-circle me-2"></i>Nessuna attività creata';
+			this.appendChild(noActivities);
+			return;
+		}
+
 		const innerBlock = document.createElement("div");
 		innerBlock.className = "container-fluid mt-3 px-4";
 		this.appendChild(innerBlock);
@@ -145,8 +155,7 @@ class TimeList extends HTMLElement {
 		statusHeader.textContent = "Status";
 		header.appendChild(statusHeader);
 
-		for (const num in this.sortedActivities) {
-			const activity = this.sortedActivities[num];
+		for (const activity of this.sortedActivities) {
 			innerBlock.appendChild(this.createItem(activity));
 		}
 	}

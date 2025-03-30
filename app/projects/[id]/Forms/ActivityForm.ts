@@ -659,6 +659,7 @@ class ActivityModifyForm extends HTMLElement {
 				window.location.reload();
 			}
 		} catch (error) {
+			console.log(error);
 			alert("Errore durante la modifica dell'attività");
 		}
 	}
@@ -715,7 +716,7 @@ class ActivityModifyForm extends HTMLElement {
 					<div class="row g-3 align-items-end">
 						<div class="col">
 						<label for="summary" class="form-label fw-semibold">Titolo</label>
-							<input type="text" class="form-control" id="summary" name="summary" 
+							<input type="text" class="form-control" id="summary" name="summary" autocomplete="off"
 								placeholder="Inserisci titolo attività" required value="${this.activity.summary}">
 						</div>
 					</div>

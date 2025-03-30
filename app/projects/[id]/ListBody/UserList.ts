@@ -51,7 +51,7 @@ class UsersList extends HTMLElement {
 		this.className = "px-3";
 		if (Object.keys(this.data).length === 0) {
 			const noActivities = document.createElement("div");
-			noActivities.className = "alert alert-info text-center m-3";
+			noActivities.className = "alert alert-primary text-center m-3";
 			noActivities.innerHTML =
 				'<i class="bi bi-info-circle me-2"></i>Nessuna attività assegnata';
 			this.appendChild(noActivities);

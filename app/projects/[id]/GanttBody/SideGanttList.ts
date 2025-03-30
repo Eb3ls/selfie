@@ -38,6 +38,8 @@ class SideGanttList extends HTMLElement {
 		this.currentUser = currentUser;
 		this.isOwner = isOwner;
 
+		this.innerHTML = "";
+
 		const container = document.createElement("div");
 		container.className = "container";
 
@@ -46,7 +48,6 @@ class SideGanttList extends HTMLElement {
 			container.appendChild(this.renderPhase(phase, null));
 		});
 
-		this.innerHTML = "";
 		this.appendChild(container);
 	}
 

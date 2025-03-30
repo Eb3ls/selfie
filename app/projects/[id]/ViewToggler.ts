@@ -30,7 +30,8 @@ class ViewToggler extends HTMLElement {
 	openToggleList: PhaseToggleMap;
 	// Salviamo la posizione dello scroll per il gantt
 	ganttPositionY: number;
-	dateTime: Date | null;
+	currentDate: Date;
+	centerDate: Date;
 	currentUser: User | null;
 	isOwner: boolean;
 
@@ -42,7 +43,8 @@ class ViewToggler extends HTMLElement {
 		this.sortedActivities = [];
 		this.openToggleList = {};
 		this.ganttPositionY = 0;
-		this.dateTime = null;
+		this.currentDate = new Date();
+		this.centerDate = new Date();
 		this.currentUser = null;
 		this.isOwner = false;
 	}
@@ -52,6 +54,7 @@ class ViewToggler extends HTMLElement {
 		if (!this.projectData) return;
 		this.isOwner = this.currentUser?.id === this.projectData?.users[0].id;
 		this.id = "viewToggler";
+		this.centerDate = new Date(this.currentDate);
 		this.sortActivies();
 		this.populateOpenToggleList();
 
@@ -60,7 +63,7 @@ class ViewToggler extends HTMLElement {
 		this.style.height = `calc(100vh - 82px)`;
 		this.insertUpperHeader();
 
-		this.render(this.viewType, true, this.dateTime || new Date());
+		this.render(this.viewType, true);
 	}
 
 	public async updatePage() {
@@ -77,10 +80,15 @@ class ViewToggler extends HTMLElement {
 		headerTitle.innerHTML = escapeHTML(this.projectData.summary);
 
 		// Prendiamo la data centrale nella timeline per mantenere la posizione
-		const timeLine = this.querySelector("time-line") as TimeLine;
-		const centerDate = new Date(timeLine.centerDate);
-
-		this.render(this.viewType, true, centerDate);
+		if (this.viewType === "GANTT") {
+			const timeLine = this.querySelector("time-line") as TimeLine;
+			if (!timeLine) return;
+			this.centerDate = new Date(timeLine.centerDate);
+			this.render(this.viewType, true);
+		} else {
+			// Se siamo nella lista la data centrale era già salvata
+			this.render(this.viewType, true);
+		}
 
 		// Se l'utente ha un modale aperto aggiorniamo le sue informazioni
 		const activityForm = document.querySelector(
@@ -116,19 +124,22 @@ class ViewToggler extends HTMLElement {
 		}
 	}
 
-	private render(
-		viewMode: "GANTT" | "LIST",
-		force: boolean,
-		centerDate: Date
-	) {
+	private render(viewMode: "GANTT" | "LIST", force: boolean) {
 		if (this.viewType === viewMode && !force) return;
 		this.viewType = viewMode;
-		if (viewMode === "LIST") {
+
+		if (viewMode === "LIST" && !force) {
 			// Ci salviamo la posizione dello scroll Y per ripristinarlo quando torniamo al gantt
 			const ganttContainer = this.querySelector(
 				"#ganttContainer"
 			) as HTMLElement;
+			if (!ganttContainer) return;
 			this.ganttPositionY = ganttContainer.scrollTop;
+
+			// Ci salviamo la data centrale per ripristinarla quando torniamo al gantt
+			const timeLine = this.querySelector("time-line") as TimeLine;
+			if (!timeLine) return;
+			this.centerDate = new Date(timeLine.centerDate);
 		}
 
 		// Rimuoviamo i figli eccetto l'upper header
@@ -138,7 +149,7 @@ class ViewToggler extends HTMLElement {
 
 		if (viewMode === "GANTT") {
 			this.insertBottomHeader();
-			this.insertGanttBody(centerDate);
+			this.insertGanttBody();
 			this.addEventListeners();
 			const ganttContainer = this.querySelector(
 				"#ganttContainer"
@@ -262,7 +273,7 @@ class ViewToggler extends HTMLElement {
 		this.appendChild(container);
 	}
 
-	private insertGanttBody(centerDate: Date): void {
+	private insertGanttBody(): void {
 		const container = document.createElement("div");
 		container.className = "row overflow-y-auto g-0";
 		container.style.minHeight = `calc(100% - ${ROW_HEIGHT * 2}px)`;
@@ -302,13 +313,13 @@ class ViewToggler extends HTMLElement {
 		) as ProjectPhaseRow;
 		projectPhaseRow.loadProjectData(
 			this.projectData.phases,
-			centerDate,
+			this.currentDate,
 			this.openToggleList
 		);
 
 		const timeLine = this.querySelector("time-line") as TimeLine;
 		// All'inizio carichiamo la data di oggi che sará quella centrale, quando ricarichiamo teniamo la data di prima
-		timeLine.loadProjectData(this.dateTime || new Date(), centerDate);
+		timeLine.loadProjectData(this.currentDate, this.centerDate);
 	}
 
 	private insertListBody(view: "USER" | "TIME"): void {
@@ -347,11 +358,11 @@ class ViewToggler extends HTMLElement {
 		const listBtn = this.querySelector("#renderList") as HTMLButtonElement;
 
 		ganttBtn.addEventListener("click", () => {
-			this.render("GANTT", false, this.dateTime!);
+			this.render("GANTT", false);
 		});
 
 		listBtn.addEventListener("click", () => {
-			this.render("LIST", false, this.dateTime!);
+			this.render("LIST", false);
 		});
 
 		if (this.viewType === "LIST") {

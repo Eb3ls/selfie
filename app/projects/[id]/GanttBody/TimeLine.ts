@@ -36,6 +36,13 @@ class TimeLine extends HTMLElement {
 		this.resizeObserver.observe(this);
 	}
 
+	disconnectedCallback() {
+		if (this.resizeObserver) {
+			this.resizeObserver.disconnect();
+			this.resizeObserver = null;
+		}
+	}
+
 	updateMonth() {
 		const month = this.centerDate.toLocaleDateString(timeFormat, {
 			month: "long"
