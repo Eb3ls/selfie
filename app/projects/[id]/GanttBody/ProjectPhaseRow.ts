@@ -111,7 +111,7 @@ class ProjectPhaseRow extends HTMLElement {
 			const diffTime = Math.abs(
 				finalDate.getTime() - initialDate.getTime()
 			);
-			const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+			const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 			width = diffDays * CELL_WIDTH;
 		}
 
@@ -252,8 +252,10 @@ class ProjectPhaseRow extends HTMLElement {
 		this.firstDate.setDate(
 			currentDate.getDate() - Math.floor(this.cellsNumber / 2)
 		);
+		this.firstDate.setHours(0, 0, 0, 0);
 		this.lastDate = new Date(this.firstDate);
 		this.lastDate.setDate(this.firstDate.getDate() + this.cellsNumber - 1);
+		this.lastDate.setHours(23, 59, 59, 999);
 		this.innerHTML = "";
 		this.className = "d-flex flex-column overflow-x-hidden";
 		for (const phase of this.phasesData) {
