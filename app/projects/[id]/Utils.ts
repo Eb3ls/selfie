@@ -120,17 +120,11 @@ export function calculateCells(element: HTMLElement): number {
 }
 
 export function hideModal(modal: HTMLElement) {
-	if (!modal || !modal.classList.contains("show")) return;
-	modal.classList.remove("show");
-	modal.setAttribute("aria-hidden", "true");
-	modal.style.display = "none";
-	const backdrop = document.querySelector(".modal-backdrop");
-	if (backdrop) {
-		backdrop.remove();
+	const closeButton = modal.querySelector('button[data-bs-dismiss="modal"]');
+
+	if (closeButton) {
+		closeButton.dispatchEvent(new MouseEvent("click"));
 	}
-	document.body.classList.remove("modal-open");
-	document.body.style.overflow = "";
-	document.body.style.paddingRight = "";
 }
 
 export function showError(inputElement: HTMLElement, message: string) {

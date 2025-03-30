@@ -206,9 +206,6 @@ class ViewToggler extends HTMLElement {
 				this.projectData.phases,
 				this.projectData.users
 			);
-			// Chiudiamo il form se é aperto
-			const modal = addForm.children[1] as HTMLElement;
-			hideModal(modal);
 		}
 
 		const phaseForm = document.querySelector("phase-form") as PhaseForm;

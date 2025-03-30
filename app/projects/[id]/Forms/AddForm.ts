@@ -12,6 +12,7 @@ import {
 	formatDate,
 	formatDueDate,
 	formatStartDate,
+	hideModal,
 	showError,
 	validateLength
 } from "../Utils";
@@ -45,6 +46,7 @@ class AddForm extends HTMLElement {
 	}
 
 	connectedCallback() {
+		// AA
 		this.innerHTML = `
 			<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#AddForm">
 				Aggiungi
@@ -201,6 +203,8 @@ class AddPhaseForm extends HTMLElement {
 			) as ViewToggler | null;
 			if (viewToggler) {
 				await viewToggler.updatePage();
+				const modal = document.querySelector("#AddForm") as HTMLElement;
+				hideModal(modal);
 			} else {
 				window.location.reload();
 			}
@@ -297,6 +301,8 @@ class AddSubPhaseForm extends HTMLElement {
 			) as ViewToggler | null;
 			if (viewToggler) {
 				await viewToggler.updatePage();
+				const modal = document.querySelector("#AddForm") as HTMLElement;
+				hideModal(modal);
 			} else {
 				window.location.reload();
 			}
@@ -496,6 +502,8 @@ class AddActivityForm extends HTMLElement {
 			) as ViewToggler | null;
 			if (viewToggler) {
 				await viewToggler.updatePage();
+				const modal = document.querySelector("#AddForm") as HTMLElement;
+				hideModal(modal);
 			} else {
 				window.location.reload();
 			}
