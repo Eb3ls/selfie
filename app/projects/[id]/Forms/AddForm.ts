@@ -10,6 +10,8 @@ import {
 	escapeHTML,
 	fetcher,
 	formatDate,
+	formatDueDate,
+	formatStartDate,
 	showError,
 	validateLength
 } from "../Utils";
@@ -188,8 +190,8 @@ class AddPhaseForm extends HTMLElement {
 			summary: data.Title,
 			projectId: this.projectId,
 			parentId: this.projectId,
-			dtStart: new Date(data.Start + "T00:00:00.000Z").toISOString(),
-			due: new Date(data.Due + "T23:59:59.999Z").toISOString()
+			dtStart: formatStartDate(data.Start.toString()),
+			due: formatDueDate(data.Due.toString())
 		};
 
 		try {
@@ -284,8 +286,8 @@ class AddSubPhaseForm extends HTMLElement {
 			summary: data.Title,
 			projectId: this.projectId,
 			parentId: data.Phase,
-			dtStart: new Date(data.Start + "T00:00:00.000Z").toISOString(),
-			due: new Date(data.Due + "T23:59:59.999Z").toISOString()
+			dtStart: formatStartDate(data.Start.toString()),
+			due: formatDueDate(data.Due.toString())
 		};
 
 		try {
@@ -480,8 +482,8 @@ class AddActivityForm extends HTMLElement {
 		const body = {
 			summary: data.Title,
 			description: data.Description,
-			dtStart: new Date(data.Start + "T00:00:00.000Z").toISOString(),
-			due: new Date(data.Due + "T23:59:59.999Z").toISOString(),
+			dtStart: formatStartDate(data.Start.toString()),
+			due: formatDueDate(data.Due.toString()),
 			isMilestone: data.isMilestone === "on",
 			phaseId: data.SubPhase || data.MainPhase,
 			usernameList: this.users.map((user) => user.name)

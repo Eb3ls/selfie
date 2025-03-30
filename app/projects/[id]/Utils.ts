@@ -70,7 +70,25 @@ export function getToggleState(
 
 // Formatta la data ISO per l'input date (yyyy-mm-dd unico formato supportato per min-max)
 export function formatDate(date: string): string {
-	return date.split("T")[0];
+	const newDate = new Date(date);
+	const year = newDate.getFullYear();
+	const month = String(newDate.getMonth() + 1).padStart(2, "0");
+	const day = String(newDate.getDate()).padStart(2, "0");
+	return `${year}-${month}-${day}`;
+}
+
+// Formatta la data da input date a ISO, impostando l'ora alle 00:00:00
+export function formatStartDate(date: string): string {
+	const newDate = new Date(date);
+	newDate.setHours(0, 0, 0, 0);
+	return newDate.toISOString();
+}
+
+// Formatta la data da input date a ISO, impostando l'ora alle 23:59:59
+export function formatDueDate(date: string): string {
+	const newDate = new Date(date);
+	newDate.setHours(23, 59, 59, 999);
+	return newDate.toISOString();
 }
 
 export function validateLength(

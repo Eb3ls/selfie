@@ -7,6 +7,7 @@ import {
 	escapeHTML,
 	fetcher,
 	formatDate,
+	formatStartDate,
 	hideModal,
 	showError,
 	validateLength
@@ -234,12 +235,8 @@ class PhaseForm extends HTMLElement {
 		const body = {
 			_id: this.phaseData._id,
 			summary: summary,
-			dtStart: new Date(
-				(formData.get("dtStart") as string) + "T00:00:00.000Z"
-			).toISOString(),
-			due: new Date(
-				(formData.get("due") as string) + "T23:59:59.999Z"
-			).toISOString()
+			dtStart: formatStartDate(formData.get("dtStart") as string),
+			due: formatStartDate(formData.get("due") as string)
 		};
 
 		try {

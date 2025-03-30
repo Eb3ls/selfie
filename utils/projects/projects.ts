@@ -290,7 +290,7 @@ export async function dropProjectActivity(
 
 async function updateNextActivitiesDates(
 	activity: StringProjectActivity,
-	today: Date,
+	lastDue2359: Date,
 	projectActivityClient: Collection<ProjectActivity>,
 	phaseClient: Collection<Phase>
 ): Promise<NextResponse> {
@@ -320,17 +320,18 @@ async function updateNextActivitiesDates(
 				await nextActivityOut.json()
 			)[0];
 			// Se doveva iniziare oggi la spostiamo a domani
-			const tomorrow = new Date(today);
-			tomorrow.setDate(tomorrow.getDate() + 1);
+			const tomorrow00 = new Date(lastDue2359.toISOString());
+			tomorrow00.setHours(0, 0, 0, 0);
+			tomorrow00.setDate(tomorrow00.getDate() + 1);
 
-			if (new Date(nextActivity.dtStart) > today) {
+			if (new Date(nextActivity.dtStart) > lastDue2359) {
 				// Se l'inizio dell'attività successiva è maggiore di oggi, non facciamo nulla
 				continue;
 			}
 
 			if (nextActivity.isMilestone) {
 				// Se doveva ANCHE finire oggi la droppiamo
-				if (new Date(nextActivity.due) <= tomorrow) {
+				if (new Date(nextActivity.due) <= tomorrow00) {
 					const dropProjectActivityOut = await dropProjectActivity(
 						nextActivity,
 						projectActivityClient
@@ -346,23 +347,13 @@ async function updateNextActivitiesDates(
 							{ _id: nextActivity._id },
 							{
 								$set: {
-									dtStart: tomorrow.toISOString()
+									dtStart: tomorrow00.toISOString()
 								}
 							} as any,
 							projectActivityClient
 						);
 					if (updateOut.status !== 200) {
 						return updateOut;
-					}
-					// Aggiorniamo le fasi in cui é contenuta nel caso
-					const checkOut = await checkAndUpdatePhase(
-						nextActivity.phaseId,
-						tomorrow,
-						phaseClient
-					);
-
-					if (checkOut.status !== 200) {
-						return checkOut;
 					}
 				}
 			} else {
@@ -376,7 +367,7 @@ async function updateNextActivitiesDates(
 						{ _id: nextActivity._id },
 						{
 							$set: {
-								dtStart: tomorrow.toISOString(),
+								dtStart: tomorrow00.toISOString(),
 								due: newDue.toISOString()
 							}
 						} as any,
@@ -395,9 +386,6 @@ async function updateNextActivitiesDates(
 				if (checkOut.status !== 200) {
 					return checkOut;
 				}
-
-				// Modifichiamo il due per essere l'inizio del giorno
-				newDue.setHours(2, 0, 0, 0);
 
 				// Spostando il due richiamiamo la funzione per controllare se le attività successive sono tutte completate
 				const nextUpdateOut = await updateNextActivitiesDates(
@@ -438,19 +426,20 @@ export async function handleOverdues() {
 	const allActivities: StringProjectActivity[] =
 		await allActivitiesOut.json();
 
-	const today = timeMachine.timeMachineTime;
+	const today00 = new Date(timeMachine.timeMachineTime.toISOString());
 	// Prendiamo il timestamp di oggi a mezzanotte
 	// Creare nuovo valore perché é per riferimento
-	console.log("today ", today.toISOString());
-	today.setHours(2, 0, 0, 0);
-	console.log("today ", today.toISOString());
-	today.setDate(today.getDate() + 1);
-	console.log("tomorrow ", today.toISOString());
+	console.log("today ", today00.toISOString());
+	today00.setHours(0, 0, 0, 0);
+	console.log("At midnight ", today00.toISOString());
+	const today2359 = new Date(today00.toISOString());
+	today2359.setHours(23, 59, 59, 999);
+	console.log("At 23:59 ", today2359.toISOString());
 
 	// Filtriamo le attività scadute
 	const overdueActivities = allActivities.filter((activity) => {
 		return (
-			new Date(activity.due) <= today &&
+			new Date(activity.due) <= today00 &&
 			activity.status !== "COMPLETED" &&
 			activity.status !== "DROPPED"
 		);
@@ -466,7 +455,7 @@ export async function handleOverdues() {
 				{ _id: activity._id },
 				{
 					$set: {
-						due: today.toISOString()
+						due: today2359.toISOString()
 					}
 				} as any,
 				projectActivityClient
@@ -488,7 +477,7 @@ export async function handleOverdues() {
 
 		const updateNextActivitiesDatesOut = await updateNextActivitiesDates(
 			activity,
-			today,
+			today2359,
 			projectActivityClient,
 			phaseClient
 		);

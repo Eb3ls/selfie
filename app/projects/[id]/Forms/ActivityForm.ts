@@ -11,6 +11,8 @@ import {
 	escapeHTML,
 	fetcher,
 	formatDate,
+	formatDueDate,
+	formatStartDate,
 	hideModal,
 	showError,
 	validateLength
@@ -638,12 +640,8 @@ class ActivityModifyForm extends HTMLElement {
 			_id: this.activity._id,
 			summary: summary,
 			description: formData.get("description") as string,
-			dtStart: new Date(
-				(formData.get("dtStart") as string) + "T00:00:00.000Z"
-			).toISOString(),
-			due: new Date(
-				(formData.get("due") as string) + "T23:59:59.999Z"
-			).toISOString(),
+			dtStart: formatStartDate(formData.get("dtStart") as string),
+			due: formatDueDate(formData.get("due") as string),
 			usernameList: this.modifiedUserlist.map((user) => user.name)
 		};
 
