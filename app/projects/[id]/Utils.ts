@@ -3,6 +3,7 @@ import {
 	ProjectActivityResponse,
 	SubPhaseResponse
 } from "@/app/api/(auth)/project/[id]/route";
+import ViewToggler from "./ViewToggler";
 
 export const ROW_HEIGHT_PX = "70px";
 export const CELL_WIDTH_PX = "200px";
@@ -189,7 +190,14 @@ export function createStatusEntry(
 		};
 		try {
 			await fetcher(method, url, body);
-			window.location.reload();
+			const viewToggler = document.querySelector(
+				"view-toggler"
+			) as ViewToggler | null;
+			if (viewToggler) {
+				await viewToggler.updatePage();
+			} else {
+				window.location.reload();
+			}
 		} catch (error) {
 			alert("Errore durante la modifica dello stato");
 		}
