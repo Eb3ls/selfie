@@ -1,6 +1,7 @@
 import {
 	PhaseResponse,
-	ProjectActivityResponse
+	ProjectActivityResponse,
+	SubPhaseResponse
 } from "@/app/api/(auth)/project/[id]/route";
 
 export const ROW_HEIGHT_PX = "70px";
@@ -26,7 +27,7 @@ export interface User {
 }
 // Interfaccia per le attivitá ordinate, aggiungiamo il riferimento alla fase genitore
 export interface SortedActivity extends ProjectActivityResponse {
-	parentPhase: PhaseResponse;
+	parentPhase: PhaseResponse | SubPhaseResponse;
 }
 
 export interface PhaseToggleMap {
@@ -97,6 +98,20 @@ export function calculateCells(element: HTMLElement): number {
 	const width = element.clientWidth || element.getBoundingClientRect().width;
 	const cols = Math.floor(width / CELL_WIDTH) * 2;
 	return Math.max(cols, 25);
+}
+
+export function hideModal(modal: HTMLElement) {
+	if (!modal || !modal.classList.contains("show")) return;
+	modal.classList.remove("show");
+	modal.setAttribute("aria-hidden", "true");
+	modal.style.display = "none";
+	const backdrop = document.querySelector(".modal-backdrop");
+	if (backdrop) {
+		backdrop.remove();
+	}
+	document.body.classList.remove("modal-open");
+	document.body.style.overflow = "";
+	document.body.style.paddingRight = "";
 }
 
 export function showError(inputElement: HTMLElement, message: string) {

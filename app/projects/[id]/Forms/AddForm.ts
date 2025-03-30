@@ -13,17 +13,20 @@ import {
 	showError,
 	validateLength
 } from "../Utils";
+import ViewToggler from "../ViewToggler";
 
 class AddForm extends HTMLElement {
 	projectId: string;
 	avaiableUsers: User[];
 	phaseList: PhaseResponse[];
+	currentView: "PHASE" | "SUBPHASE" | "ACTIVITY";
 
 	constructor() {
 		super();
 		this.projectId = "";
 		this.avaiableUsers = [];
 		this.phaseList = [];
+		this.currentView = "PHASE";
 	}
 
 	public loadProjectData(
@@ -35,7 +38,7 @@ class AddForm extends HTMLElement {
 		this.projectId = id;
 		this.avaiableUsers = avaiableUsers;
 		this.phaseList = phases;
-		this.render("PHASE");
+		this.render();
 		this.setupEventListeners();
 	}
 
@@ -51,7 +54,7 @@ class AddForm extends HTMLElement {
 						<div class="modal-header d-flex justify-content-between align-items-center">
 							<h5 class="modal-title mb-0"></h5>
 							<div class="btn-group" role="group" aria-label="Form type selection">
-								<button class="btn btn-outline-primary active" id="phase-tab">Fase</button>
+								<button class="btn btn-outline-primary" id="phase-tab">Fase</button>
 								<button class="btn btn-outline-primary" id="subphase-tab">Sottofase</button>
 								<button class="btn btn-outline-primary" id="activity-tab">Attività</button>
 							</div>
@@ -63,30 +66,48 @@ class AddForm extends HTMLElement {
 		`;
 	}
 
-	private render(type: "PHASE" | "SUBPHASE" | "ACTIVITY") {
+	private render() {
 		const modalTitle = this.querySelector(".modal-title") as HTMLElement;
 		const modalBody = this.querySelector(".modal-body") as HTMLElement;
 
 		if (!modalTitle || !modalBody) return;
 
-		if (type === "PHASE") {
+		if (this.currentView === "PHASE") {
 			modalTitle.innerText = "Aggiungi nuova Fase";
 			modalBody.innerHTML = "";
 			const phaseForm = new AddPhaseForm();
 			phaseForm.initialize(this.projectId);
 			modalBody.appendChild(phaseForm);
-		} else if (type === "SUBPHASE") {
+			const phaseTab = this.querySelector(
+				"#phase-tab"
+			) as HTMLButtonElement;
+			if (phaseTab) {
+				phaseTab.classList.add("active");
+			}
+		} else if (this.currentView === "SUBPHASE") {
 			modalTitle.innerText = "Aggiungi nuova Sottofase";
 			modalBody.innerHTML = "";
 			const subPhaseForm = new AddSubPhaseForm();
 			subPhaseForm.initialize(this.projectId, this.phaseList);
 			modalBody.appendChild(subPhaseForm);
-		} else if (type === "ACTIVITY") {
+			const subphaseTab = this.querySelector(
+				"#subphase-tab"
+			) as HTMLButtonElement;
+			if (subphaseTab) {
+				subphaseTab.classList.add("active");
+			}
+		} else if (this.currentView === "ACTIVITY") {
 			modalTitle.innerText = "Aggiungi nuova Attività";
 			modalBody.innerHTML = "";
 			const activityForm = new AddActivityForm();
 			activityForm.initialize(this.phaseList, this.avaiableUsers);
 			modalBody.appendChild(activityForm);
+			const activityTab = this.querySelector(
+				"#activity-tab"
+			) as HTMLButtonElement;
+			if (activityTab) {
+				activityTab.classList.add("active");
+			}
 		}
 	}
 
@@ -102,24 +123,24 @@ class AddForm extends HTMLElement {
 		if (!phaseBtn || !subphaseBtn || !activityBtn) return;
 
 		phaseBtn.addEventListener("click", () => {
-			this.render("PHASE");
-			phaseBtn.classList.add("active");
 			subphaseBtn.classList.remove("active");
 			activityBtn.classList.remove("active");
+			this.currentView = "PHASE";
+			this.render();
 		});
 
 		subphaseBtn.addEventListener("click", () => {
-			this.render("SUBPHASE");
-			subphaseBtn.classList.add("active");
 			phaseBtn.classList.remove("active");
 			activityBtn.classList.remove("active");
+			this.currentView = "SUBPHASE";
+			this.render();
 		});
 
 		activityBtn.addEventListener("click", () => {
-			this.render("ACTIVITY");
-			activityBtn.classList.add("active");
 			phaseBtn.classList.remove("active");
 			subphaseBtn.classList.remove("active");
+			this.currentView = "ACTIVITY";
+			this.render();
 		});
 	}
 }
@@ -173,7 +194,14 @@ class AddPhaseForm extends HTMLElement {
 
 		try {
 			await fetcher(method, url, body);
-			window.location.reload();
+			const viewToggler = document.querySelector(
+				"view-toggler"
+			) as ViewToggler | null;
+			if (viewToggler) {
+				await viewToggler.updatePage();
+			} else {
+				window.location.reload();
+			}
 		} catch (error) {
 			alert("Errore nella creazione della fase");
 		}
@@ -262,7 +290,14 @@ class AddSubPhaseForm extends HTMLElement {
 
 		try {
 			await fetcher(method, url, body);
-			window.location.reload();
+			const viewToggler = document.querySelector(
+				"view-toggler"
+			) as ViewToggler | null;
+			if (viewToggler) {
+				await viewToggler.updatePage();
+			} else {
+				window.location.reload();
+			}
 		} catch (error) {
 			alert("Errore nella creazione della sottofase");
 		}
@@ -454,7 +489,14 @@ class AddActivityForm extends HTMLElement {
 
 		try {
 			await fetcher(method, url, body);
-			window.location.reload();
+			const viewToggler = document.querySelector(
+				"view-toggler"
+			) as ViewToggler | null;
+			if (viewToggler) {
+				await viewToggler.updatePage();
+			} else {
+				window.location.reload();
+			}
 		} catch (error) {
 			alert("Errore nella creazione dell'attività");
 		}

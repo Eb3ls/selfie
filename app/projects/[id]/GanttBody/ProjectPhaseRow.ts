@@ -252,6 +252,7 @@ class ProjectPhaseRow extends HTMLElement {
 		this.firstDate.setDate(
 			currentDate.getDate() - Math.floor(this.cellsNumber / 2)
 		);
+		this.lastDate = new Date(this.firstDate);
 		this.lastDate.setDate(this.firstDate.getDate() + this.cellsNumber - 1);
 		this.innerHTML = "";
 		this.className = "d-flex flex-column overflow-x-hidden";

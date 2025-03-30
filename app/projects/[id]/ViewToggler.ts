@@ -18,7 +18,8 @@ import {
 	ROW_HEIGHT_PX,
 	SortedActivity,
 	User,
-	escapeHTML
+	escapeHTML,
+	hideModal
 } from "./Utils";
 
 class ViewToggler extends HTMLElement {
@@ -35,8 +36,7 @@ class ViewToggler extends HTMLElement {
 
 	constructor() {
 		super();
-		// Inizializziamo la vista sbagliata per forzare il render
-		this.viewType = "LIST";
+		this.viewType = "GANTT";
 		this.listViewType = "USER";
 		this.projectData = null;
 		this.sortedActivities = [];
@@ -51,6 +51,7 @@ class ViewToggler extends HTMLElement {
 		this.projectData = await this.getData();
 		if (!this.projectData) return;
 		this.isOwner = this.currentUser?.id === this.projectData?.users[0].id;
+		this.id = "viewToggler";
 		this.sortActivies();
 		this.populateOpenToggleList();
 
@@ -59,11 +60,68 @@ class ViewToggler extends HTMLElement {
 		this.style.height = `calc(100vh - 82px)`;
 		this.insertUpperHeader();
 
-		this.render("GANTT");
+		this.render(this.viewType, true, this.dateTime || new Date());
 	}
 
-	private render(viewMode: "GANTT" | "LIST") {
-		if (this.viewType === viewMode) return;
+	public async updatePage() {
+		this.projectData = await this.getData();
+		if (!this.projectData) return;
+		this.sortActivies();
+		this.populateOpenToggleList(true);
+
+		this.loadUpperHeaderData();
+		const headerTitle = this.querySelector(
+			"#headerTitle"
+		) as HTMLSpanElement;
+		// Se l'utente ha cambiato il titolo del progetto
+		headerTitle.innerHTML = escapeHTML(this.projectData.summary);
+
+		// Prendiamo la data centrale nella timeline per mantenere la posizione
+		const timeLine = this.querySelector("time-line") as TimeLine;
+		const centerDate = new Date(timeLine.centerDate);
+
+		this.render(this.viewType, true, centerDate);
+
+		// Se l'utente ha un modale aperto aggiorniamo le sue informazioni
+		const activityForm = document.querySelector(
+			"activity-form"
+		) as ActivityForm;
+		const activityFormOpen =
+			activityForm.children[0].classList.contains("show");
+		if (activityForm && activityFormOpen) {
+			const id = activityForm.activity._id;
+			const activity = this.sortedActivities.find(
+				(activity) => activity._id === id
+			);
+			if (!activity) return;
+			activityForm.updateData(activity, activity?.parentPhase);
+		}
+
+		const phaseForm = document.querySelector("phase-form") as PhaseForm;
+		const phaseFormOpen = phaseForm.children[0].classList.contains("show");
+		if (phaseForm && phaseFormOpen) {
+			const id = phaseForm.phaseData._id;
+			for (const phase of this.projectData.phases) {
+				if (phase._id === id) {
+					phaseForm.updateData(phase, null);
+					return;
+				}
+				for (const subPhase of phase.subPhases) {
+					if (subPhase._id === id) {
+						phaseForm.updateData(subPhase, phase);
+						return;
+					}
+				}
+			}
+		}
+	}
+
+	private render(
+		viewMode: "GANTT" | "LIST",
+		force: boolean,
+		centerDate: Date
+	) {
+		if (this.viewType === viewMode && !force) return;
 		this.viewType = viewMode;
 		if (viewMode === "LIST") {
 			// Ci salviamo la posizione dello scroll Y per ripristinarlo quando torniamo al gantt
@@ -80,7 +138,7 @@ class ViewToggler extends HTMLElement {
 
 		if (viewMode === "GANTT") {
 			this.insertBottomHeader();
-			this.insertGanttBody();
+			this.insertGanttBody(centerDate);
 			this.addEventListeners();
 			const ganttContainer = this.querySelector(
 				"#ganttContainer"
@@ -94,6 +152,8 @@ class ViewToggler extends HTMLElement {
 	}
 
 	private insertUpperHeader(): void {
+		if (!this.projectData) return;
+
 		let block = "";
 		if (this.isOwner) {
 			// Se siamo l'owner aggiungiamo il form per aggiungere gli elementi
@@ -113,7 +173,7 @@ class ViewToggler extends HTMLElement {
 					<a class="btn text-secondary me-1 p-0 text-nowrap" href="/projects">
 						Dashboard /
 					</a>
-					<span class="text-truncate">${escapeHTML(this.projectData!.summary)}</span>
+					<span class="text-truncate" id="headerTitle">${escapeHTML(this.projectData!.summary)}</span>
 				</div>
 				<div class="col d-flex justify-content-end align-items-center">
 					${block}
@@ -123,8 +183,11 @@ class ViewToggler extends HTMLElement {
 
 		this.appendChild(wrapper);
 
-		if (!this.projectData) return;
+		this.loadUpperHeaderData();
+	}
 
+	loadUpperHeaderData() {
+		if (!this.projectData) return;
 		if (this.isOwner) {
 			const addForm = this.querySelector("add-form-component") as AddForm;
 			addForm.loadProjectData(
@@ -132,6 +195,9 @@ class ViewToggler extends HTMLElement {
 				this.projectData.phases,
 				this.projectData.users
 			);
+			// Chiudiamo il form se é aperto
+			const modal = addForm.children[1] as HTMLElement;
+			hideModal(modal);
 		}
 
 		const phaseForm = document.querySelector("phase-form") as PhaseForm;
@@ -196,7 +262,7 @@ class ViewToggler extends HTMLElement {
 		this.appendChild(container);
 	}
 
-	private insertGanttBody(): void {
+	private insertGanttBody(centerDate: Date): void {
 		const container = document.createElement("div");
 		container.className = "row overflow-y-auto g-0";
 		container.style.minHeight = `calc(100% - ${ROW_HEIGHT * 2}px)`;
@@ -236,12 +302,13 @@ class ViewToggler extends HTMLElement {
 		) as ProjectPhaseRow;
 		projectPhaseRow.loadProjectData(
 			this.projectData.phases,
-			this.dateTime || new Date(),
+			centerDate,
 			this.openToggleList
 		);
 
 		const timeLine = this.querySelector("time-line") as TimeLine;
-		timeLine.loadProjectData(this.dateTime || new Date());
+		// All'inizio carichiamo la data di oggi che sará quella centrale, quando ricarichiamo teniamo la data di prima
+		timeLine.loadProjectData(this.dateTime || new Date(), centerDate);
 	}
 
 	private insertListBody(view: "USER" | "TIME"): void {
@@ -280,11 +347,11 @@ class ViewToggler extends HTMLElement {
 		const listBtn = this.querySelector("#renderList") as HTMLButtonElement;
 
 		ganttBtn.addEventListener("click", () => {
-			this.render("GANTT");
+			this.render("GANTT", false, this.dateTime!);
 		});
 
 		listBtn.addEventListener("click", () => {
-			this.render("LIST");
+			this.render("LIST", false, this.dateTime!);
 		});
 
 		if (this.viewType === "LIST") {
@@ -365,7 +432,7 @@ class ViewToggler extends HTMLElement {
 		function apppendActivities(phase: PhaseResponse | SubPhaseResponse) {
 			for (const activity of phase.activities) {
 				const act = activity as SortedActivity;
-				act.parentPhase = phase as PhaseResponse;
+				act.parentPhase = phase;
 				allActivities.push(act);
 			}
 
@@ -387,8 +454,12 @@ class ViewToggler extends HTMLElement {
 		this.sortedActivities = allActivities;
 	}
 
-	private populateOpenToggleList() {
+	private populateOpenToggleList(forUpdate: boolean = false): void {
 		for (const phase of this.projectData!.phases) {
+			if (forUpdate && phase._id in this.openToggleList) {
+				continue;
+			}
+
 			this.openToggleList[phase._id] = {
 				isOpen: false,
 				subPhases: {}

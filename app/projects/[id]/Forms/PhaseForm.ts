@@ -1,10 +1,17 @@
 import {
+	PhaseResponse,
+	SubPhaseResponse
+} from "@/app/api/(auth)/project/[id]/route";
+import {
 	clearError,
 	escapeHTML,
+	fetcher,
 	formatDate,
+	hideModal,
 	showError,
 	validateLength
 } from "../Utils";
+import ViewToggler from "../ViewToggler";
 
 class PhaseForm extends HTMLElement {
 	parentData: any;
@@ -169,27 +176,39 @@ class PhaseForm extends HTMLElement {
 		});
 
 		const confirmBtn = this.querySelector("#confirmDeleteBtn");
-		confirmBtn?.addEventListener("click", async () => {
-			try {
-				const response = await fetch(`/api/project/phase/delete`, {
-					method: "DELETE",
-					headers: {
-						"Content-Type": "application/json"
-					},
-					body: JSON.stringify({
-						_id: this.phaseData._id
-					})
-				});
+		confirmBtn?.addEventListener(
+			"click",
+			this.handleDeleteSubmit.bind(this)
+		);
+	}
 
-				if (response.ok) {
-					window.location.reload();
-				} else {
-					throw new Error("Failed to delete phase");
-				}
-			} catch (error) {
-				alert("Errore nell'eliminazione della fase");
+	async handleDeleteSubmit(event: Event) {
+		event.preventDefault();
+
+		const method = "DELETE";
+		const url = `/api/project/phase/delete`;
+		const body = {
+			_id: this.phaseData._id
+		};
+
+		try {
+			await fetcher(method, url, body);
+
+			const viewToggler = document.querySelector(
+				"view-toggler"
+			) as ViewToggler | null;
+			if (viewToggler) {
+				await viewToggler.updatePage();
+				const modal = document.querySelector(
+					"#ModifyPhase"
+				) as HTMLElement;
+				hideModal(modal);
+			} else {
+				window.location.reload();
 			}
-		});
+		} catch (error) {
+			alert("Errore nell'eliminazione della fase");
+		}
 	}
 
 	async handleModifySubmit(event: Event) {
@@ -210,7 +229,9 @@ class PhaseForm extends HTMLElement {
 			return;
 		}
 
-		const data = {
+		const method = "PATCH";
+		const url = `/api/project/phase/modify`;
+		const body = {
 			_id: this.phaseData._id,
 			summary: summary,
 			dtStart: new Date(
@@ -222,18 +243,15 @@ class PhaseForm extends HTMLElement {
 		};
 
 		try {
-			const response = await fetch(`/api/project/phase/modify`, {
-				method: "PATCH",
-				headers: {
-					"Content-Type": "application/json"
-				},
-				body: JSON.stringify(data)
-			});
+			await fetcher(method, url, body);
 
-			if (response.ok) {
-				window.location.reload();
+			const viewToggler = document.querySelector(
+				"view-toggler"
+			) as ViewToggler | null;
+			if (viewToggler) {
+				await viewToggler.updatePage();
 			} else {
-				throw new Error("Failed to update activity");
+				window.location.reload();
 			}
 		} catch (error) {
 			alert("Errore nell'aggiornamento della fase");
@@ -332,7 +350,10 @@ class PhaseForm extends HTMLElement {
 	}
 
 	// Funzione da chiamare per popolare il form con i dati
-	public updateData(phaseData: any, parentData: any) {
+	public updateData(
+		phaseData: PhaseResponse | SubPhaseResponse,
+		parentData: PhaseResponse | null
+	) {
 		this.phaseData = phaseData;
 		this.parentData = parentData;
 		this.isEditMode = false;

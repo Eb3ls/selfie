@@ -8,13 +8,13 @@ import {
 import ProjectPhaseRow from "./ProjectPhaseRow";
 
 class TimeLine extends HTMLElement {
-	private firstDate: Date;
-	private lastDate: Date;
-	private centerDate: Date;
-	private todayDate: Date;
-	private isScrolling: boolean;
-	private resizeObserver: ResizeObserver | null;
-	private phaseRowsHandler: ProjectPhaseRow | null;
+	firstDate: Date;
+	lastDate: Date;
+	centerDate: Date;
+	todayDate: Date;
+	isScrolling: boolean;
+	resizeObserver: ResizeObserver | null;
+	phaseRowsHandler: ProjectPhaseRow | null;
 
 	constructor() {
 		super();
@@ -34,12 +34,6 @@ class TimeLine extends HTMLElement {
 			this.render();
 		});
 		this.resizeObserver.observe(this);
-	}
-
-	disconnectedCallback() {
-		if (this.resizeObserver) {
-			this.resizeObserver.disconnect();
-		}
 	}
 
 	updateMonth() {
@@ -77,9 +71,11 @@ class TimeLine extends HTMLElement {
 			weekday: "short"
 		});
 		if (date.toDateString() === this.todayDate.toDateString()) {
-			cell.style.backgroundColor = "#ffcccc";
+			cell.style.backgroundColor = "#e6f3ff";
+			cell.style.fontWeight = "bold";
 		} else {
 			cell.style.backgroundColor = "";
+			cell.style.fontWeight = "normal";
 		}
 	}
 
@@ -141,6 +137,41 @@ class TimeLine extends HTMLElement {
 		this.isScrolling = false;
 	}
 
+	private onLeftScroll = () => {
+		if (this.isScrolling) return;
+		this.isScrolling = true;
+		const date = new Date(this.centerDate);
+		date.setDate(date.getDate() - 3);
+		this.scrollToDate(date, true);
+
+		setTimeout(() => {
+			this.handleScroll(false);
+			this.phaseRowsHandler!.shiftTimeline(false);
+		}, 500);
+	};
+
+	private onRightScroll = () => {
+		if (this.isScrolling) return;
+		this.isScrolling = true;
+		const date = new Date(this.centerDate);
+		date.setDate(date.getDate() + 3);
+		this.scrollToDate(date, true);
+
+		setTimeout(() => {
+			this.handleScroll(true);
+			this.phaseRowsHandler!.shiftTimeline(true);
+		}, 500);
+	};
+
+	createScrollButton(id: string, icon: string, onClick: () => void) {
+		const button = document.createElement("button");
+		button.id = id;
+		button.className = "btn p-0";
+		button.innerHTML = `<i class="bi ${icon}"></i>`;
+		button.addEventListener("click", onClick);
+		return button;
+	}
+
 	addEventListeners() {
 		const leftScrollBtn = document.getElementById("leftScroll");
 		const rightScrollBtn = document.getElementById("rightScroll");
@@ -159,37 +190,26 @@ class TimeLine extends HTMLElement {
 			this.phaseRowsHandler!.scrollLeft = this.scrollLeft;
 		});
 
-		leftScrollBtn.addEventListener("click", () => {
-			if (this.isScrolling) return;
-			this.isScrolling = true;
-			const date = new Date(this.centerDate);
-			date.setDate(date.getDate() - 3);
-			this.scrollToDate(date, true);
-
-			setTimeout(() => {
-				this.handleScroll(false);
-				this.phaseRowsHandler!.shiftTimeline(false);
-			}, 500);
-		});
-
-		rightScrollBtn.addEventListener("click", () => {
-			if (this.isScrolling) return;
-			this.isScrolling = true;
-			const date = new Date(this.centerDate);
-			date.setDate(date.getDate() + 3);
-			this.scrollToDate(date, true);
-
-			setTimeout(() => {
-				this.handleScroll(true);
-				this.phaseRowsHandler!.shiftTimeline(true);
-			}, 500);
-		});
+		leftScrollBtn.replaceWith(
+			this.createScrollButton(
+				"leftScroll",
+				"bi-chevron-left",
+				this.onLeftScroll
+			)
+		);
+		rightScrollBtn.replaceWith(
+			this.createScrollButton(
+				"rightScroll",
+				"bi-chevron-right",
+				this.onRightScroll
+			)
+		);
 	}
 
-	public loadProjectData(todayDate: Date) {
+	public loadProjectData(todayDate: Date, centerDate: Date) {
 		this.todayDate = todayDate;
 		// Le date sono passate per riferimento quindi ne creo una nuova
-		this.centerDate = new Date(todayDate);
+		this.centerDate = new Date(centerDate);
 		this.render();
 	}
 

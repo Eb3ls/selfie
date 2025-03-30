@@ -1,6 +1,7 @@
 import {
 	PhaseResponse,
-	ProjectActivityResponse
+	ProjectActivityResponse,
+	SubPhaseResponse
 } from "@/app/api/(auth)/project/[id]/route";
 import {
 	User,
@@ -10,9 +11,11 @@ import {
 	escapeHTML,
 	fetcher,
 	formatDate,
+	hideModal,
 	showError,
 	validateLength
 } from "../Utils";
+import ViewToggler from "../ViewToggler";
 
 interface PartialLink {
 	name: string;
@@ -20,7 +23,7 @@ interface PartialLink {
 }
 
 class ActivityForm extends HTMLElement {
-	parentPhase: PhaseResponse;
+	parentPhase: PhaseResponse | SubPhaseResponse;
 	activity: ProjectActivityResponse;
 	activitiesList: ProjectActivityResponse[];
 	usersAvaiable: User[];
@@ -67,7 +70,7 @@ class ActivityForm extends HTMLElement {
 	// Funzione per fornire i dati dell'activity specifica
 	public updateData(
 		activity: ProjectActivityResponse,
-		parentPhase: PhaseResponse
+		parentPhase: PhaseResponse | SubPhaseResponse
 	) {
 		if (!activity || !parentPhase) return;
 		this.activity = activity;
@@ -406,7 +409,14 @@ class ActivityLinkForm extends HTMLElement {
 
 		try {
 			await fetcher(method, url, body);
-			window.location.reload();
+			const viewToggler = document.querySelector(
+				"view-toggler"
+			) as ViewToggler | null;
+			if (viewToggler) {
+				await viewToggler.updatePage();
+			} else {
+				window.location.reload();
+			}
 		} catch (error) {
 			alert("Errore nell'associazione delle attività");
 		}
@@ -531,7 +541,18 @@ class ActivityDeleteForm extends HTMLElement {
 
 		try {
 			await fetcher(method, url, body);
-			window.location.reload();
+			const viewToggler = document.querySelector(
+				"view-toggler"
+			) as ViewToggler | null;
+			if (viewToggler) {
+				await viewToggler.updatePage();
+				const modal = document.querySelector(
+					"#ModifyActivity"
+				) as HTMLDivElement;
+				hideModal(modal);
+			} else {
+				window.location.reload();
+			}
 		} catch (error) {
 			alert("Errore nell'eliminazione dell'attività");
 		}
@@ -579,7 +600,7 @@ customElements.define("activity-delete-form", ActivityDeleteForm);
 
 class ActivityModifyForm extends HTMLElement {
 	activity: ProjectActivityResponse;
-	parentPhase: PhaseResponse;
+	parentPhase: PhaseResponse | SubPhaseResponse;
 	usersAvailable: User[];
 	modifiedUserlist: User[];
 	minDate: string;
@@ -631,7 +652,14 @@ class ActivityModifyForm extends HTMLElement {
 
 		try {
 			await fetcher(method, url, data);
-			window.location.reload();
+			const viewToggler = document.querySelector(
+				"view-toggler"
+			) as ViewToggler | null;
+			if (viewToggler) {
+				await viewToggler.updatePage();
+			} else {
+				window.location.reload();
+			}
 		} catch (error) {
 			alert("Errore durante la modifica dell'attività");
 		}
@@ -863,7 +891,7 @@ class ActivityModifyForm extends HTMLElement {
 
 	public initialize(
 		activity: ProjectActivityResponse,
-		parentPhase: PhaseResponse,
+		parentPhase: PhaseResponse | SubPhaseResponse,
 		usersList: User[],
 		usersAvailable: User[]
 	) {

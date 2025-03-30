@@ -7,6 +7,7 @@ import {
 	showError,
 	validateLength
 } from "../Utils";
+import ViewToggler from "../ViewToggler";
 
 class ProjectSettings extends HTMLElement {
 	projectTitle: string;
@@ -184,7 +185,14 @@ class ProjectSettings extends HTMLElement {
 
 		try {
 			await fetcher(method, url, body);
-			window.location.reload();
+			const viewToggler = document.querySelector(
+				"view-toggler"
+			) as ViewToggler | null;
+			if (viewToggler) {
+				await viewToggler.updatePage();
+			} else {
+				window.location.reload();
+			}
 		} catch (error) {
 			alert("Errore durante la modifica del progetto");
 		}

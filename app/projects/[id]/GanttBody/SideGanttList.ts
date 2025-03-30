@@ -50,20 +50,37 @@ class SideGanttList extends HTMLElement {
 		this.appendChild(container);
 	}
 
-	// Funzione per aggiungere i dati al modale
-	openModify(data: any, parentData: any, isPhase: boolean) {
-		const name = isPhase ? "Phase" : "Activity";
+	// Funzione per aggiungere i dati al modale della Phase
+	openModifyPhase(
+		data: PhaseResponse | SubPhaseResponse,
+		parentData: PhaseResponse | null
+	) {
 		const modifyModal = document.getElementById(
-			`Modify${name}Component`
-		) as ModifyPhase | ModifyActivity;
-
+			"ModifyPhaseComponent"
+		) as ModifyPhase;
 		if (!modifyModal) {
 			console.error(
-				`Errore: modale per modifica delle ${name.toLocaleLowerCase()} non trovato`
+				"Errore: modale per modifica della phase non trovato"
 			);
 			return;
 		}
+		modifyModal.updateData(data, parentData);
+	}
 
+	// Funzione per aggiungere i dati al modale dell'Activity
+	openModifyActivity(
+		data: ProjectActivityResponse,
+		parentData: SubPhaseResponse | PhaseResponse
+	) {
+		const modifyModal = document.getElementById(
+			"ModifyActivityComponent"
+		) as ModifyActivity;
+		if (!modifyModal) {
+			console.error(
+				"Errore: modale per modifica dell'attività non trovato"
+			);
+			return;
+		}
 		modifyModal.updateData(data, parentData);
 	}
 
@@ -130,7 +147,7 @@ class SideGanttList extends HTMLElement {
 
 		// Aggiungiamo il listener per aprire il modale
 		activityElement.addEventListener("click", () => {
-			this.openModify(activity, phaseData, false);
+			this.openModifyActivity(activity, phaseData);
 		});
 
 		return activityElement;
@@ -178,7 +195,7 @@ class SideGanttList extends HTMLElement {
 		button.setAttribute("data-bs-toggle", "modal");
 		button.setAttribute("data-bs-target", "#ModifyPhase");
 		button.onclick = () => {
-			this.openModify(data, parentData, true);
+			this.openModifyPhase(data, parentData);
 		};
 
 		togglerContent.appendChild(caretIcon);
