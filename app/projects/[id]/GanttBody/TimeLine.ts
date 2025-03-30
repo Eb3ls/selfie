@@ -76,10 +76,7 @@ class TimeLine extends HTMLElement {
 		cell.children[1].textContent = date.toLocaleDateString(timeFormat, {
 			weekday: "short"
 		});
-		if (
-			formatDate(date.toISOString()) ===
-			formatDate(this.todayDate.toISOString())
-		) {
+		if (date.toDateString() === this.todayDate.toDateString()) {
 			cell.style.backgroundColor = "#ffcccc";
 		} else {
 			cell.style.backgroundColor = "";

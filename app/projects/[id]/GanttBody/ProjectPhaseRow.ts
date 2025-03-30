@@ -103,7 +103,7 @@ class ProjectPhaseRow extends HTMLElement {
 			Math.min(this.lastDate.getTime(), formattedDue.getTime())
 		);
 
-		// Calcoliamo la larghezza in base alla differenza di giorni (attenzione: getDate() funziona se le date sono nello stesso mese)
+		// Calcoliamo la larghezza in base alla differenza di giorni
 		let width;
 		if (initialDate.getTime() > finalDate.getTime()) {
 			width = 0;
@@ -117,7 +117,7 @@ class ProjectPhaseRow extends HTMLElement {
 
 		// Calcoliamo la posizione left del pill in base alla data iniziale
 		let left;
-		if (initialDate.getTime() < this.firstDate.getTime() && this.lastDate) {
+		if (initialDate < this.firstDate) {
 			left = 0;
 		} else {
 			const diffTime = Math.abs(
@@ -248,6 +248,7 @@ class ProjectPhaseRow extends HTMLElement {
 	public render(currentDate: Date) {
 		this.rowsArray = [];
 		this.cellsNumber = calculateCells(this);
+		this.firstDate = new Date(currentDate);
 		this.firstDate.setDate(
 			currentDate.getDate() - Math.floor(this.cellsNumber / 2)
 		);
