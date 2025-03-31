@@ -70,7 +70,7 @@ class ProjectPhaseRow extends HTMLElement {
 		color: string
 	): HTMLElement {
 		const start = new Date(data.dtStart);
-		const due = new Date(data.due);
+		const due = new Date(formatDate(data.due));
 		const isMilestone = "isMilestone" in data ? data.isMilestone : false;
 
 		const phasePill = document.createElement("div");

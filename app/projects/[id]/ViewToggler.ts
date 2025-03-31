@@ -81,9 +81,7 @@ class ViewToggler extends HTMLElement {
 
 		// Prendiamo la data centrale nella timeline per mantenere la posizione
 		if (this.viewType === "GANTT") {
-			const timeLine = this.querySelector("time-line") as TimeLine;
-			if (!timeLine) return;
-			this.centerDate = new Date(timeLine.centerDate);
+			this.saveGanttInfo();
 			this.render(this.viewType, true);
 		} else {
 			// Se siamo nella lista la data centrale era già salvata
@@ -124,22 +122,26 @@ class ViewToggler extends HTMLElement {
 		}
 	}
 
+	saveGanttInfo() {
+		// Ci salviamo la posizione dello scroll Y per ripristinarlo quando torniamo al gantt
+		const ganttContainer = this.querySelector(
+			"#ganttContainer"
+		) as HTMLElement;
+		if (!ganttContainer) return;
+		this.ganttPositionY = ganttContainer.scrollTop;
+
+		// Ci salviamo la data centrale per ripristinarla quando torniamo al gantt
+		const timeLine = this.querySelector("time-line") as TimeLine;
+		if (!timeLine) return;
+		this.centerDate = new Date(timeLine.centerDate);
+	}
+
 	private render(viewMode: "GANTT" | "LIST", force: boolean) {
 		if (this.viewType === viewMode && !force) return;
 		this.viewType = viewMode;
 
 		if (viewMode === "LIST" && !force) {
-			// Ci salviamo la posizione dello scroll Y per ripristinarlo quando torniamo al gantt
-			const ganttContainer = this.querySelector(
-				"#ganttContainer"
-			) as HTMLElement;
-			if (!ganttContainer) return;
-			this.ganttPositionY = ganttContainer.scrollTop;
-
-			// Ci salviamo la data centrale per ripristinarla quando torniamo al gantt
-			const timeLine = this.querySelector("time-line") as TimeLine;
-			if (!timeLine) return;
-			this.centerDate = new Date(timeLine.centerDate);
+			this.saveGanttInfo();
 		}
 
 		// Rimuoviamo i figli eccetto l'upper header
