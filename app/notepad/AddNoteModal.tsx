@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button, Form, Modal } from "react-bootstrap";
 import { FaPlus } from "react-icons/fa";
-import "./GenericModal.css";
+import StandardInput from "../components/StandardInput";
+import StandardModal from "../components/StandardModal";
 
 export function AddNoteModal({ children, handleAdd }: any) {
 	const [show, setShow] = useState(false);
@@ -45,65 +45,31 @@ export function AddNoteModal({ children, handleAdd }: any) {
 			<span onClick={() => setShow(true)} style={{ cursor: "pointer" }}>
 				{children || <FaPlus />}
 			</span>
-
-			<Modal
+			<StandardModal
+				title="Aggiungi Nota"
+				saveBtnText="Salva"
 				show={show}
-				onHide={() => setShow(false)}
-				centered
-				dialogClassName="custom-modal"
-				backdropClassName="custom-backdrop"
+				handleClose={() => setShow(false)}
+				handleSubmit={handleSubmit}
 			>
-				<Modal.Header closeButton className="custom-modal-header">
-					<Modal.Title>Aggiungi Nota</Modal.Title>
-				</Modal.Header>
-				<Form onSubmit={handleSubmit} className="custom-form">
-					<Modal.Body>
-						<Form.Group className="mb-4" controlId="formSummary">
-							<Form.Label>
-								<strong>Titolo</strong>
-							</Form.Label>
-							<Form.Control
-								type="text"
-								name="summary"
-								value={formData.summary}
-								onChange={handleChange}
-								placeholder="Inserisci il titolo della nota"
-								className="input-field"
-							/>
-						</Form.Group>
+				<StandardInput
+					type="text"
+					name="summary"
+					value={formData.summary}
+					title="Titolo"
+					placeholder="Inserisci il titolo della nota"
+					onChange={handleChange}
+				/>
 
-						<Form.Group className="mb-4" controlId="formCategories">
-							<Form.Label>
-								<strong>Categorie</strong>
-							</Form.Label>
-							<Form.Control
-								type="text"
-								name="categories"
-								value={formData.categories}
-								onChange={handleChange}
-								placeholder="Inserisci le categorie separate da virgola"
-								className="input-field"
-							/>
-						</Form.Group>
-					</Modal.Body>
-					<Modal.Footer>
-						<Button
-							variant="secondary"
-							onClick={() => setShow(false)}
-							className="custom-cancel-button"
-						>
-							Annulla
-						</Button>
-						<Button
-							variant="primary"
-							type="submit"
-							className="custom-submit-button"
-						>
-							Aggiungi
-						</Button>
-					</Modal.Footer>
-				</Form>
-			</Modal>
+				<StandardInput
+					type="text"
+					name="categories"
+					value={formData.categories}
+					title="Categorie"
+					onChange={handleChange}
+					placeholder="Inserisci le categorie separate da virgola"
+				/>
+			</StandardModal>
 		</>
 	);
 }
