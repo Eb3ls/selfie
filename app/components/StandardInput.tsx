@@ -1,13 +1,13 @@
 import React from "react";
 
 interface StandardInputProps {
-	type: string;
+	type?: string;
 	name: string;
 	title: string;
-	placeholder: string;
+	placeholder?: string;
 	onChange: React.ChangeEventHandler<HTMLInputElement | HTMLSelectElement>;
 	value: string | number;
-	optionArray?: string[];
+	optionMap?: { [key: string]: string };
 	isRequired?: boolean;
 }
 
@@ -18,7 +18,7 @@ export default function StandardInput({
 	placeholder,
 	onChange,
 	value,
-	optionArray = [],
+	optionMap = {},
 	isRequired = true
 }: StandardInputProps) {
 	return (
@@ -26,16 +26,16 @@ export default function StandardInput({
 			<label htmlFor={name} className="form-label fw-bold">
 				{title}
 			</label>
-			{optionArray.length === 0 ? (
+			{Object.keys(optionMap).length === 0 ? (
 				<input
 					type={type}
 					name={name}
 					id={name}
 					placeholder={placeholder}
-					onChange={onChange}
 					value={value}
-					className="form-control"
+					onChange={onChange}
 					required={isRequired}
+					className="form-control"
 				/>
 			) : (
 				<select
@@ -46,9 +46,9 @@ export default function StandardInput({
 					className="form-select"
 					required={isRequired}
 				>
-					{optionArray.map((option) => (
-						<option key={option} value={option}>
-							{option}
+					{Object.entries(optionMap).map(([value, title]) => (
+						<option key={value} value={value}>
+							{title}
 						</option>
 					))}
 				</select>

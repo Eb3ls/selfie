@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button, Form, Modal } from "react-bootstrap";
+import { Button, Form } from "react-bootstrap";
 import {
 	FaSortAlphaDown,
 	FaSortAlphaUp,
@@ -10,7 +10,7 @@ import {
 	FaSortNumericDown,
 	FaSortNumericUp
 } from "react-icons/fa";
-import "./GenericModal.css";
+import StandardModal from "../components/StandardModal";
 
 export function SortModal({ children, handleSort }: any) {
 	const [show, setShow] = useState(false);
@@ -28,110 +28,76 @@ export function SortModal({ children, handleSort }: any) {
 				{children}
 			</span>
 
-			<Modal
+			<StandardModal
+				title="Ordina Note"
+				saveBtnText="Applica"
 				show={show}
-				onHide={() => setShow(false)}
-				centered
-				dialogClassName="custom-modal"
-				backdropClassName="custom-backdrop"
+				handleClose={() => setShow(false)}
 			>
-				<Modal.Header closeButton className="custom-modal-header">
-					<Modal.Title>Ordina Note</Modal.Title>
-				</Modal.Header>
-				<Modal.Body>
-					<Form className="custom-form">
-						<Form.Group
-							className="mb-4"
-							controlId="formSortAlphabetical"
+				<Form.Group className="mb-4" controlId="formSortAlphabetical">
+					<Form.Label>
+						<strong>Titolo</strong>
+					</Form.Label>
+					<div className="d-flex justify-content-between">
+						<Button
+							variant="light"
+							onClick={() =>
+								handleSortClick("alphabetical", "asc")
+							}
 						>
-							<Form.Label>
-								<strong>Titolo</strong>
-							</Form.Label>
-							<div className="d-flex justify-content-between">
-								<Button
-									variant="light"
-									onClick={() =>
-										handleSortClick("alphabetical", "asc")
-									}
-									className="custom-sort-button"
-								>
-									<FaSortAlphaUp /> Crescente
-								</Button>
-								<Button
-									variant="light"
-									onClick={() =>
-										handleSortClick("alphabetical", "desc")
-									}
-									className="custom-sort-button"
-								>
-									<FaSortAlphaDown /> Decrescente
-								</Button>
-							</div>
-						</Form.Group>
+							<FaSortAlphaUp /> Crescente
+						</Button>
+						<Button
+							variant="light"
+							onClick={() =>
+								handleSortClick("alphabetical", "desc")
+							}
+						>
+							<FaSortAlphaDown /> Decrescente
+						</Button>
+					</div>
+				</Form.Group>
 
-						<Form.Group className="mb-4" controlId="formSortDate">
-							<Form.Label>
-								<strong>Data di creazione</strong>
-							</Form.Label>
-							<div className="d-flex justify-content-between">
-								<Button
-									variant="light"
-									onClick={() =>
-										handleSortClick("date", "asc")
-									}
-									className="custom-sort-button"
-								>
-									<FaSortNumericUp /> Crescente
-								</Button>
-								<Button
-									variant="light"
-									onClick={() =>
-										handleSortClick("date", "desc")
-									}
-									className="custom-sort-button"
-								>
-									<FaSortNumericDown /> Decrescente
-								</Button>
-							</div>
-						</Form.Group>
+				<Form.Group className="mb-4" controlId="formSortDate">
+					<Form.Label>
+						<strong>Data di creazione</strong>
+					</Form.Label>
+					<div className="d-flex justify-content-between">
+						<Button
+							variant="light"
+							onClick={() => handleSortClick("date", "asc")}
+						>
+							<FaSortNumericUp /> Crescente
+						</Button>
+						<Button
+							variant="light"
+							onClick={() => handleSortClick("date", "desc")}
+						>
+							<FaSortNumericDown /> Decrescente
+						</Button>
+					</div>
+				</Form.Group>
 
-						<Form.Group className="mb-4" controlId="formSortLength">
-							<Form.Label>
-								<strong>Lunghezza</strong>
-							</Form.Label>
-							<div className="d-flex justify-content-between">
-								<Button
-									variant="light"
-									onClick={() =>
-										handleSortClick("length", "asc")
-									}
-									className="custom-sort-button"
-								>
-									<FaSortAmountUp /> Crescente
-								</Button>
-								<Button
-									variant="light"
-									onClick={() =>
-										handleSortClick("length", "desc")
-									}
-									className="custom-sort-button"
-								>
-									<FaSortAmountDown /> Decrescente
-								</Button>
-							</div>
-						</Form.Group>
-					</Form>
-				</Modal.Body>
-				<Modal.Footer>
-					<Button
-						variant="secondary"
-						onClick={() => setShow(false)}
-						className="custom-cancel-button"
-					>
-						Annulla
-					</Button>
-				</Modal.Footer>
-			</Modal>
+				<Form.Group className="mb-4" controlId="formSortLength">
+					<Form.Label>
+						<strong>Lunghezza</strong>
+					</Form.Label>
+					<div className="d-flex justify-content-between">
+						<Button
+							variant="light"
+							onClick={() => handleSortClick("length", "asc")}
+						>
+							<FaSortAmountUp /> Crescente
+						</Button>
+						<Button
+							variant="light"
+							onClick={() => handleSortClick("length", "desc")}
+						>
+							<FaSortAmountDown /> Decrescente
+						</Button>
+					</div>
+				</Form.Group>
+			</StandardModal>
 		</>
 	);
 }

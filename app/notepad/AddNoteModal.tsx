@@ -68,6 +68,7 @@ export function AddNoteModal({ children, handleAdd }: any) {
 					title="Categorie"
 					onChange={handleChange}
 					placeholder="Inserisci le categorie separate da virgola"
+					isRequired={false}
 				/>
 			</StandardModal>
 		</>

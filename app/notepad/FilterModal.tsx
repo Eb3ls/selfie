@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button, Form, Modal } from "react-bootstrap";
+import { Form } from "react-bootstrap";
 import { FaFilter } from "react-icons/fa";
+import StandardInput from "../components/StandardInput";
+import StandardModal from "../components/StandardModal";
 import "./GenericModal.css";
 
 // TODO: Sistemare ricerca categorie - cercare più categorie insieme
@@ -91,113 +93,82 @@ export function FilterModal({ children, handleFilters }: any) {
 				{children}
 			</span>
 
-			<Modal
+			<StandardModal
+				title="Filtra Note"
+				titleIcon={<FaFilter />}
+				saveBtnText="Filtra"
 				show={show}
-				onHide={() => setShow(false)}
-				centered
-				dialogClassName="custom-modal"
-				backdropClassName="custom-backdrop"
+				handleClose={() => setShow(false)}
+				handleSubmit={handleSubmit}
 			>
-				<Modal.Header closeButton className="custom-modal-header">
-					<Modal.Title>
-						<FaFilter /> Filtra Note
-					</Modal.Title>
-				</Modal.Header>
-				<Form onSubmit={handleSubmit} className="custom-form">
-					<Modal.Body>
-						<Form.Group
-							className="mb-4"
-							controlId="formCreationDate"
-						>
-							<Form.Label>
-								<strong>Data Creazione</strong>
-							</Form.Label>
-							<div className="row">
-								<div className="col-12 col-sm-6 mb-3 mb-sm-0">
-									<Form.Label>Minimo</Form.Label>
-									<Form.Control
-										type="date"
-										name="creationDateMin"
-										value={formData.creationDateMin} // Resta una stringa vuota se non è stato selezionato nulla
-										onChange={handleChange}
-										className="input-field"
-									/>
-								</div>
-								<div className="col-12 col-sm-6">
-									<Form.Label>Massimo</Form.Label>
-									<Form.Control
-										type="date"
-										name="creationDateMax"
-										value={formData.creationDateMax}
-										onChange={handleChange}
-										className="input-field"
-									/>
-								</div>
-							</div>
-						</Form.Group>
-
-						<Form.Group className="mb-4" controlId="formLength">
-							<Form.Label>
-								<strong>Lunghezza</strong>
-							</Form.Label>
-							<div className="row">
-								<div className="col-12 col-sm-6 mb-3 mb-sm-0">
-									<Form.Label>Minimo</Form.Label>
-									<Form.Control
-										type="number"
-										name="lengthMin"
-										value={formData.lengthMin}
-										onChange={handleChange}
-										placeholder="Lunghezza minima"
-										className="input-field"
-									/>
-								</div>
-								<div className="col-12 col-sm-6">
-									<Form.Label>Massimo</Form.Label>
-									<Form.Control
-										type="number"
-										name="lengthMax"
-										value={formData.lengthMax}
-										onChange={handleChange}
-										placeholder="Lunghezza massima"
-										className="input-field"
-									/>
-								</div>
-							</div>
-						</Form.Group>
-
-						<Form.Group className="mb-3" controlId="formCategories">
-							<Form.Label>
-								<strong>Categoria</strong>
-							</Form.Label>
+				<Form.Group className="mb-4" controlId="formCreationDate">
+					<Form.Label>
+						<strong>Data Creazione</strong>
+					</Form.Label>
+					<div className="row">
+						<div className="col-12 col-sm-6 mb-3 mb-sm-0">
+							<Form.Label>Minimo</Form.Label>
 							<Form.Control
-								type="text"
-								name="categories"
-								value={formData.categories}
+								type="date"
+								name="creationDateMin"
+								value={formData.creationDateMin} // Resta una stringa vuota se non è stato selezionato nulla
 								onChange={handleChange}
-								placeholder="Inserisci categoria"
 								className="input-field"
 							/>
-						</Form.Group>
-					</Modal.Body>
-					<Modal.Footer>
-						<Button
-							variant="secondary"
-							onClick={() => setShow(false)}
-							className="custom-cancel-button"
-						>
-							Annulla
-						</Button>
-						<Button
-							variant="primary"
-							type="submit"
-							className="custom-submit-button"
-						>
-							Filtra
-						</Button>
-					</Modal.Footer>
-				</Form>
-			</Modal>
+						</div>
+						<div className="col-12 col-sm-6">
+							<Form.Label>Massimo</Form.Label>
+							<Form.Control
+								type="date"
+								name="creationDateMax"
+								value={formData.creationDateMax}
+								onChange={handleChange}
+								className="input-field"
+							/>
+						</div>
+					</div>
+				</Form.Group>
+
+				<Form.Group className="mb-4" controlId="formLength">
+					<Form.Label>
+						<strong>Lunghezza</strong>
+					</Form.Label>
+					<div className="row">
+						<div className="col-12 col-sm-6 mb-3 mb-sm-0">
+							<Form.Label>Minimo</Form.Label>
+							<Form.Control
+								type="number"
+								name="lengthMin"
+								value={formData.lengthMin}
+								onChange={handleChange}
+								placeholder="Lunghezza minima"
+								className="input-field"
+							/>
+						</div>
+						<div className="col-12 col-sm-6">
+							<Form.Label>Massimo</Form.Label>
+							<Form.Control
+								type="number"
+								name="lengthMax"
+								value={formData.lengthMax}
+								onChange={handleChange}
+								placeholder="Lunghezza massima"
+								className="input-field"
+							/>
+						</div>
+					</div>
+				</Form.Group>
+
+				<StandardInput
+					type="text"
+					name="categories"
+					value={formData.categories}
+					title="Categorie"
+					placeholder="Inserisci categoria"
+					onChange={handleChange}
+					isRequired={false}
+				/>
+			</StandardModal>
 		</>
 	);
 }
