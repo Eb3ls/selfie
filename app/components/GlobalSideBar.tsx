@@ -130,7 +130,7 @@ export function GlobalSideBar() {
 				bg="light"
 				expand="md"
 				className="d-none d-lg-flex border-bottom shadow-sm sticky-top"
-				style={{ zIndex: 2000 }}
+				style={{ zIndex: 102 }}
 			>
 				<Container>
 					<Navbar.Brand href="/home" className="fw-bold">
@@ -188,7 +188,7 @@ export function GlobalSideBar() {
 					position: "fixed",
 					top: "1rem",
 					left: "1rem",
-					zIndex: 1000,
+					zIndex: 100,
 					padding: "0.5rem",
 					display: showSidebar ? "none" : "block"
 				}}

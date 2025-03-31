@@ -3,7 +3,7 @@ import { GroupChatModal } from "@/app/chat/sideBar/GroupChatModal";
 import { useState } from "react";
 import React from "react";
 import { Button } from "react-bootstrap";
-import { IoIosAdd, IoIosClose } from "react-icons/io";
+import { IoIosAdd } from "react-icons/io";
 
 interface FloatingMenuProps {
 	updateChatList: () => void;
@@ -55,15 +55,12 @@ export function FloatingMenu({ updateChatList }: FloatingMenuProps) {
 				style={{
 					width: "30px",
 					height: "30px",
-					transition: "transform 0.2s ease"
+					transition: "transform 0.2s ease",
+					transform: showOptions ? "rotate(135deg)" : "rotate(0deg)"
 				}}
 				onClick={() => setShowOptions(!showOptions)}
 			>
-				{showOptions ? (
-					<IoIosClose size={28} />
-				) : (
-					<IoIosAdd size={28} />
-				)}
+				<IoIosAdd size={28} />
 			</Button>
 		</div>
 	);

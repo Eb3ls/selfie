@@ -16,7 +16,7 @@ export function Header({
 	return (
 		<div
 			className="text-dark p-3 border-bottom d-flex align-items-center justify-content-start bg-light sticky-top"
-			style={{ minHeight: "75px" }}
+			style={{ minHeight: "75px", zIndex: 101 }}
 		>
 			<Button
 				variant="link"
