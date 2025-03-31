@@ -74,7 +74,7 @@ export function UserItem({
 		<div
 			className={`fw-bold p-3 mb-3 rounded-4 border d-flex align-items-center position-relative hover-shadow`}
 			onClick={entry.loader}
-			style={{ minHeight: "81px" }}
+			style={{ minHeight: "81px", cursor: "pointer" }}
 		>
 			<div className="position-relative">{iconToShow}</div>
 

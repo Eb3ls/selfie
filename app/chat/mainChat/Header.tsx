@@ -14,7 +14,10 @@ export function Header({
 	setIsSidebarOpen
 }: HeaderProps) {
 	return (
-		<div className="text-dark p-3 border-bottom d-flex align-items-center justify-content-start bg-light sticky-top">
+		<div
+			className="text-dark p-3 border-bottom d-flex align-items-center justify-content-start bg-light sticky-top"
+			style={{ minHeight: "75px" }}
+		>
 			<Button
 				variant="link"
 				className="d-block d-ld-none"
@@ -23,7 +26,7 @@ export function Header({
 					setSelectedChat(null);
 				}}
 			>
-				<FaArrowLeft fill="black" size={28}></FaArrowLeft>
+				<FaArrowLeft fill="black" size={20}></FaArrowLeft>
 			</Button>
 			<h3 className="text-center fw-bold flex-grow-1 position-absolute top-50 start-50 translate-middle">
 				{chatSummary}

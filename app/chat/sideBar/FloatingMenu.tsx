@@ -3,7 +3,7 @@ import { GroupChatModal } from "@/app/chat/sideBar/GroupChatModal";
 import { useState } from "react";
 import React from "react";
 import { Button } from "react-bootstrap";
-import { IoIosAddCircleOutline, IoIosClose } from "react-icons/io";
+import { IoIosAdd, IoIosClose } from "react-icons/io";
 
 interface FloatingMenuProps {
 	updateChatList: () => void;
@@ -13,40 +13,56 @@ export function FloatingMenu({ updateChatList }: FloatingMenuProps) {
 	const [showOptions, setShowOptions] = useState(false);
 
 	return (
-		<div className="position-relative" style={{ zIndex: 100 }}>
-			{/* Menu con le opzioni */}
-			{showOptions && (
-				<div
-					className="position-absolute end-0 top-100 mt-2"
-					style={{ width: "200px" }}
-				>
-					<ChatModal updateChatList={updateChatList}>
-						<Button variant="primary" className="mb-2 w-100">
-							Crea nuova chat
-						</Button>
-					</ChatModal>
-					<GroupChatModal updateChatList={updateChatList}>
-						<Button variant="primary" className="mb-2 w-100">
-							Crea nuovo gruppo
-						</Button>
-					</GroupChatModal>
-				</div>
-			)}
+		<div
+			className="position-relative d-flex align-items-center"
+			style={{ zIndex: 100 }}
+		>
+			{/* Menu with options in a dropdown */}
+			<div
+				className={`dropdown-menu ${showOptions ? "show" : ""} shadow-sm`}
+				style={{
+					position: "absolute",
+					right: 0,
+					top: "100%",
+					marginTop: "0.5rem",
+					minWidth: "200px"
+				}}
+			>
+				<ChatModal updateChatList={updateChatList}>
+					<Button
+						variant="light"
+						className="dropdown-item d-flex align-items-center gap-2"
+					>
+						<i className="bi bi-chat"></i>
+						Crea nuova chat
+					</Button>
+				</ChatModal>
+				<GroupChatModal updateChatList={updateChatList}>
+					<Button
+						variant="light"
+						className="dropdown-item d-flex align-items-center gap-2"
+					>
+						<i className="bi bi-people"></i>
+						Crea nuovo gruppo
+					</Button>
+				</GroupChatModal>
+			</div>
 
-			{/* Pulsante principale */}
+			{/* Main button */}
 			<Button
 				variant="primary"
-				className="p-2 rounded-circle d-flex align-items-center justify-content-center shadow-sm hover-shadow transition-all"
+				className="rounded-circle d-flex align-items-center justify-content-center shadow-sm p-0"
 				style={{
-					width: "42px",
-					height: "42px"
+					width: "30px",
+					height: "30px",
+					transition: "transform 0.2s ease"
 				}}
 				onClick={() => setShowOptions(!showOptions)}
 			>
 				{showOptions ? (
-					<IoIosClose className="text-white" size={24} />
+					<IoIosClose size={28} />
 				) : (
-					<IoIosAddCircleOutline className="text-white" size={24} />
+					<IoIosAdd size={28} />
 				)}
 			</Button>
 		</div>

@@ -16,21 +16,19 @@ export function SideBarHeader({
 	return (
 		<div
 			className="d-flex justify-content-between p-3 border-bottom bg-light sticky-top"
-			style={{ zIndex: 1 }}
+			style={{ zIndex: 1, minHeight: "75px" }}
 		>
-			<InputGroup
-				className="ms-5 ps-2 me-2 ms-lg-0 ps-lg-0"
-				style={{ flex: 1 }}
-			>
+			<InputGroup className="ms-5 ps-2 me-2 ms-lg-0 ps-lg-0">
 				<Form.Control
 					type="text"
 					name="searchUsersBar"
+					className="p-0 ps-3"
 					placeholder="Cerca utenti..."
 					value={searchTerm}
 					onChange={(e) => setSearchTerm(e.target.value)}
 				/>
-				<InputGroup.Text>
-					<FaSearch />
+				<InputGroup.Text className="border-start-0">
+					<FaSearch size={20} className="text-secondary" />
 				</InputGroup.Text>
 			</InputGroup>
 			<FloatingMenu updateChatList={updateChatList} />

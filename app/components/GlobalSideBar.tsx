@@ -130,6 +130,7 @@ export function GlobalSideBar() {
 				bg="light"
 				expand="md"
 				className="d-none d-lg-flex border-bottom shadow-sm sticky-top"
+				style={{ zIndex: 2000 }}
 			>
 				<Container>
 					<Navbar.Brand href="/home" className="fw-bold">
