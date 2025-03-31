@@ -345,7 +345,8 @@ class ActivityLinkForm extends HTMLElement {
 				this.activity.prevLinks.some(
 					(link) => link._id === activity._id
 				) ||
-				this.selectedLinks.some((link) => link._id === activity._id)
+				this.selectedLinks.some((link) => link._id === activity._id) ||
+				activity.status === "DROPPED"
 			) {
 				continue;
 			}
