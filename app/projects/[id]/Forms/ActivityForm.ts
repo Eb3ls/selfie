@@ -664,7 +664,6 @@ class ActivityModifyForm extends HTMLElement {
 				window.location.reload();
 			}
 		} catch (error) {
-			console.log(error);
 			alert("Errore durante la modifica dell'attività");
 		}
 	}
@@ -910,3 +909,18 @@ class ActivityModifyForm extends HTMLElement {
 }
 
 customElements.define("activity-modify-form", ActivityModifyForm);
+
+// Funzione per aggiungere i dati al modale dell'Activity
+export function openActivityForm(
+	data: ProjectActivityResponse,
+	parentData: SubPhaseResponse | PhaseResponse
+) {
+	const modifyModal = document.getElementById(
+		"ModifyActivityComponent"
+	) as ActivityForm | null;
+	if (!modifyModal) {
+		console.error("Errore: modale per modifica dell'attività non trovato");
+		return;
+	}
+	modifyModal.updateData(data, parentData);
+}

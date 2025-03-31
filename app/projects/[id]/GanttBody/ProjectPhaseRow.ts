@@ -3,6 +3,8 @@ import {
 	ProjectActivityResponse,
 	SubPhaseResponse
 } from "@/app/api/(auth)/project/[id]/route";
+import { openActivityForm } from "../Forms/ActivityForm";
+import { openPhaseForm } from "../Forms/PhaseForm";
 import {
 	CELL_WIDTH,
 	CELL_WIDTH_PX,
@@ -16,13 +18,10 @@ import {
 
 interface RowReference {
 	pill: HTMLElement;
-	data: {
-		summary: string;
-		startDate: Date;
-		dueDate: Date;
-		statusColor: string;
-		isMilestone: boolean;
-	};
+	color: string;
+	data: PhaseResponse | SubPhaseResponse | ProjectActivityResponse;
+	dataType: "activity" | "phase" | "subPhase";
+	parentData: SubPhaseResponse | PhaseResponse | null;
 }
 
 class ProjectPhaseRow extends HTMLElement {
@@ -54,23 +53,6 @@ class ProjectPhaseRow extends HTMLElement {
 		this.render(currentDate);
 	}
 
-	pushReference(
-		ref: HTMLElement,
-		data: ProjectActivityResponse | SubPhaseResponse | PhaseResponse,
-		color: string
-	) {
-		this.rowsArray.push({
-			pill: ref,
-			data: {
-				summary: data.summary,
-				startDate: new Date(data.dtStart),
-				dueDate: new Date(data.due),
-				statusColor: color,
-				isMilestone: "isMilestone" in data ? data.isMilestone : false
-			}
-		});
-	}
-
 	createSingleCell() {
 		const cell = document.createElement("div");
 		cell.className =
@@ -82,25 +64,51 @@ class ProjectPhaseRow extends HTMLElement {
 	}
 
 	createPill(
-		text: string,
-		color: string,
-		isMilestone: boolean,
-		start: string,
-		due: string
-	) {
+		data: PhaseResponse | SubPhaseResponse | ProjectActivityResponse,
+		dataType: "activity" | "phase" | "subPhase",
+		parentData: SubPhaseResponse | PhaseResponse | null,
+		color: string
+	): HTMLElement {
+		const start = new Date(data.dtStart);
+		const due = new Date(data.due);
+		const isMilestone = "isMilestone" in data ? data.isMilestone : false;
+
 		const phasePill = document.createElement("div");
 		phasePill.className =
 			"rounded-pill position-absolute text-white top-50 translate-middle-y d-flex align-items-center justify-content-start px-2";
 		phasePill.style.height = "70%";
 		phasePill.style.backgroundColor = color;
 
+		if (dataType === "activity") {
+			phasePill.setAttribute("data-bs-toggle", "modal");
+			phasePill.setAttribute("data-bs-target", "#ModifyActivity");
+			const handleClick = () => {
+				openActivityForm(
+					data as ProjectActivityResponse,
+					parentData as PhaseResponse | SubPhaseResponse
+				);
+			};
+
+			phasePill.addEventListener("click", handleClick);
+		} else {
+			phasePill.setAttribute("data-bs-toggle", "modal");
+			phasePill.setAttribute("data-bs-target", "#ModifyPhase");
+			const handleClick = () => {
+				openPhaseForm(
+					data as PhaseResponse | SubPhaseResponse,
+					parentData as PhaseResponse | null
+				);
+			};
+
+			phasePill.addEventListener("click", handleClick);
+		}
+
 		// Calcoliamo le date iniziale e finale in base agli estremi della timeline
 		const initialDate = new Date(
-			Math.max(this.firstDate.getTime(), new Date(start).getTime())
+			Math.max(this.firstDate.getTime(), start.getTime())
 		);
-		const formattedDue = new Date(formatDate(due));
 		const finalDate = new Date(
-			Math.min(this.lastDate.getTime(), formattedDue.getTime())
+			Math.min(this.lastDate.getTime(), due.getTime())
 		);
 
 		// Calcoliamo la larghezza in base alla differenza di giorni
@@ -143,7 +151,7 @@ class ProjectPhaseRow extends HTMLElement {
 		}
 
 		const textSpan = document.createElement("span");
-		textSpan.innerText = text;
+		textSpan.innerText = data.summary;
 		textElement.appendChild(textSpan);
 
 		phasePill.appendChild(textElement);
@@ -152,6 +160,8 @@ class ProjectPhaseRow extends HTMLElement {
 
 	createRow(
 		data: PhaseResponse | SubPhaseResponse | ProjectActivityResponse,
+		dataType: "activity" | "phase" | "subPhase",
+		parentData: SubPhaseResponse | PhaseResponse | null,
 		color: string
 	): HTMLElement {
 		// Riga principale
@@ -159,15 +169,15 @@ class ProjectPhaseRow extends HTMLElement {
 		row.style.height = `${ROW_HEIGHT_PX}`;
 		row.className = "d-flex position-relative";
 		row.style.width = "max-content";
-		const pill = this.createPill(
-			data.summary,
-			color,
-			"isMilestone" in data ? data.isMilestone : false,
-			data.dtStart,
-			data.due
-		);
+		const pill = this.createPill(data, dataType, parentData, color);
 
-		this.pushReference(pill, data, color);
+		this.rowsArray.push({
+			pill,
+			color,
+			data,
+			dataType,
+			parentData
+		});
 		row.appendChild(pill);
 
 		for (let i = 0; i < this.cellsNumber; i++) {
@@ -181,9 +191,11 @@ class ProjectPhaseRow extends HTMLElement {
 	renderPhaseRow(
 		parentElement: HTMLElement,
 		data: PhaseResponse | SubPhaseResponse,
-		parentId: string | null
+		dataType: "phase" | "subPhase",
+		parentData: PhaseResponse | null
 	) {
-		const row = this.createRow(data, parentId ? "gray" : "black");
+		const color = dataType === "phase" ? "black" : "gray";
+		const row = this.createRow(data, dataType, parentData, color);
 		parentElement.appendChild(row);
 
 		// Contenitore per il collapse con lo stesso id per fare il toggle di tutti
@@ -198,7 +210,7 @@ class ProjectPhaseRow extends HTMLElement {
 		if ("subPhases" in data && data.subPhases.length > 0) {
 			hasDataInside = true;
 			for (const subPhase of data.subPhases) {
-				this.renderPhaseRow(collapse, subPhase, data._id);
+				this.renderPhaseRow(collapse, subPhase, "subPhase", data);
 			}
 		}
 
@@ -216,7 +228,7 @@ class ProjectPhaseRow extends HTMLElement {
 						].color;
 				}
 
-				const row = this.createRow(activity, color);
+				const row = this.createRow(activity, "activity", data, color);
 				collapse.appendChild(row);
 			}
 		}
@@ -224,7 +236,11 @@ class ProjectPhaseRow extends HTMLElement {
 		if (hasDataInside) {
 			parentElement.appendChild(collapse);
 			if (
-				getToggleState(this.openToggleList, data._id, parentId || null)
+				getToggleState(
+					this.openToggleList,
+					data._id,
+					parentData?._id || null
+				)
 			) {
 				collapse.classList.add("show");
 			}
@@ -237,11 +253,10 @@ class ProjectPhaseRow extends HTMLElement {
 		this.lastDate.setDate(this.lastDate.getDate() + offset);
 		this.rowsArray.forEach((ref) => {
 			const pill = this.createPill(
-				ref.data.summary,
-				ref.data.statusColor,
-				ref.data.isMilestone,
-				ref.data.startDate.toISOString(),
-				ref.data.dueDate.toISOString()
+				ref.data,
+				ref.dataType,
+				ref.parentData,
+				ref.color
 			);
 			ref.pill.replaceWith(pill);
 			ref.pill = pill;
@@ -262,7 +277,7 @@ class ProjectPhaseRow extends HTMLElement {
 		this.innerHTML = "";
 		this.className = "d-flex flex-column overflow-x-hidden";
 		for (const phase of this.phasesData) {
-			this.renderPhaseRow(this, phase, null);
+			this.renderPhaseRow(this, phase, "phase", null);
 		}
 	}
 }

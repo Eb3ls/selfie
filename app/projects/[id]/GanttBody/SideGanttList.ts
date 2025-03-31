@@ -3,8 +3,8 @@ import {
 	ProjectActivityResponse,
 	SubPhaseResponse
 } from "@/app/api/(auth)/project/[id]/route";
-import ModifyActivity from "../Forms/ActivityForm";
-import ModifyPhase from "../Forms/PhaseForm";
+import { openActivityForm } from "../Forms/ActivityForm";
+import { openPhaseForm } from "../Forms/PhaseForm";
 import {
 	PhaseToggleMap,
 	ROW_HEIGHT_PX,
@@ -49,40 +49,6 @@ class SideGanttList extends HTMLElement {
 		});
 
 		this.appendChild(container);
-	}
-
-	// Funzione per aggiungere i dati al modale della Phase
-	openModifyPhase(
-		data: PhaseResponse | SubPhaseResponse,
-		parentData: PhaseResponse | null
-	) {
-		const modifyModal = document.getElementById(
-			"ModifyPhaseComponent"
-		) as ModifyPhase;
-		if (!modifyModal) {
-			console.error(
-				"Errore: modale per modifica della phase non trovato"
-			);
-			return;
-		}
-		modifyModal.updateData(data, parentData);
-	}
-
-	// Funzione per aggiungere i dati al modale dell'Activity
-	openModifyActivity(
-		data: ProjectActivityResponse,
-		parentData: SubPhaseResponse | PhaseResponse
-	) {
-		const modifyModal = document.getElementById(
-			"ModifyActivityComponent"
-		) as ModifyActivity;
-		if (!modifyModal) {
-			console.error(
-				"Errore: modale per modifica dell'attività non trovato"
-			);
-			return;
-		}
-		modifyModal.updateData(data, parentData);
 	}
 
 	// Funzione per creare una attivitá
@@ -155,7 +121,7 @@ class SideGanttList extends HTMLElement {
 
 		// Aggiungiamo il listener per aprire il modale
 		activityElement.addEventListener("click", () => {
-			this.openModifyActivity(activity, phaseData);
+			openActivityForm(activity, phaseData);
 		});
 
 		return activityElement;
@@ -203,7 +169,7 @@ class SideGanttList extends HTMLElement {
 		button.setAttribute("data-bs-toggle", "modal");
 		button.setAttribute("data-bs-target", "#ModifyPhase");
 		button.onclick = () => {
-			this.openModifyPhase(data, parentData);
+			openPhaseForm(data, parentData);
 		};
 
 		togglerContent.appendChild(caretIcon);

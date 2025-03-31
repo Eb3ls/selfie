@@ -362,3 +362,17 @@ class PhaseForm extends HTMLElement {
 customElements.define("phase-form", PhaseForm);
 
 export default PhaseForm;
+// Funzione per aggiungere i dati al modale della Phase
+export function openPhaseForm(
+	data: PhaseResponse | SubPhaseResponse,
+	parentData: PhaseResponse | null
+) {
+	const modifyModal = document.getElementById(
+		"ModifyPhaseComponent"
+	) as PhaseForm | null;
+	if (!modifyModal) {
+		console.error("Errore: modale per modifica della phase non trovato");
+		return;
+	}
+	modifyModal.updateData(data, parentData);
+}
