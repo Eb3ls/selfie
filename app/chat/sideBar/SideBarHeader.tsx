@@ -5,11 +5,13 @@ import { FloatingMenu } from "./FloatingMenu";
 interface SideBarHeaderProps {
 	searchTerm: string;
 	setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
+	updateChatList: () => void;
 }
 
 export function SideBarHeader({
 	searchTerm,
-	setSearchTerm
+	setSearchTerm,
+	updateChatList
 }: SideBarHeaderProps) {
 	return (
 		<div
@@ -31,7 +33,7 @@ export function SideBarHeader({
 					<FaSearch />
 				</InputGroup.Text>
 			</InputGroup>
-			<FloatingMenu />
+			<FloatingMenu updateChatList={updateChatList} />
 		</div>
 	);
 }

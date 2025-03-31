@@ -5,7 +5,11 @@ import React from "react";
 import { Button } from "react-bootstrap";
 import { IoIosAddCircleOutline, IoIosClose } from "react-icons/io";
 
-export function FloatingMenu() {
+interface FloatingMenuProps {
+	updateChatList: () => void;
+}
+
+export function FloatingMenu({ updateChatList }: FloatingMenuProps) {
 	const [showOptions, setShowOptions] = useState(false);
 
 	return (
@@ -16,12 +20,12 @@ export function FloatingMenu() {
 					className="position-absolute end-0 top-100 mt-2"
 					style={{ width: "200px" }}
 				>
-					<ChatModal>
+					<ChatModal updateChatList={updateChatList}>
 						<Button variant="primary" className="mb-2 w-100">
 							Crea nuova chat
 						</Button>
 					</ChatModal>
-					<GroupChatModal className="pd-0">
+					<GroupChatModal updateChatList={updateChatList}>
 						<Button variant="primary" className="mb-2 w-100">
 							Crea nuovo gruppo
 						</Button>

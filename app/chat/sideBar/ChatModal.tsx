@@ -4,7 +4,12 @@ import "@/app/chat/sideBar/Modal.css";
 import React, { useState } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
 
-export function ChatModal({ children }: any) {
+interface ChatModalProps {
+	updateChatList: () => void;
+	children: any;
+}
+
+export function ChatModal({ updateChatList, children }: ChatModalProps) {
 	const [show, setShow] = useState(false);
 	const [form, setForm] = useState({
 		username: ""
@@ -35,7 +40,8 @@ export function ChatModal({ children }: any) {
 		}
 
 		alert("Chat creata con successo!");
-		window.location.reload();
+		setShow(false);
+		updateChatList();
 	};
 
 	return (

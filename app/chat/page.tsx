@@ -43,13 +43,14 @@ export default function ChatMain() {
 	const chatEndRef = useRef<HTMLDivElement>(null); // Riferimento all'ultimo messaggio della chat
 
 	// Fetch dei dati dei contatti a sinistra
-	const { data: raw_contacts, error: error_contacts } = useSWR(
-		"/api/chat/getContacts",
-		fetcher,
-		{
-			revalidateOnFocus: false // Disabilita il refetch quando si torna alla finestra
-		}
-	);
+	const {
+		data: raw_contacts,
+		error: error_contacts,
+		mutate: mutateContacts
+	} = useSWR("/api/chat/getContacts", fetcher, {
+		refreshInterval: 5000, // Ricarica i dati ogni 5 secondi
+		revalidateOnFocus: false // Disabilita il refetch quando si torna alla finestra
+	});
 
 	// Aggiorna chatResponse quando i dati vengono recuperati
 	useEffect(() => {
@@ -196,6 +197,7 @@ export default function ChatMain() {
 				<SideBarHeader
 					searchTerm={searchTerm}
 					setSearchTerm={setSearchTerm}
+					updateChatList={mutateContacts}
 				></SideBarHeader>
 				<div className="flex-grow-1 p-3">
 					{filteredChats.length > 0 ? (
@@ -204,6 +206,7 @@ export default function ChatMain() {
 								key={chat._id}
 								entry={chat}
 								setSelectedChat={setSelectedChat}
+								updateChatList={mutateContacts}
 							></UserItem>
 						))
 					) : (

@@ -4,7 +4,15 @@ import "@/app/chat/sideBar/Modal.css";
 import React, { useState } from "react";
 import { Button, Container, Form, ListGroup, Modal } from "react-bootstrap";
 
-export function GroupChatModal({ children }: any) {
+interface GroupChatModalProps {
+	updateChatList: () => void;
+	children: any;
+}
+
+export function GroupChatModal({
+	updateChatList,
+	children
+}: GroupChatModalProps) {
 	const [show, setShow] = useState(false);
 	const [groupName, setGroupName] = useState("");
 	const [userName, setUserName] = useState("");
@@ -36,7 +44,8 @@ export function GroupChatModal({ children }: any) {
 		}
 
 		alert("Gruppo creato con successo!");
-		window.location.reload();
+		setShow(false);
+		updateChatList();
 	};
 
 	const handleAddUser = () => {

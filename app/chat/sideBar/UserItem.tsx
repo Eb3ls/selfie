@@ -18,10 +18,12 @@ type SidebarEntry = {
 
 export function UserItem({
 	entry,
-	setSelectedChat
+	setSelectedChat,
+	updateChatList
 }: {
 	entry: SidebarEntry;
 	setSelectedChat: any;
+	updateChatList: () => void;
 }) {
 	const [fetchImageError, setFetchImageError] = useState(false);
 
@@ -102,7 +104,7 @@ export function UserItem({
 				<DeleteModal
 					chat_id={entry._id}
 					setSelectedChat={setSelectedChat}
-					className="ms-3"
+					updateChatList={updateChatList}
 				>
 					<Container className="rounded-circle p-2 delete-btn">
 						<IoTrash className="icon text-danger" size={24} />

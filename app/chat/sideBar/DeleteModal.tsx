@@ -4,7 +4,19 @@ import "@/app/chat/sideBar/Modal.css";
 import React, { useState } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
 
-export function DeleteModal({ chat_id, setSelectedChat, children }: any) {
+interface DeleteModalProps {
+	chat_id: string;
+	setSelectedChat: any;
+	updateChatList: () => void;
+	children: any;
+}
+
+export function DeleteModal({
+	chat_id,
+	setSelectedChat,
+	updateChatList,
+	children
+}: DeleteModalProps) {
 	const [show, setShow] = useState(false);
 
 	// Gestisce il submit del form
@@ -28,7 +40,7 @@ export function DeleteModal({ chat_id, setSelectedChat, children }: any) {
 		}
 
 		alert("Chat eliminata con successo!");
-		window.location.reload();
+		updateChatList();
 	};
 
 	const handleClick = (e: React.MouseEvent) => {
