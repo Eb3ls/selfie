@@ -7,6 +7,7 @@ import {
 	escapeHTML,
 	fetcher,
 	formatDate,
+	formatDueDate,
 	formatStartDate,
 	hideModal,
 	showError,
@@ -236,7 +237,7 @@ class PhaseForm extends HTMLElement {
 			_id: this.phaseData._id,
 			summary: summary,
 			dtStart: formatStartDate(formData.get("dtStart") as string),
-			due: formatStartDate(formData.get("due") as string)
+			due: formatDueDate(formData.get("due") as string)
 		};
 
 		try {
