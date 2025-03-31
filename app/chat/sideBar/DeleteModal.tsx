@@ -1,8 +1,7 @@
 "use client";
 
-import "@/app/chat/sideBar/Modal.css";
+import StandardModal from "@/app/components/StandardModal";
 import React, { useState } from "react";
-import { Button, Form, Modal } from "react-bootstrap";
 
 interface DeleteModalProps {
 	chat_id: string;
@@ -49,49 +48,28 @@ export function DeleteModal({
 	};
 
 	return (
-		<>
+		<div
+			onClick={(e: any) => {
+				e.stopPropagation();
+			}}
+		>
 			{/* Bottone per aprire il modal */}
 			<span onClick={handleClick} style={{ cursor: "pointer" }}>
 				{children}
 			</span>
 
-			<Modal
+			<StandardModal
+				title="Elimina chat"
+				titleIcon={<i className="bi bi-person-plus me-2" />}
+				saveBtnText="Cancella"
 				show={show}
-				onHide={() => setShow(false)}
-				centered
-				dialogClassName="custom-modal"
-				backdropClassName="custom-backdrop"
-				fullscreen="lg-down"
-				onClick={(e: any) => e.stopPropagation()}
+				handleClose={() => {
+					setShow(false);
+				}}
+				handleSubmit={handleSubmit}
 			>
-				<Modal.Header closeButton className="custom-modal-header">
-					<Modal.Title>
-						<i className="bi bi-person-plus me-2" />
-						Elimina Chat
-					</Modal.Title>
-				</Modal.Header>
-				<Form onSubmit={handleSubmit} className="custom-form">
-					<Modal.Body>
-						<p>Sei sicuro di voler eliminare questa chat?</p>
-					</Modal.Body>
-					<Modal.Footer>
-						<Button
-							variant="secondary"
-							onClick={() => setShow(false)}
-							className="custom-cancel-button"
-						>
-							Annulla
-						</Button>
-						<Button
-							variant="primary"
-							type="submit"
-							className="custom-submit-button"
-						>
-							Cancella Chat
-						</Button>
-					</Modal.Footer>
-				</Form>
-			</Modal>
-		</>
+				<div>Sei sicuro di voler eliminare questa chat?</div>
+			</StandardModal>
+		</div>
 	);
 }

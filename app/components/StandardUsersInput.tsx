@@ -36,7 +36,10 @@ export default function StandardUsersInput({
 
 	function createUserEntry(username: string) {
 		return (
-			<div className="d-flex align-items-center justify-content-center gap-2 mb-2 bg-light rounded-3 p-2">
+			<div
+				className="d-flex align-items-center justify-content-center gap-2 mb-2 bg-light rounded-3 p-2"
+				key={username}
+			>
 				<i className="bi bi-person-fill"></i>
 				<span className="text-truncate">{username}</span>
 				<button

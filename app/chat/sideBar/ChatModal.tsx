@@ -1,8 +1,8 @@
 "use client";
 
-import "@/app/chat/sideBar/Modal.css";
+import StandardInput from "@/app/components/StandardInput";
+import StandardModal from "@/app/components/StandardModal";
 import React, { useState } from "react";
-import { Button, Form, Modal } from "react-bootstrap";
 
 interface ChatModalProps {
 	updateChatList: () => void;
@@ -52,52 +52,23 @@ export function ChatModal({ updateChatList, children }: ChatModalProps) {
 				{children}
 			</span>
 
-			<Modal
+			<StandardModal
+				title="Nuova chat"
+				titleIcon={<i className="bi bi-chat me-2" />}
+				saveBtnText="Crea"
 				show={show}
-				onHide={() => setShow(false)}
-				centered
-				dialogClassName="custom-modal"
-				backdropClassName="custom-backdrop"
+				handleClose={() => setShow(false)}
+				handleSubmit={handleSubmit}
 			>
-				<Modal.Header closeButton className="custom-modal-header">
-					<Modal.Title>
-						<i className="bi bi-chat-dots-fill" />
-						Nuova chat
-					</Modal.Title>
-				</Modal.Header>
-				<Form onSubmit={handleSubmit} className="custom-form">
-					<Modal.Body>
-						<Form.Group className="mb-3" controlId="formFirstName">
-							<Form.Label>Nome dell&apos;utente</Form.Label>
-							<Form.Control
-								type="text"
-								name="username"
-								value={form.username}
-								onChange={handleChange}
-								placeholder="Inserisci nome"
-								className="input-field"
-								required
-							/>
-						</Form.Group>
-					</Modal.Body>
-					<Modal.Footer>
-						<Button
-							variant="secondary"
-							onClick={() => setShow(false)}
-							className="custom-cancel-button"
-						>
-							Annulla
-						</Button>
-						<Button
-							variant="primary"
-							type="submit"
-							className="custom-submit-button"
-						>
-							Crea chat
-						</Button>
-					</Modal.Footer>
-				</Form>
-			</Modal>
+				<StandardInput
+					type="text"
+					name="username"
+					title="Nome dell'utente"
+					value={form.username}
+					onChange={handleChange}
+					placeholder="Inserisci nome"
+				/>
+			</StandardModal>
 		</>
 	);
 }
