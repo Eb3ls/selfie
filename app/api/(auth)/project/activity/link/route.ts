@@ -115,6 +115,14 @@ export const PATCH = async (request: NextRequest) => {
 		}
 	});
 
+	// Controlliamo che tra le attività precedenti non ci siano attività DROPPED
+	if (prevActivities.some((activity) => activity.status === "DROPPED")) {
+		return generateMessageResponse(
+			"Can't link an activity with a dropped activity",
+			400
+		);
+	}
+
 	// Controlliamo se l'attività successiva è già attiva
 	if (
 		nextActivity.status !== "ACTIVABLE" &&
