@@ -12,7 +12,6 @@ import { useTime } from "@/app/components/TimeContext";
 // Librerie
 import { StringMessage } from "@/utils/db/db";
 import React, { Fragment, useEffect, useRef, useState } from "react";
-import { ListGroup } from "react-bootstrap";
 import useSWR from "swr";
 
 async function fetcher(url: string) {
@@ -198,25 +197,20 @@ export default function ChatMain() {
 					searchTerm={searchTerm}
 					setSearchTerm={setSearchTerm}
 				></SideBarHeader>
-				<div
-					className="me-4 me-lg-0 flex-grow-1 overflow-auto"
-					style={{ maxHeight: "90vh" }}
-				>
-					<ListGroup className="p-3">
-						{filteredChats.length > 0 ? (
-							filteredChats.map((chat) => (
-								<UserItem
-									key={chat._id}
-									entry={chat}
-									setSelectedChat={setSelectedChat}
-								></UserItem>
-							))
-						) : (
-							<ListGroup.Item className="fw-bold p-2 ps-4 rounded-pill border-0 d-flex align-items-center bg-transparent text-white">
-								Nessun utente trovato
-							</ListGroup.Item>
-						)}
-					</ListGroup>
+				<div className="flex-grow-1 p-3">
+					{filteredChats.length > 0 ? (
+						filteredChats.map((chat) => (
+							<UserItem
+								key={chat._id}
+								entry={chat}
+								setSelectedChat={setSelectedChat}
+							></UserItem>
+						))
+					) : (
+						<div className="fw-bold p-2 ps-4 rounded-pill border-0 d-flex align-items-center bg-transparent text-white">
+							Nessun utente trovato
+						</div>
+					)}
 				</div>
 			</>
 		);
@@ -287,7 +281,7 @@ export default function ChatMain() {
 					setSelectedChat={setSelectedChat}
 					setIsSidebarOpen={setIsSidebarOpen}
 				></Header>
-				<div className="flex-grow-1 overflow-auto p-3">
+				<div className="flex-grow-1 px-3">
 					{messageList}
 					<div ref={chatEndRef}></div>
 				</div>
@@ -301,23 +295,21 @@ export default function ChatMain() {
 	}
 
 	return (
-		<div className="d-flex flex-column vh-100 ">
+		<div className="d-flex flex-column vh-100">
 			<GlobalSideBar />
 			<div className="d-flex flex-grow-1 overflow-hidden">
 				{/* Sidebar */}
 				<div
-					className={`col-12 col-lg-4 col-xl-3 d-flex flex-column p-0 border-end ${
-						isSidebarOpen ? "d-block" : "d-none d-lg-block"
-					}`}
+					className={`col-12 col-lg-4 col-xl-3 d-flex flex-column p-0 border-end overflow-y-auto ${isSidebarOpen ? "d-block" : "d-none d-lg-block"}`}
+					style={{ minHeight: 0 }}
 				>
 					{Sidebar()}
 				</div>
 
 				{/* Chat principale */}
 				<div
-					className={`col flex-grow-1 d-flex flex-column p-0 ${
-						isSidebarOpen ? "d-none d-lg-block" : "d-block"
-					}`}
+					className={`col d-flex flex-column flex-grow-1 p-0 overflow-y-auto ${isSidebarOpen ? "d-none d-lg-block" : "d-block"}`}
+					style={{ minHeight: 0 }}
 				>
 					{selectedChat && MainChatComponent()}
 				</div>

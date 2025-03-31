@@ -3,7 +3,7 @@ import "@/app/chat/styles.css";
 import { DEFAULT_PROFILE_URL } from "@/app/constants";
 import Image from "next/image";
 import { useState } from "react";
-import { Container, ListGroup } from "react-bootstrap";
+import { Container } from "react-bootstrap";
 import { IoPeopleCircleOutline, IoTrash } from "react-icons/io5";
 
 type SidebarEntry = {
@@ -69,14 +69,14 @@ export function UserItem({
 	}
 
 	return (
-		<ListGroup.Item
-			action
-			className={`fw-bold p-3 my-2 rounded-4 border d-flex align-items-center position-relative hover-shadow`}
+		<div
+			className={`fw-bold p-3 mb-3 rounded-4 border d-flex align-items-center position-relative hover-shadow`}
 			onClick={entry.loader}
+			style={{ minHeight: "81px" }}
 		>
 			<div className="position-relative">{iconToShow}</div>
 
-			<Container className="d-flex flex-column justify-content-center m-0 overflow-hidden py-1">
+			<Container className="d-flex flex-column justify-content-center m-0 overflow-hidden">
 				<h5
 					className="fw-bold m-0 text-truncate mb-1 text-dark"
 					style={{ fontSize: "1.1rem" }}
@@ -109,6 +109,6 @@ export function UserItem({
 					</Container>
 				</DeleteModal>
 			)}
-		</ListGroup.Item>
+		</div>
 	);
 }

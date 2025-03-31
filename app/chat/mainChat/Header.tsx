@@ -14,10 +14,7 @@ export function Header({
 	setIsSidebarOpen
 }: HeaderProps) {
 	return (
-		<div
-			className="text-dark p-3 border-bottom d-flex align-items-center justify-content-start bg-light position-relative"
-			style={{ zIndex: 1000 }}
-		>
+		<div className="text-dark p-3 border-bottom d-flex align-items-center justify-content-start bg-light sticky-top">
 			<Button
 				variant="link"
 				className="d-block d-ld-none"

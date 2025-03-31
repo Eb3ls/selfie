@@ -12,7 +12,10 @@ export function SideBarHeader({
 	setSearchTerm
 }: SideBarHeaderProps) {
 	return (
-		<div className="d-flex justify-content-between p-3 border-bottom bg-light">
+		<div
+			className="d-flex justify-content-between p-3 border-bottom bg-light sticky-top"
+			style={{ zIndex: 1 }}
+		>
 			<InputGroup
 				className="ms-5 ps-2 me-2 ms-lg-0 ps-lg-0"
 				style={{ flex: 1 }}
