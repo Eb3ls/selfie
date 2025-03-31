@@ -41,6 +41,7 @@ export function ChatModal({ updateChatList, children }: ChatModalProps) {
 
 		alert("Chat creata con successo!");
 		setShow(false);
+		setForm({ username: "" });
 		updateChatList();
 	};
 

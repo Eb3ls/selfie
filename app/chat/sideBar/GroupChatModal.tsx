@@ -45,6 +45,9 @@ export function GroupChatModal({
 
 		alert("Gruppo creato con successo!");
 		setShow(false);
+		setGroupName("");
+		setUserName("");
+		setUsers([]);
 		updateChatList();
 	};
 
