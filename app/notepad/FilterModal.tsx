@@ -3,8 +3,8 @@
 import React, { useState } from "react";
 import { Form } from "react-bootstrap";
 import { FaFilter } from "react-icons/fa";
-import StandardInput from "../components/StandardInput";
-import StandardModal from "../components/StandardModal";
+import { StandardInput } from "../components/StandardInput";
+import { StandardModal } from "../components/StandardModal";
 import "./GenericModal.css";
 
 // TODO: Sistemare ricerca categorie - cercare più categorie insieme

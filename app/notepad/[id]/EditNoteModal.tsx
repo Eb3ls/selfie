@@ -1,11 +1,10 @@
 "use client";
 
-import StandardInput from "@/app/components/StandardInput";
-import StandardModal from "@/app/components/StandardModal";
-import StandardUsersInput from "@/app/components/StandardUsersInput";
+import { StandardInput } from "@/app/components/StandardInput";
+import { StandardModal } from "@/app/components/StandardModal";
+import { StandardUsersInput } from "@/app/components/StandardUsersInput";
 import React, { useState } from "react";
-import { Button, Form } from "react-bootstrap";
-import { FaEdit, FaTrash, FaUserPlus } from "react-icons/fa";
+import { FaEdit } from "react-icons/fa";
 
 export function EditNoteModal({
 	note,

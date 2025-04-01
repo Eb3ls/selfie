@@ -2,8 +2,8 @@
 
 import React, { useState } from "react";
 import { FaPlus } from "react-icons/fa";
-import StandardInput from "../components/StandardInput";
-import StandardModal from "../components/StandardModal";
+import { StandardInput } from "../components/StandardInput";
+import { StandardModal } from "../components/StandardModal";
 
 export function AddNoteModal({ children, handleAdd }: any) {
 	const [show, setShow] = useState(false);

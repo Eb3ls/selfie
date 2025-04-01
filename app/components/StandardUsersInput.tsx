@@ -7,7 +7,7 @@ interface StandardUsersInputProps {
 	setUsernameList: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
-export default function StandardUsersInput({
+export function StandardUsersInput({
 	title,
 	placeholder,
 	usernameList,

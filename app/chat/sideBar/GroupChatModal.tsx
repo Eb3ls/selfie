@@ -1,8 +1,8 @@
 "use client";
 
-import StandardInput from "@/app/components/StandardInput";
-import StandardModal from "@/app/components/StandardModal";
-import StandardUsersInput from "@/app/components/StandardUsersInput";
+import { StandardInput } from "@/app/components/StandardInput";
+import { StandardModal } from "@/app/components/StandardModal";
+import { StandardUsersInput } from "@/app/components/StandardUsersInput";
 import React, { useState } from "react";
 
 interface GroupChatModalProps {

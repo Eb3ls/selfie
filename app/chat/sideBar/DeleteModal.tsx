@@ -1,6 +1,6 @@
 "use client";
 
-import StandardModal from "@/app/components/StandardModal";
+import { StandardModal } from "@/app/components/StandardModal";
 import React, { useState } from "react";
 
 interface DeleteModalProps {

@@ -2,37 +2,12 @@
 
 import { AlarmSelector } from "@/app/calendar/AlarmSelector";
 import "@/app/calendar/Modal.css";
-import StandardInput from "@/app/components/StandardInput";
-import StandardModal from "@/app/components/StandardModal";
+import { StandardInput } from "@/app/components/StandardInput";
+import { StandardModal } from "@/app/components/StandardModal";
+import { StandardRepetitionInput } from "@/app/components/StandardRepetitionInput";
 import { StringAlarm } from "@/utils/db/db";
 import React, { useState } from "react";
-import { Button, Card, Col, Form, Modal, Row } from "react-bootstrap";
-
-// Mappe per la conversione dei valori
-const WEEKDAY_MAP: { [key: string]: string } = {
-	Lunedì: "MO",
-	Martedì: "TU",
-	Mercoledì: "WE",
-	Giovedì: "TH",
-	Venerdì: "FR",
-	Sabato: "SA",
-	Domenica: "SU"
-};
-
-const MONTH_MAP: { [key: string]: string } = {
-	Gennaio: "1",
-	Febbraio: "2",
-	Marzo: "3",
-	Aprile: "4",
-	Maggio: "5",
-	Giugno: "6",
-	Luglio: "7",
-	Agosto: "8",
-	Settembre: "9",
-	Ottobre: "10",
-	Novembre: "11",
-	Dicembre: "12"
-};
+import { Card, Col, Row } from "react-bootstrap";
 
 export function AddSessionModal({ children }: any) {
 	const [show, setShow] = useState(false);
@@ -102,38 +77,6 @@ export function AddSessionModal({ children }: any) {
 				[e.target.name]: parseInt(e.target.value)
 			}
 		});
-	};
-
-	const handleRecurrenceTypeChange = (
-		e: React.ChangeEvent<HTMLSelectElement>
-	) => {
-		setRecurrenceType(
-			e.target.value as "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY"
-		);
-	};
-
-	const handleWeeklyDaysChange = (day: string) => {
-		const mappedDay = WEEKDAY_MAP[day];
-		setWeeklyDays((prev) =>
-			prev.includes(mappedDay)
-				? prev.filter((d) => d !== mappedDay)
-				: [...prev, mappedDay]
-		);
-	};
-
-	const handleMonthlyDaysChange = (day: number) => {
-		setMonthlyDays((prev) =>
-			prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
-		);
-	};
-
-	const handleYearlyMonthsChange = (month: string) => {
-		const mappedMonth = MONTH_MAP[month];
-		setYearlyMonths((prev) =>
-			prev.includes(mappedMonth)
-				? prev.filter((m) => m !== mappedMonth)
-				: [...prev, mappedMonth]
-		);
 	};
 
 	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -246,146 +189,22 @@ export function AddSessionModal({ children }: any) {
 					value={form.dtStart}
 				/>
 
-				<StandardInput
-					type="select"
-					name="recurrenceType"
-					title="Tipo di ripetizione"
-					onChange={handleRecurrenceTypeChange}
-					value={recurrenceType}
-					optionMap={{
-						DAILY: "Giornaliero",
-						WEEKLY: "Settimanale",
-						MONTHLY: "Mensile",
-						YEARLY: "Annuale"
-					}}
+				<StandardRepetitionInput
+					recurrenceType={recurrenceType}
+					setRecurrenceType={setRecurrenceType}
+					recurrenceEnd={recurrenceEnd}
+					setRecurrenceEnd={setRecurrenceEnd}
+					recurrenceEndDate={recurrenceEndDate}
+					setRecurrenceEndDate={setRecurrenceEndDate}
+					recurrenceCount={recurrenceCount}
+					setRecurrenceCount={setRecurrenceCount}
+					weeklyDays={weeklyDays}
+					setWeeklyDays={setWeeklyDays}
+					monthlyDays={monthlyDays}
+					setMonthlyDays={setMonthlyDays}
+					yearlyMonths={yearlyMonths}
+					setYearlyMonths={setYearlyMonths}
 				/>
-
-				{recurrenceType === "WEEKLY" && (
-					<div className="my-3">
-						<Form.Label className="fw-bold">
-							Giorni della settimana
-						</Form.Label>
-						<Row>
-							{[
-								"Lunedì",
-								"Martedì",
-								"Mercoledì",
-								"Giovedì",
-								"Venerdì",
-								"Sabato",
-								"Domenica"
-							].map((day) => (
-								<Col key={day} xs={6} sm={4} md={3}>
-									<Form.Check
-										type="checkbox"
-										label={day}
-										checked={weeklyDays.includes(
-											WEEKDAY_MAP[day]
-										)}
-										onChange={() =>
-											handleWeeklyDaysChange(day)
-										}
-									/>
-								</Col>
-							))}
-						</Row>
-					</div>
-				)}
-
-				{recurrenceType === "MONTHLY" && (
-					<div className="my-3">
-						<Form.Label className="fw-bold">
-							Giorni del mese
-						</Form.Label>
-						<Row>
-							{Array.from({ length: 31 }, (_, i) => i + 1).map(
-								(day) => (
-									<Col key={day} xs={6} sm={4} md={3}>
-										<Form.Check
-											type="checkbox"
-											label={day}
-											checked={monthlyDays.includes(day)}
-											onChange={() =>
-												handleMonthlyDaysChange(day)
-											}
-										/>
-									</Col>
-								)
-							)}
-						</Row>
-					</div>
-				)}
-
-				{recurrenceType === "YEARLY" && (
-					<div className="my-3">
-						<Form.Label className="fw-bold">Mesi</Form.Label>
-						<Row>
-							{[
-								"Gennaio",
-								"Febbraio",
-								"Marzo",
-								"Aprile",
-								"Maggio",
-								"Giugno",
-								"Luglio",
-								"Agosto",
-								"Settembre",
-								"Ottobre",
-								"Novembre",
-								"Dicembre"
-							].map((month) => (
-								<Col key={month} xs={6} sm={4} md={3}>
-									<Form.Check
-										type="checkbox"
-										label={month}
-										checked={yearlyMonths.includes(
-											MONTH_MAP[month]
-										)}
-										onChange={() =>
-											handleYearlyMonthsChange(month)
-										}
-									/>
-								</Col>
-							))}
-						</Row>
-					</div>
-				)}
-
-				<StandardInput
-					type="select"
-					name="repetitionEnd"
-					title="Fine della ripetizione"
-					value={recurrenceEnd}
-					onChange={(e) => setRecurrenceEnd(e.target.value as any)}
-					optionMap={{
-						NEVER: "Mai",
-						UNTIL_EVENT_END: "Fino a data di fine",
-						COUNT: "Dopo un numero di occorrenze"
-					}}
-				/>
-
-				{recurrenceEnd === "UNTIL_EVENT_END" && (
-					<StandardInput
-						type="date"
-						name="recurrenceEndDate"
-						title="Fine ricorrenza"
-						value={recurrenceEndDate}
-						onChange={(e) => setRecurrenceEndDate(e.target.value)}
-					/>
-				)}
-
-				{recurrenceEnd === "COUNT" && (
-					<StandardInput
-						type="number"
-						name="recurrenceCount"
-						title="Numero di occorrenze"
-						value={recurrenceCount}
-						onChange={(e) =>
-							setRecurrenceCount(parseInt(e.target.value))
-						}
-						min={1}
-					/>
-				)}
 
 				<Card className="mt-4 mb-3">
 					<Card.Header>

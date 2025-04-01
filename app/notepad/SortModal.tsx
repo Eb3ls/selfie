@@ -10,7 +10,7 @@ import {
 	FaSortNumericDown,
 	FaSortNumericUp
 } from "react-icons/fa";
-import StandardModal from "../components/StandardModal";
+import { StandardModal } from "../components/StandardModal";
 
 export function SortModal({ children, handleSort }: any) {
 	const [show, setShow] = useState(false);

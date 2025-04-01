@@ -1,7 +1,7 @@
 "use client";
 
-import StandardInput from "@/app/components/StandardInput";
-import StandardModal from "@/app/components/StandardModal";
+import { StandardInput } from "@/app/components/StandardInput";
+import { StandardModal } from "@/app/components/StandardModal";
 import React, { useState } from "react";
 
 interface ChatModalProps {

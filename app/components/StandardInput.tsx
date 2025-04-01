@@ -15,7 +15,7 @@ interface StandardInputProps {
 	isRequired?: boolean;
 }
 
-export default function StandardInput({
+export function StandardInput({
 	type,
 	name,
 	title,

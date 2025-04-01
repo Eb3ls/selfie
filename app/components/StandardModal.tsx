@@ -11,7 +11,7 @@ interface StandardModalProps {
 	handleSubmit?: (event: React.FormEvent<HTMLFormElement>) => void;
 }
 
-export default function StandardModal({
+export function StandardModal({
 	children,
 	title,
 	titleIcon,
