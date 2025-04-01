@@ -1,12 +1,16 @@
 import React from "react";
 
 interface StandardInputProps {
-	type?: string;
+	type: string;
 	name: string;
 	title: string;
 	placeholder?: string;
-	onChange: React.ChangeEventHandler<HTMLInputElement | HTMLSelectElement>;
+	onChange: React.ChangeEventHandler<
+		HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+	>;
 	value: string | number;
+	min?: number;
+	max?: number;
 	optionMap?: { [key: string]: string };
 	isRequired?: boolean;
 }
@@ -16,20 +20,22 @@ export default function StandardInput({
 	name,
 	title,
 	placeholder,
-	onChange,
 	value,
+	onChange,
+	min,
+	max,
 	optionMap = {},
 	isRequired = true
 }: StandardInputProps) {
-	return (
-		<div className="mb-3">
-			<label htmlFor={name} className="form-label fw-bold">
-				{title}
-			</label>
-			{Object.keys(optionMap).length === 0 ? (
-				<input
-					type={type}
+	if (type === "textarea") {
+		return (
+			<div className="mb-3">
+				<label htmlFor={name} className="form-label fw-bold">
+					{title}
+				</label>
+				<textarea
 					name={name}
+					autoComplete="off"
 					id={name}
 					placeholder={placeholder}
 					value={value}
@@ -37,7 +43,15 @@ export default function StandardInput({
 					required={isRequired}
 					className="form-control"
 				/>
-			) : (
+			</div>
+		);
+	} else if (type === "select") {
+		return (
+			<div className="mb-3">
+				<label htmlFor={name} className="form-label fw-bold">
+					{title}
+				</label>
+
 				<select
 					name={name}
 					id={name}
@@ -52,7 +66,28 @@ export default function StandardInput({
 						</option>
 					))}
 				</select>
-			)}
-		</div>
-	);
+			</div>
+		);
+	} else {
+		return (
+			<div className="mb-3">
+				<label htmlFor={name} className="form-label fw-bold">
+					{title}
+				</label>
+				<input
+					type={type}
+					autoComplete="off"
+					name={name}
+					id={name}
+					placeholder={placeholder}
+					value={value}
+					onChange={onChange}
+					required={isRequired}
+					className="form-control"
+					min={min}
+					max={max}
+				/>
+			</div>
+		);
+	}
 }

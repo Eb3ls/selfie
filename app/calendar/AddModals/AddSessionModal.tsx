@@ -2,9 +2,11 @@
 
 import { AlarmSelector } from "@/app/calendar/AlarmSelector";
 import "@/app/calendar/Modal.css";
+import StandardInput from "@/app/components/StandardInput";
+import StandardModal from "@/app/components/StandardModal";
 import { StringAlarm } from "@/utils/db/db";
 import React, { useState } from "react";
-import { Button, Col, Form, Modal, Row } from "react-bootstrap";
+import { Button, Card, Col, Form, Modal, Row } from "react-bootstrap";
 
 // Mappe per la conversione dei valori
 const WEEKDAY_MAP: { [key: string]: string } = {
@@ -54,7 +56,7 @@ export function AddSessionModal({ children }: any) {
 		dtStart: "",
 		dtEnd: "",
 		settings: {
-			cycles: 0,
+			cycles: 1,
 			studyTime: 1,
 			breakTime: 1
 		},
@@ -198,311 +200,246 @@ export function AddSessionModal({ children }: any) {
 				{children}
 			</span>
 
-			<Modal
+			<StandardModal
+				title="Nuova sessione"
+				saveBtnText="Crea"
 				show={show}
-				onHide={() => setShow(false)}
-				centered
-				dialogClassName="custom-modal"
-				backdropClassName="custom-backdrop"
-				fullscreen="lg-down"
+				handleClose={() => setShow(false)}
+				handleSubmit={handleSubmit}
 			>
-				<Modal.Header closeButton className="custom-modal-header">
-					<Modal.Title>
-						<i className="bi bi-person-plus me-2" />
-						Nuova Sessione
-					</Modal.Title>
-				</Modal.Header>
-				<Form onSubmit={handleSubmit} className="custom-form">
-					<Modal.Body>
-						<Form.Group className="mb-3" controlId="formSummary">
-							<Form.Label>Titolo</Form.Label>
-							<Form.Control
-								type="text"
-								name="summary"
-								value={form.summary}
-								onChange={handleChange}
-								placeholder="Inserisci titolo"
-								className="input-field"
-								required
-							/>
-						</Form.Group>
+				<StandardInput
+					type="text"
+					name="summary"
+					title="Titolo"
+					placeholder="Inserisci titolo"
+					onChange={handleChange}
+					value={form.summary}
+				/>
 
-						<Form.Group
-							className="mb-3"
-							controlId="formDescription"
-						>
-							<Form.Label>Descrizione</Form.Label>
-							<Form.Control
-								as="textarea"
-								name="description"
-								value={form.description}
-								onChange={handleChange}
-								placeholder="Inserisci descrizione"
-								className="input-field"
-								required
-							/>
-						</Form.Group>
+				<StandardInput
+					type="textarea"
+					name="description"
+					title="Descrizione"
+					placeholder="Inserisci descrizione"
+					onChange={handleChange}
+					value={form.description}
+					isRequired={false}
+				/>
 
-						<Form.Group className="mb-3" controlId="formStatus">
-							<Form.Label>Stato</Form.Label>
-							<Form.Select
-								name="status"
-								value={form.status}
-								onChange={handleChange}
-								className="input-field"
-								required
-							>
-								<option value="TENTATIVE">Provvisorio</option>
-								<option value="CONFIRMED">Confermato</option>
-							</Form.Select>
-						</Form.Group>
+				<StandardInput
+					type="select"
+					name="status"
+					title="Stato"
+					onChange={handleChange}
+					value={form.status}
+					optionMap={{
+						TENTATIVE: "Provvisorio",
+						CONFIRMED: "Confermato"
+					}}
+				/>
 
-						<Form.Group
-							className="mb-3"
-							controlId="formDtStartDate"
-						>
-							<Form.Label>Data di inizio</Form.Label>
-							<Form.Control
-								type="datetime-local"
-								name="dtStart"
-								value={form.dtStart}
-								onChange={handleChange}
-								className="input-field"
-								required
-							/>
-						</Form.Group>
+				<StandardInput
+					type="datetime-local"
+					name="dtStart"
+					title="Data di inizio"
+					onChange={handleChange}
+					value={form.dtStart}
+				/>
 
-						<Form.Group className="mb-3" controlId="formRecurrence">
-							<Form.Label>Tipo di ripetizione</Form.Label>
-							<Form.Select
-								value={recurrenceType}
-								onChange={handleRecurrenceTypeChange}
-								className="input-field"
-								required
-							>
-								<option value="DAILY">Giornaliero</option>
-								<option value="WEEKLY">Settimanale</option>
-								<option value="MONTHLY">Mensile</option>
-								<option value="YEARLY">Annuale</option>
-							</Form.Select>
+				<StandardInput
+					type="select"
+					name="recurrenceType"
+					title="Tipo di ripetizione"
+					onChange={handleRecurrenceTypeChange}
+					value={recurrenceType}
+					optionMap={{
+						DAILY: "Giornaliero",
+						WEEKLY: "Settimanale",
+						MONTHLY: "Mensile",
+						YEARLY: "Annuale"
+					}}
+				/>
 
-							{recurrenceType === "WEEKLY" && (
-								<div className="mt-3">
-									<Form.Label>
-										Giorni della settimana
-									</Form.Label>
-									<Row>
-										{[
-											"Lunedì",
-											"Martedì",
-											"Mercoledì",
-											"Giovedì",
-											"Venerdì",
-											"Sabato",
-											"Domenica"
-										].map((day) => (
-											<Col key={day} xs={6} sm={4} md={3}>
-												<Form.Check
-													type="checkbox"
-													label={day}
-													checked={weeklyDays.includes(
-														WEEKDAY_MAP[day]
-													)}
-													onChange={() =>
-														handleWeeklyDaysChange(
-															day
-														)
-													}
-												/>
-											</Col>
-										))}
-									</Row>
-								</div>
-							)}
-
-							{recurrenceType === "MONTHLY" && (
-								<div className="mt-3">
-									<Form.Label>Giorni del mese</Form.Label>
-									<Row>
-										{Array.from(
-											{ length: 31 },
-											(_, i) => i + 1
-										).map((day) => (
-											<Col key={day} xs={6} sm={4} md={3}>
-												<Form.Check
-													type="checkbox"
-													label={day}
-													checked={monthlyDays.includes(
-														day
-													)}
-													onChange={() =>
-														handleMonthlyDaysChange(
-															day
-														)
-													}
-												/>
-											</Col>
-										))}
-									</Row>
-								</div>
-							)}
-
-							{recurrenceType === "YEARLY" && (
-								<div className="mt-3">
-									<Form.Label>Mesi</Form.Label>
-									<Row>
-										{[
-											"Gennaio",
-											"Febbraio",
-											"Marzo",
-											"Aprile",
-											"Maggio",
-											"Giugno",
-											"Luglio",
-											"Agosto",
-											"Settembre",
-											"Ottobre",
-											"Novembre",
-											"Dicembre"
-										].map((month) => (
-											<Col
-												key={month}
-												xs={6}
-												sm={4}
-												md={3}
-											>
-												<Form.Check
-													type="checkbox"
-													label={month}
-													checked={yearlyMonths.includes(
-														MONTH_MAP[month]
-													)}
-													onChange={() =>
-														handleYearlyMonthsChange(
-															month
-														)
-													}
-												/>
-											</Col>
-										))}
-									</Row>
-								</div>
-							)}
-						</Form.Group>
-
-						<Form.Group
-							className="mb-3"
-							controlId="formRecurrenceEnd"
-						>
-							<Form.Label>Fine della ripetizione</Form.Label>
-							<Form.Select
-								value={recurrenceEnd}
-								onChange={(e) =>
-									setRecurrenceEnd(e.target.value as any)
-								}
-								className="input-field"
-							>
-								<option value="NEVER">Mai</option>
-								<option value="UNTIL_EVENT_END">
-									Fino a data di fine
-								</option>
-								<option value="COUNT">
-									Dopo un numero di occorrenze
-								</option>
-							</Form.Select>
-
-							{recurrenceEnd === "UNTIL_EVENT_END" && (
-								<div className="mt-3">
-									<Form.Label>Fine ricorrenza</Form.Label>
-									<Form.Control
-										type="date"
-										value={recurrenceEndDate}
-										onChange={(e) =>
-											setRecurrenceEndDate(e.target.value)
+				{recurrenceType === "WEEKLY" && (
+					<div className="my-3">
+						<Form.Label className="fw-bold">
+							Giorni della settimana
+						</Form.Label>
+						<Row>
+							{[
+								"Lunedì",
+								"Martedì",
+								"Mercoledì",
+								"Giovedì",
+								"Venerdì",
+								"Sabato",
+								"Domenica"
+							].map((day) => (
+								<Col key={day} xs={6} sm={4} md={3}>
+									<Form.Check
+										type="checkbox"
+										label={day}
+										checked={weeklyDays.includes(
+											WEEKDAY_MAP[day]
+										)}
+										onChange={() =>
+											handleWeeklyDaysChange(day)
 										}
 									/>
-								</div>
-							)}
+								</Col>
+							))}
+						</Row>
+					</div>
+				)}
 
-							{recurrenceEnd === "COUNT" && (
-								<div className="mt-3">
-									<Form.Label>
-										Numero di occorrenze
-									</Form.Label>
-									<Form.Control
-										type="number"
-										value={recurrenceCount}
-										onChange={(e) =>
-											setRecurrenceCount(
-												parseInt(e.target.value)
-											)
+				{recurrenceType === "MONTHLY" && (
+					<div className="my-3">
+						<Form.Label className="fw-bold">
+							Giorni del mese
+						</Form.Label>
+						<Row>
+							{Array.from({ length: 31 }, (_, i) => i + 1).map(
+								(day) => (
+									<Col key={day} xs={6} sm={4} md={3}>
+										<Form.Check
+											type="checkbox"
+											label={day}
+											checked={monthlyDays.includes(day)}
+											onChange={() =>
+												handleMonthlyDaysChange(day)
+											}
+										/>
+									</Col>
+								)
+							)}
+						</Row>
+					</div>
+				)}
+
+				{recurrenceType === "YEARLY" && (
+					<div className="my-3">
+						<Form.Label className="fw-bold">Mesi</Form.Label>
+						<Row>
+							{[
+								"Gennaio",
+								"Febbraio",
+								"Marzo",
+								"Aprile",
+								"Maggio",
+								"Giugno",
+								"Luglio",
+								"Agosto",
+								"Settembre",
+								"Ottobre",
+								"Novembre",
+								"Dicembre"
+							].map((month) => (
+								<Col key={month} xs={6} sm={4} md={3}>
+									<Form.Check
+										type="checkbox"
+										label={month}
+										checked={yearlyMonths.includes(
+											MONTH_MAP[month]
+										)}
+										onChange={() =>
+											handleYearlyMonthsChange(month)
 										}
-										min="1"
-										className="input-field"
 									/>
-								</div>
-							)}
-						</Form.Group>
+								</Col>
+							))}
+						</Row>
+					</div>
+				)}
 
-						<Form.Group className="mb-3">
-							<p>Impostazioni Pomodoro:</p>
-							<Form.Label>Cicli pomodoro</Form.Label>
-							<Form.Control
-								type="number"
-								name="cycles"
-								value={form.settings.cycles}
-								min={0}
-								onChange={handleChangePomodoro}
-								className="input-field"
-								required
-							/>
+				<StandardInput
+					type="select"
+					name="repetitionEnd"
+					title="Fine della ripetizione"
+					value={recurrenceEnd}
+					onChange={(e) => setRecurrenceEnd(e.target.value as any)}
+					optionMap={{
+						NEVER: "Mai",
+						UNTIL_EVENT_END: "Fino a data di fine",
+						COUNT: "Dopo un numero di occorrenze"
+					}}
+				/>
 
-							<Form.Label>Durata studio (minuti)</Form.Label>
-							<Form.Control
-								type="number"
-								name="studyTime"
-								value={form.settings.studyTime}
-								min={1}
-								onChange={handleChangePomodoro}
-								className="input-field"
-								required
-							/>
+				{recurrenceEnd === "UNTIL_EVENT_END" && (
+					<StandardInput
+						type="date"
+						name="recurrenceEndDate"
+						title="Fine ricorrenza"
+						value={recurrenceEndDate}
+						onChange={(e) => setRecurrenceEndDate(e.target.value)}
+					/>
+				)}
 
-							<Form.Label>Durata pausa (minuti)</Form.Label>
-							<Form.Control
-								type="number"
-								name="breakTime"
-								value={form.settings.breakTime}
-								min={1}
-								onChange={handleChangePomodoro}
-								className="input-field"
-								required
-							/>
-						</Form.Group>
+				{recurrenceEnd === "COUNT" && (
+					<StandardInput
+						type="number"
+						name="recurrenceCount"
+						title="Numero di occorrenze"
+						value={recurrenceCount}
+						onChange={(e) =>
+							setRecurrenceCount(parseInt(e.target.value))
+						}
+						min={1}
+					/>
+				)}
 
-						<AlarmSelector
-							alarms={form.alarms}
-							onChange={handleAlarmsChange}
-						/>
-					</Modal.Body>
-					<Modal.Footer>
-						<Button
-							variant="secondary"
-							onClick={() => setShow(false)}
-							className="custom-cancel-button"
-						>
-							Annulla
-						</Button>
-						<Button
-							variant="primary"
-							type="submit"
-							className="custom-submit-button"
-						>
-							Crea Sessione
-						</Button>
-					</Modal.Footer>
-				</Form>
-			</Modal>
+				<Card className="mt-4 mb-3">
+					<Card.Header>
+						<i className="bi bi-alarm me-2"></i>
+						Impostazioni Pomodoro
+					</Card.Header>
+					<Card.Body>
+						<Row>
+							<Col md={4}>
+								<StandardInput
+									type="number"
+									name="cycles"
+									title="Cicli"
+									min={1}
+									value={form.settings.cycles}
+									onChange={handleChangePomodoro}
+								/>
+							</Col>
+							<Col md={4}>
+								<StandardInput
+									type="number"
+									name="studyTime"
+									title="Studio (min)"
+									min={1}
+									value={form.settings.studyTime}
+									onChange={handleChangePomodoro}
+								/>
+							</Col>
+							<Col md={4}>
+								<StandardInput
+									type="number"
+									name="breakTime"
+									title="Pausa (min)"
+									min={1}
+									value={form.settings.breakTime}
+									onChange={handleChangePomodoro}
+								/>
+							</Col>
+						</Row>
+						<small className="text-muted mt-2 d-block">
+							Durata totale:{" "}
+							{form.settings.cycles *
+								(form.settings.studyTime +
+									form.settings.breakTime)}{" "}
+							minuti
+						</small>
+					</Card.Body>
+				</Card>
+
+				<AlarmSelector
+					alarms={form.alarms}
+					onChange={handleAlarmsChange}
+				/>
+			</StandardModal>
 		</>
 	);
 }

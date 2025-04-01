@@ -83,7 +83,7 @@ export function TimezoneSelector({
 
 	return (
 		<Form.Group className="mb-3">
-			<Form.Label>Fuso orario</Form.Label>
+			<Form.Label className="fw-bold">Fuso orario</Form.Label>
 			<Form.Control
 				type="text"
 				list="timezone-list"

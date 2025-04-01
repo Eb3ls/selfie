@@ -21,24 +21,26 @@ export default function StandardModal({
 	handleSubmit
 }: StandardModalProps) {
 	return (
-		<Modal show={show} onHide={handleClose}>
+		<Modal show={show} onHide={handleClose} size="lg" scrollable={true}>
 			<Modal.Header closeButton>
 				{titleIcon && <span className="modal-icon">{titleIcon}</span>}
 				<Modal.Title>{title}</Modal.Title>
 			</Modal.Header>
-			<Form onSubmit={handleSubmit} className="custom-form">
-				<Modal.Body>{children}</Modal.Body>
-				<Modal.Footer>
-					<Button variant="secondary" onClick={handleClose}>
-						Chiudi
+			<Modal.Body>
+				<Form onSubmit={handleSubmit} id="modalForm">
+					{children}
+				</Form>
+			</Modal.Body>
+			<Modal.Footer>
+				<Button variant="secondary" onClick={handleClose}>
+					Chiudi
+				</Button>
+				{handleSubmit && (
+					<Button type="submit" variant="primary" form="modalForm">
+						{saveBtnText}
 					</Button>
-					{handleSubmit && (
-						<Button type="submit" variant="primary">
-							{saveBtnText}
-						</Button>
-					)}
-				</Modal.Footer>
-			</Form>
+				)}
+			</Modal.Footer>
 		</Modal>
 	);
 }

@@ -31,7 +31,7 @@ export function AlarmSelector({ alarms, onChange }: AlarmSelectorProps) {
 
 	return (
 		<Form.Group className="mb-3">
-			<Form.Label>Notifiche</Form.Label>
+			<Form.Label className="fw-bold">Notifiche</Form.Label>
 			{ALARM_OPTIONS.map((option) => (
 				<Form.Check
 					key={option.value}

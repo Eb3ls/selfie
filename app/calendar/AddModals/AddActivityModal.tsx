@@ -4,10 +4,11 @@ import { AlarmSelector } from "@/app/calendar/AlarmSelector";
 import { InvitationComponent } from "@/app/calendar/InvitationComponent";
 import "@/app/calendar/Modal.css";
 import { TimezoneSelector } from "@/app/calendar/TimezoneSelector";
+import StandardInput from "@/app/components/StandardInput";
+import StandardModal from "@/app/components/StandardModal";
 import { useTime } from "@/app/components/TimeContext";
 import { StringAlarm } from "@/utils/db/db";
 import React, { useState } from "react";
-import { Button, Form, Modal } from "react-bootstrap";
 
 export function AddActivityModal({ children }: any) {
 	const [show, setShow] = useState(false);
@@ -100,116 +101,70 @@ export function AddActivityModal({ children }: any) {
 				{children}
 			</span>
 
-			<Modal
+			<StandardModal
+				title="Nuova Attività"
+				saveBtnText="Crea"
 				show={show}
-				onHide={() => setShow(false)}
-				centered
-				dialogClassName="custom-modal"
-				backdropClassName="custom-backdrop"
-				fullscreen="lg-down"
+				handleClose={() => setShow(false)}
+				handleSubmit={handleSubmit}
 			>
-				<Modal.Header closeButton className="custom-modal-header">
-					<Modal.Title>
-						<i className="bi bi-person-plus me-2" />
-						Nuova Attività
-					</Modal.Title>
-				</Modal.Header>
-				<Form onSubmit={handleSubmit} className="custom-form">
-					<Modal.Body>
-						<Form.Group className="mb-3" controlId="formSummary">
-							<Form.Label>Titolo</Form.Label>
-							<Form.Control
-								type="text"
-								name="summary"
-								value={form.summary}
-								onChange={handleChange}
-								placeholder="Inserisci titolo"
-								className="input-field"
-								required
-							/>
-						</Form.Group>
+				<StandardInput
+					type="text"
+					name="summary"
+					title="Titolo"
+					placeholder="Inserisci titolo"
+					onChange={handleChange}
+					value={form.summary}
+				/>
 
-						<Form.Group
-							className="mb-3"
-							controlId="formDescription"
-						>
-							<Form.Label>Descrizione</Form.Label>
-							<Form.Control
-								as="textarea"
-								name="description"
-								value={form.description}
-								onChange={handleChange}
-								placeholder="Inserisci descrizione"
-								className="input-field"
-								required
-							/>
-						</Form.Group>
+				<StandardInput
+					type="textarea"
+					name="description"
+					title="Descrizione"
+					placeholder="Inserisci descrizione"
+					onChange={handleChange}
+					value={form.description}
+					isRequired={false}
+				/>
 
-						<Form.Group className="mb-3" controlId="formDue">
-							<Form.Label>Consegna</Form.Label>
-							<Form.Control
-								type="datetime-local"
-								name="due"
-								value={form.due}
-								onChange={handleChange}
-								className="input-field"
-								required
-							/>
-						</Form.Group>
+				<StandardInput
+					type="datetime-local"
+					name="due"
+					title="Consegna"
+					onChange={handleChange}
+					value={form.due}
+				/>
 
-						<Form.Group className="mb-3" controlId="formCategories">
-							<Form.Label>
-								Categorie (separate da virgola)
-							</Form.Label>
-							<Form.Control
-								type="text"
-								name="categories"
-								value={form.categories}
-								onChange={handleChange}
-								placeholder="Inserisci categorie"
-								className="input-field"
-							/>
-						</Form.Group>
+				<StandardInput
+					type="text"
+					name="categories"
+					title="Categorie (separate da virgola)"
+					value={form.categories}
+					onChange={handleChange}
+					placeholder="Inserisci categorie"
+				/>
 
-						<TimezoneSelector
-							regularTimezone={form.geo}
-							setRegularTimezone={handleTimezoneChange}
-							firstDateToConvert={{
-								text: "Consegna",
-								date: form.due
-							}}
-							secondDateToConvert={undefined}
-						/>
+				<TimezoneSelector
+					regularTimezone={form.geo}
+					setRegularTimezone={handleTimezoneChange}
+					firstDateToConvert={{
+						text: "Consegna",
+						date: form.due
+					}}
+					secondDateToConvert={undefined}
+				/>
 
-						<InvitationComponent
-							mainId={"42"}
-							usernameList={form.usernameList}
-							setUsernameList={handleUsernameListChange}
-						/>
+				<InvitationComponent
+					mainId={"42"}
+					usernameList={form.usernameList}
+					setUsernameList={handleUsernameListChange}
+				/>
 
-						<AlarmSelector
-							alarms={form.alarms}
-							onChange={handleAlarmsChange}
-						/>
-					</Modal.Body>
-					<Modal.Footer>
-						<Button
-							variant="secondary"
-							onClick={() => setShow(false)}
-							className="custom-cancel-button"
-						>
-							Annulla
-						</Button>
-						<Button
-							variant="primary"
-							type="submit"
-							className="custom-submit-button"
-						>
-							Crea Attività
-						</Button>
-					</Modal.Footer>
-				</Form>
-			</Modal>
+				<AlarmSelector
+					alarms={form.alarms}
+					onChange={handleAlarmsChange}
+				/>
+			</StandardModal>
 		</>
 	);
 }
