@@ -2,10 +2,12 @@
 
 import { AlarmSelector } from "@/app/calendar/AlarmSelector";
 import "@/app/calendar/Modal.css";
+import { StandardInput } from "@/app/components/StandardInput";
+import { StandardModal } from "@/app/components/StandardModal";
 import { StringAlarm, StringSession } from "@/utils/db/db";
 import moment from "moment";
 import React, { useState } from "react";
-import { Button, Form, Modal } from "react-bootstrap";
+import { Button, Card, Col, Form, Row } from "react-bootstrap";
 
 export function ModifySessionModal({
 	session,
@@ -145,176 +147,140 @@ export function ModifySessionModal({
 		});
 	};
 
-	return (
-		<>
-			<Modal
-				show={show}
-				onHide={() => setShow(false)}
-				centered
-				dialogClassName="custom-modal"
-				backdropClassName="custom-backdrop"
-				fullscreen="lg-down"
-			>
-				<Modal.Header closeButton className="custom-modal-header">
-					<Modal.Title>
-						<i className="bi bi-person-plus me-2" />
-						Modifica Sessione
-					</Modal.Title>
-				</Modal.Header>
-				<Form onSubmit={handleSubmit} className="custom-form">
-					<Modal.Body>
-						<Form.Group className="mb-3" controlId="formFirstName">
-							<Form.Label>Titolo</Form.Label>
-							<Form.Control
-								type="text"
-								name="summary"
-								value={form.summary}
-								onChange={handleChange}
-								placeholder="Inserisci titolo"
-								className="input-field"
-								required
-							/>
-							<Form.Label>Descrizione</Form.Label>
-							<Form.Control
-								as="textarea"
-								name="description"
-								value={form.description}
-								onChange={handleChange}
-								placeholder="Inserisci descrizione"
-								className="input-field"
-								required
-							/>
-							<Form.Label>Stato</Form.Label>
-							<Form.Select
-								name="status"
-								value={form.status}
-								onChange={handleChange}
-								className="input-field"
-								required
-							>
-								<option value="TENTATIVE">Provvisorio</option>
-								<option value="CONFIRMED">Confermato</option>
-								<option value="CANCELLED">Cancellato</option>
-							</Form.Select>
-							<Form.Label>Data di inizio</Form.Label>
-							<Form.Control
-								type="datetime-local"
-								name="dtStart"
-								value={moment(form.dtStart).format(
-									"YYYY-MM-DDTHH:mm"
-								)}
-								onChange={handleChange}
-								placeholder="Inserisci data di inizio"
-								className="input-field"
-								required
-							/>
+	function calculateTotalDuration() {
+		const cycles =
+			form.settingsList[form.settingsList.length - 1].cycles || 0;
+		const studyTime =
+			form.settingsList[form.settingsList.length - 1].studyTime || 0;
+		const breakTime =
+			form.settingsList[form.settingsList.length - 1].breakTime || 0;
 
-							<p>Sezione pomodoro:</p>
-							<Form.Label>Cicli pomodoro</Form.Label>
-							<Form.Control
+		return cycles * (studyTime + breakTime);
+	}
+
+	return (
+		<StandardModal
+			title="Modifica Sessione"
+			titleIcon={<i className="bi bi-pencil me-2" />}
+			saveBtnText="Modifica"
+			show={show}
+			handleClose={() => setShow(false)}
+			handleSubmit={handleSubmit}
+		>
+			<StandardInput
+				type="text"
+				name="summary"
+				title="Titolo"
+				value={form.summary}
+				onChange={handleChange}
+				placeholder="Inserisci titolo"
+			/>
+			<StandardInput
+				type="textarea"
+				name="description"
+				title="Descrizione"
+				value={form.description}
+				onChange={handleChange}
+				placeholder="Inserisci descrizione"
+				isRequired={false}
+			/>
+			<StandardInput
+				type="select"
+				name="status"
+				title="Stato"
+				value={form.status}
+				onChange={handleChange}
+				optionMap={{
+					TENTATIVE: "Provvisorio",
+					CONFIRMED: "Confermato",
+					CANCELLED: "Cancellato"
+				}}
+			/>
+			<StandardInput
+				type="datetime-local"
+				name="dtStart"
+				title="Data di inizio"
+				value={moment(form.dtStart).format("YYYY-MM-DDTHH:mm")}
+				onChange={handleChange}
+				placeholder="Inserisci data di inizio"
+			/>
+
+			<Card className="mt-4 mb-3">
+				<Card.Header>
+					<i className="bi bi-alarm me-2"></i>
+					Impostazioni Pomodoro
+				</Card.Header>
+				<Card.Body>
+					<Row>
+						<Col md={4}>
+							<StandardInput
 								type="number"
 								name="cycles"
+								title="Cicli"
+								min={1}
 								value={
 									form.settingsList[
 										form.settingsList.length - 1
 									].cycles
 								}
-								min={0}
 								onChange={handleChangePomodoro}
-								placeholder="Inserisci il numero di cicli"
-								className="input-field"
-								required
 							/>
-							<Form.Label>Durata studio</Form.Label>
-							<Form.Control
+						</Col>
+						<Col md={4}>
+							<StandardInput
 								type="number"
 								name="studyTime"
+								title="Studio (min)"
+								min={1}
 								value={
 									form.settingsList[
 										form.settingsList.length - 1
 									].studyTime
 								}
-								min={1}
 								onChange={handleChangePomodoro}
-								placeholder="Inserisci la durata dello studio"
-								className="input-field"
-								required
 							/>
-							<Form.Label>Durata pausa</Form.Label>
-							<Form.Control
+						</Col>
+						<Col md={4}>
+							<StandardInput
 								type="number"
 								name="breakTime"
+								title="Pausa (min)"
+								min={1}
 								value={
 									form.settingsList[
 										form.settingsList.length - 1
 									].breakTime
 								}
-								min={1}
 								onChange={handleChangePomodoro}
-								placeholder="Inserisci la durata della pausa"
-								className="input-field"
-								required
 							/>
-						</Form.Group>
-						{/* Nuova sezione grafica per condividere la sessione */}
-						<Form.Group className="mb-3" controlId="formInviteUser">
-							<Form.Label>Condividi impostazioni</Form.Label>
-							<div className="d-flex">
-								<Form.Control
-									type="text"
-									placeholder="Inserisci nome utente"
-									className="input-field"
-									value={userToInvite}
-									onChange={(e) =>
-										setUserToInvite(e.target.value)
-									}
-								/>
-								<Button
-									variant="success"
-									className="ms-2"
-									onClick={handleShare}
-								>
-									Condividi
-								</Button>
-							</div>
-						</Form.Group>
-						<AlarmSelector
-							alarms={form.alarms}
-							onChange={handleAlarmsChange}
-						/>
-					</Modal.Body>
-					<Modal.Footer>
-						<Button
-							variant="success"
-							onClick={handleRedirect}
-							className="custom-cancel-button"
-						>
-							Pomi
-						</Button>
-						<Button
-							variant="danger"
-							onClick={handleDelete}
-							className="custom-cancel-button"
-						>
-							Elimina
-						</Button>
-						<Button
-							variant="secondary"
-							onClick={() => setShow(false)}
-							className="custom-cancel-button"
-						>
-							Annulla
-						</Button>
-						<Button
-							variant="primary"
-							type="submit"
-							className="custom-submit-button"
-						>
-							Modifica Sessione
-						</Button>
-					</Modal.Footer>
-				</Form>
-			</Modal>
-		</>
+						</Col>
+					</Row>
+					<small className="text-muted mt-2 d-block">
+						Durata totale: {calculateTotalDuration()} minuti
+					</small>
+				</Card.Body>
+			</Card>
+			{/* Nuova sezione grafica per condividere la sessione */}
+			<Form.Group className="mb-3" controlId="formInviteUser">
+				<Form.Label>Condividi impostazioni</Form.Label>
+				<div className="d-flex">
+					<Form.Control
+						type="text"
+						placeholder="Inserisci nome utente"
+						className="input-field"
+						value={userToInvite}
+						onChange={(e) => setUserToInvite(e.target.value)}
+					/>
+					<Button
+						variant="success"
+						className="ms-2"
+						onClick={handleShare}
+					>
+						Condividi
+					</Button>
+				</div>
+			</Form.Group>
+			<AlarmSelector alarms={form.alarms} onChange={handleAlarmsChange} />
+		</StandardModal>
 	);
 }
