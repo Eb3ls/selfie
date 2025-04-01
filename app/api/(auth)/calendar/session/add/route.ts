@@ -50,7 +50,18 @@ export const POST = async (request: NextRequest) => {
 	// Estraiamo le impostazioni da newBody
 	const settings = newBody.settings;
 
-	// TODO: Validare anche i dati del pomodoro, study/break non possono essere 0
+	// Controlliamo che il numero di cicli sia maggiore o uguale a 0
+	if (settings.cycles <= 0) {
+		return generateMessageResponse("Invalid number of cycles", 400);
+	}
+	// Controlliamo che il tempo di studio sia maggiore o uguale a 0
+	if (settings.studyTime <= 0) {
+		return generateMessageResponse("Invalid study time", 400);
+	}
+	// Controlliamo che il tempo di pausa sia maggiore o uguale a 0
+	if (settings.breakTime <= 0) {
+		return generateMessageResponse("Invalid break time", 400);
+	}
 
 	// Creiamo una nuova sessione con quei campi
 	const newSession: StringSession = generateStringModel<StringSession>(

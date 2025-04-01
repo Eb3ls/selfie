@@ -95,7 +95,18 @@ export const PATCH = async (request: NextRequest) => {
 		);
 	}
 
-	// TODO: Validare anche i dati del pomodoro, study/break non possono essere 0
+	// Controlliamo che il numero di cicli sia maggiore o uguale a 0
+	if (newSetting.cycles <= 0) {
+		return generateMessageResponse("Invalid number of cycles", 400);
+	}
+	// Controlliamo che il tempo di studio sia maggiore o uguale a 0
+	if (newSetting.studyTime <= 0) {
+		return generateMessageResponse("Invalid study time", 400);
+	}
+	// Controlliamo che il tempo di pausa sia maggiore o uguale a 0
+	if (newSetting.breakTime <= 0) {
+		return generateMessageResponse("Invalid break time", 400);
+	}
 
 	// Rimuoviamo tutti gli elementi in completedCycles che sono futuri rispetto a TimeMachine
 	const today = timeMachine.timeMachineTime.toDateString();
@@ -109,22 +120,6 @@ export const PATCH = async (request: NextRequest) => {
 		modificationDate: today,
 		...newSetting
 	};
-
-	// Controlliamo se in completedCycles c'è la giornata odierna secondo TimeMachine
-	const foundDay = session[0].completedCycles.find((element) => {
-		return (
-			new Date(element.date).toDateString() ==
-			new Date(today).toDateString()
-		);
-	});
-
-	if (foundDay) {
-		const index = session[0].completedCycles.indexOf(foundDay);
-		session[0].completedCycles[index] = {
-			date: session[0].completedCycles[index].date,
-			cycles: newSetting.cycles
-		};
-	}
 
 	let settingsList = session[0].settingsList;
 

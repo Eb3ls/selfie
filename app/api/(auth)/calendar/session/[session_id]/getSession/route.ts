@@ -63,32 +63,67 @@ export const GET = async (
 	// Otteniamo il giorno tramite timeMachine
 	const today: string = timeMachine.timeMachineTime.toDateString();
 
-	// Controlliamo che il giorno richiesto sia compatibile con la RRULE
-
-	// Cerchiamo qual'è la data all'interno di settingsList che viene prima di today ma per ultima
-	let lastSettings = session.settingsList[0];
-	session.settingsList.forEach((settings) => {
-		if (new Date(settings.modificationDate) <= new Date(today)) {
-			lastSettings.modificationDate = settings.modificationDate;
-		}
-	});
+	// Cerchiamo quali sono le impostazioni che si applicano al momento corrente
+	const settingsListBeforeToday = session.settingsList
+		.filter((s) => new Date(s.modificationDate) <= new Date(today))
+		.sort(
+			(a, b) =>
+				new Date(b.modificationDate).getTime() -
+				new Date(a.modificationDate).getTime()
+		);
+	const lastSettings = settingsListBeforeToday[0];
 
 	// Cerchiamo il giorno all'interno di completedCycles
-	const day = session.completedCycles.find((day) => day.date === today);
+	const dayEntry = session.completedCycles.find((day) => day.date === today);
+	const day = dayEntry ? dayEntry.cycles : 0;
 
-	let response: SessionResponse;
+	const response: SessionResponse = {
+		settings: lastSettings,
+		cycles: day
+	};
 
-	if (day === undefined) {
-		response = {
-			settings: lastSettings,
-			cycles: 0
-		};
-	} else {
-		response = {
-			settings: lastSettings,
-			cycles: day.cycles
-		};
+	// Dobbiamo aggiungere il cicli di debito accumulato ai cicli dei settings
+	// Calcolo del debito accumulato
+	let totalDebt = 0;
+	let currentDate = new Date(session.settingsList[0].modificationDate);
+	const endDate = new Date(today);
+
+	while (currentDate <= endDate) {
+		const dateStr = currentDate.toDateString();
+		// Troviamo il setting appropriato per questo giorno
+		const applicableSettings = session.settingsList
+			.filter((s) => new Date(s.modificationDate) <= currentDate)
+			.sort(
+				(a, b) =>
+					new Date(b.modificationDate).getTime() -
+					new Date(a.modificationDate).getTime()
+			);
+		const dailySettings = applicableSettings[0];
+
+		// Calcoliamo i cicli svolti o 0 se il giorno non è presente
+		const dayEntry = session.completedCycles.find(
+			(dc) => dc.date === dateStr
+		);
+		const completed = dayEntry ? dayEntry.cycles : 0;
+
+		// Prendiamo i cicli che erano da fare in quel giorno
+		const dailyGoal = dailySettings.cycles;
+
+		// Aggiungiamo il debito di giornata
+		// (se è minore di 0, significa che ha recuperato debito)
+		totalDebt += dailyGoal - completed;
+
+		// Avanziamo di un giorno
+		currentDate.setDate(currentDate.getDate() + 1);
 	}
+
+	if (totalDebt < 0) {
+		console.warn("[POMODORO] Debito negativo trovato!");
+		totalDebt = 0;
+	}
+
+	// I cicli da svolgere sono quelli già svolti oggi + il debito
+	response.settings.cycles = response.cycles + totalDebt;
 
 	return generateObjectResponse(response, 200);
 };
