@@ -143,10 +143,10 @@ export function ModifyEventModal({
 	function getViewContent() {
 		return (
 			<>
-				<StandardViewField title="Titolo" value={form.summary} />
+				<StandardViewField title="Titolo" value={event.summary} />
 				<StandardViewField
 					title="Descrizione"
-					value={form.description || "-"}
+					value={event.description || "-"}
 				/>
 				<StandardViewField
 					title="Stato"
@@ -155,33 +155,33 @@ export function ModifyEventModal({
 							TENTATIVE: "Provvisorio",
 							CONFIRMED: "Confermato",
 							CANCELLED: "Cancellato"
-						}[form.status] || form.status
+						}[event.status] || event.status
 					}
 				/>
 				<StandardViewField
 					title="Inizio"
-					value={moment(form.dtStart).format("DD/MM/YYYY HH:mm")}
+					value={moment(event.dtStart).format("DD/MM/YYYY HH:mm")}
 				/>
 				<StandardViewField
 					title="Fine"
-					value={moment(form.dtEnd).format("DD/MM/YYYY HH:mm")}
+					value={moment(event.dtEnd).format("DD/MM/YYYY HH:mm")}
 				/>
 				<StandardViewField
 					title="Categorie"
-					value={form.categories || "-"}
+					value={event.categories || "-"}
 				/>
 				<StandardViewField
 					title="Fuso orario"
-					value={form.geo || "-"}
+					value={event.geo || "-"}
 				/>
 				<StandardViewField
 					title="Partecipanti"
-					value={form.usernameList.join(", ") || "-"}
+					value={event.usernameList.join(", ") || "-"}
 				/>
 				<StandardViewField
 					title="Promemoria"
 					value={
-						form.alarms
+						event.alarms
 							.map((a) => `${getTextFromTrigger(a.trigger)}`)
 							.join(", ") || "Nessuno"
 					}
@@ -296,13 +296,20 @@ export function ModifyEventModal({
 		);
 	}
 
-	const mainView = {
-		title: "Dettagli Evento",
-		handleClose: () => setShow(false),
-		renderChildren: () => {
-			return getViewContent();
+	function getMainView() {
+		let title = "Dettagli Evento";
+		if (event.ownerId !== currentUserId) {
+			title += " (Ospite)";
 		}
-	};
+
+		return {
+			title,
+			handleClose: () => setShow(false),
+			renderChildren: () => {
+				return getViewContent();
+			}
+		};
+	}
 
 	function getSingleViewMap() {
 		if (form.ownerId === currentUserId) {
@@ -338,7 +345,7 @@ export function ModifyEventModal({
 	return (
 		<StandardToggleModal
 			show={show}
-			mainView={mainView}
+			mainView={getMainView()}
 			singleViewsMap={getSingleViewMap()}
 		/>
 	);

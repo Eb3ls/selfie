@@ -140,10 +140,10 @@ export function ModifyActivityModal({
 	function getViewContent() {
 		return (
 			<>
-				<StandardViewField title="Titolo" value={form.summary} />
+				<StandardViewField title="Titolo" value={activity.summary} />
 				<StandardViewField
 					title="Descrizione"
-					value={form.description || "-"}
+					value={activity.description || "-"}
 				/>
 				<StandardViewField
 					title="Stato"
@@ -153,29 +153,29 @@ export function ModifyActivityModal({
 							COMPLETED: "Completata",
 							"IN-PROCESS": "In corso",
 							CANCELLED: "Cancellata"
-						}[form.status] || form.status
+						}[activity.status] || activity.status
 					}
 				/>
 				<StandardViewField
 					title="Consegna"
-					value={moment(form.due).format("DD/MM/YYYY HH:mm")}
+					value={moment(activity.due).format("DD/MM/YYYY HH:mm")}
 				/>
 				<StandardViewField
 					title="Categorie"
-					value={form.categories || "-"}
+					value={activity.categories || "-"}
 				/>
 				<StandardViewField
 					title="Fuso orario"
-					value={form.geo || "-"}
+					value={activity.geo || "-"}
 				/>
 				<StandardViewField
 					title="Partecipanti"
-					value={form.usernameList.join(", ") || "-"}
+					value={activity.usernameList.join(", ") || "-"}
 				/>
 				<StandardViewField
 					title="Promemoria"
 					value={
-						form.alarms
+						activity.alarms
 							.map((a) => `${getTextFromTrigger(a.trigger)}`)
 							.join(", ") || "Nessuno"
 					}
@@ -282,13 +282,20 @@ export function ModifyActivityModal({
 		);
 	}
 
-	const mainView = {
-		title: "Dettagli Attività",
-		handleClose: () => setShow(false),
-		renderChildren: () => {
-			return getViewContent();
+	function getMainView() {
+		let title = "Dettagli Attività";
+		if (activity.ownerId !== currentUserId) {
+			title += " (Ospite)";
 		}
-	};
+
+		return {
+			title: title,
+			handleClose: () => setShow(false),
+			renderChildren: () => {
+				return getViewContent();
+			}
+		};
+	}
 
 	function getSingleViewMap() {
 		if (form.ownerId === currentUserId) {
@@ -324,7 +331,7 @@ export function ModifyActivityModal({
 	return (
 		<StandardToggleModal
 			show={show}
-			mainView={mainView}
+			mainView={getMainView()}
 			singleViewsMap={getSingleViewMap()}
 		/>
 	);

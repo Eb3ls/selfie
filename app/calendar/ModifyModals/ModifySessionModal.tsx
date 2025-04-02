@@ -195,19 +195,19 @@ export function ModifySessionModal({
 				<StandardViewField title="Titolo" value={form.summary} />
 				<StandardViewField
 					title="Descrizione"
-					value={form.description || "-"}
+					value={session.description || "-"}
 				/>
 				<StandardViewField
 					title="Stato"
-					value={getTextFromStatus(form.status)}
+					value={getTextFromStatus(session.status)}
 				/>
 				<StandardViewField
 					title="Inizio"
-					value={moment(form.dtStart).format("DD/MM/YYYY HH:mm")}
+					value={moment(session.dtStart).format("DD/MM/YYYY HH:mm")}
 				/>
 				<StandardViewField
 					title="Fine"
-					value={moment(form.dtEnd).format("DD/MM/YYYY HH:mm")}
+					value={moment(session.dtEnd).format("DD/MM/YYYY HH:mm")}
 				/>
 				<Card className="mt-4 mb-3">
 					<Card.Header>
@@ -219,24 +219,24 @@ export function ModifySessionModal({
 							<Col md={4}>
 								<StandardViewField
 									title="Cicli"
-									value={form.settingsList[
-										form.settingsList.length - 1
+									value={session.settingsList[
+										session.settingsList.length - 1
 									].cycles.toString()}
 								/>
 							</Col>
 							<Col md={4}>
 								<StandardViewField
 									title="Studio (min)"
-									value={form.settingsList[
-										form.settingsList.length - 1
+									value={session.settingsList[
+										session.settingsList.length - 1
 									].studyTime.toString()}
 								/>
 							</Col>
 							<Col md={4}>
 								<StandardViewField
 									title="Pausa (min)"
-									value={form.settingsList[
-										form.settingsList.length - 1
+									value={session.settingsList[
+										session.settingsList.length - 1
 									].breakTime.toString()}
 								/>
 							</Col>
@@ -249,11 +249,22 @@ export function ModifySessionModal({
 				<StandardViewField
 					title="Promemoria"
 					value={
-						form.alarms
+						session.alarms
 							.map((a) => `${getTextFromTrigger(a.trigger)}`)
 							.join(", ") || "Nessuno"
 					}
 				/>
+				<div className="text-center mt-4">
+					<Button
+						variant="success"
+						size="lg"
+						onClick={handleRedirect}
+						className="px-4 py-2"
+					>
+						<i className="bi bi-play-circle-fill me-2"></i>
+						Vai al Pomodoro
+					</Button>
+				</div>
 			</>
 		);
 	}
@@ -415,21 +426,6 @@ export function ModifySessionModal({
 	};
 
 	const singleViewsMap = {
-		Vai: {
-			title: "Vai alla Sessione",
-			buttonColor: "success",
-			icon: <i className="bi bi-play-fill me-2" />,
-			saveBtnText: "Vai",
-			onSubmit: (e: React.FormEvent<HTMLFormElement>) => {
-				e.preventDefault();
-				handleRedirect();
-			},
-			renderChildren: () => (
-				<p className="text-center">
-					Clicca per iniziare la sessione di Pomodoro!
-				</p>
-			)
-		},
 		Condividi: {
 			title: "Condividi Sessione",
 			buttonColor: "success",
