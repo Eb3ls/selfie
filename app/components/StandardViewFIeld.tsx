@@ -7,7 +7,12 @@ export function StandardViewField({ title, value }: StandardViewFieldProps) {
 	return (
 		<div className="mb-3">
 			<label className="form-label fw-bold">{title}</label>
-			<div className="p-2 bg-light rounded">{value}</div>
+			<div
+				className="p-2 bg-light rounded overflow-y-auto"
+				style={{ maxHeight: 300 }}
+			>
+				{value}
+			</div>
 		</div>
 	);
 }

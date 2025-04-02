@@ -50,6 +50,19 @@ export function StandardModal({
 		return null;
 	}
 
+	// Se non abbiamo pulsanti in fondo, non mostriamo il footer
+	function getFooter() {
+		if (getCloseButton() || getSubmitButton()) {
+			return (
+				<Modal.Footer>
+					{getCloseButton()}
+					{getSubmitButton()}
+				</Modal.Footer>
+			);
+		}
+		return null;
+	}
+
 	// Sulla destra del titolo, se abbiamo passato extraHeaderButtons, li mostriamo
 	return (
 		<Modal
@@ -79,10 +92,7 @@ export function StandardModal({
 					{children}
 				</Form>
 			</Modal.Body>
-			<Modal.Footer>
-				{getCloseButton()}
-				{getSubmitButton()}
-			</Modal.Footer>
+			{getFooter()}
 		</Modal>
 	);
 }

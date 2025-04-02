@@ -19,11 +19,13 @@ type StringActivityFrontend = Omit<StringActivity, "userIdList"> & {
 export function ModifyActivityModal({
 	activity,
 	show,
-	setShow
+	setShow,
+	currentUserId
 }: {
 	activity: StringActivityFrontend;
 	show: boolean;
 	setShow: (show: boolean) => void;
+	currentUserId: string;
 }) {
 	const newActivity: StringActivityFrontend = { ...activity };
 	const [form, setForm] = useState(newActivity);
@@ -288,37 +290,42 @@ export function ModifyActivityModal({
 		}
 	};
 
-	const singleViewsMap = {
-		Modifica: {
-			title: "Modifica Attività",
-			buttonColor: "primary",
-			icon: <i className="bi bi-pencil me-2" />,
-			saveBtnText: "Modifica",
-			onSubmit: handleSubmit,
-			renderChildren: () => {
-				return getEditContent();
-			}
-		},
-		Elimina: {
-			title: "Elimina Attività",
-			buttonColor: "danger",
-			icon: <i className="bi bi-trash me-2" />,
-			saveBtnText: "",
-			onSubmit: (e: React.FormEvent<HTMLFormElement>) => {
-				e.preventDefault();
-				handleDelete();
-			},
-			renderChildren: () => {
-				return getDeleteContent();
-			}
+	function getSingleViewMap() {
+		if (form.ownerId === currentUserId) {
+			return {
+				Modifica: {
+					title: "Modifica Attività",
+					buttonColor: "primary",
+					icon: <i className="bi bi-pencil me-2" />,
+					saveBtnText: "Modifica",
+					onSubmit: handleSubmit,
+					renderChildren: () => {
+						return getEditContent();
+					}
+				},
+				Elimina: {
+					title: "Elimina Attività",
+					buttonColor: "danger",
+					icon: <i className="bi bi-trash me-2" />,
+					saveBtnText: "",
+					onSubmit: (e: React.FormEvent<HTMLFormElement>) => {
+						e.preventDefault();
+						handleDelete();
+					},
+					renderChildren: () => {
+						return getDeleteContent();
+					}
+				}
+			};
 		}
-	};
+		return null;
+	}
 
 	return (
 		<StandardToggleModal
 			show={show}
 			mainView={mainView}
-			singleViewsMap={singleViewsMap}
+			singleViewsMap={getSingleViewMap()}
 		/>
 	);
 }

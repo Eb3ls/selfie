@@ -3,8 +3,11 @@
 import { AlarmSelector } from "@/app/calendar/AlarmSelector";
 import "@/app/calendar/Modal.css";
 import { StandardInput } from "@/app/components/StandardInput";
-import { StandardModal } from "@/app/components/StandardModal";
+import { StandardToggleModal } from "@/app/components/StandardToggleModal";
+// nuovo import
+import { StandardViewField } from "@/app/components/StandardViewFIeld";
 import { StringAlarm, StringSession } from "@/utils/db/db";
+import { Trigger } from "@/utils/db/models/Alarm";
 import moment from "moment";
 import React, { useState } from "react";
 import { Button, Card, Col, Form, Row } from "react-bootstrap";
@@ -158,109 +161,231 @@ export function ModifySessionModal({
 		return cycles * (studyTime + breakTime);
 	}
 
-	return (
-		<StandardModal
-			title="Modifica Sessione"
-			titleIcon={<i className="bi bi-pencil me-2" />}
-			saveBtnText="Modifica"
-			show={show}
-			handleClose={() => setShow(false)}
-			handleSubmit={handleSubmit}
-		>
-			<StandardInput
-				type="text"
-				name="summary"
-				title="Titolo"
-				value={form.summary}
-				onChange={handleChange}
-				placeholder="Inserisci titolo"
-			/>
-			<StandardInput
-				type="textarea"
-				name="description"
-				title="Descrizione"
-				value={form.description}
-				onChange={handleChange}
-				placeholder="Inserisci descrizione"
-				isRequired={false}
-			/>
-			<StandardInput
-				type="select"
-				name="status"
-				title="Stato"
-				value={form.status}
-				onChange={handleChange}
-				optionMap={{
-					TENTATIVE: "Provvisorio",
-					CONFIRMED: "Confermato",
-					CANCELLED: "Cancellato"
-				}}
-			/>
-			<StandardInput
-				type="datetime-local"
-				name="dtStart"
-				title="Data di inizio"
-				value={moment(form.dtStart).format("YYYY-MM-DDTHH:mm")}
-				onChange={handleChange}
-				placeholder="Inserisci data di inizio"
-			/>
+	function getTextFromTrigger(trigger: Trigger): string {
+		switch (trigger) {
+			case "-PT0S":
+				return "Al momento dell'evento";
+			case "-PT10M":
+				return "10 minuti prima";
+			case "-PT1H":
+				return "1 ora prima";
+			case "-PT1D":
+				return "1 giorno prima";
+			default:
+				return "";
+		}
+	}
 
-			<Card className="mt-4 mb-3">
-				<Card.Header>
-					<i className="bi bi-alarm me-2"></i>
-					Impostazioni Pomodoro
-				</Card.Header>
-				<Card.Body>
-					<Row>
-						<Col md={4}>
-							<StandardInput
-								type="number"
-								name="cycles"
-								title="Cicli"
-								min={1}
-								value={
-									form.settingsList[
+	function getTextFromStatus(status: string): string {
+		switch (status) {
+			case "TENTATIVE":
+				return "Provvisorio";
+			case "CONFIRMED":
+				return "Confermato";
+			case "CANCELLED":
+				return "Cancellato";
+			default:
+				return "";
+		}
+	}
+
+	function getViewContent() {
+		return (
+			<>
+				<StandardViewField title="Titolo" value={form.summary} />
+				<StandardViewField
+					title="Descrizione"
+					value={form.description || "-"}
+				/>
+				<StandardViewField
+					title="Stato"
+					value={getTextFromStatus(form.status)}
+				/>
+				<StandardViewField
+					title="Inizio"
+					value={moment(form.dtStart).format("DD/MM/YYYY HH:mm")}
+				/>
+				<StandardViewField
+					title="Fine"
+					value={moment(form.dtEnd).format("DD/MM/YYYY HH:mm")}
+				/>
+				<Card className="mt-4 mb-3">
+					<Card.Header>
+						<i className="bi bi-alarm me-2"></i>
+						Impostazioni Pomodoro
+					</Card.Header>
+					<Card.Body>
+						<Row>
+							<Col md={4}>
+								<StandardViewField
+									title="Cicli"
+									value={form.settingsList[
 										form.settingsList.length - 1
-									].cycles
-								}
-								onChange={handleChangePomodoro}
-							/>
-						</Col>
-						<Col md={4}>
-							<StandardInput
-								type="number"
-								name="studyTime"
-								title="Studio (min)"
-								min={1}
-								value={
-									form.settingsList[
+									].cycles.toString()}
+								/>
+							</Col>
+							<Col md={4}>
+								<StandardViewField
+									title="Studio (min)"
+									value={form.settingsList[
 										form.settingsList.length - 1
-									].studyTime
-								}
-								onChange={handleChangePomodoro}
-							/>
-						</Col>
-						<Col md={4}>
-							<StandardInput
-								type="number"
-								name="breakTime"
-								title="Pausa (min)"
-								min={1}
-								value={
-									form.settingsList[
+									].studyTime.toString()}
+								/>
+							</Col>
+							<Col md={4}>
+								<StandardViewField
+									title="Pausa (min)"
+									value={form.settingsList[
 										form.settingsList.length - 1
-									].breakTime
-								}
-								onChange={handleChangePomodoro}
-							/>
-						</Col>
-					</Row>
-					<small className="text-muted mt-2 d-block">
-						Durata totale: {calculateTotalDuration()} minuti
-					</small>
-				</Card.Body>
-			</Card>
-			{/* Nuova sezione grafica per condividere la sessione */}
+									].breakTime.toString()}
+								/>
+							</Col>
+						</Row>
+						<small className="text-muted mt-2 d-block">
+							Durata totale: {calculateTotalDuration()} minuti
+						</small>
+					</Card.Body>
+				</Card>
+				<StandardViewField
+					title="Promemoria"
+					value={
+						form.alarms
+							.map((a) => `${getTextFromTrigger(a.trigger)}`)
+							.join(", ") || "Nessuno"
+					}
+				/>
+			</>
+		);
+	}
+
+	function getEditContent() {
+		return (
+			<>
+				<StandardInput
+					type="text"
+					name="summary"
+					title="Titolo"
+					value={form.summary}
+					onChange={handleChange}
+					placeholder="Inserisci titolo"
+				/>
+				<StandardInput
+					type="textarea"
+					name="description"
+					title="Descrizione"
+					value={form.description}
+					onChange={handleChange}
+					placeholder="Inserisci descrizione"
+					isRequired={false}
+				/>
+				<StandardInput
+					type="select"
+					name="status"
+					title="Stato"
+					value={form.status}
+					onChange={handleChange}
+					optionMap={{
+						TENTATIVE: "Provvisorio",
+						CONFIRMED: "Confermato",
+						CANCELLED: "Cancellato"
+					}}
+				/>
+				<StandardInput
+					type="datetime-local"
+					name="dtStart"
+					title="Data di inizio"
+					value={moment(form.dtStart).format("YYYY-MM-DDTHH:mm")}
+					onChange={handleChange}
+					placeholder="Inserisci data di inizio"
+				/>
+				{/* Pomodoro settings */}
+				<Card className="mt-4 mb-3">
+					<Card.Header>
+						<i className="bi bi-alarm me-2"></i>
+						Impostazioni Pomodoro
+					</Card.Header>
+					<Card.Body>
+						<Row>
+							<Col md={4}>
+								<StandardInput
+									type="number"
+									name="cycles"
+									title="Cicli"
+									min={1}
+									value={
+										form.settingsList[
+											form.settingsList.length - 1
+										].cycles
+									}
+									onChange={handleChangePomodoro}
+								/>
+							</Col>
+							<Col md={4}>
+								<StandardInput
+									type="number"
+									name="studyTime"
+									title="Studio (min)"
+									min={1}
+									value={
+										form.settingsList[
+											form.settingsList.length - 1
+										].studyTime
+									}
+									onChange={handleChangePomodoro}
+								/>
+							</Col>
+							<Col md={4}>
+								<StandardInput
+									type="number"
+									name="breakTime"
+									title="Pausa (min)"
+									min={1}
+									value={
+										form.settingsList[
+											form.settingsList.length - 1
+										].breakTime
+									}
+									onChange={handleChangePomodoro}
+								/>
+							</Col>
+						</Row>
+						<small className="text-muted mt-2 d-block">
+							Durata totale: {calculateTotalDuration()} minuti
+						</small>
+					</Card.Body>
+				</Card>
+				<AlarmSelector
+					alarms={form.alarms}
+					onChange={handleAlarmsChange}
+				/>
+			</>
+		);
+	}
+
+	function getDeleteContent() {
+		return (
+			<div className="text-center">
+				<i className="bi bi-exclamation-triangle text-warning display-1 mb-4 d-block" />
+				<h4 className="mb-4">
+					Sei sicuro di voler eliminare questa sessione?
+				</h4>
+				<p className="mb-4 text-muted">{form.summary}</p>
+				<button
+					className="btn btn-danger btn-lg"
+					onClick={(e) => {
+						e.preventDefault();
+						handleDelete();
+					}}
+				>
+					<i className="bi bi-trash me-2" />
+					Conferma Eliminazione
+				</button>
+			</div>
+		);
+	}
+
+	function getShareContent() {
+		return (
 			<Form.Group className="mb-3" controlId="formInviteUser">
 				<Form.Label>Condividi impostazioni</Form.Label>
 				<div className="d-flex">
@@ -280,7 +405,65 @@ export function ModifySessionModal({
 					</Button>
 				</div>
 			</Form.Group>
-			<AlarmSelector alarms={form.alarms} onChange={handleAlarmsChange} />
-		</StandardModal>
+		);
+	}
+
+	const mainView = {
+		title: "Dettagli Sessione",
+		handleClose: () => setShow(false),
+		renderChildren: () => getViewContent()
+	};
+
+	const singleViewsMap = {
+		Vai: {
+			title: "Vai alla Sessione",
+			buttonColor: "success",
+			icon: <i className="bi bi-play-fill me-2" />,
+			saveBtnText: "Vai",
+			onSubmit: (e: React.FormEvent<HTMLFormElement>) => {
+				e.preventDefault();
+				handleRedirect();
+			},
+			renderChildren: () => (
+				<p className="text-center">
+					Clicca per iniziare la sessione di Pomodoro!
+				</p>
+			)
+		},
+		Condividi: {
+			title: "Condividi Sessione",
+			buttonColor: "success",
+			icon: <i className="bi bi-person-plus me-2" />,
+			saveBtnText: "Condividi",
+			onSubmit: handleShare,
+			renderChildren: () => getShareContent()
+		},
+		Modifica: {
+			title: "Modifica Sessione",
+			buttonColor: "primary",
+			icon: <i className="bi bi-pencil me-2" />,
+			saveBtnText: "Modifica",
+			onSubmit: handleSubmit,
+			renderChildren: () => getEditContent()
+		},
+		Elimina: {
+			title: "Elimina Sessione",
+			buttonColor: "danger",
+			icon: <i className="bi bi-trash me-2" />,
+			saveBtnText: "",
+			onSubmit: (e: React.FormEvent<HTMLFormElement>) => {
+				e.preventDefault();
+				handleDelete();
+			},
+			renderChildren: () => getDeleteContent()
+		}
+	};
+
+	return (
+		<StandardToggleModal
+			show={show}
+			mainView={mainView}
+			singleViewsMap={singleViewsMap}
+		/>
 	);
 }

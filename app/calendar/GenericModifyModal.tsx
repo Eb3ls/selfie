@@ -9,6 +9,7 @@ import {
 	StringEventFrontend,
 	StringSessionFrontend
 } from "@/app/calendar/calendarUtils/calendarTypes";
+import { useUser } from "../components/UserContext";
 
 interface ModifyModalProps {
 	calendarEvent: CalendarEvent;
@@ -21,6 +22,8 @@ export function GenericModifyModal({
 	showModal,
 	setShowModal
 }: ModifyModalProps) {
+	const { user } = useUser();
+
 	if (calendarEvent.typology === "activity") {
 		const activity =
 			calendarEvent.originalElement as StringActivityFrontend;
@@ -29,6 +32,7 @@ export function GenericModifyModal({
 				show={showModal}
 				setShow={setShowModal}
 				activity={activity}
+				currentUserId={user?._id || ""}
 			/>
 		);
 	} else if (calendarEvent.typology === "event") {
@@ -38,6 +42,7 @@ export function GenericModifyModal({
 				show={showModal}
 				setShow={setShowModal}
 				event={event}
+				currentUserId={user?._id || ""}
 			/>
 		);
 	} else if (calendarEvent.typology === "session") {

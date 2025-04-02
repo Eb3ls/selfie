@@ -60,7 +60,7 @@ export function InvitationComponent({
 
 	return (
 		<Form.Group className="mb-3">
-			<Form.Label>Inviti</Form.Label>
+			<Form.Label className="fw-bold">Inviti</Form.Label>
 			<div className="d-flex">
 				<Form.Control
 					type="text"

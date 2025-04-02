@@ -41,6 +41,7 @@ export function StandardInput({
 					value={value}
 					onChange={onChange}
 					required={isRequired}
+					rows={5}
 					className="form-control"
 				/>
 			</div>

@@ -22,7 +22,7 @@ export interface MainView
 interface StandardToggleModalProps {
 	show: boolean;
 	mainView: MainView;
-	singleViewsMap: { [key: string]: SingleView };
+	singleViewsMap: { [key: string]: SingleView } | null;
 }
 
 export function StandardToggleModal({
@@ -41,7 +41,7 @@ export function StandardToggleModal({
 		prop: K
 	): SingleView[K] | undefined {
 		let value: any;
-		if (currentViewKey) {
+		if (currentViewKey && singleViewsMap) {
 			// Recuperiamo la vista corrente dalla mappa
 			value = singleViewsMap[currentViewKey][prop];
 		} else {
@@ -61,6 +61,11 @@ export function StandardToggleModal({
 	}
 
 	function getExtraHeaderButtons() {
+		// Se non ci sono altre viste, non mostriamo i pulsanti
+		if (!singleViewsMap) {
+			return null;
+		}
+
 		if (currentViewKey) {
 			return (
 				<button
