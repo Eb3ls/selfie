@@ -142,6 +142,7 @@ export function AddActivityModal({ children }: any) {
 					value={form.categories}
 					onChange={handleChange}
 					placeholder="Inserisci categorie"
+					isRequired={false}
 				/>
 
 				<TimezoneSelector

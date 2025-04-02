@@ -5,41 +5,83 @@ interface StandardModalProps {
 	children: React.ReactNode;
 	title: string;
 	titleIcon?: React.ReactNode;
-	saveBtnText: string;
 	show: boolean;
-	handleClose: () => void;
+	showCloseButton?: boolean;
+	handleClose?: () => void;
+	// Se saveBtnText o handleSubmit non sono definiti, non mostriamo il pulsante di salvataggio
+	saveBtnText?: string;
 	handleSubmit?: (event: React.FormEvent<HTMLFormElement>) => void;
+	extraHeaderButtons?: React.ReactNode;
 }
 
 export function StandardModal({
 	children,
 	title,
 	titleIcon,
-	saveBtnText,
 	show,
+	showCloseButton = true,
 	handleClose,
-	handleSubmit
+	saveBtnText,
+	handleSubmit,
+	extraHeaderButtons
 }: StandardModalProps) {
+	// Se handleSubmit o saveBtnText non sono definiti, non mostriamo il pulsante di salvataggio
+	function getSubmitButton() {
+		if (handleSubmit && saveBtnText) {
+			return (
+				<Button type="submit" variant="primary" form="modalForm">
+					{saveBtnText}
+				</Button>
+			);
+		}
+		return null;
+	}
+
+	// Se handleClose o showCloseButton non sono definiti, non mostriamo il pulsante di chiusura
+	// La funzione di close é sempre definita e chiamata quando si preme la X
+	function getCloseButton() {
+		if (handleClose && showCloseButton) {
+			return (
+				<Button variant="secondary" onClick={handleClose}>
+					Chiudi
+				</Button>
+			);
+		}
+		return null;
+	}
+
+	// Sulla destra del titolo, se abbiamo passato extraHeaderButtons, li mostriamo
 	return (
-		<Modal show={show} onHide={handleClose} size="lg" scrollable={true}>
+		<Modal
+			show={show}
+			onHide={handleClose || undefined}
+			size="lg"
+			scrollable={true}
+		>
 			<Modal.Header closeButton>
-				{titleIcon && <span className="modal-icon">{titleIcon}</span>}
-				<Modal.Title>{title}</Modal.Title>
+				<div className="d-flex align-items-center w-100">
+					<div className="d-flex align-items-center">
+						{titleIcon && (
+							<span className="modal-icon me-2">{titleIcon}</span>
+						)}
+						<Modal.Title>{title}</Modal.Title>
+					</div>
+					{extraHeaderButtons && (
+						<div className="ms-auto d-flex align-items-center me-2">
+							{extraHeaderButtons}
+						</div>
+					)}
+				</div>
 			</Modal.Header>
+
 			<Modal.Body>
-				<Form onSubmit={handleSubmit} id="modalForm">
+				<Form onSubmit={handleSubmit || undefined} id="modalForm">
 					{children}
 				</Form>
 			</Modal.Body>
 			<Modal.Footer>
-				<Button variant="secondary" onClick={handleClose}>
-					Chiudi
-				</Button>
-				{handleSubmit && (
-					<Button type="submit" variant="primary" form="modalForm">
-						{saveBtnText}
-					</Button>
-				)}
+				{getCloseButton()}
+				{getSubmitButton()}
 			</Modal.Footer>
 		</Modal>
 	);
