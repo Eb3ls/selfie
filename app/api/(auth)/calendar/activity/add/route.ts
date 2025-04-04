@@ -1,9 +1,9 @@
 import {
 	addInvitations,
+	divideResourcesAndConvert,
 	generateMessageResponse,
 	generateObjectResponse,
 	generateStringModel,
-	usernameListToIds,
 	validate
 } from "@/utils/api/api";
 import {
@@ -54,14 +54,21 @@ export const POST = async (request: NextRequest) => {
 	// Estriamo la lista degli username dal body
 	const usernameList: string[] = newBody.usernameList;
 
-	// Convertiamo lo username in id e aggiungiamo lo userId come primo elemento
-	const convertionOut = await usernameListToIds(usernameList, userId, true);
+	// Dividiamo e convertiamo la lista degli username e risorse in una lista di id
+	const convertionOut = await divideResourcesAndConvert(
+		usernameList,
+		userId,
+		true
+	);
 
 	if (convertionOut.status !== 200) {
 		return convertionOut;
 	}
 
-	const userIdList: string[] = (await convertionOut.json()).users;
+	const { userIdList, resourceIdList } = (await convertionOut.json()) as {
+		userIdList: string[];
+		resourceIdList: string[];
+	};
 
 	// Sostituiamo la lista degli username con quella degli id, rimuovendo usernameList
 	const { usernameList: _, ...smallBody } = newBody;
@@ -80,7 +87,7 @@ export const POST = async (request: NextRequest) => {
 
 	// Aggiungiamo il campo 'owner' a newActivity
 	newActivity.ownerId = owner._id!;
-	newActivity.userIdList = [owner._id!];
+	newActivity.userIdList = [...resourceIdList, owner._id!];
 
 	// Ottieniamo la collezione delle attività
 	const client: Collection<Activity> =

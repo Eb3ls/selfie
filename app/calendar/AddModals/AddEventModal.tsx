@@ -89,6 +89,9 @@ export function AddEventModal({ children }: any) {
 		form.dtStart = new Date(form.dtStart).toISOString();
 		form.dtEnd = new Date(form.dtEnd).toISOString();
 
+		// Aggiungiamo le risorse
+		form.usernameList = form.usernameList.concat(resourceList);
+
 		// Genera l'rrule se la ripetizione è abilitata
 		if (enableRecurrence) {
 			form.rrule = generateRRule();

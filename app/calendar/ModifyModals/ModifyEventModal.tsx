@@ -10,6 +10,7 @@ import { StandardViewField } from "@/app/components/StandardViewFIeld";
 import { StringAlarm, StringEvent } from "@/utils/db/db";
 import moment from "moment";
 import React, { useState } from "react";
+import { ResourceInvitationComponent } from "../ResourceInvitationComponent";
 import {
 	getDeleteContent,
 	getDropContent,
@@ -34,6 +35,7 @@ export function ModifyEventModal({
 }) {
 	const newEvent: StringEventFrontend = { ...event };
 	const [form, setForm] = useState(newEvent);
+	const [resourceList, setResourceList] = useState<string[]>([]);
 
 	const handleChange = (
 		e: React.ChangeEvent<
@@ -53,6 +55,9 @@ export function ModifyEventModal({
 		// Converti le date in formato ISO
 		form.dtStart = new Date(form.dtStart).toISOString();
 		form.dtEnd = new Date(form.dtEnd).toISOString();
+
+		// Aggiungiamo le risorse
+		form.usernameList = form.usernameList.concat(resourceList);
 
 		const newForm = {
 			_id: form._id,
@@ -213,6 +218,10 @@ export function ModifyEventModal({
 					value={event.usernameList.join(", ") || "-"}
 				/>
 				<StandardViewField
+					title="Risorse"
+					value={resourceList.join(", ") || "-"}
+				/>
+				<StandardViewField
 					title="Promemoria"
 					value={getTextFromTriggerList(event.alarms)}
 				/>
@@ -294,6 +303,12 @@ export function ModifyEventModal({
 					mainId={form._id!}
 					usernameList={form.usernameList}
 					setUsernameList={handleUsernameListChange}
+				/>
+
+				<ResourceInvitationComponent
+					mainId={form._id!}
+					resourceList={resourceList}
+					setResourceList={setResourceList}
 				/>
 
 				<AlarmSelector

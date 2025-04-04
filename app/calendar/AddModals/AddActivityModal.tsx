@@ -45,6 +45,9 @@ export function AddActivityModal({ children }: any) {
 		// Converti la data di consegna in formato ISO
 		form.due = new Date(form.due).toISOString();
 
+		// Aggiungiamo le risorse
+		form.usernameList = form.usernameList.concat(resourceList);
+
 		// Imposta la data di inizio (dtStart) come la data di creazione (dtStamp)
 		const dtStart = dateTime.toISOString();
 

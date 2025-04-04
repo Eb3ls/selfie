@@ -488,3 +488,52 @@ export async function removeInvitations(
 
 	return generateMessageResponse("Invitations removed", 200);
 }
+
+export function divideResourcesFromUserList(usernameList: string[]) {
+	// Questa funzione divide gli utenti in due liste, in base a come inizia il loro nome
+	// Se inizia con "[RES]-" allora sono risorse, altrimenti sono utenti normali
+	const resources: string[] = [];
+	const users: string[] = [];
+	for (const username of usernameList) {
+		if (username.startsWith("[RES]-")) {
+			resources.push(username);
+		} else {
+			users.push(username);
+		}
+	}
+	// Ritorniamo le due liste
+	return { resources, users };
+}
+
+export async function divideResourcesAndConvert(
+	usernameList: string[],
+	sender: string,
+	toAddSender: boolean = true
+): Promise<NextResponse> {
+	// Dividiamo le risorse dagli utenti
+	const { resources, users } = divideResourcesFromUserList(usernameList);
+
+	// Facciamo la conversione degli username in id
+	const usersOut = await usernameListToIds(users, sender, toAddSender);
+
+	if (usersOut.status !== 200) {
+		return usersOut;
+	}
+
+	const userIdList: string[] = (await usersOut.json()).users;
+
+	// Facciamo la conversione delle risorse in id
+	const resourcesOut = await usernameListToIds(resources, sender, false);
+
+	if (resourcesOut.status !== 200) {
+		return resourcesOut;
+	}
+
+	const resourceIdList: string[] = (await resourcesOut.json()).users;
+
+	// Ritorniamo le due liste
+	return generateObjectResponse(
+		{ userIdList: userIdList, resourceIdList: resourceIdList },
+		200
+	);
+}

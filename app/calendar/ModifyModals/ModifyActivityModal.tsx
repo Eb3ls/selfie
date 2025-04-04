@@ -55,6 +55,9 @@ export function ModifyActivityModal({
 		// Converti le date in formato ISO
 		form.due = new Date(form.due).toISOString();
 
+		// Aggiungiamo le risorse
+		form.usernameList = form.usernameList.concat(resourceList);
+
 		const newForm = {
 			_id: form._id,
 			summary: form.summary,

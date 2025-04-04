@@ -81,9 +81,7 @@ export function StandardUsersInput({
 			<div className="mt-3">
 				{oldUsernames.length > 0 && (
 					<div className="mb-4">
-						<h6 className="text-muted mb-3">
-							Utenti già aggiunti:
-						</h6>
+						<h6 className="text-muted mb-3">Utenti già aggiunti</h6>
 						<div
 							className="list-group shadow-sm"
 							style={{ maxHeight: "200px", overflowY: "auto" }}

@@ -18,19 +18,11 @@ export function ResourceInvitationComponent({
 		string[]
 	>([]);
 
-	function testRES(num: number) {
-		let res = [];
-		for (let i = 0; i < num; i++) {
-			res.push("RES-" + i);
-		}
-		return res;
-	}
-
 	// Se cambia l'id dell'attività, aggiorna la lista delle risorse che erano già presenti
 	useEffect(() => {
 		if (currentMainId !== mainId) {
 			setCurrentMainId(mainId);
-			setCurrentOriginalResources([...resourceList, ...testRES(10)]);
+			setCurrentOriginalResources(resourceList);
 		}
 	}, [mainId, currentMainId, resourceList]);
 
@@ -39,11 +31,9 @@ export function ResourceInvitationComponent({
 	const oldResources = currentOriginalResources.filter((resource) =>
 		resourceList.includes(resource)
 	);
-	oldResources.push(...testRES(1));
 	const newResources = resourceList.filter(
 		(resource) => !currentOriginalResources.includes(resource)
 	);
-	newResources.push(...testRES(1));
 
 	const [resourceInput, setResourceInput] = useState("");
 
@@ -53,7 +43,7 @@ export function ResourceInvitationComponent({
 			return;
 		}
 
-		const correctResourceInput = "RES-" + resourceInput.trim();
+		const correctResourceInput = "[RES]-" + resourceInput.trim();
 
 		// Se la risorsa è già presente, non fare nulla
 		if (resourceList.includes(correctResourceInput)) {
@@ -75,12 +65,12 @@ export function ResourceInvitationComponent({
 	return (
 		<Form.Group className="mb-3">
 			<Form.Label className="fw-bold">Risorse</Form.Label>
-			<div className="d-flex mb-3">
+			<div className="d-flex">
 				<Form.Control
 					type="text"
 					value={resourceInput}
 					onChange={(e) => setResourceInput(e.target.value)}
-					placeholder="Inserisci nome utente"
+					placeholder="Inserisci nome risorsa"
 					className="input-field"
 				/>
 				<Button
@@ -92,74 +82,83 @@ export function ResourceInvitationComponent({
 					+
 				</Button>
 			</div>
-
-			{/* Existing Resources Section */}
-			{oldResources.length > 0 && (
-				<div className="mb-4">
-					<h6 className="text-muted mb-3">Risorse già aggiunte</h6>
-					<div
-						className="list-group shadow-sm"
-						style={{ maxHeight: "200px", overflowY: "auto" }}
-					>
-						{oldResources.map((resource) => (
-							<div
-								key={resource}
-								className="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
-							>
-								<div className="d-flex align-items-center">
-									<FaUser className="text-primary me-3" />
-									<span className="fw-medium">
-										{resource.substring(4)}
-									</span>
-								</div>
-								<Button
-									variant="link"
-									className="text-danger p-1"
-									onClick={() =>
-										handleRemoveResource(resource)
-									}
+			<div className="mt-3">
+				{oldResources.length > 0 && (
+					<div className="mb-4">
+						<h6 className="text-muted mb-3">
+							Risorse già aggiunte
+						</h6>
+						<div
+							className="list-group shadow-sm"
+							style={{ maxHeight: "200px", overflowY: "auto" }}
+						>
+							{oldResources.map((resource) => (
+								<div
+									key={resource}
+									className="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
 								>
-									<FaTrash size={14} className="hover-grow" />
-								</Button>
-							</div>
-						))}
-					</div>
-				</div>
-			)}
-
-			{/* New Resources Section */}
-			{newResources.length > 0 && (
-				<div>
-					<h6 className="text-muted mb-3">Risorse da aggiungere</h6>
-					<div
-						className="list-group shadow-sm"
-						style={{ maxHeight: "200px", overflowY: "auto" }}
-					>
-						{newResources.map((resource) => (
-							<div
-								key={resource}
-								className="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
-							>
-								<div className="d-flex align-items-center">
-									<FaUser className="text-primary me-3" />
-									<span className="fw-medium">
-										{resource.substring(4)}
-									</span>
+									<div className="d-flex align-items-center">
+										<FaUser className="text-primary me-3" />
+										<span className="fw-medium">
+											{resource.substring(6)}
+										</span>
+									</div>
+									<Button
+										variant="link"
+										className="text-danger p-1"
+										onClick={() =>
+											handleRemoveResource(resource)
+										}
+									>
+										<FaTrash
+											size={14}
+											className="hover-grow"
+										/>
+									</Button>
 								</div>
-								<Button
-									variant="link"
-									className="text-danger p-1"
-									onClick={() =>
-										handleRemoveResource(resource)
-									}
-								>
-									<FaTrash size={14} className="hover-grow" />
-								</Button>
-							</div>
-						))}
+							))}
+						</div>
 					</div>
-				</div>
-			)}
+				)}
+
+				{newResources.length > 0 && (
+					<div>
+						<h6 className="text-muted mb-3">
+							Risorse da aggiungere
+						</h6>
+						<div
+							className="list-group shadow-sm"
+							style={{ maxHeight: "200px", overflowY: "auto" }}
+						>
+							{newResources.map((resource) => (
+								<div
+									key={resource}
+									className="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+								>
+									<div className="d-flex align-items-center">
+										<FaUser className="text-primary me-3" />
+										<span className="fw-medium">
+											{resource.substring(6)}
+										</span>
+									</div>
+									<Button
+										variant="link"
+										className="text-danger p-1"
+										onClick={() =>
+											handleRemoveResource(resource)
+										}
+									>
+										<FaTrash
+											size={14}
+											className="hover-grow"
+										/>
+									</Button>
+								</div>
+							))}
+						</div>
+					</div>
+				)}
+			</div>
 		</Form.Group>
 	);
 }
