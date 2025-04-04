@@ -1,8 +1,8 @@
 "use client";
 
+import { StandardInput } from "@/app/components/StandardInput";
 import { Button, Form, Stack } from "react-bootstrap";
 import { FaKey } from "react-icons/fa";
-import styles from "../SettingsPage.module.css";
 
 export default function PasswordSection({
 	showPasswordFields,
@@ -16,51 +16,46 @@ export default function PasswordSection({
 	setFormData: React.Dispatch<React.SetStateAction<any>>;
 }) {
 	return (
-		<div className={styles.passwordSection}>
+		<div>
 			<Button
-				className={`${styles.passwordToggle} ${
-					showPasswordFields ? styles.active : ""
-				}`}
 				onClick={() => setShowPasswordFields(!showPasswordFields)}
+				className="mb-3 w-100"
 			>
-				<FaKey className={styles.buttonIcon} />
+				<FaKey />
 				{showPasswordFields
 					? " Nascondi cambia password"
 					: " Cambia password"}
 			</Button>
 
 			{showPasswordFields && (
-				<Stack gap={3} className="mt-3">
-					<Form.Group controlId="oldPassword">
-						<Form.Label>Password attuale</Form.Label>
-						<Form.Control
-							type="password"
-							value={formData.oldPassword}
-							onChange={(e) =>
-								setFormData({
-									...formData,
-									oldPassword: e.target.value
-								})
-							}
-							placeholder="Inserisci la password corrente"
-						/>
-					</Form.Group>
-
-					<Form.Group controlId="newPassword">
-						<Form.Label>Nuova password</Form.Label>
-						<Form.Control
-							type="password"
-							value={formData.newPassword}
-							onChange={(e) =>
-								setFormData({
-									...formData,
-									newPassword: e.target.value
-								})
-							}
-							placeholder="Inserisci la nuova password"
-						/>
-					</Form.Group>
-				</Stack>
+				<>
+					<StandardInput
+						type="password"
+						name="oldPassword"
+						title="Password attuale"
+						value={formData.oldPassword}
+						placeholder="Inserisci la password corrente"
+						onChange={(e) =>
+							setFormData({
+								...formData,
+								oldPassword: e.target.value
+							})
+						}
+					/>
+					<StandardInput
+						type="password"
+						name="newPassword"
+						title="Nuova password"
+						value={formData.newPassword}
+						placeholder="Inserisci la nuova password"
+						onChange={(e) =>
+							setFormData({
+								...formData,
+								newPassword: e.target.value
+							})
+						}
+					/>
+				</>
 			)}
 		</div>
 	);

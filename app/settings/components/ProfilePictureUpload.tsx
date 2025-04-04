@@ -3,9 +3,7 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Button, Spinner } from "react-bootstrap";
-import { FaImage } from "react-icons/fa";
 import { DEFAULT_PROFILE_URL } from "../../constants";
-import styles from "../SettingsPage.module.css";
 
 interface ProfilePictureUploadProps {
 	userId: string | undefined;
@@ -76,49 +74,57 @@ export default function ProfilePictureUpload({
 	}
 
 	return (
-		<div className={styles.profilePicWrapper}>
-			<div className={styles.profilePicContainer}>
-				<Image
-					src={
-						fetchImageError
-							? DEFAULT_PROFILE_URL
-							: myPic || DEFAULT_PROFILE_URL
-					}
-					alt="Profile"
-					width={500}
-					height={500}
-					className={styles.profilePic}
-					onError={() => setFetchImageError(true)}
-					unoptimized
+		<div className="d-flex flex-column align-items-center">
+			<div className="position-relative mb-4">
+				<div
+					style={{
+						width: "200px",
+						height: "200px",
+						borderRadius: "50%",
+						overflow: "hidden"
+					}}
+				>
+					<Image
+						src={
+							fetchImageError
+								? DEFAULT_PROFILE_URL
+								: myPic || DEFAULT_PROFILE_URL
+						}
+						alt="Profile"
+						width={200}
+						height={200}
+						className="object-fit-cover"
+						onError={() => setFetchImageError(true)}
+						unoptimized
+					/>
+					{isUploading && (
+						<div className="position-absolute top-50 start-50 translate-middle">
+							<Spinner animation="border" variant="light" />
+						</div>
+					)}
+				</div>
+				<input
+					type="file"
+					id="uploadInput"
+					accept="image/*"
+					onChange={handleImageUpload}
+					hidden
 				/>
-				{isUploading && (
-					<div className={styles.uploadOverlay}>
-						<Spinner animation="border" variant="light" />
-					</div>
-				)}
+				<Button
+					variant="primary"
+					className="position-absolute bottom-0 end-0 rounded-circle p-2 shadow-sm"
+					disabled={isUploading}
+					onClick={() =>
+						document.getElementById("uploadInput")?.click()
+					}
+					style={{ width: "40px", height: "40px" }}
+				>
+					<i className="bi bi-pencil"></i>
+				</Button>
 			</div>
 
-			<input
-				type="file"
-				id="uploadInput"
-				accept="image/*"
-				onChange={handleImageUpload}
-				hidden
-			/>
-			<Button
-				variant="outline-primary"
-				className={styles.uploadButton}
-				disabled={isUploading}
-				onClick={() => {
-					document.getElementById("uploadInput")?.click();
-				}}
-			>
-				<FaImage className={styles.buttonIcon} />
-				{isUploading ? "Caricando..." : " Cambia immagine"}
-			</Button>
-
 			{uploadImageError && (
-				<div className={styles.errorMessage}>{uploadImageError}</div>
+				<div className="text-danger mt-2">{uploadImageError}</div>
 			)}
 		</div>
 	);

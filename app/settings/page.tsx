@@ -5,7 +5,6 @@ import { Card, Col, Container, Row } from "react-bootstrap";
 import { FaUserEdit } from "react-icons/fa";
 import { GlobalSideBar } from "../components/GlobalSideBar";
 import { useUser } from "../components/UserContext";
-import styles from "./SettingsPage.module.css";
 import ProfilePictureUpload from "./components/ProfilePictureUpload";
 import SettingsForm from "./components/SettingsForm";
 
@@ -111,6 +110,7 @@ export default function SettingsPage() {
 				setSuccessMessage("Profilo aggiornato con successo");
 			} else {
 				setErrorMessage(data.message || "Errore di aggiornamento");
+				alert(data.message || "Errore di aggiornamento");
 			}
 		} catch (error) {
 			setErrorMessage("Errore di connessione");
@@ -118,52 +118,24 @@ export default function SettingsPage() {
 	};
 
 	return (
-		<main>
+		<div className="d-flex flex-column min-vh-100">
 			<GlobalSideBar />
-			<Container fluid className={styles.container}>
-				<Row className="justify-content-center">
-					<Col xl={10} lg={12}>
-						<Card className={styles.profileCard}>
-							<Card.Header className={styles.cardHeader}>
-								<h1>
-									<FaUserEdit className={styles.titleIcon} />
-									Impostazioni
-								</h1>
-							</Card.Header>
+			<div className="container flex-grow-1 d-flex flex-column justify-content-center mt-3">
+				<ProfilePictureUpload
+					userId={user?._id}
+					fetchUser={fetchUser}
+				/>
 
-							<Card.Body className={styles.cardBody}>
-								<Row className="g-4">
-									<Col
-										md={5}
-										className={styles.profileSection}
-									>
-										<ProfilePictureUpload
-											userId={user?._id}
-											fetchUser={fetchUser}
-										/>
-									</Col>
-
-									<Col md={7}>
-										<SettingsForm
-											formData={formData}
-											setFormData={setFormData}
-											showPasswordFields={
-												showPasswordFields
-											}
-											setShowPasswordFields={
-												setShowPasswordFields
-											}
-											onSubmit={handleSubmit}
-											errorMessage={errorMessage}
-											successMessage={successMessage}
-										/>
-									</Col>
-								</Row>
-							</Card.Body>
-						</Card>
-					</Col>
-				</Row>
-			</Container>
-		</main>
+				<SettingsForm
+					formData={formData}
+					setFormData={setFormData}
+					showPasswordFields={showPasswordFields}
+					setShowPasswordFields={setShowPasswordFields}
+					onSubmit={handleSubmit}
+					errorMessage={errorMessage}
+					successMessage={successMessage}
+				/>
+			</div>
+		</div>
 	);
 }

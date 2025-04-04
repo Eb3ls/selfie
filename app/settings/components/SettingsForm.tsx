@@ -1,9 +1,9 @@
 "use client";
 
-import { Col, Form, Row, Stack } from "react-bootstrap";
+import { StandardInput } from "@/app/components/StandardInput";
+import { Col, Form, Row } from "react-bootstrap";
 import Button from "react-bootstrap/Button";
 import { FaSave } from "react-icons/fa";
-import styles from "../SettingsPage.module.css";
 import PasswordSection from "./PasswordSection";
 
 export default function SettingsForm({
@@ -24,344 +24,277 @@ export default function SettingsForm({
 	successMessage: string;
 }) {
 	return (
-		<Form onSubmit={onSubmit} className={styles.settingsForm}>
-			<Stack gap={3}>
-				{/* Username */}
-				<h4>Impostazioni Utente</h4>
-				<Form.Group controlId="username">
-					<Form.Label>Username</Form.Label>
-					<Form.Control
-						value={formData.username}
-						onChange={(e) =>
-							setFormData({
-								...formData,
-								username: e.target.value
-							})
-						}
-						required
-					/>
-				</Form.Group>
+		<Form onSubmit={onSubmit}>
+			{/* Username */}
+			<h4>Impostazioni Utente</h4>
+			<div className="p-3 bg-light rounded-3">
+				<StandardInput
+					type="text"
+					name="username"
+					title="Username"
+					value={formData.username}
+					placeholder="Inserisci il tuo username"
+					onChange={(e) =>
+						setFormData({
+							...formData,
+							username: e.target.value
+						})
+					}
+				/>
 
-				{/* Nome e Cognome */}
 				<Row>
 					<Col md={6}>
-						<Form.Group controlId="firstName">
-							<Form.Label>Nome</Form.Label>
-							<Form.Control
-								value={formData.firstName}
-								onChange={(e) =>
-									setFormData({
-										...formData,
-										firstName: e.target.value
-									})
-								}
-							/>
-						</Form.Group>
+						<StandardInput
+							type="text"
+							name="firstName"
+							title="Nome"
+							value={formData.firstName}
+							placeholder="Inserisci il tuo nome"
+							onChange={(e) =>
+								setFormData({
+									...formData,
+									firstName: e.target.value
+								})
+							}
+						/>
 					</Col>
 					<Col md={6}>
-						<Form.Group controlId="lastName">
-							<Form.Label>Cognome</Form.Label>
-							<Form.Control
-								value={formData.lastName}
-								onChange={(e) =>
-									setFormData({
-										...formData,
-										lastName: e.target.value
-									})
-								}
-							/>
-						</Form.Group>
+						<StandardInput
+							type="text"
+							name="lastName"
+							title="Cognome"
+							value={formData.lastName}
+							placeholder="Inserisci il tuo cognome"
+							onChange={(e) =>
+								setFormData({
+									...formData,
+									lastName: e.target.value
+								})
+							}
+						/>
 					</Col>
 				</Row>
 
-				{/* Email */}
-				<Form.Group controlId="email">
-					<Form.Label>Email</Form.Label>
-					<Form.Control
-						type="email"
-						value={formData.email}
-						onChange={(e) =>
-							setFormData({ ...formData, email: e.target.value })
-						}
-						required
-					/>
-				</Form.Group>
+				<StandardInput
+					type="email"
+					name="email"
+					title="Email"
+					value={formData.email}
+					placeholder="Inserisci la tua email"
+					onChange={(e) =>
+						setFormData({ ...formData, email: e.target.value })
+					}
+				/>
 
-				{/* Data di nascita */}
-				<Form.Group controlId="birthDay">
-					<Form.Label>Data di nascita</Form.Label>
-					<Form.Control
-						type="date"
-						value={formData.birthDay}
-						onChange={(e) =>
-							setFormData({
-								...formData,
-								birthDay: e.target.value
-							})
-						}
-					/>
-				</Form.Group>
+				<StandardInput
+					type="date"
+					name="birthDay"
+					title="Data di nascita"
+					value={formData.birthDay}
+					placeholder="Inserisci la tua data di nascita"
+					onChange={(e) =>
+						setFormData({
+							...formData,
+							birthDay: e.target.value
+						})
+					}
+				/>
 
-				{/* Sezione Password */}
 				<PasswordSection
 					showPasswordFields={showPasswordFields}
 					setShowPasswordFields={setShowPasswordFields}
 					formData={formData}
 					setFormData={setFormData}
 				/>
+			</div>
 
-				<hr />
+			<hr className="my-4" />
 
-				{/* Sezione Anteprime */}
-				<Form.Group controlId="previews">
-					<Form.Label>
-						<h4>Anteprime</h4>
-					</Form.Label>
-					<Stack gap={3}>
-						{/* Impostazioni Calendario */}
-						<div>
-							<Form.Label>
-								<h5>Impostazioni Calendario</h5>
-							</Form.Label>
-							<Row className="mb-3">
-								<Col md={3}>
-									<Form.Check
-										type="checkbox"
-										label="Attività"
-										checked={
-											formData.previews.calendar.activity
-										}
-										onChange={(e) =>
-											setFormData((prev: any) => ({
-												...prev,
-												previews: {
-													...prev.previews,
-													calendar: {
-														...prev.previews
-															.calendar,
-														activity:
-															e.target.checked
-													}
-												}
-											}))
-										}
-									/>
-								</Col>
-								<Col md={3}>
-									<Form.Check
-										type="checkbox"
-										label="Evento"
-										checked={
-											formData.previews.calendar.event
-										}
-										onChange={(e) =>
-											setFormData((prev: any) => ({
-												...prev,
-												previews: {
-													...prev.previews,
-													calendar: {
-														...prev.previews
-															.calendar,
-														event: e.target.checked
-													}
-												}
-											}))
-										}
-									/>
-								</Col>
-								<Col md={3}>
-									<Form.Check
-										type="checkbox"
-										label="Sessione"
-										checked={
-											formData.previews.calendar.session
-										}
-										onChange={(e) =>
-											setFormData((prev: any) => ({
-												...prev,
-												previews: {
-													...prev.previews,
-													calendar: {
-														...prev.previews
-															.calendar,
-														session:
-															e.target.checked
-													}
-												}
-											}))
-										}
-									/>
-								</Col>
-								<Col md={3}>
-									<Form.Check
-										type="checkbox"
-										label="Attività Progetto"
-										checked={
-											formData.previews.calendar
-												.projectActivity
-										}
-										onChange={(e) =>
-											setFormData((prev: any) => ({
-												...prev,
-												previews: {
-													...prev.previews,
-													calendar: {
-														...prev.previews
-															.calendar,
-														projectActivity:
-															e.target.checked
-													}
-												}
-											}))
-										}
-									/>
-								</Col>
-							</Row>
-
-							{/* Massimo Occorrenze */}
-							<Form.Group controlId="maxOccurrences">
-								<Form.Label>Massimo Occorrenze</Form.Label>
-								<Form.Control
-									type="number"
-									min={0}
-									value={
-										formData.previews.calendar
-											.maxOccurrences
-									}
-									onChange={(e) =>
-										setFormData((prev: any) => ({
-											...prev,
-											previews: {
-												...prev.previews,
-												calendar: {
-													...prev.previews.calendar,
-													maxOccurrences:
-														parseInt(
-															e.target.value
-														) || 0
-												}
-											}
-										}))
-									}
-								/>
-							</Form.Group>
-						</div>
-
-						<h5>Altre</h5>
-
-						{/* Massimo Chat e Note */}
-						<Row>
-							<Col md={6}>
-								<Form.Group controlId="maxChats">
-									<Form.Label>Massimo Chat</Form.Label>
-									<Form.Control
-										type="number"
-										min={0}
-										value={formData.previews.maxChats}
-										onChange={(e) =>
-											setFormData((prev: any) => ({
-												...prev,
-												previews: {
-													...prev.previews,
-													maxChats:
-														parseInt(
-															e.target.value
-														) || 0
-												}
-											}))
-										}
-									/>
-								</Form.Group>
-							</Col>
-							<Col md={6}>
-								<Form.Group controlId="maxNotes">
-									<Form.Label>Massimo Note</Form.Label>
-									<Form.Control
-										type="number"
-										min={0}
-										value={formData.previews.maxNotes}
-										onChange={(e) =>
-											setFormData((prev: any) => ({
-												...prev,
-												previews: {
-													...prev.previews,
-													maxNotes:
-														parseInt(
-															e.target.value
-														) || 0
-												}
-											}))
-										}
-									/>
-								</Form.Group>
-							</Col>
-						</Row>
-					</Stack>
-				</Form.Group>
-
-				<hr />
-
-				{/* Sezione Preferenze Allarme */}
-				<Form.Group controlId="alarmPreferences">
-					<Form.Label>
-						<h4>Preferenze Notifiche</h4>
-					</Form.Label>
-					<Stack gap={3}>
+			<h4>Anteprime</h4>
+			<div className="p-3 bg-light rounded-3">
+				<Row className="mb-3 g-2">
+					<Col xs={6} md={3}>
 						<Form.Check
 							type="checkbox"
-							label="Email"
-							checked={formData.alarmPreferences.email}
+							label="Attività"
+							checked={formData.previews.calendar.activity}
 							onChange={(e) =>
 								setFormData((prev: any) => ({
 									...prev,
-									alarmPreferences: {
-										...prev.alarmPreferences,
-										email: e.target.checked
+									previews: {
+										...prev.previews,
+										calendar: {
+											...prev.previews.calendar,
+											activity: e.target.checked
+										}
 									}
 								}))
 							}
 						/>
+					</Col>
+					<Col xs={6} md={3}>
 						<Form.Check
 							type="checkbox"
-							label="Notifiche Push"
-							checked={formData.alarmPreferences.push}
+							label="Evento"
+							checked={formData.previews.calendar.event}
 							onChange={(e) =>
 								setFormData((prev: any) => ({
 									...prev,
-									alarmPreferences: {
-										...prev.alarmPreferences,
-										push: e.target.checked
+									previews: {
+										...prev.previews,
+										calendar: {
+											...prev.previews.calendar,
+											event: e.target.checked
+										}
 									}
 								}))
 							}
 						/>
-					</Stack>
-				</Form.Group>
+					</Col>
+					<Col xs={6} md={3}>
+						<Form.Check
+							type="checkbox"
+							label="Sessione"
+							checked={formData.previews.calendar.session}
+							onChange={(e) =>
+								setFormData((prev: any) => ({
+									...prev,
+									previews: {
+										...prev.previews,
+										calendar: {
+											...prev.previews.calendar,
+											session: e.target.checked
+										}
+									}
+								}))
+							}
+						/>
+					</Col>
+					<Col xs={6} md={3}>
+						<Form.Check
+							type="checkbox"
+							label="Attività Progetto"
+							checked={formData.previews.calendar.projectActivity}
+							onChange={(e) =>
+								setFormData((prev: any) => ({
+									...prev,
+									previews: {
+										...prev.previews,
+										calendar: {
+											...prev.previews.calendar,
+											projectActivity: e.target.checked
+										}
+									}
+								}))
+							}
+						/>
+					</Col>
+				</Row>
+				<StandardInput
+					type="number"
+					name="maxOccurrences"
+					title="Massime occorrenze del calendario da visualizzare"
+					value={formData.previews.calendar.maxOccurrences}
+					min={0}
+					onChange={(e) =>
+						setFormData({
+							...formData,
+							previews: {
+								...formData.previews,
+								calendar: {
+									...formData.previews.calendar,
+									maxOccurrences:
+										parseInt(e.target.value) || 0
+								}
+							}
+						})
+					}
+				/>
 
-				{/* Messaggi di errore/successo */}
-				{(errorMessage || successMessage) && (
-					<div
-						className={
-							errorMessage
-								? styles.errorMessage
-								: styles.successMessage
+				<StandardInput
+					type="number"
+					name="maxChats"
+					title="Massime chat da visualizzare"
+					value={formData.previews.maxChats}
+					min={0}
+					onChange={(e) =>
+						setFormData({
+							...formData,
+							previews: {
+								...formData.previews,
+								maxChats: parseInt(e.target.value) || 0
+							}
+						})
+					}
+				/>
+
+				<StandardInput
+					type="number"
+					name="maxNotes"
+					title="Massime note da visualizzare"
+					value={formData.previews.maxNotes}
+					min={0}
+					onChange={(e) =>
+						setFormData({
+							...formData,
+							previews: {
+								...formData.previews,
+								maxNotes: parseInt(e.target.value) || 0
+							}
+						})
+					}
+				/>
+			</div>
+
+			<hr className="my-4" />
+
+			<h4>Notifiche</h4>
+			<div className="mb-3 p-3 bg-light rounded-3">
+				<div className="mb-2">
+					<Form.Switch
+						id="email-switch"
+						label="Email"
+						checked={formData.alarmPreferences.email}
+						onChange={(e) =>
+							setFormData((prev: any) => ({
+								...prev,
+								alarmPreferences: {
+									...prev.alarmPreferences,
+									email: e.target.checked
+								}
+							}))
 						}
-					>
-						{errorMessage || successMessage}
-					</div>
-				)}
-
-				{/* Pulsante Salva */}
-				<div className={styles.buttonGroup}>
-					<Button
-						type="submit"
-						variant="primary"
-						className={styles.primaryButton}
-					>
-						<FaSave className={styles.buttonIcon} /> Salva
-					</Button>
+					/>
 				</div>
-			</Stack>
+				<div>
+					<Form.Switch
+						id="push-switch"
+						label="Notifiche Push"
+						checked={formData.alarmPreferences.push}
+						onChange={(e) =>
+							setFormData((prev: any) => ({
+								...prev,
+								alarmPreferences: {
+									...prev.alarmPreferences,
+									push: e.target.checked
+								}
+							}))
+						}
+					/>
+				</div>
+			</div>
+
+			{(errorMessage || successMessage) && (
+				<div>{errorMessage || successMessage}</div>
+			)}
+
+			<Button
+				type="submit"
+				variant="primary"
+				className="my-4 w-100 d-flex justify-content-center align-items-center fs-3"
+			>
+				<FaSave className="me-2" /> Salva
+			</Button>
 		</Form>
 	);
 }
