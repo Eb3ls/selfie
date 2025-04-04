@@ -78,6 +78,10 @@
 	flex-direction: column;
 }
 
+.right-column .modern-card {
+	max-height: 379px;
+}
+
 .modern-card:hover {
 	transform: translateY(-5px);
 }
