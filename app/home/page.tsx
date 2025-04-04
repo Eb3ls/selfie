@@ -1,20 +1,19 @@
 "use client";
 
-import Link from "next/link";
+import { PomodoroSettings } from "@/utils/db/db";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Badge, Button, Container, Stack } from "react-bootstrap";
 import {
-	Badge,
-	Button,
-	Card,
-	Col,
-	Container,
-	Row,
-	Stack
-} from "react-bootstrap";
-import { FaBook, FaCoffee, FaRedoAlt, FaStickyNote } from "react-icons/fa";
+	FaBook,
+	FaCalendarAlt,
+	FaCoffee,
+	FaRedoAlt,
+	FaStickyNote
+} from "react-icons/fa";
 import { GlobalSideBar } from "../components/GlobalSideBar";
 import { useUser } from "../components/UserContext";
+import "./home.css";
 
 // Tipi esistenti per Note, Progetti e Chat
 interface ReducedNote {
@@ -98,62 +97,6 @@ function formatDate(dateString: string): string {
 	return `${day}/${month}/${year} ${hours}:${minutes}`;
 }
 
-function PreviewBox({
-	title,
-	content,
-	link
-}: {
-	title: string;
-	content: React.ReactNode;
-	link: string;
-}) {
-	let vh = 50;
-	if (title === "Chat") {
-		vh = 92;
-	}
-
-	return (
-		<Card
-			className="shadow-lg mt-1 mb-3 rounded-4 border-0"
-			style={{
-				height: `calc(${vh}vh - 12vh)`,
-				background: "linear-gradient(145deg, #ffffff, #f8f9fa)",
-				transition: "transform 0.2s, box-shadow 0.2s"
-			}}
-			onMouseEnter={(e) => {
-				e.currentTarget.style.transform = "translateY(-5px)";
-				e.currentTarget.style.boxShadow =
-					"0 8px 16px rgba(0, 0, 0, 0.2)";
-			}}
-			onMouseLeave={(e) => {
-				e.currentTarget.style.transform = "translateY(0)";
-				e.currentTarget.style.boxShadow =
-					"0 4px 8px rgba(0, 0, 0, 0.1)";
-			}}
-		>
-			<Card.Body className="d-flex flex-column h-100 p-3">
-				<Stack gap={2} className="h-100">
-					<Link
-						href={link}
-						passHref
-						className="text-center text-lg-start"
-					>
-						<Button
-							variant="link"
-							className="text-start p-0 text-decoration-none"
-						>
-							<h5 className="text-primary fw-bold">{title}</h5>
-						</Button>
-					</Link>
-					<div className="flex-grow-1" style={{ overflowY: "auto" }}>
-						{content}
-					</div>
-				</Stack>
-			</Card.Body>
-		</Card>
-	);
-}
-
 function PreviewList({
 	items,
 	type
@@ -163,116 +106,82 @@ function PreviewList({
 }) {
 	const router = useRouter();
 
-	const handleItemClick = (itemId: string) => {
-		if (type === "chat") {
-			router.push(`/chat`);
-		} else {
-			router.push(`/${type}/${itemId}`);
-		}
-	};
-
 	return (
 		<Stack gap={3}>
-			{items &&
-				items.map((item, index) => (
-					<div
-						key={index}
-						className="d-flex justify-content-between align-items-center p-3 border rounded-4 shadow-sm"
-						style={{
-							cursor: "pointer",
-							background: "white",
-							transition: "transform 0.2s, box-shadow 0.2s"
-						}}
-						onClick={() => handleItemClick(item._id)}
-						onMouseEnter={(e) => {
-							e.currentTarget.style.transform =
-								"translateY(-3px)";
-							e.currentTarget.style.boxShadow =
-								"0 6px 12px rgba(0, 0, 0, 0.15)";
-						}}
-						onMouseLeave={(e) => {
-							e.currentTarget.style.transform = "translateY(0)";
-							e.currentTarget.style.boxShadow =
-								"0 4px 8px rgba(0, 0, 0, 0.1)";
-						}}
-					>
-						<div>
-							<h6 className="mb-2 fw-bold">{item.summary}</h6>
-							{type === "notepad" && (
-								<>
-									<div className="mb-1">
-										<Badge bg="info" className="me-2">
-											Categorie
-										</Badge>
-										<span className="text-muted">
-											{item.categories}
-										</span>
-									</div>
-									<div>
-										<Badge bg="secondary" className="me-2">
-											Ultima modifica
-										</Badge>
-										<span className="text-muted">
-											{formatDate(item.dtModified)}
-										</span>
-									</div>
-								</>
+			{items?.map((item, index) => (
+				<div
+					key={index}
+					className="preview-item"
+					onClick={() =>
+						type === "chat"
+							? router.push("/chat")
+							: router.push(`/${type}/${item._id}`)
+					}
+				>
+					<div className="preview-header">
+						<div
+							className={`preview-icon bg-${type === "chat" ? "success" : type === "notepad" ? "primary" : "warning"}-subtle`}
+						>
+							{type === "chat" ? (
+								<FaStickyNote
+									className={`text-${type === "chat" ? "success" : type === "notepad" ? "primary" : "warning"}`}
+								/>
+							) : type === "notepad" ? (
+								<FaBook className="text-primary" />
+							) : (
+								<FaStickyNote className="text-warning" />
 							)}
-							{type === "projects" && (
-								<>
-									<div className="mb-1">
-										<Badge bg="warning" className="me-2">
-											Nota
-										</Badge>
-										<span
-											className="ms-2 p-0"
-											onClick={(e) => {
-												e.stopPropagation();
-												router.push(
-													`/notepad/${item.noteId}`
-												);
-											}}
-											style={{ cursor: "pointer" }}
-										>
-											<FaStickyNote
-												size={20}
-												className="text-warning"
-											/>
-										</span>
-									</div>
-								</>
-							)}
+						</div>
+						<div className="flex-grow-1">
+							<h6 className="preview-title">{item.summary}</h6>
 							{type === "chat" && (
-								<>
+								<div className="preview-meta">
 									<div className="mb-1">
-										<Badge bg="success" className="me-2">
-											Ultimo messaggio
-										</Badge>
-										<span className="text-muted">
-											{item.lastMessage}
-										</span>
+										{item.lastMessage}
 									</div>
-									<div className="mb-1">
-										<Badge bg="dark" className="me-2">
-											Da
-										</Badge>
-										<span className="text-muted">
-											{item.lastMessageOwner}
-										</span>
+									<span className="preview-badge bg-light text-dark">
+										{item.lastMessageOwner}
+									</span>
+									<small className="ms-2">
+										{formatDate(item.lastMessageAt)}
+									</small>
+								</div>
+							)}
+							{type === "notepad" && (
+								<div className="preview-meta">
+									<div className="d-flex flex-wrap gap-2 mb-1">
+										{item.categories
+											.split(",")
+											.map((cat: string, i: number) => (
+												<span
+													key={i}
+													className="preview-badge bg-primary-subtle text-primary"
+												>
+													{cat.trim()}
+												</span>
+											))}
 									</div>
-									<div>
-										<Badge bg="secondary" className="me-2">
-											Inviato
-										</Badge>
-										<span className="text-muted">
-											{formatDate(item.lastMessageAt)}
-										</span>
-									</div>
-								</>
+									<small>{formatDate(item.dtModified)}</small>
+								</div>
+							)}
+							{type === "projects" && item.noteId && (
+								<Button
+									variant="none"
+									className="p-0 mt-1"
+									onClick={(e) => {
+										e.stopPropagation();
+										router.push(`/notepad/${item.noteId}`);
+									}}
+								>
+									<small className="text-warning">
+										Vedi nota collegata
+									</small>
+								</Button>
 							)}
 						</div>
 					</div>
-				))}
+				</div>
+			))}
 		</Stack>
 	);
 }
@@ -352,16 +261,7 @@ function PreviewCalendar({ calendar }: { calendar: ReducedCalendar }) {
 }
 
 // Nuovo componente per la preview del Pomodoro
-function PreviewPomodoro({
-	pomodoro
-}: {
-	pomodoro: {
-		modificationDate: string;
-		cycles: number;
-		studyTime: number;
-		breakTime: number;
-	};
-}) {
+function PreviewPomodoro({ pomodoro }: { pomodoro: PomodoroSettings }) {
 	return (
 		<Stack gap={3}>
 			<div className="d-flex align-items-center">
@@ -393,6 +293,80 @@ function PreviewPomodoro({
 	);
 }
 
+function WelcomeSection({ userName }: { userName: string }) {
+	return (
+		<div className="welcome-section text-center py-4 mb-4">
+			<h1 className="display-4 mb-3 fw-bold text-primary">
+				Benvenuto in Selfie{userName ? `, ${userName}` : ""}! 👋
+			</h1>
+			<p className="lead mb-4">
+				Il tuo spazio personale per organizzare studio, progetti e molto
+				altro. Inizia ad esplorare le funzionalità che abbiamo creato
+				per te!
+			</p>
+		</div>
+	);
+}
+
+function ModernCard({
+	title,
+	icon,
+	description,
+	content,
+	link,
+	accentColor = "primary"
+}: {
+	title: string;
+	icon: React.ReactNode;
+	description: string;
+	content: React.ReactNode;
+	link: string;
+	accentColor?: string;
+}) {
+	const router = useRouter();
+
+	return (
+		<div className="modern-card bg-white rounded-4 shadow-lg border-0">
+			<div className="card-header p-4 position-relative">
+				<div
+					className="accent-bar"
+					style={{
+						background: `var(--bs-${accentColor})`,
+						position: "absolute",
+						top: 0,
+						left: "50%",
+						transform: "translateX(-50%)",
+						height: "4px",
+						width: "60%",
+						borderRadius: "0 0 8px 8px"
+					}}
+				/>
+				<div className="d-flex align-items-center gap-3 mb-3">
+					<div className={`icon-wrapper text-${accentColor}`}>
+						{icon}
+					</div>
+					<div className="flex-grow-1">
+						<h3 className="h4 mb-1">{title}</h3>
+						<p className="text-muted mb-0 small">{description}</p>
+					</div>
+				</div>
+				<div className="mt-3">
+					<Button
+						variant={accentColor}
+						size="sm"
+						className="rounded-pill px-4 py-2"
+						onClick={() => router.push(link)}
+					>
+						Apri {title}
+					</Button>
+				</div>
+			</div>
+
+			<div className="content-scroll px-4 py-2 mb-2">{content}</div>
+		</div>
+	);
+}
+
 export default function Home() {
 	const [previews, setPreviews] = useState<PreviewsResponse | null>(null);
 	const { user } = useUser();
@@ -419,112 +393,84 @@ export default function Home() {
 	}, []);
 
 	return (
-		<main>
+		<main className="bg-light min-vh-100">
 			<GlobalSideBar />
-			<Container fluid className="mt-3 px-3 overflow-hidden">
-				<Row className="gx-3">
-					<Col xs={12} lg={3} className="mb-3">
-						<PreviewBox
-							title="Chat"
+			<Container fluid className="px-4 py-5">
+				<WelcomeSection userName={user?.firstName || ""} />
+
+				<div className="dashboard-grid">
+					<ModernCard
+						title="Chat"
+						icon={<FaStickyNote size={24} />}
+						description="Messaggia con i tuoi colleghi"
+						content={
+							previews && (
+								<PreviewList
+									items={previews.chats}
+									type="chat"
+								/>
+							)
+						}
+						link="/chat"
+						accentColor="success"
+					/>
+					<ModernCard
+						title="Calendario"
+						icon={<FaCalendarAlt size={24} />}
+						description="Organizza i tuoi impegni"
+						content={
+							previews && (
+								<PreviewCalendar calendar={previews.calendar} />
+							)
+						}
+						link="/calendar"
+						accentColor="info"
+					/>
+					<div className="right-column">
+						<ModernCard
+							title="Note"
+							icon={<FaBook size={24} />}
+							description="Gestisci i tuoi appunti"
 							content={
 								previews && (
 									<PreviewList
-										items={previews.chats}
-										type="chat"
+										items={previews.notes}
+										type="notepad"
 									/>
 								)
 							}
-							link="/chat"
+							link="/notepad"
+							accentColor="primary"
 						/>
-					</Col>
-					<Col xs={12} lg={9}>
-						<Row className="gx-3">
-							<Col xs={12} md={6} className="mb-3">
-								<PreviewBox
-									title="Calendario"
-									content={
-										previews && (
-											<PreviewCalendar
-												calendar={previews.calendar}
-											/>
-										)
-									}
-									link="/calendar"
-								/>
-							</Col>
-							<Col xs={12} md={6} className="mb-3">
-								<PreviewBox
-									title="Progetti"
-									content={
-										previews && (
-											<PreviewList
-												items={previews.projects}
-												type="projects"
-											/>
-										)
-									}
-									link="/projects"
-								/>
-							</Col>
-							<Col xs={12} md={6} className="mb-3">
-								<PreviewBox
-									title="Note"
-									content={
-										previews && (
-											<PreviewList
-												items={previews.notes}
-												type="notepad"
-											/>
-										)
-									}
-									link="/notepad"
-								/>
-							</Col>
-							<Col xs={12} md={6} className="mb-3">
-								<PreviewBox
-									title="Pomodoro"
-									content={
-										user?.pomodoro ? (
-											<PreviewPomodoro
-												pomodoro={{
-													modificationDate:
-														typeof user.pomodoro
-															.modificationDate ===
-														"string"
-															? formatDate(
-																	user
-																		.pomodoro
-																		.modificationDate
-																)
-															: formatDate(
-																	user
-																		.pomodoro
-																		.modificationDate !==
-																		undefined
-																		? user.pomodoro.modificationDate.toISOString()
-																		: ""
-																),
-													cycles: user.pomodoro
-														.cycles,
-													studyTime:
-														user.pomodoro.studyTime,
-													breakTime:
-														user.pomodoro.breakTime
-												}}
-											/>
-										) : (
-											<p className="text-muted">
-												Non sono disponibili
-												informazioni sul Pomodoro.
-											</p>
-										)
-									}
-									link="/pomodoro"
-								/>
-							</Col>
-						</Row>
-					</Col>
-				</Row>
+						<ModernCard
+							title="Progetti"
+							icon={<FaStickyNote size={24} />}
+							description="Coordina le tue attività"
+							content={
+								previews && (
+									<PreviewList
+										items={previews.projects}
+										type="projects"
+									/>
+								)
+							}
+							link="/projects"
+							accentColor="warning"
+						/>
+						<ModernCard
+							title="Pomodoro"
+							icon={<FaCoffee size={24} />}
+							description="Ottimizza il tuo studio"
+							content={
+								user?.pomodoro && (
+									<PreviewPomodoro pomodoro={user.pomodoro} />
+								)
+							}
+							link="/pomodoro"
+							accentColor="danger"
+						/>
+					</div>
+				</div>
 			</Container>
 		</main>
 	);
