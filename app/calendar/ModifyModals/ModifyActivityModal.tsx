@@ -213,7 +213,11 @@ export function ModifyActivityModal({
 				/>
 				<StandardViewField
 					title="Risorse"
-					value={resources.join(", ") || "-"}
+					value={
+						resources
+							.map((resource) => resource.slice(6))
+							.join(", ") || "-"
+					}
 				/>
 				<StandardViewField
 					title="Promemoria"
