@@ -28,7 +28,8 @@ const requestTemplate = {
 		studyTime: 0,
 		breakTime: 0
 	},
-	alarms: []
+	alarms: [],
+	dateToChange: ""
 };
 
 type RequestType = typeof requestTemplate;
@@ -85,8 +86,8 @@ export const PATCH = async (request: NextRequest) => {
 	}
 
 	// Controlliamo che la data di inizio sia nello stesso giorno della data di fine
-	const dtStart = new Date(session[0].dtStart).toDateString();
-	const dtEnd = new Date(session[0].dtEnd).toDateString();
+	const dtStart = new Date(newBody.dtStart).toDateString();
+	const dtEnd = new Date(newBody.dtEnd).toDateString();
 
 	if (dtStart !== dtEnd) {
 		return generateMessageResponse(
@@ -117,17 +118,17 @@ export const PATCH = async (request: NextRequest) => {
 	);
 
 	const readyNewSetting = {
-		modificationDate: today,
+		modificationDate: newBody.dateToChange,
 		...newSetting
 	};
 
 	let settingsList = session[0].settingsList;
 
-	// Controlliamo se in settingsList c'è la giornata odierna secondo TimeMachine
+	// Controlliamo se in settingsList c'è la giornata richiesta
 	const found = settingsList.find((element) => {
 		return (
 			new Date(element.modificationDate).toDateString() ==
-			new Date(today).toDateString()
+			new Date(newBody.dateToChange).toDateString()
 		);
 	});
 

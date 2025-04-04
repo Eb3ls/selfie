@@ -52,6 +52,7 @@ export function GenericModifyModal({
 				show={showModal}
 				setShow={setShowModal}
 				session={session}
+				startOfSelectedSession={calendarEvent.start}
 			/>
 		);
 	} else {

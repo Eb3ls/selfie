@@ -6,9 +6,13 @@ import { StandardInput } from "@/app/components/StandardInput";
 import { StandardToggleModal } from "@/app/components/StandardToggleModal";
 // nuovo import
 import { StandardViewField } from "@/app/components/StandardViewFIeld";
-import { StringAlarm, StringSession } from "@/utils/db/db";
+import {
+	StringAlarm,
+	StringPomodoroSettings,
+	StringSession
+} from "@/utils/db/db";
 import moment from "moment";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Form } from "react-bootstrap";
 import {
 	PomodoroBlock,
@@ -17,18 +21,57 @@ import {
 	getTextFromTriggerList
 } from "../calendarUtils/calendarUX";
 
+type StringSessionForm = Omit<StringSession, "settingsList"> & {
+	settings: StringPomodoroSettings;
+};
+
 export function ModifySessionModal({
 	session,
 	show,
-	setShow
+	setShow,
+	startOfSelectedSession
 }: {
 	session: StringSession;
 	show: boolean;
 	setShow: (show: boolean) => void;
+	startOfSelectedSession: Date;
 }) {
-	const newSession: StringSession = { ...session };
+	const rawSession: StringSession = { ...session };
+	const newSession: StringSessionForm = {
+		...rawSession,
+		settings: session.settingsList
+			.filter(
+				(s) =>
+					new Date(s.modificationDate) <=
+					new Date(startOfSelectedSession)
+			)
+			.sort(
+				(a, b) =>
+					new Date(b.modificationDate).getTime() -
+					new Date(a.modificationDate).getTime()
+			)[0]
+	};
 	const [form, setForm] = useState(newSession);
 	const [userToInvite, setUserToInvite] = useState("");
+
+	useEffect(() => {
+		const rawSession: StringSession = { ...session };
+		const newSession: StringSessionForm = {
+			...rawSession,
+			settings: session.settingsList
+				.filter(
+					(s) =>
+						new Date(s.modificationDate) <=
+						new Date(startOfSelectedSession)
+				)
+				.sort(
+					(a, b) =>
+						new Date(b.modificationDate).getTime() -
+						new Date(a.modificationDate).getTime()
+				)[0]
+		};
+		setForm(newSession);
+	}, [session, startOfSelectedSession]);
 
 	const handleChange = (
 		e: React.ChangeEvent<
@@ -44,13 +87,10 @@ export function ModifySessionModal({
 	const handleChangePomodoro = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setForm({
 			...form,
-			settingsList: [
-				...form.settingsList.slice(0, form.settingsList.length - 1),
-				{
-					...form.settingsList[form.settingsList.length - 1],
-					[e.target.name]: parseInt(e.target.value)
-				}
-			]
+			settings: {
+				...form.settings,
+				[e.target.name]: parseInt(e.target.value)
+			}
 		});
 	};
 
@@ -91,9 +131,8 @@ export function ModifySessionModal({
 
 		const startDateTime = new Date(form.dtStart);
 		const pomodoroDuration =
-			form.settingsList[form.settingsList.length - 1].cycles *
-			(form.settingsList[form.settingsList.length - 1].studyTime +
-				form.settingsList[form.settingsList.length - 1].breakTime);
+			form.settings.cycles *
+			(form.settings.studyTime + form.settings.breakTime);
 		const endDateTime = new Date(
 			startDateTime.getTime() + pomodoroDuration * 60000
 		);
@@ -107,13 +146,12 @@ export function ModifySessionModal({
 			dtStart: startDateTime.toISOString(),
 			dtEnd: endDateTime.toISOString(),
 			newSetting: {
-				cycles: form.settingsList[form.settingsList.length - 1].cycles,
-				studyTime:
-					form.settingsList[form.settingsList.length - 1].studyTime,
-				breakTime:
-					form.settingsList[form.settingsList.length - 1].breakTime
+				cycles: form.settings.cycles,
+				studyTime: form.settings.studyTime,
+				breakTime: form.settings.breakTime
 			},
-			alarms: form.alarms
+			alarms: form.alarms,
+			dateToChange: startOfSelectedSession.toISOString()
 		};
 
 		console.log("Primo form inviato:", { ...newForm });
@@ -182,17 +220,9 @@ export function ModifySessionModal({
 				/>
 
 				<PomodoroBlock
-					cycles={
-						form.settingsList[form.settingsList.length - 1].cycles
-					}
-					studyTime={
-						form.settingsList[form.settingsList.length - 1]
-							.studyTime
-					}
-					breakTime={
-						form.settingsList[form.settingsList.length - 1]
-							.breakTime
-					}
+					cycles={form.settings.cycles}
+					studyTime={form.settings.studyTime}
+					breakTime={form.settings.breakTime}
 					mode={"view"}
 				/>
 
@@ -260,17 +290,9 @@ export function ModifySessionModal({
 				/>
 
 				<PomodoroBlock
-					cycles={
-						form.settingsList[form.settingsList.length - 1].cycles
-					}
-					studyTime={
-						form.settingsList[form.settingsList.length - 1]
-							.studyTime
-					}
-					breakTime={
-						form.settingsList[form.settingsList.length - 1]
-							.breakTime
-					}
+					cycles={form.settings.cycles}
+					studyTime={form.settings.studyTime}
+					breakTime={form.settings.breakTime}
 					handleChangePomodoro={handleChangePomodoro}
 					mode="edit"
 				/>
