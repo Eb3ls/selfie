@@ -1,12 +1,12 @@
 "use client";
 
 import { AlarmSelector } from "@/app/calendar/AlarmSelector";
-import { InvitationComponent } from "@/app/calendar/InvitationComponent";
 import "@/app/calendar/Modal.css";
 import { TimezoneSelector } from "@/app/calendar/TimezoneSelector";
 import { StandardInput } from "@/app/components/StandardInput";
 import { StandardModal } from "@/app/components/StandardModal";
 import { StandardRepetitionInput } from "@/app/components/StandardRepetitionInput";
+import { StandardUsersInput } from "@/app/components/StandardUsersInput";
 import { StringAlarm } from "@/utils/db/db";
 import React, { useState } from "react";
 import { Form } from "react-bootstrap";
@@ -262,7 +262,7 @@ export function AddEventModal({ children }: any) {
 					}}
 				/>
 
-				<InvitationComponent
+				<StandardUsersInput
 					mainId={"42"}
 					usernameList={form.usernameList}
 					setUsernameList={handleUsernameListChange}

@@ -102,8 +102,6 @@ export function EditNoteModal({
 
 				{formData.access === "INVITED" && (
 					<StandardUsersInput
-						title="Utenti invitati"
-						placeholder="Aggiungi un utente per username"
 						usernameList={usernameList}
 						setUsernameList={setUsernameList}
 					/>

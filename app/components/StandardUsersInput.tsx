@@ -1,83 +1,158 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Button, Form } from "react-bootstrap";
+import { FaTrash, FaUser } from "react-icons/fa";
 
 interface StandardUsersInputProps {
-	title: string;
-	placeholder: string;
+	mainId?: string;
 	usernameList: string[];
-	setUsernameList: React.Dispatch<React.SetStateAction<string[]>>;
+	setUsernameList: (usernameList: string[]) => void;
 }
 
 export function StandardUsersInput({
-	title,
-	placeholder,
+	mainId,
 	usernameList,
 	setUsernameList
 }: StandardUsersInputProps) {
-	const [username, setUsername] = useState<string>("");
+	const [currentMainId, setCurrentMainId] = useState("");
+	const [currentOriginalUL, setCurrentOriginalUL] = useState<string[]>([]);
 
-	function handleAddUser() {
-		if (!username) return;
+	// Se cambia l'id dell'attività, aggiorna la lista degli utenti che erano già presenti
+	useEffect(() => {
+		if (currentMainId !== mainId) {
+			setCurrentMainId(mainId || "");
+			setCurrentOriginalUL(usernameList);
+		}
+	}, [mainId, currentMainId, usernameList]);
 
-		if (usernameList.includes(username)) {
-			// TODO mettere messaggio di errore
-			alert("Username already exists");
+	// Troviamo gli utenti in usernameList che erano presenti anche in currentOriginalUsernameList
+	// E troviamo gli utenti in currentOriginalUsernameList che non sono presenti in usernameList
+	const oldUsernames = currentOriginalUL.filter((username) =>
+		usernameList.includes(username)
+	);
+	const newUsernames = usernameList.filter(
+		(username) => !currentOriginalUL.includes(username)
+	);
+
+	const [usernameInput, setUsernameInput] = useState("");
+
+	// Funzione per aggiungere un invito
+	const handleAddUsername = () => {
+		if (!usernameInput.trim()) {
 			return;
 		}
 
-		setUsernameList([...usernameList, username]);
-		setUsername("");
-	}
+		// Se l'utente è già presente, non fare nulla
+		if (usernameList.includes(usernameInput.trim())) {
+			setUsernameInput("");
+			return;
+		}
 
-	function handleRemoveUser(usernameToRemove: string) {
-		setUsernameList((prevList) =>
-			prevList.filter((user) => user !== usernameToRemove)
-		);
-	}
+		setUsernameList([...usernameList, usernameInput.trim()]);
+		setUsernameInput("");
+	};
 
-	function createUserEntry(username: string) {
-		return (
-			<div
-				className="d-flex align-items-center justify-content-center gap-2 mb-2 bg-light rounded-3 p-2"
-				key={username}
-			>
-				<i className="bi bi-person-fill"></i>
-				<span className="text-truncate">{username}</span>
-				<button
-					type="button"
-					className="btn btn-sm btn-outline-danger ms-auto"
-					onClick={() => handleRemoveUser(username)}
-				>
-					<i className="bi bi-x"></i>
-				</button>
-			</div>
+	// Funzione per rimuovere un utente
+	const handleRemoveUsername = (usernameToRemove: string) => {
+		setUsernameList(
+			usernameList.filter((username) => username !== usernameToRemove)
 		);
-	}
+	};
 
 	return (
-		<div className="flex flex-col gap-4">
-			<label className="form-label fw-bold">{title}</label>
-			<div className="input-group mb-3">
-				<input
+		<Form.Group className="mb-3">
+			<Form.Label className="fw-bold">Inviti</Form.Label>
+			<div className="d-flex">
+				<Form.Control
 					type="text"
-					value={username}
-					className="form-control"
-					placeholder={placeholder}
-					onChange={(e) => setUsername(e.target.value)}
+					value={usernameInput}
+					onChange={(e) => setUsernameInput(e.target.value)}
+					placeholder="Inserisci nome utente"
+					className="input-field"
 				/>
-				<button
+				<Button
+					className="ms-2 rounded-3 hover-lift"
+					variant="primary"
+					onClick={handleAddUsername}
 					type="button"
-					className="btn btn-primary"
-					onClick={handleAddUser}
 				>
-					<i className="bi bi-plus"></i>
-				</button>
+					+
+				</Button>
 			</div>
-			<div
-				className="overflow-y-auto py-2"
-				style={{ maxHeight: "500px" }}
-			>
-				{usernameList.map((username) => createUserEntry(username))}
+			<div className="mt-3">
+				{oldUsernames.length > 0 && (
+					<div className="mb-4">
+						<h6 className="text-muted mb-3">
+							Utenti già aggiunti:
+						</h6>
+						<div
+							className="list-group shadow-sm"
+							style={{ maxHeight: "200px", overflowY: "auto" }}
+						>
+							{oldUsernames.map((username) => (
+								<div
+									key={username}
+									className="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+								>
+									<div className="d-flex align-items-center">
+										<FaUser className="text-primary me-3" />
+										<span className="fw-medium">
+											username
+										</span>
+									</div>
+									<Button
+										variant="link"
+										className="text-danger p-1"
+										onClick={() =>
+											handleRemoveUsername(username)
+										}
+									>
+										<FaTrash
+											size={14}
+											className="hover-grow"
+										/>
+									</Button>
+								</div>
+							))}
+						</div>
+					</div>
+				)}
+
+				{newUsernames.length > 0 && (
+					<div>
+						<h6 className="text-muted mb-3">Utenti da invitare</h6>
+						<div
+							className="list-group shadow-sm"
+							style={{ maxHeight: "200px", overflowY: "auto" }}
+						>
+							{newUsernames.map((username) => (
+								<div
+									key={username}
+									className="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+								>
+									<div className="d-flex align-items-center">
+										<FaUser className="text-primary me-3" />
+										<span className="fw-medium">
+											{username}
+										</span>
+									</div>
+									<Button
+										variant="link"
+										className="text-danger p-1"
+										onClick={() =>
+											handleRemoveUsername(username)
+										}
+									>
+										<FaTrash
+											size={14}
+											className="hover-grow"
+										/>
+									</Button>
+								</div>
+							))}
+						</div>
+					</div>
+				)}
 			</div>
-		</div>
+		</Form.Group>
 	);
 }

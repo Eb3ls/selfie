@@ -1,11 +1,11 @@
 "use client";
 
 import { AlarmSelector } from "@/app/calendar/AlarmSelector";
-import { InvitationComponent } from "@/app/calendar/InvitationComponent";
 import "@/app/calendar/Modal.css";
 import { TimezoneSelector } from "@/app/calendar/TimezoneSelector";
 import { StandardInput } from "@/app/components/StandardInput";
 import { StandardModal } from "@/app/components/StandardModal";
+import { StandardUsersInput } from "@/app/components/StandardUsersInput";
 import { useTime } from "@/app/components/TimeContext";
 import { StringAlarm } from "@/utils/db/db";
 import React, { useState } from "react";
@@ -158,7 +158,7 @@ export function AddActivityModal({ children }: any) {
 					secondDateToConvert={undefined}
 				/>
 
-				<InvitationComponent
+				<StandardUsersInput
 					mainId={"42"}
 					usernameList={form.usernameList}
 					setUsernameList={handleUsernameListChange}

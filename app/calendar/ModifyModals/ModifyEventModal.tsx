@@ -1,11 +1,11 @@
 "use client";
 
 import { AlarmSelector } from "@/app/calendar/AlarmSelector";
-import { InvitationComponent } from "@/app/calendar/InvitationComponent";
 import "@/app/calendar/Modal.css";
 import { TimezoneSelector } from "@/app/calendar/TimezoneSelector";
 import { StandardInput } from "@/app/components/StandardInput";
 import { StandardToggleModal } from "@/app/components/StandardToggleModal";
+import { StandardUsersInput } from "@/app/components/StandardUsersInput";
 import { StandardViewField } from "@/app/components/StandardViewFIeld";
 import { StringAlarm, StringEvent } from "@/utils/db/db";
 import moment from "moment";
@@ -240,7 +240,7 @@ export function ModifyEventModal({
 					}}
 				/>
 
-				<InvitationComponent
+				<StandardUsersInput
 					mainId={form._id!}
 					usernameList={form.usernameList}
 					setUsernameList={handleUsernameListChange}

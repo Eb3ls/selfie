@@ -73,8 +73,6 @@ export function GroupChatModal({
 				/>
 
 				<StandardUsersInput
-					title="Utenti aggiunti"
-					placeholder="Aggiungi utenti"
 					usernameList={users}
 					setUsernameList={setUsers}
 				/>

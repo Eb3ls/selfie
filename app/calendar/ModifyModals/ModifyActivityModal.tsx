@@ -1,15 +1,16 @@
 "use client";
 
 import { AlarmSelector } from "@/app/calendar/AlarmSelector";
-import { InvitationComponent } from "@/app/calendar/InvitationComponent";
 import "@/app/calendar/Modal.css";
 import { TimezoneSelector } from "@/app/calendar/TimezoneSelector";
 import { StandardInput } from "@/app/components/StandardInput";
 import { StandardToggleModal } from "@/app/components/StandardToggleModal";
+import { StandardUsersInput } from "@/app/components/StandardUsersInput";
 import { StandardViewField } from "@/app/components/StandardViewFIeld";
 import { StringActivity, StringAlarm } from "@/utils/db/db";
 import moment from "moment";
 import React, { useState } from "react";
+import { ResourceInvitationComponent } from "../ResourceInvitationComponent";
 import {
 	getDeleteContent,
 	getDropContent,
@@ -34,6 +35,7 @@ export function ModifyActivityModal({
 }) {
 	const newActivity: StringActivityFrontend = { ...activity };
 	const [form, setForm] = useState(newActivity);
+	const [resourceList, setResourceList] = useState<string[]>([]);
 
 	const handleChange = (
 		e: React.ChangeEvent<
@@ -156,6 +158,10 @@ export function ModifyActivityModal({
 					value={activity.usernameList.join(", ") || "-"}
 				/>
 				<StandardViewField
+					title="Risorse"
+					value={resourceList.join(", ") || "-"}
+				/>
+				<StandardViewField
 					title="Promemoria"
 					value={getTextFromTriggerList(form.alarms)}
 				/>
@@ -204,7 +210,6 @@ export function ModifyActivityModal({
 					onChange={handleChange}
 					placeholder="Inserisci consegna"
 				/>
-
 				<StandardInput
 					type="text"
 					name="categories"
@@ -214,7 +219,6 @@ export function ModifyActivityModal({
 					placeholder="Inserisci categorie"
 					isRequired={false}
 				/>
-
 				<TimezoneSelector
 					regularTimezone={form.geo}
 					setRegularTimezone={handleTimezoneChange}
@@ -224,13 +228,16 @@ export function ModifyActivityModal({
 					}}
 					secondDateToConvert={undefined}
 				/>
-
-				<InvitationComponent
+				<StandardUsersInput
 					mainId={form._id!}
 					usernameList={form.usernameList}
 					setUsernameList={handleUsernameListChange}
 				/>
-
+				<ResourceInvitationComponent
+					mainId={form._id!}
+					resourceList={resourceList}
+					setResourceList={setResourceList}
+				/>
 				<AlarmSelector
 					alarms={form.alarms}
 					onChange={handleAlarmsChange}
