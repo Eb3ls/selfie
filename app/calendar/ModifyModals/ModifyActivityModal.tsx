@@ -8,9 +8,12 @@ import { StandardInput } from "@/app/components/StandardInput";
 import { StandardToggleModal } from "@/app/components/StandardToggleModal";
 import { StandardViewField } from "@/app/components/StandardViewFIeld";
 import { StringActivity, StringAlarm } from "@/utils/db/db";
-import { Trigger } from "@/utils/db/models/Alarm";
 import moment from "moment";
 import React, { useState } from "react";
+import {
+	getDeleteContent,
+	getTextFromTriggerList
+} from "../calendarUtils/calendarUX";
 
 type StringActivityFrontend = Omit<StringActivity, "userIdList"> & {
 	usernameList: string[];
@@ -40,21 +43,6 @@ export function ModifyActivityModal({
 			[e.target.name]: e.target.value
 		});
 	};
-
-	function getTextFromTrigger(trigger: Trigger): string {
-		switch (trigger) {
-			case "-PT0S":
-				return "Al momento dell'evento";
-			case "-PT10M":
-				return "10 minuti prima";
-			case "-PT1H":
-				return "1 ora prima";
-			case "-PT1D":
-				return "1 giorno prima";
-			default:
-				return "";
-		}
-	}
 
 	// Gestisce il submit del form
 	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -174,11 +162,7 @@ export function ModifyActivityModal({
 				/>
 				<StandardViewField
 					title="Promemoria"
-					value={
-						activity.alarms
-							.map((a) => `${getTextFromTrigger(a.trigger)}`)
-							.join(", ") || "Nessuno"
-					}
+					value={getTextFromTriggerList(form.alarms)}
 				/>
 			</>
 		);
@@ -260,28 +244,6 @@ export function ModifyActivityModal({
 		);
 	}
 
-	function getDeleteContent() {
-		return (
-			<div className="text-center">
-				<i className="bi bi-exclamation-triangle text-warning display-1 mb-4 d-block" />
-				<h4 className="mb-4">
-					Sei sicuro di voler eliminare questa attività?
-				</h4>
-				<p className="mb-4 text-muted">{form.summary}</p>
-				<button
-					className="btn btn-danger btn-lg"
-					onClick={(e) => {
-						e.preventDefault();
-						handleDelete();
-					}}
-				>
-					<i className="bi bi-trash me-2" />
-					Conferma Eliminazione
-				</button>
-			</div>
-		);
-	}
-
 	function getMainView() {
 		let title = "Dettagli Attività";
 		if (activity.ownerId !== currentUserId) {
@@ -298,34 +260,48 @@ export function ModifyActivityModal({
 	}
 
 	function getSingleViewMap() {
-		if (form.ownerId === currentUserId) {
-			return {
-				Modifica: {
-					title: "Modifica Attività",
-					buttonColor: "primary",
-					icon: <i className="bi bi-pencil me-2" />,
-					saveBtnText: "Modifica",
-					onSubmit: handleSubmit,
-					renderChildren: () => {
-						return getEditContent();
-					}
-				},
-				Elimina: {
-					title: "Elimina Attività",
-					buttonColor: "danger",
-					icon: <i className="bi bi-trash me-2" />,
-					saveBtnText: "",
-					onSubmit: (e: React.FormEvent<HTMLFormElement>) => {
-						e.preventDefault();
-						handleDelete();
-					},
-					renderChildren: () => {
-						return getDeleteContent();
-					}
+		const ownerViews = {
+			Modifica: {
+				title: "Modifica Attività",
+				buttonColor: "primary",
+				icon: <i className="bi bi-pencil me-2" />,
+				saveBtnText: "Modifica",
+				onSubmit: handleSubmit,
+				renderChildren: () => {
+					return getEditContent();
 				}
-			};
-		}
-		return null;
+			},
+			Elimina: {
+				title: "Elimina Attività",
+				buttonColor: "danger",
+				icon: <i className="bi bi-trash me-2" />,
+				saveBtnText: "",
+				onSubmit: undefined,
+				renderChildren: () => {
+					return getDeleteContent(form.summary, handleDelete, false);
+				}
+			}
+		};
+
+		const guestViews = {
+			Abbandona: {
+				title: "Abbandona Attività",
+				buttonColor: "danger",
+				saveBtnText: "",
+				onSubmit: undefined,
+				renderChildren: () => {
+					return getDeleteContent(
+						form.summary,
+						() => {
+							alert("TODO: Abbandona attività");
+						},
+						false
+					);
+				}
+			}
+		};
+
+		return form.ownerId === currentUserId ? ownerViews : guestViews;
 	}
 
 	return (

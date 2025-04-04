@@ -8,9 +8,13 @@ import { StandardInput } from "@/app/components/StandardInput";
 import { StandardToggleModal } from "@/app/components/StandardToggleModal";
 import { StandardViewField } from "@/app/components/StandardViewFIeld";
 import { StringAlarm, StringEvent } from "@/utils/db/db";
-import { Trigger } from "@/utils/db/models/Alarm";
 import moment from "moment";
 import React, { useState } from "react";
+import {
+	getDeleteContent,
+	getDropContent,
+	getTextFromTriggerList
+} from "../calendarUtils/calendarUX";
 
 type StringEventFrontend = Omit<StringEvent, "userIdList"> & {
 	usernameList: string[];
@@ -125,21 +129,6 @@ export function ModifyEventModal({
 		});
 	};
 
-	function getTextFromTrigger(trigger: Trigger): string {
-		switch (trigger) {
-			case "-PT0S":
-				return "Al momento dell'evento";
-			case "-PT10M":
-				return "10 minuti prima";
-			case "-PT1H":
-				return "1 ora prima";
-			case "-PT1D":
-				return "1 giorno prima";
-			default:
-				return "";
-		}
-	}
-
 	function getViewContent() {
 		return (
 			<>
@@ -180,11 +169,7 @@ export function ModifyEventModal({
 				/>
 				<StandardViewField
 					title="Promemoria"
-					value={
-						event.alarms
-							.map((a) => `${getTextFromTrigger(a.trigger)}`)
-							.join(", ") || "Nessuno"
-					}
+					value={getTextFromTriggerList(event.alarms)}
 				/>
 			</>
 		);
@@ -274,28 +259,6 @@ export function ModifyEventModal({
 		);
 	}
 
-	function getDeleteContent() {
-		return (
-			<div className="text-center">
-				<i className="bi bi-exclamation-triangle text-warning display-1 mb-4 d-block" />
-				<h4 className="mb-4">
-					Sei sicuro di voler eliminare questo evento?
-				</h4>
-				<p className="mb-4 text-muted">{form.summary}</p>
-				<button
-					className="btn btn-danger btn-lg"
-					onClick={(e) => {
-						e.preventDefault();
-						handleDelete();
-					}}
-				>
-					<i className="bi bi-trash me-2" />
-					Conferma Eliminazione
-				</button>
-			</div>
-		);
-	}
-
 	function getMainView() {
 		let title = "Dettagli Evento";
 		if (event.ownerId !== currentUserId) {
@@ -312,34 +275,44 @@ export function ModifyEventModal({
 	}
 
 	function getSingleViewMap() {
-		if (form.ownerId === currentUserId) {
-			return {
-				Modifica: {
-					title: "Modifica Evento",
-					buttonColor: "primary",
-					icon: <i className="bi bi-pencil me-2" />,
-					saveBtnText: "Modifica",
-					onSubmit: handleSubmit,
-					renderChildren: () => {
-						return getEditContent();
-					}
-				},
-				Elimina: {
-					title: "Elimina Evento",
-					buttonColor: "danger",
-					icon: <i className="bi bi-trash me-2" />,
-					saveBtnText: "",
-					onSubmit: (e: React.FormEvent<HTMLFormElement>) => {
-						e.preventDefault();
-						handleDelete();
-					},
-					renderChildren: () => {
-						return getDeleteContent();
-					}
+		const ownerViews = {
+			Modifica: {
+				title: "Modifica Evento",
+				buttonColor: "primary",
+				icon: <i className="bi bi-pencil me-2" />,
+				saveBtnText: "Modifica",
+				onSubmit: handleSubmit,
+				renderChildren: () => {
+					return getEditContent();
 				}
-			};
-		}
-		return null;
+			},
+			Elimina: {
+				title: "Elimina Evento",
+				buttonColor: "danger",
+				icon: <i className="bi bi-trash me-2" />,
+				saveBtnText: "",
+				// Abbiamo il bottone di conferma nei children
+				onSubmit: undefined,
+				renderChildren: () => {
+					return getDeleteContent(form.summary, handleDelete, true);
+				}
+			}
+		};
+
+		const guestViews = {
+			Abbandona: {
+				title: "Abbandona Evento",
+				buttonColor: "danger",
+				saveBtnText: "",
+				// Abbiamo il bottone di conferma nei children
+				onSubmit: undefined,
+				renderChildren: () => {
+					return getDropContent(form.summary, handleDelete, true);
+				}
+			}
+		};
+
+		return form.ownerId === currentUserId ? ownerViews : guestViews;
 	}
 
 	return (

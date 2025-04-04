@@ -6,7 +6,7 @@ export interface SingleView {
 	buttonColor: string;
 	icon?: React.ReactNode;
 	saveBtnText: string;
-	onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
+	onSubmit: ((event: React.FormEvent<HTMLFormElement>) => void) | undefined;
 	renderChildren: () => React.ReactNode;
 }
 
