@@ -54,14 +54,6 @@ export function CustomToolbar({
 		setCurrentView((prev) => (prev === "list" ? "calendar" : "list"));
 	}
 
-	function testRES(num: number) {
-		let res = [];
-		for (let i = 0; i < num; i++) {
-			res.push("RES-" + i);
-		}
-		return res;
-	}
-
 	return (
 		<div className="rbc-toolbar">
 			<div className="toolbar-left">
@@ -157,7 +149,7 @@ export function CustomToolbar({
 							<span>+</span> Sessione
 						</button>
 					</AddSessionModal>
-					<ResourcesModal resources={testRES(50)} />
+					<ResourcesModal />
 				</div>
 			</div>
 		</div>

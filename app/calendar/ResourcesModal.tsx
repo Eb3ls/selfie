@@ -1,23 +1,56 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { IoMdGlobe } from "react-icons/io";
+import useSWR from "swr";
 import { StandardModal } from "../components/StandardModal";
 
-interface ResourcesModalProps {
-	resources: string[];
+type Resource = {
+	id: string;
+	name: string;
+};
+
+async function fetcher(url: string) {
+	const response = await fetch(url);
+	if (!response.ok) {
+		throw new Error("Errore durante il fetch delle risorse");
+	}
+	return response.json();
 }
 
-export function ResourcesModal({ resources }: ResourcesModalProps) {
+export function ResourcesModal() {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [searchValue, setSearchValue] = useState("");
-	const trimmedResources = resources.map((resource) => resource.substring(4));
-	const filteredResources = trimmedResources.filter((resource) =>
-		resource.toLowerCase().includes(searchValue.toLowerCase())
+
+	const [resources, setResources] = useState<Resource[]>([]);
+
+	// Fetch della lista delle risorse
+	const { data: raw_resources, error: error_resources } = useSWR(
+		"/api/calendar/getResources",
+		fetcher,
+		{
+			revalidateOnFocus: false
+		}
 	);
 
-	function createResourceEntry(resource: string) {
+	useEffect(() => {
+		if (raw_resources) {
+			const newResources = raw_resources.map((resource: Resource) => {
+				return {
+					...resource,
+					name: resource.name.substring(6)
+				};
+			});
+			setResources(newResources);
+		}
+	}, [raw_resources]);
+
+	const filteredResources = resources.filter((resource) =>
+		resource.name.toLowerCase().includes(searchValue.toLowerCase())
+	);
+
+	function createResourceEntry(resource: Resource) {
 		return (
 			<div
-				key={resource}
+				key={resource.id}
 				className="d-flex align-items-center p-3 mt-2 rounded-3 border hover-lift"
 				style={{
 					backgroundColor: "#ffffff",
@@ -26,7 +59,7 @@ export function ResourcesModal({ resources }: ResourcesModalProps) {
 			>
 				<div className="d-flex align-items-center flex-grow-1">
 					<i className="bi bi-person-badge fs-4 text-primary me-3"></i>
-					<span className="fw-medium">{resource}</span>
+					<span className="fw-medium">{resource.name}</span>
 				</div>
 				<button
 					className="btn btn-light rounded-pill px-4 hover-lift"
@@ -90,14 +123,21 @@ export function ResourcesModal({ resources }: ResourcesModalProps) {
 						className="resource-list"
 						style={{ maxHeight: "70vh", overflowY: "auto" }}
 					>
-						{filteredResources.length > 0 ? (
-							filteredResources.map((resource) =>
-								createResourceEntry(resource)
+						{!error_resources ? (
+							filteredResources.length > 0 ? (
+								filteredResources.map((resource) =>
+									createResourceEntry(resource)
+								)
+							) : (
+								<div className="text-center text-muted p-4">
+									<i className="bi bi-emoji-frown fs-4"></i>
+									<p>Nessuna risorsa trovata</p>
+								</div>
 							)
 						) : (
 							<div className="text-center text-muted p-4">
-								<i className="bi bi-emoji-frown fs-4"></i>
-								<p>Nessuna risorsa trovata</p>
+								<i className="bi bi-exclamation-triangle fs-4"></i>
+								<p>Errore nel caricamento delle risorse</p>
 							</div>
 						)}
 					</div>
