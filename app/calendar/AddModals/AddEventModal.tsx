@@ -10,6 +10,7 @@ import { StandardRepetitionInput } from "@/app/components/StandardRepetitionInpu
 import { StringAlarm } from "@/utils/db/db";
 import React, { useState } from "react";
 import { Form } from "react-bootstrap";
+import { ResourceInvitationComponent } from "../ResourceInvitationComponent";
 
 export function AddEventModal({ children }: any) {
 	const [show, setShow] = useState(false);
@@ -39,6 +40,8 @@ export function AddEventModal({ children }: any) {
 		usernameList: [] as string[],
 		alarms: [] as StringAlarm[]
 	});
+
+	const [resourceList, setResourceList] = useState<string[]>([]);
 
 	const handleChange = (
 		e: React.ChangeEvent<
@@ -263,6 +266,12 @@ export function AddEventModal({ children }: any) {
 					mainId={"42"}
 					usernameList={form.usernameList}
 					setUsernameList={handleUsernameListChange}
+				/>
+
+				<ResourceInvitationComponent
+					mainId={"42"}
+					resourceList={resourceList}
+					setResourceList={setResourceList}
 				/>
 
 				<AlarmSelector

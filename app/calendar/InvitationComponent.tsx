@@ -14,7 +14,7 @@ export function InvitationComponent({
 	setUsernameList
 }: InvitationComponentProps) {
 	const [currentMainId, setCurrentMainId] = useState("");
-	const [currentOriginalUL, setCurrentOriginalUL] = useState([] as string[]);
+	const [currentOriginalUL, setCurrentOriginalUL] = useState<string[]>([]);
 
 	// Se cambia l'id dell'attività, aggiorna la lista degli utenti che erano già presenti
 	useEffect(() => {
@@ -70,9 +70,9 @@ export function InvitationComponent({
 					className="input-field"
 				/>
 				<Button
-					variant="success"
+					className="ms-2 rounded-3 hover-lift"
+					variant="primary"
 					onClick={handleAddUsername}
-					style={{ marginLeft: "10px" }}
 					type="button"
 				>
 					+
@@ -80,17 +80,24 @@ export function InvitationComponent({
 			</div>
 			<div className="mt-3">
 				{oldUsernames.length > 0 && (
-					<>
-						<h6 className="mb-2">Utenti già presenti:</h6>
-						<div className="border rounded p-2">
+					<div className="mb-4">
+						<h6 className="text-muted mb-3">
+							Utenti già aggiunti:
+						</h6>
+						<div
+							className="list-group shadow-sm"
+							style={{ maxHeight: "200px", overflowY: "auto" }}
+						>
 							{oldUsernames.map((username) => (
 								<div
 									key={username}
-									className="d-flex justify-content-between align-items-center p-2"
+									className="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
 								>
 									<div className="d-flex align-items-center">
-										<FaUser className="text-secondary me-2" />
-										<span>{username}</span>
+										<FaUser className="text-primary me-3" />
+										<span className="fw-medium">
+											username
+										</span>
 									</div>
 									<Button
 										variant="link"
@@ -99,26 +106,34 @@ export function InvitationComponent({
 											handleRemoveUsername(username)
 										}
 									>
-										<FaTrash size={14} />
+										<FaTrash
+											size={14}
+											className="hover-grow"
+										/>
 									</Button>
 								</div>
 							))}
 						</div>
-					</>
+					</div>
 				)}
 
 				{newUsernames.length > 0 && (
-					<>
-						<h6 className="mt-3 mb-2">Utenti da invitare:</h6>
-						<div className="border rounded p-2">
+					<div>
+						<h6 className="text-muted mb-3">Utenti da invitare</h6>
+						<div
+							className="list-group shadow-sm"
+							style={{ maxHeight: "200px", overflowY: "auto" }}
+						>
 							{newUsernames.map((username) => (
 								<div
 									key={username}
-									className="d-flex justify-content-between align-items-center p-2"
+									className="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
 								>
 									<div className="d-flex align-items-center">
-										<FaUser className="text-secondary me-2" />
-										<span>{username}</span>
+										<FaUser className="text-primary me-3" />
+										<span className="fw-medium">
+											{username}
+										</span>
 									</div>
 									<Button
 										variant="link"
@@ -127,12 +142,15 @@ export function InvitationComponent({
 											handleRemoveUsername(username)
 										}
 									>
-										<FaTrash size={14} />
+										<FaTrash
+											size={14}
+											className="hover-grow"
+										/>
 									</Button>
 								</div>
 							))}
 						</div>
-					</>
+					</div>
 				)}
 			</div>
 		</Form.Group>

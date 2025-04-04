@@ -144,8 +144,9 @@ class ActivityForm extends HTMLElement {
 				
 				<div class="mb-4">
 					<label class="form-label text-muted small">Descrizione</label>
-					<p class="fs-5" style="max-height: 200px; overflow-y: auto"
-					>${escapeHTML(this.activity.description || "Nessuna descrizione fornita")}</p>
+					<div class="fs-5 text-wrap" style="max-height: 200px; overflow-y: auto; white-space: pre-wrap; overflow-wrap: break-word;">
+						${escapeHTML(this.activity.description || "Nessuna descrizione fornita")}
+					</div>
 				</div>
 
 				<div class="mb-4">

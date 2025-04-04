@@ -2,6 +2,16 @@ body {
 	background: white;
 }
 
+.hover-grow {
+	transition:
+		transform 0.3s ease-in-out,
+		box-shadow 0.3s ease-in-out;
+}
+.hover-grow:hover {
+	transform: scale(1.2);
+	box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05) !important;
+}
+
 .hover-lift {
 	transition:
 		transform 0.2s ease-in-out,

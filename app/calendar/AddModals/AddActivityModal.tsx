@@ -9,6 +9,7 @@ import { StandardModal } from "@/app/components/StandardModal";
 import { useTime } from "@/app/components/TimeContext";
 import { StringAlarm } from "@/utils/db/db";
 import React, { useState } from "react";
+import { ResourceInvitationComponent } from "../ResourceInvitationComponent";
 
 export function AddActivityModal({ children }: any) {
 	const [show, setShow] = useState(false);
@@ -24,6 +25,8 @@ export function AddActivityModal({ children }: any) {
 		alarms: [] as StringAlarm[]
 	});
 	const { dateTime } = useTime();
+
+	const [resourceList, setResourceList] = useState<string[]>([]);
 
 	const handleChange = (
 		e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -159,6 +162,12 @@ export function AddActivityModal({ children }: any) {
 					mainId={"42"}
 					usernameList={form.usernameList}
 					setUsernameList={handleUsernameListChange}
+				/>
+
+				<ResourceInvitationComponent
+					mainId={"42"}
+					resourceList={resourceList}
+					setResourceList={setResourceList}
 				/>
 
 				<AlarmSelector

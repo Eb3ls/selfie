@@ -9,9 +9,7 @@ interface ResourcesModalProps {
 export function ResourcesModal({ resources }: ResourcesModalProps) {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [searchValue, setSearchValue] = useState("");
-	const trimmedResources = resources.map((resource) =>
-		resource.replace("RES-", "")
-	);
+	const trimmedResources = resources.map((resource) => resource.substring(4));
 	const filteredResources = trimmedResources.filter((resource) =>
 		resource.toLowerCase().includes(searchValue.toLowerCase())
 	);
