@@ -96,7 +96,7 @@ export function StandardUsersInput({
 									<div className="d-flex align-items-center">
 										<FaUser className="text-primary me-3" />
 										<span className="fw-medium">
-											username
+											{username}
 										</span>
 									</div>
 									<Button
