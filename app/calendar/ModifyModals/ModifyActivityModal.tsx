@@ -108,6 +108,21 @@ export function ModifyActivityModal({
 		}
 	}
 
+	async function handleDrop() {
+		const response = await fetch("/api/calendar/quit", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({ _id: form._id, type: "ACTIVITY" })
+		});
+
+		if (response.ok) {
+			alert("Attività abbandonata con successo!");
+			window.location.reload();
+		}
+	}
+
 	const handleAlarmsChange = (newAlarms: StringAlarm[]) => {
 		setForm({
 			...form,
@@ -325,13 +340,7 @@ export function ModifyActivityModal({
 				saveBtnText: "",
 				onSubmit: undefined,
 				renderChildren: () => {
-					return getDropContent(
-						form.summary,
-						() => {
-							alert("TODO: Abbandona attività");
-						},
-						false
-					);
+					return getDropContent(form.summary, handleDrop, false);
 				}
 			}
 		};

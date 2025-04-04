@@ -109,6 +109,21 @@ export function ModifyEventModal({
 		}
 	}
 
+	async function handleDrop() {
+		const response = await fetch("/api/calendar/quit", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({ _id: form._id, type: "EVENT" })
+		});
+
+		if (response.ok) {
+			alert("Evento abbandonato con successo!");
+			window.location.reload();
+		}
+	}
+
 	const handleAlarmsChange = (newAlarms: StringAlarm[]) => {
 		setForm({
 			...form,
@@ -321,7 +336,6 @@ export function ModifyEventModal({
 				buttonColor: "danger",
 				icon: <i className="bi bi-trash me-2" />,
 				saveBtnText: "",
-				// Abbiamo il bottone di conferma nei children
 				onSubmit: undefined,
 				renderChildren: () => {
 					return getDeleteContent(
@@ -338,10 +352,9 @@ export function ModifyEventModal({
 				title: "Abbandona Evento",
 				buttonColor: "danger",
 				saveBtnText: "",
-				// Abbiamo il bottone di conferma nei children
 				onSubmit: undefined,
 				renderChildren: () => {
-					return getDropContent(form.summary, handleDelete, true);
+					return getDropContent(form.summary, handleDrop, true);
 				}
 			}
 		};
