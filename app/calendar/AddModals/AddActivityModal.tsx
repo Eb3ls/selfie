@@ -46,7 +46,7 @@ export function AddActivityModal({ children }: any) {
 		form.due = new Date(form.due).toISOString();
 
 		// Aggiungiamo le risorse
-		form.usernameList = form.usernameList.concat(resourceList);
+		const usernames = form.usernameList.concat(resourceList);
 
 		// Imposta la data di inizio (dtStart) come la data di creazione (dtStamp)
 		const dtStart = dateTime.toISOString();
@@ -61,7 +61,12 @@ export function AddActivityModal({ children }: any) {
 			headers: {
 				"Content-Type": "application/json"
 			},
-			body: JSON.stringify({ ...form, dtStart, status: "NEEDS-ACTION" }) // Includi dtStart e lo stato di default
+			body: JSON.stringify({
+				...form,
+				dtStart,
+				usernames,
+				status: "NEEDS-ACTION"
+			}) // Includi dtStart e lo stato di default
 		});
 
 		if (response.status === 200) {

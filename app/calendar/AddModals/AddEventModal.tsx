@@ -90,7 +90,7 @@ export function AddEventModal({ children }: any) {
 		form.dtEnd = new Date(form.dtEnd).toISOString();
 
 		// Aggiungiamo le risorse
-		form.usernameList = form.usernameList.concat(resourceList);
+		const usernames = form.usernameList.concat(resourceList);
 
 		// Genera l'rrule se la ripetizione è abilitata
 		if (enableRecurrence) {
@@ -104,7 +104,7 @@ export function AddEventModal({ children }: any) {
 			headers: {
 				"Content-Type": "application/json"
 			},
-			body: JSON.stringify({ ...form })
+			body: JSON.stringify({ ...form, usernames })
 		});
 
 		if (response.status === 200) {

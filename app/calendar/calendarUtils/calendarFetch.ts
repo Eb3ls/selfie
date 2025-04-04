@@ -110,3 +110,19 @@ export function convertToCalendarEvents(
 
 	return calendarEvents;
 }
+
+export function divideResourcesFromUserList(usernameList: string[]) {
+	// Questa funzione divide gli utenti in due liste, in base a come inizia il loro nome
+	// Se inizia con "[RES]-" allora sono risorse, altrimenti sono utenti normali
+	const resources: string[] = [];
+	const users: string[] = [];
+	for (const username of usernameList) {
+		if (username.startsWith("[RES]-")) {
+			resources.push(username);
+		} else {
+			users.push(username);
+		}
+	}
+	// Ritorniamo le due liste
+	return { resources, users };
+}

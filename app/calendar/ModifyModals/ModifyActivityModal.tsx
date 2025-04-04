@@ -11,6 +11,7 @@ import { StringActivity, StringAlarm } from "@/utils/db/db";
 import moment from "moment";
 import React, { useState } from "react";
 import { ResourceInvitationComponent } from "../ResourceInvitationComponent";
+import { divideResourcesFromUserList } from "../calendarUtils/calendarFetch";
 import {
 	getDeleteContent,
 	getDropContent,
@@ -33,9 +34,15 @@ export function ModifyActivityModal({
 	setShow: (show: boolean) => void;
 	currentUserId: string;
 }) {
-	const newActivity: StringActivityFrontend = { ...activity };
+	const { users, resources } = divideResourcesFromUserList(
+		activity.usernameList
+	);
+	const newActivity: StringActivityFrontend = {
+		...activity,
+		usernameList: users
+	};
 	const [form, setForm] = useState(newActivity);
-	const [resourceList, setResourceList] = useState<string[]>([]);
+	const [resourceList, setResourceList] = useState<string[]>(resources);
 
 	const handleChange = (
 		e: React.ChangeEvent<
@@ -56,7 +63,7 @@ export function ModifyActivityModal({
 		form.due = new Date(form.due).toISOString();
 
 		// Aggiungiamo le risorse
-		form.usernameList = form.usernameList.concat(resourceList);
+		const usernames = form.usernameList.concat(resourceList);
 
 		const newForm = {
 			_id: form._id,
@@ -67,7 +74,7 @@ export function ModifyActivityModal({
 			categories: form.categories,
 			location: form.location,
 			geo: form.geo,
-			usernameList: form.usernameList,
+			usernameList: usernames,
 			alarms: form.alarms
 		};
 
@@ -202,11 +209,11 @@ export function ModifyActivityModal({
 				/>
 				<StandardViewField
 					title="Partecipanti"
-					value={activity.usernameList.join(", ") || "-"}
+					value={users.join(", ") || "-"}
 				/>
 				<StandardViewField
 					title="Risorse"
-					value={resourceList.join(", ") || "-"}
+					value={resources.join(", ") || "-"}
 				/>
 				<StandardViewField
 					title="Promemoria"
