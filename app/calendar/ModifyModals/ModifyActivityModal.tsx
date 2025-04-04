@@ -130,6 +130,25 @@ export function ModifyActivityModal({
 	};
 
 	function getViewContent() {
+		function generateConversionProps(
+			text: string,
+			dateToConvert: string | undefined,
+			regularTimezone: string
+		) {
+			if (!dateToConvert) return;
+			if (dateToConvert === "") return;
+			if (regularTimezone === "") return;
+
+			return (
+				<p className="text-muted m-0 p-0">
+					{text}:{" "}
+					{moment(dateToConvert)
+						.tz(regularTimezone)
+						.format("YYYY-MM-DD HH:mm")}
+				</p>
+			);
+		}
+
 		return (
 			<>
 				<StandardViewField title="Titolo" value={activity.summary} />
@@ -151,7 +170,17 @@ export function ModifyActivityModal({
 				/>
 				<StandardViewField
 					title="Fuso orario"
-					value={activity.geo || "-"}
+					value={
+						<>
+							{activity.geo || "-"}
+							{activity.geo &&
+								generateConversionProps(
+									"Consegna",
+									activity.due,
+									activity.geo
+								)}
+						</>
+					}
 				/>
 				<StandardViewField
 					title="Partecipanti"

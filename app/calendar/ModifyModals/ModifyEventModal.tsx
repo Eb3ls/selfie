@@ -131,6 +131,25 @@ export function ModifyEventModal({
 	};
 
 	function getViewContent() {
+		function generateConversionProps(
+			text: string,
+			dateToConvert: string | undefined,
+			regularTimezone: string
+		) {
+			if (!dateToConvert) return;
+			if (dateToConvert === "") return;
+			if (regularTimezone === "") return;
+
+			return (
+				<p className="text-muted m-0 p-0">
+					{text}:{" "}
+					{moment(dateToConvert)
+						.tz(regularTimezone)
+						.format("YYYY-MM-DD HH:mm")}
+				</p>
+			);
+		}
+
 		return (
 			<>
 				<StandardViewField title="Titolo" value={event.summary} />
@@ -156,7 +175,23 @@ export function ModifyEventModal({
 				/>
 				<StandardViewField
 					title="Fuso orario"
-					value={event.geo || "-"}
+					value={
+						<>
+							{event.geo || "-"}
+							{event.geo &&
+								generateConversionProps(
+									"Inizio",
+									event.dtStart,
+									event.geo
+								)}
+							{event.geo &&
+								generateConversionProps(
+									"Fine",
+									event.dtEnd,
+									event.geo
+								)}
+						</>
+					}
 				/>
 				<StandardViewField
 					title="Partecipanti"

@@ -1,6 +1,6 @@
 interface StandardViewFieldProps {
 	title: string;
-	value: string | number;
+	value: string | number | JSX.Element;
 }
 
 export function StandardViewField({ title, value }: StandardViewFieldProps) {
