@@ -30,18 +30,44 @@ export function getTextFromTriggerList(triggers: StringAlarm[]): string {
 	return text;
 }
 
+export function getTextFromStatus(status: string): string {
+	switch (status) {
+		case "TENTATIVE":
+			return "Provvisorio";
+		case "CONFIRMED":
+			return "Confermato";
+		case "CANCELLED":
+			return "Cancellato";
+		case "NEEDS-ACTION":
+			return "Da fare";
+		case "COMPLETED":
+			return "Completata";
+		case "IN-PROCESS":
+			return "In corso";
+		case "CANCELLED":
+			return "Cancellata";
+		default:
+			return status;
+	}
+}
+
 export function getDeleteContent(
 	summary: string,
 	handleDelete: () => void,
-	isEvent: boolean
+	type: "ACTIVITY" | "EVENT" | "SESSION"
 ): JSX.Element {
+	let text = "";
+	if (type === "SESSION") {
+		text = "questa sessione";
+	} else if (type === "EVENT") {
+		text = "questo evento";
+	} else {
+		text = "questa attività";
+	}
 	return (
 		<div className="text-center">
 			<i className="bi bi-exclamation-triangle text-warning display-1 mb-4 d-block" />
-			<h4 className="mb-4">
-				Sei sicuro di voler eliminare{" "}
-				{isEvent ? "questo evento" : "questa attività"}?
-			</h4>
+			<h4 className="mb-4">Sei sicuro di voler eliminare {text}</h4>
 			<p className="mb-4 text-muted">{summary}</p>
 			<button
 				className="btn btn-danger btn-lg"

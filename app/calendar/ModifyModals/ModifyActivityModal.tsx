@@ -12,6 +12,8 @@ import moment from "moment";
 import React, { useState } from "react";
 import {
 	getDeleteContent,
+	getDropContent,
+	getTextFromStatus,
 	getTextFromTriggerList
 } from "../calendarUtils/calendarUX";
 
@@ -135,14 +137,7 @@ export function ModifyActivityModal({
 				/>
 				<StandardViewField
 					title="Stato"
-					value={
-						{
-							"NEEDS-ACTION": "Da fare",
-							COMPLETED: "Completata",
-							"IN-PROCESS": "In corso",
-							CANCELLED: "Cancellata"
-						}[activity.status] || activity.status
-					}
+					value={getTextFromStatus(activity.status)}
 				/>
 				<StandardViewField
 					title="Consegna"
@@ -278,7 +273,11 @@ export function ModifyActivityModal({
 				saveBtnText: "",
 				onSubmit: undefined,
 				renderChildren: () => {
-					return getDeleteContent(form.summary, handleDelete, false);
+					return getDeleteContent(
+						form.summary,
+						handleDelete,
+						"ACTIVITY"
+					);
 				}
 			}
 		};
@@ -290,7 +289,7 @@ export function ModifyActivityModal({
 				saveBtnText: "",
 				onSubmit: undefined,
 				renderChildren: () => {
-					return getDeleteContent(
+					return getDropContent(
 						form.summary,
 						() => {
 							alert("TODO: Abbandona attività");

@@ -13,6 +13,7 @@ import React, { useState } from "react";
 import {
 	getDeleteContent,
 	getDropContent,
+	getTextFromStatus,
 	getTextFromTriggerList
 } from "../calendarUtils/calendarUX";
 
@@ -139,13 +140,7 @@ export function ModifyEventModal({
 				/>
 				<StandardViewField
 					title="Stato"
-					value={
-						{
-							TENTATIVE: "Provvisorio",
-							CONFIRMED: "Confermato",
-							CANCELLED: "Cancellato"
-						}[event.status] || event.status
-					}
+					value={getTextFromStatus(event.status)}
 				/>
 				<StandardViewField
 					title="Inizio"
@@ -294,7 +289,11 @@ export function ModifyEventModal({
 				// Abbiamo il bottone di conferma nei children
 				onSubmit: undefined,
 				renderChildren: () => {
-					return getDeleteContent(form.summary, handleDelete, true);
+					return getDeleteContent(
+						form.summary,
+						handleDelete,
+						"EVENT"
+					);
 				}
 			}
 		};

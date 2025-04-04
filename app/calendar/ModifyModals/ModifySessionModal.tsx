@@ -11,6 +11,11 @@ import { Trigger } from "@/utils/db/models/Alarm";
 import moment from "moment";
 import React, { useState } from "react";
 import { Button, Card, Col, Form, Row } from "react-bootstrap";
+import {
+	getDeleteContent,
+	getTextFromStatus,
+	getTextFromTriggerList
+} from "../calendarUtils/calendarUX";
 
 export function ModifySessionModal({
 	session,
@@ -49,7 +54,12 @@ export function ModifySessionModal({
 		});
 	};
 
-	const handleShare = async () => {
+	const handleShare = async (event: React.FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
+		if (userToInvite === "") {
+			return;
+		}
+
 		const body = {
 			username: userToInvite
 		};
@@ -65,7 +75,7 @@ export function ModifySessionModal({
 			}
 		);
 
-		if (response.status === 200) {
+		if (response.ok) {
 			const fetched_data = await response.json();
 			alert("Successful: " + fetched_data.message);
 		} else {
@@ -161,34 +171,6 @@ export function ModifySessionModal({
 		return cycles * (studyTime + breakTime);
 	}
 
-	function getTextFromTrigger(trigger: Trigger): string {
-		switch (trigger) {
-			case "-PT0S":
-				return "Al momento dell'evento";
-			case "-PT10M":
-				return "10 minuti prima";
-			case "-PT1H":
-				return "1 ora prima";
-			case "-PT1D":
-				return "1 giorno prima";
-			default:
-				return "";
-		}
-	}
-
-	function getTextFromStatus(status: string): string {
-		switch (status) {
-			case "TENTATIVE":
-				return "Provvisorio";
-			case "CONFIRMED":
-				return "Confermato";
-			case "CANCELLED":
-				return "Cancellato";
-			default:
-				return "";
-		}
-	}
-
 	function getViewContent() {
 		return (
 			<>
@@ -248,11 +230,7 @@ export function ModifySessionModal({
 				</Card>
 				<StandardViewField
 					title="Promemoria"
-					value={
-						session.alarms
-							.map((a) => `${getTextFromTrigger(a.trigger)}`)
-							.join(", ") || "Nessuno"
-					}
+					value={getTextFromTriggerList(form.alarms)}
 				/>
 				<div className="text-center mt-4">
 					<Button
@@ -373,28 +351,6 @@ export function ModifySessionModal({
 		);
 	}
 
-	function getDeleteContent() {
-		return (
-			<div className="text-center">
-				<i className="bi bi-exclamation-triangle text-warning display-1 mb-4 d-block" />
-				<h4 className="mb-4">
-					Sei sicuro di voler eliminare questa sessione?
-				</h4>
-				<p className="mb-4 text-muted">{form.summary}</p>
-				<button
-					className="btn btn-danger btn-lg"
-					onClick={(e) => {
-						e.preventDefault();
-						handleDelete();
-					}}
-				>
-					<i className="bi bi-trash me-2" />
-					Conferma Eliminazione
-				</button>
-			</div>
-		);
-	}
-
 	function getShareContent() {
 		return (
 			<Form.Group className="mb-3" controlId="formInviteUser">
@@ -407,13 +363,6 @@ export function ModifySessionModal({
 						value={userToInvite}
 						onChange={(e) => setUserToInvite(e.target.value)}
 					/>
-					<Button
-						variant="success"
-						className="ms-2"
-						onClick={handleShare}
-					>
-						Condividi
-					</Button>
 				</div>
 			</Form.Group>
 		);
@@ -427,7 +376,7 @@ export function ModifySessionModal({
 
 	const singleViewsMap = {
 		Condividi: {
-			title: "Condividi Sessione",
+			title: "Condividi Impostazioni Sessione",
 			buttonColor: "success",
 			icon: <i className="bi bi-person-plus me-2" />,
 			saveBtnText: "Condividi",
@@ -451,7 +400,8 @@ export function ModifySessionModal({
 				e.preventDefault();
 				handleDelete();
 			},
-			renderChildren: () => getDeleteContent()
+			renderChildren: () =>
+				getDeleteContent(form.summary, handleDelete, "SESSION")
 		}
 	};
 
