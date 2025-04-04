@@ -3,7 +3,7 @@ import { Button, Form } from "react-bootstrap";
 import { FaTrash, FaUser } from "react-icons/fa";
 
 interface StandardUsersInputProps {
-	mainId?: string;
+	mainId: string;
 	usernameList: string[];
 	setUsernameList: (usernameList: string[]) => void;
 }
