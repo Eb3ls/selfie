@@ -289,7 +289,9 @@ function PomodoroImplementation() {
 	function InvalidSessionBlock() {
 		return (
 			<div className="d-flex flex-column align-items-center justify-content-center h-100">
-				<h1 className="display-4 text-danger mb-3">Invalid Session</h1>
+				<h1 className="display-4 text-danger mb-3">
+					Sessione non valida
+				</h1>
 				<p className="text-muted">
 					La sessione a cui stai tentando di accedere non esiste o è
 					scaduta

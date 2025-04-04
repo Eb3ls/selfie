@@ -7,7 +7,7 @@ import { marked } from "marked";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
-import { FaEdit } from "react-icons/fa";
+import { FaGear } from "react-icons/fa6";
 import useSWR from "swr";
 import { EditNoteModal } from "./EditNoteModal";
 import styles from "./Note.module.css";
@@ -115,8 +115,45 @@ export default function Note() {
 		}
 	};
 
-	if (error) return <div>Errore durante il caricamento della nota.</div>;
-	if (!note) return <div className={styles.loading}>Caricamento...</div>;
+	if (error)
+		return (
+			<div className={styles.container}>
+				<GlobalSideBar />
+				<Container className={`${styles.mainContainer} mt-3`}>
+					<div className="d-flex flex-column align-items-center justify-content-center h-100">
+						<h1 className="display-4 text-danger mb-3">
+							Nota non valida
+						</h1>
+						<p className="text-muted">
+							La nota che stai cercando di visualizzare non è
+							accessibile o non esiste.
+						</p>
+						<Button href="/home" variant="primary" className="mt-3">
+							Torna alla home
+						</Button>
+					</div>
+				</Container>
+			</div>
+		);
+	if (!note)
+		return (
+			<div className={styles.container}>
+				<GlobalSideBar />
+				<Container className={`${styles.mainContainer} mt-3`}>
+					<div className="d-flex flex-column align-items-center justify-content-center h-100">
+						<div
+							className="spinner-border text-primary mb-3"
+							role="status"
+						>
+							<span className="visually-hidden">
+								Caricamento...
+							</span>
+						</div>
+						<h2 className="h4 text-muted">Caricamento...</h2>
+					</div>
+				</Container>
+			</div>
+		);
 
 	const sanitizedMarkdown = DOMPurify.sanitize(
 		marked(noteText, { async: false })
@@ -147,7 +184,7 @@ export default function Note() {
 									handleEdit={handleEdit}
 								>
 									<button className={styles.editButton}>
-										<FaEdit size={24} />
+										<FaGear size={24} />
 									</button>
 								</EditNoteModal>
 							)}
@@ -156,7 +193,7 @@ export default function Note() {
 								onClick={handleSave}
 								className={styles.saveButton}
 							>
-								Salva Modifiche
+								Salva
 							</Button>
 						</div>
 					</div>
