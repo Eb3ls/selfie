@@ -7,11 +7,11 @@ import { StandardToggleModal } from "@/app/components/StandardToggleModal";
 // nuovo import
 import { StandardViewField } from "@/app/components/StandardViewFIeld";
 import { StringAlarm, StringSession } from "@/utils/db/db";
-import { Trigger } from "@/utils/db/models/Alarm";
 import moment from "moment";
 import React, { useState } from "react";
-import { Button, Card, Col, Form, Row } from "react-bootstrap";
+import { Button, Form } from "react-bootstrap";
 import {
+	PomodoroBlock,
 	getDeleteContent,
 	getTextFromStatus,
 	getTextFromTriggerList
@@ -160,17 +160,6 @@ export function ModifySessionModal({
 		});
 	};
 
-	function calculateTotalDuration() {
-		const cycles =
-			form.settingsList[form.settingsList.length - 1].cycles || 0;
-		const studyTime =
-			form.settingsList[form.settingsList.length - 1].studyTime || 0;
-		const breakTime =
-			form.settingsList[form.settingsList.length - 1].breakTime || 0;
-
-		return cycles * (studyTime + breakTime);
-	}
-
 	function getViewContent() {
 		return (
 			<>
@@ -191,43 +180,22 @@ export function ModifySessionModal({
 					title="Fine"
 					value={moment(session.dtEnd).format("DD/MM/YYYY HH:mm")}
 				/>
-				<Card className="mt-4 mb-3">
-					<Card.Header>
-						<i className="bi bi-alarm me-2"></i>
-						Impostazioni Pomodoro
-					</Card.Header>
-					<Card.Body>
-						<Row>
-							<Col md={4}>
-								<StandardViewField
-									title="Cicli"
-									value={session.settingsList[
-										session.settingsList.length - 1
-									].cycles.toString()}
-								/>
-							</Col>
-							<Col md={4}>
-								<StandardViewField
-									title="Studio (min)"
-									value={session.settingsList[
-										session.settingsList.length - 1
-									].studyTime.toString()}
-								/>
-							</Col>
-							<Col md={4}>
-								<StandardViewField
-									title="Pausa (min)"
-									value={session.settingsList[
-										session.settingsList.length - 1
-									].breakTime.toString()}
-								/>
-							</Col>
-						</Row>
-						<small className="text-muted mt-2 d-block">
-							Durata totale: {calculateTotalDuration()} minuti
-						</small>
-					</Card.Body>
-				</Card>
+
+				<PomodoroBlock
+					cycles={
+						form.settingsList[form.settingsList.length - 1].cycles
+					}
+					studyTime={
+						form.settingsList[form.settingsList.length - 1]
+							.studyTime
+					}
+					breakTime={
+						form.settingsList[form.settingsList.length - 1]
+							.breakTime
+					}
+					mode={"view"}
+				/>
+
 				<StandardViewField
 					title="Promemoria"
 					value={getTextFromTriggerList(form.alarms)}
@@ -258,6 +226,7 @@ export function ModifySessionModal({
 					onChange={handleChange}
 					placeholder="Inserisci titolo"
 				/>
+
 				<StandardInput
 					type="textarea"
 					name="description"
@@ -267,6 +236,7 @@ export function ModifySessionModal({
 					placeholder="Inserisci descrizione"
 					isRequired={false}
 				/>
+
 				<StandardInput
 					type="select"
 					name="status"
@@ -279,6 +249,7 @@ export function ModifySessionModal({
 						CANCELLED: "Cancellato"
 					}}
 				/>
+
 				<StandardInput
 					type="datetime-local"
 					name="dtStart"
@@ -287,62 +258,23 @@ export function ModifySessionModal({
 					onChange={handleChange}
 					placeholder="Inserisci data di inizio"
 				/>
-				{/* Pomodoro settings */}
-				<Card className="mt-4 mb-3">
-					<Card.Header>
-						<i className="bi bi-alarm me-2"></i>
-						Impostazioni Pomodoro
-					</Card.Header>
-					<Card.Body>
-						<Row>
-							<Col md={4}>
-								<StandardInput
-									type="number"
-									name="cycles"
-									title="Cicli"
-									min={1}
-									value={
-										form.settingsList[
-											form.settingsList.length - 1
-										].cycles
-									}
-									onChange={handleChangePomodoro}
-								/>
-							</Col>
-							<Col md={4}>
-								<StandardInput
-									type="number"
-									name="studyTime"
-									title="Studio (min)"
-									min={1}
-									value={
-										form.settingsList[
-											form.settingsList.length - 1
-										].studyTime
-									}
-									onChange={handleChangePomodoro}
-								/>
-							</Col>
-							<Col md={4}>
-								<StandardInput
-									type="number"
-									name="breakTime"
-									title="Pausa (min)"
-									min={1}
-									value={
-										form.settingsList[
-											form.settingsList.length - 1
-										].breakTime
-									}
-									onChange={handleChangePomodoro}
-								/>
-							</Col>
-						</Row>
-						<small className="text-muted mt-2 d-block">
-							Durata totale: {calculateTotalDuration()} minuti
-						</small>
-					</Card.Body>
-				</Card>
+
+				<PomodoroBlock
+					cycles={
+						form.settingsList[form.settingsList.length - 1].cycles
+					}
+					studyTime={
+						form.settingsList[form.settingsList.length - 1]
+							.studyTime
+					}
+					breakTime={
+						form.settingsList[form.settingsList.length - 1]
+							.breakTime
+					}
+					handleChangePomodoro={handleChangePomodoro}
+					mode="edit"
+				/>
+
 				<AlarmSelector
 					alarms={form.alarms}
 					onChange={handleAlarmsChange}

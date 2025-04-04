@@ -73,7 +73,7 @@ export function StandardModal({
 		>
 			<Modal.Header closeButton>
 				<div className="d-flex align-items-center w-100">
-					<div className="d-flex align-items-center">
+					<div className="d-flex align-items-center justify-content-center">
 						{titleIcon && (
 							<span className="modal-icon me-2">{titleIcon}</span>
 						)}

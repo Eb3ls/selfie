@@ -6,6 +6,7 @@ import { AddSessionModal } from "@/app/calendar/AddModals/AddSessionModal";
 import moment from "moment";
 import { SetStateAction } from "react";
 import { View } from "react-big-calendar";
+import { ResourcesModal } from "./ResourcesModal";
 
 function obtainFormattedDate(currentDate: Date, calendarView: View): string {
 	let startOf: "month" | "week" | "day";
@@ -51,6 +52,14 @@ export function CustomToolbar({
 
 	function switchView() {
 		setCurrentView((prev) => (prev === "list" ? "calendar" : "list"));
+	}
+
+	function testRES(num: number) {
+		let res = [];
+		for (let i = 0; i < num; i++) {
+			res.push("RES-" + i);
+		}
+		return res;
 	}
 
 	return (
@@ -132,7 +141,7 @@ export function CustomToolbar({
 				>
 					{currentView === "list" ? "Calendario" : "Lista"}
 				</button>
-				<div className="add-buttons-container">
+				<div className="d-flex gap-2 p-2 align-items-center">
 					<AddActivityModal>
 						<button className="add-button activity">
 							<span>+</span> Attività
@@ -148,6 +157,7 @@ export function CustomToolbar({
 							<span>+</span> Sessione
 						</button>
 					</AddSessionModal>
+					<ResourcesModal resources={testRES(50)} />
 				</div>
 			</div>
 		</div>

@@ -1,5 +1,9 @@
+import { StandardInput } from "@/app/components/StandardInput";
+import { StandardViewField } from "@/app/components/StandardViewFIeld";
 import { StringAlarm, Trigger } from "@/utils/db/models/Alarm";
 import React from "react";
+import { Col, Row } from "react-bootstrap";
+import Card from "react-bootstrap/esm/Card";
 
 export function getTextFromTrigger(trigger: Trigger): string {
 	switch (trigger) {
@@ -107,5 +111,93 @@ export function getDropContent(
 				Conferma Abbandono
 			</button>
 		</div>
+	);
+}
+
+interface PomodoroInputProps {
+	cycles: number;
+	studyTime: number;
+	breakTime: number;
+	handleChangePomodoro: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+export interface PomodoroBlockProps {
+	mode: "edit" | "view";
+	cycles: number;
+	studyTime: number;
+	breakTime: number;
+	handleChangePomodoro?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+export function PomodoroBlock({
+	mode,
+	cycles,
+	studyTime,
+	breakTime,
+	handleChangePomodoro
+}: PomodoroBlockProps) {
+	const totalDuration = cycles * (studyTime + breakTime);
+	return (
+		<Card className="mt-4 mb-3">
+			<Card.Header>
+				<i className="bi bi-alarm me-2" />
+				Impostazioni Pomodoro
+			</Card.Header>
+			<Card.Body>
+				<Row>
+					<Col md={4}>
+						{mode === "edit" ? (
+							<StandardInput
+								type="number"
+								name="cycles"
+								title="Cicli"
+								min={1}
+								value={cycles}
+								onChange={handleChangePomodoro!}
+							/>
+						) : (
+							<StandardViewField title="Cicli" value={cycles} />
+						)}
+					</Col>
+					<Col md={4}>
+						{mode === "edit" ? (
+							<StandardInput
+								type="number"
+								name="studyTime"
+								title="Studio (min)"
+								min={1}
+								value={studyTime}
+								onChange={handleChangePomodoro!}
+							/>
+						) : (
+							<StandardViewField
+								title="Studio (min)"
+								value={studyTime}
+							/>
+						)}
+					</Col>
+					<Col md={4}>
+						{mode === "edit" ? (
+							<StandardInput
+								type="number"
+								name="breakTime"
+								title="Pausa (min)"
+								min={1}
+								value={breakTime}
+								onChange={handleChangePomodoro!}
+							/>
+						) : (
+							<StandardViewField
+								title="Pausa (min)"
+								value={breakTime}
+							/>
+						)}
+					</Col>
+				</Row>
+				<small className="text-muted mt-2 d-block">
+					Durata totale: {totalDuration} minuti
+				</small>
+			</Card.Body>
+		</Card>
 	);
 }

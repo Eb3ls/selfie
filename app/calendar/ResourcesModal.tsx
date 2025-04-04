@@ -1,0 +1,110 @@
+import React, { useState } from "react";
+import { IoMdGlobe } from "react-icons/io";
+import { StandardModal } from "../components/StandardModal";
+
+interface ResourcesModalProps {
+	resources: string[];
+}
+
+export function ResourcesModal({ resources }: ResourcesModalProps) {
+	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [searchValue, setSearchValue] = useState("");
+	const trimmedResources = resources.map((resource) =>
+		resource.replace("RES-", "")
+	);
+	const filteredResources = trimmedResources.filter((resource) =>
+		resource.toLowerCase().includes(searchValue.toLowerCase())
+	);
+
+	function createResourceEntry(resource: string) {
+		return (
+			<div
+				key={resource}
+				className="d-flex align-items-center p-3 mt-2 rounded-3 border hover-lift"
+				style={{
+					backgroundColor: "#ffffff",
+					transition: "all 0.2s ease-in-out"
+				}}
+			>
+				<div className="d-flex align-items-center flex-grow-1">
+					<i className="bi bi-person-badge fs-4 text-primary me-3"></i>
+					<span className="fw-medium">{resource}</span>
+				</div>
+				<button
+					className="btn btn-light rounded-pill px-4 hover-lift"
+					onClick={(e: any) => {
+						e.preventDefault();
+						alert("Risorsa prenotata: " + resource);
+					}}
+				>
+					<i className="bi bi-calendar3 me-2"></i>
+					Prenota
+				</button>
+			</div>
+		);
+	}
+
+	function searchResourcesBlock() {
+		return (
+			<div className="position-relative mb-2">
+				<div className="position-relative">
+					<input
+						type="text"
+						className="form-control form-control-lg py-3 ps-5 pe-4 rounded-pill shadow-sm"
+						placeholder="Cerca risorse..."
+						value={searchValue}
+						onChange={(e) => setSearchValue(e.target.value)}
+						autoFocus
+					/>
+					<i className="bi bi-search position-absolute top-50 translate-middle-y ms-4 text-muted"></i>
+					{searchValue && (
+						<button
+							className="btn position-absolute top-50 end-0 translate-middle-y me-3 p-0"
+							onClick={() => setSearchValue("")}
+						>
+							<i className="bi bi-x-circle text-muted fs-5"></i>
+						</button>
+					)}
+				</div>
+			</div>
+		);
+	}
+
+	return (
+		<div>
+			<button
+				className="btn btn-outline-secondary rounded-pill"
+				onClick={() => setIsModalOpen(true)}
+			>
+				<i className="bi bi-search me-2"></i>
+				Cerca Risorse
+			</button>
+
+			<StandardModal
+				title="Risorse Disponibili"
+				titleIcon={<IoMdGlobe className="fs-3" />}
+				show={isModalOpen}
+				handleClose={() => setIsModalOpen(false)}
+			>
+				<div className="m-2">
+					{searchResourcesBlock()}
+					<div
+						className="resource-list"
+						style={{ maxHeight: "70vh", overflowY: "auto" }}
+					>
+						{filteredResources.length > 0 ? (
+							filteredResources.map((resource) =>
+								createResourceEntry(resource)
+							)
+						) : (
+							<div className="text-center text-muted p-4">
+								<i className="bi bi-emoji-frown fs-4"></i>
+								<p>Nessuna risorsa trovata</p>
+							</div>
+						)}
+					</div>
+				</div>
+			</StandardModal>
+		</div>
+	);
+}

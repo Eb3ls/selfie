@@ -7,7 +7,7 @@ import { StandardModal } from "@/app/components/StandardModal";
 import { StandardRepetitionInput } from "@/app/components/StandardRepetitionInput";
 import { StringAlarm } from "@/utils/db/db";
 import React, { useState } from "react";
-import { Card, Col, Row } from "react-bootstrap";
+import { PomodoroBlock } from "../calendarUtils/calendarUX";
 
 export function AddSessionModal({ children }: any) {
 	const [show, setShow] = useState(false);
@@ -206,53 +206,13 @@ export function AddSessionModal({ children }: any) {
 					setYearlyMonths={setYearlyMonths}
 				/>
 
-				<Card className="mt-4 mb-3">
-					<Card.Header>
-						<i className="bi bi-alarm me-2"></i>
-						Impostazioni Pomodoro
-					</Card.Header>
-					<Card.Body>
-						<Row>
-							<Col md={4}>
-								<StandardInput
-									type="number"
-									name="cycles"
-									title="Cicli"
-									min={1}
-									value={form.settings.cycles}
-									onChange={handleChangePomodoro}
-								/>
-							</Col>
-							<Col md={4}>
-								<StandardInput
-									type="number"
-									name="studyTime"
-									title="Studio (min)"
-									min={1}
-									value={form.settings.studyTime}
-									onChange={handleChangePomodoro}
-								/>
-							</Col>
-							<Col md={4}>
-								<StandardInput
-									type="number"
-									name="breakTime"
-									title="Pausa (min)"
-									min={1}
-									value={form.settings.breakTime}
-									onChange={handleChangePomodoro}
-								/>
-							</Col>
-						</Row>
-						<small className="text-muted mt-2 d-block">
-							Durata totale:{" "}
-							{form.settings.cycles *
-								(form.settings.studyTime +
-									form.settings.breakTime)}{" "}
-							minuti
-						</small>
-					</Card.Body>
-				</Card>
+				<PomodoroBlock
+					cycles={form.settings.cycles}
+					studyTime={form.settings.studyTime}
+					breakTime={form.settings.breakTime}
+					handleChangePomodoro={handleChangePomodoro}
+					mode={"edit"}
+				/>
 
 				<AlarmSelector
 					alarms={form.alarms}
