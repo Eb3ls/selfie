@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import Script from "next/script";
 import { TimeButton } from "./components/TimeButton";
 import { TimeProvider } from "./components/TimeContext";
+import { ToastWrapper } from "./components/ToastWrapper";
 import { UserProvider } from "./components/UserContext";
 import "./globals.css";
 
@@ -35,6 +36,7 @@ export default function RootLayout({
 			<UserProvider>
 				<TimeProvider>
 					<body className={`${inter.className} m-0 p-0`}>
+						<ToastWrapper />
 						{children}
 						<TimeButton />
 					</body>

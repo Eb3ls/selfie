@@ -1,10 +1,13 @@
 "use client";
 
 import { greenColor } from "@/app/color_palette";
+import { useUser } from "@/app/components/UserContext";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ChangeEvent, FormEvent, useState } from "react";
 import { Button, Col, Container, Form, InputGroup, Row } from "react-bootstrap";
+import { toast } from "react-toastify";
 
 function CompleteFormComponent() {
 	const [passwordShown, setPasswordShown] = useState(false); // Stato per la visibilità della password
@@ -12,6 +15,8 @@ function CompleteFormComponent() {
 		username: "",
 		password: ""
 	}); // Stato per i dati del form
+	const router = useRouter();
+	const { fetchUser } = useUser();
 
 	// Gestore per il campo username
 	const handleUsernameChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -49,11 +54,13 @@ function CompleteFormComponent() {
 		});
 
 		if (!response.ok) {
-			alert("Operazione fallita! Codice di stato: " + response.status);
+			toast.error("Accesso fallito! Controlla le tue credenziali");
 			return;
 		}
 
-		window.location.href = "/home";
+		toast.success("Accesso effettuato con successo!");
+		router.push("/home");
+		fetchUser();
 	};
 
 	return (

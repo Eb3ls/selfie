@@ -26,7 +26,7 @@ type NewCalendarEvent = Omit<CalendarEvent, "originalElement"> & {
 	originalElement: StringEventFrontend;
 };
 
-export async function fetchCalendarID(url: string) {
+async function fetchCalendarID(url: string) {
 	const response = await fetch(url);
 	if (!response.ok)
 		throw new Error("Errore durante il fetch degli elementi!");

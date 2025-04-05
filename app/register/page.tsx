@@ -3,9 +3,11 @@
 import { greenColor } from "@/app/color_palette";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ChangeEvent, FormEvent, useState } from "react";
 import { Button, Col, Container, Form, InputGroup, Row } from "react-bootstrap";
 import { IoIosSend } from "react-icons/io";
+import { toast } from "react-toastify";
 
 function CompleteFormComponent() {
 	const [passwordShown, setPasswordShown] = useState(false); // Stato per la visibilità della password
@@ -17,6 +19,7 @@ function CompleteFormComponent() {
 		emailToken: "",
 		password: ""
 	}); // Stato per i dati del form
+	const router = useRouter();
 
 	// Gestore per il campo username
 	const handleUsernameChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -90,11 +93,11 @@ function CompleteFormComponent() {
 		});
 
 		if (!response.ok) {
-			alert("Operazione fallita! Codice di stato: " + response.status);
+			toast.error("Invio email fallito! Controlla l'email");
 			return;
 		}
 
-		alert("Email inviata con successo!");
+		toast.success("Email di verifica inviata!");
 	};
 
 	// Gestisce il submit del form
@@ -110,11 +113,12 @@ function CompleteFormComponent() {
 		});
 
 		if (!response.ok) {
-			alert("Operazione fallita! Codice di stato: " + response.status);
+			toast.error("Registrazione fallita! Controlla i dati");
 			return;
 		}
 
-		window.location.href = "/login";
+		toast.success("Registrazione effettuata con successo!");
+		router.push("/login");
 	};
 
 	return (
