@@ -104,7 +104,7 @@ export function AddEventModal({ children }: any) {
 			headers: {
 				"Content-Type": "application/json"
 			},
-			body: JSON.stringify({ ...form, usernames })
+			body: JSON.stringify({ ...form, usernameList: usernames })
 		});
 
 		if (response.status === 200) {

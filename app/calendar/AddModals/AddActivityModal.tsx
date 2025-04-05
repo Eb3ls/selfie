@@ -64,7 +64,7 @@ export function AddActivityModal({ children }: any) {
 			body: JSON.stringify({
 				...form,
 				dtStart,
-				usernames,
+				usernameList: usernames,
 				status: "NEEDS-ACTION"
 			}) // Includi dtStart e lo stato di default
 		});
