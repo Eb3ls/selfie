@@ -1,7 +1,6 @@
 "use client";
 
 import { AlarmSelector } from "@/app/calendar/AlarmSelector";
-import "@/app/calendar/Modal.css";
 import { TimezoneSelector } from "@/app/calendar/TimezoneSelector";
 import { StandardInput } from "@/app/components/StandardInput";
 import { StandardModal } from "@/app/components/StandardModal";

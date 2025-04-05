@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, Col, Container, Row } from "react-bootstrap";
-import { FaUserEdit } from "react-icons/fa";
 import { GlobalSideBar } from "../components/GlobalSideBar";
 import { useUser } from "../components/UserContext";
 import ProfilePictureUpload from "./components/ProfilePictureUpload";

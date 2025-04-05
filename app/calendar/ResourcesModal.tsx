@@ -109,11 +109,11 @@ export function ResourcesModal() {
 	return (
 		<div>
 			<button
-				className="btn btn-outline-secondary rounded-pill"
+				className="btn resource-color rounded-pill hover-lift text-white shadow-sm fw-semibold"
 				onClick={() => setIsModalOpen(true)}
 			>
-				<i className="bi bi-search me-2"></i>
-				Cerca Risorse
+				<i className="bi bi-search me-2" />
+				Risorse
 			</button>
 
 			<StandardModal

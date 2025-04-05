@@ -6,113 +6,29 @@
 	height: 86vh;
 }
 
-/* Toolbar personalizzata */
-.rbc-toolbar {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	flex-wrap: wrap;
-	gap: 15px;
-	margin-bottom: 15px;
-	padding: 8px 0;
+.activity-color {
+	background: #f37b85 !important;
 }
-
-.toolbar-left {
-	display: flex;
-	align-items: center;
-	gap: 20px;
+.activity-color-text {
+	color: #f37b85 !important;
 }
-
-.toolbar-controls {
-	display: flex;
-	align-items: center;
-	gap: 10px;
+.activity-color-border {
+	border-color: #f37b85 !important;
 }
-
-.nav-button {
-	background: none;
-	border: 2px solid #3498db;
-	color: #3498db;
-	width: 36px;
-	height: 36px;
-	border-radius: 50%;
-	font-size: 1rem;
-	cursor: pointer;
-	transition: all 0.3s;
+.event-color {
+	background: #67d1bf !important;
 }
-
-.nav-button:hover {
-	background: #3498db;
-	color: white;
+.session-color {
+	background: #8d89f7 !important;
 }
-
-.current-date {
-	font-size: 1.4rem;
-	color: #34495e;
-	font-weight: 500;
+.download-color {
+	background: #f3d37a !important;
 }
-
-.view-select {
-	padding: 8px 12px;
-	border-radius: 8px;
-	border: 2px solid #bdc3c7;
-	background: white;
-	font-size: 1rem;
-	cursor: pointer;
+.list-color {
+	background: #f3a285 !important;
 }
-
-.toolbar-right {
-	display: flex;
-	align-items: center;
-	gap: 15px;
-}
-
-.add-buttons-container {
-	display: flex;
-	gap: 10px;
-}
-
-.view-switch-button {
-	padding: 6px 12px;
-	border: none;
-	border-radius: 8px;
-	background: #3498db;
-	color: white;
-	cursor: pointer;
-	transition: all 0.3s;
-	font-size: 0.9rem;
-}
-
-.view-switch-button:hover {
-	background: #2980b9;
-}
-
-.add-button {
-	padding: 6px 12px;
-	border-radius: 8px;
-	color: white;
-	display: flex;
-	align-items: center;
-	gap: 5px;
-	font-size: 0.8rem;
-	transition: transform 0.2s;
-}
-
-.add-button:hover {
-	transform: translateY(-2px);
-}
-
-.add-button.activity {
-	background: #f37b85;
-}
-.add-button.event {
-	background: #67d1bf;
-}
-.add-button.session {
-	background: #8d89f7;
-}
-.add-button.download {
-	background: #dd8b1f;
+.resource-color {
+	background: #7da9f7 !important;
 }
 
 /* Celle del mese */
@@ -140,76 +56,6 @@
 	padding: 2px 4px;
 	margin: 1px;
 	font-size: 0.8rem;
-}
-
-.event-activity {
-	background: #f37b85;
-}
-.event-event {
-	background: #67d1bf;
-}
-.event-session {
-	background: #8d89f7;
-}
-.event-projectActivity {
-	background: #c684c9;
-}
-
-/* Vista lista */
-.list-view {
-	background: white;
-	border-radius: 12px;
-	box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
-	padding: 20px;
-}
-
-.list-header,
-.list-event {
-	display: grid;
-	grid-template-columns: 250px 1fr 150px;
-	padding: 10px 15px;
-}
-
-.list-header {
-	font-weight: 600;
-	border-bottom: 2px solid #eee;
-	margin-bottom: 8px;
-}
-
-.list-event {
-	border-radius: 8px;
-	margin-bottom: 6px;
-	transition: background 0.2s;
-}
-
-.list-event:hover {
-	background: #f8f9fa;
-}
-
-.list-date {
-	color: #666;
-	font-size: 0.8em;
-}
-
-.list-title {
-	font-weight: 500;
-	font-size: 0.9rem;
-	display: flex;
-	align-items: center;
-	gap: 8px;
-}
-
-.recurring-badge {
-	background: #e74c3c;
-	color: white;
-	font-size: 0.6em;
-	padding: 1px 6px;
-	border-radius: 10px;
-}
-
-.list-type {
-	color: #ff9aa2;
-	font-size: 0.8em;
 }
 
 /* Responsive */
@@ -258,23 +104,6 @@
 	.rbc-event {
 		font-size: 0.7rem;
 		padding: 1px 2px;
-	}
-
-	/* Modifica il layout della toolbar */
-	.toolbar-right {
-		flex-direction: column;
-		width: 100%;
-	}
-
-	.add-buttons-container {
-		flex-direction: column;
-		width: 100%;
-	}
-
-	.add-button {
-		width: 100%;
-		justify-content: center;
-		padding: 8px 12px;
 	}
 
 	/* Ottimizza la visualizzazione delle date */

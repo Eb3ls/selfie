@@ -1,7 +1,7 @@
 "use client";
 
 import { StandardInput } from "@/app/components/StandardInput";
-import { Button, Form, Stack } from "react-bootstrap";
+import { Button } from "react-bootstrap";
 import { FaKey } from "react-icons/fa";
 
 export default function PasswordSection({

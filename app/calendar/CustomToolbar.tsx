@@ -55,101 +55,118 @@ export function CustomToolbar({
 	}
 
 	return (
-		<div className="rbc-toolbar">
-			<div className="toolbar-left">
-				<div className="toolbar-controls">
-					<button
-						onClick={() =>
-							setCurrentDate(
-								moment(currentDate)
-									.subtract(
-										1,
-										calendarView === "month"
-											? "month"
-											: calendarView === "week"
-												? "week"
-												: "day"
-									)
-									.toDate()
-							)
-						}
-						className="nav-button"
-					>
-						‹
-					</button>
-					<span className="current-date">{formattedDate}</span>
-					<button
-						onClick={() =>
-							setCurrentDate(
-								moment(currentDate)
-									.add(
-										1,
-										calendarView === "month"
-											? "month"
-											: calendarView === "week"
-												? "week"
-												: "day"
-									)
-									.toDate()
-							)
-						}
-						className="nav-button"
-					>
-						›
-					</button>
+		<div className="container-fluid py-3">
+			<div className="row align-items-center justify-content-between gy-3">
+				<div className="col-12 col-md-auto">
+					<div className="d-flex align-items-center gap-3">
+						<button
+							className="btn p-2"
+							onClick={() =>
+								setCurrentDate(
+									moment(currentDate)
+										.subtract(
+											1,
+											calendarView === "month"
+												? "month"
+												: calendarView === "week"
+													? "week"
+													: "day"
+										)
+										.toDate()
+								)
+							}
+						>
+							<i className="bi bi-chevron-left"></i>
+						</button>
+						<span className="fs-3 mb-0 fw-semibold">
+							{formattedDate}
+						</span>
+						<button
+							className="btn p-2"
+							onClick={() =>
+								setCurrentDate(
+									moment(currentDate)
+										.add(
+											1,
+											calendarView === "month"
+												? "month"
+												: calendarView === "week"
+													? "week"
+													: "day"
+										)
+										.toDate()
+								)
+							}
+						>
+							<i className="bi bi-chevron-right"></i>
+						</button>
+						<select
+							className="form-select w-auto rounded-pill"
+							value={calendarView}
+							onChange={(e) =>
+								setCalendarView(e.target.value as View)
+							}
+							disabled={currentView === "list"}
+						>
+							{["month", "week", "day"].map((view) => (
+								<option key={view} value={view}>
+									{view === "month"
+										? "Mese"
+										: view === "week"
+											? "Settimana"
+											: "Giorno"}
+								</option>
+							))}
+						</select>
+					</div>
 				</div>
-				<select
-					value={calendarView}
-					onChange={(e) => setCalendarView(e.target.value as View)}
-					className="view-select"
-					disabled={currentView === "list"}
-				>
-					{["month", "week", "day"].map((view) => (
-						<option key={view} value={view}>
-							{view === "month"
-								? "Mese"
-								: view === "week"
-									? "Settimana"
-									: "Giorno"}
-						</option>
-					))}
-				</select>
-			</div>
 
-			<div className="toolbar-right">
-				<a
-					href="/api/calendar/exportCalendar"
-					className="download-button"
-				>
-					<button className="add-button download">
-						Scarica calendario
-					</button>
-				</a>
-				<button
-					onClick={switchView}
-					className={`view-switch-button ${
-						currentView === "list" ? "to-calendar" : "to-list"
-					}`}
-				>
-					{currentView === "list" ? "Calendario" : "Lista"}
-				</button>
-				<div className="d-flex gap-2 p-2 align-items-center">
-					<AddActivityModal>
-						<button className="add-button activity">
-							<span>+</span> Attività
+				<div className="col-12 col-md-auto">
+					<div className="d-flex flex-wrap gap-2 align-items-center">
+						<a
+							href="/api/calendar/exportCalendar"
+							className="text-decoration-none"
+						>
+							<button className="btn rounded-pill download-color text-white hover-lift rounded-pill shadow-sm fw-semibold">
+								<i className="bi bi-download me-1"></i>Scarica
+							</button>
+						</a>
+						<button
+							className="btn rounded-pill list-color text-white hover-lift rounded-pill shadow-sm fw-semibold"
+							onClick={switchView}
+						>
+							{currentView === "list" ? (
+								<>
+									<i className="bi bi-calendar3 me-1"></i>
+									Calendario
+								</>
+							) : (
+								<>
+									<i className="bi bi-list-ul me-1"></i>Lista
+								</>
+							)}
 						</button>
-					</AddActivityModal>
-					<AddEventModal>
-						<button className="add-button event">
-							<span>+</span> Evento
-						</button>
-					</AddEventModal>
-					<AddSessionModal>
-						<button className="add-button session">
-							<span>+</span> Sessione
-						</button>
-					</AddSessionModal>
-					<ResourcesModal />
+						<div className="d-flex gap-2 align-items-center">
+							<AddActivityModal>
+								<button className="btn activity-color text-white hover-lift rounded-pill shadow-sm fw-semibold">
+									<i className="bi bi-plus-lg me-1"></i>
+									Attività
+								</button>
+							</AddActivityModal>
+							<AddEventModal>
+								<button className="btn event-color text-white hover-lift rounded-pill shadow-sm fw-semibold">
+									<i className="bi bi-plus-lg me-1"></i>Evento
+								</button>
+							</AddEventModal>
+							<AddSessionModal>
+								<button className="btn session-color text-white hover-lift rounded-pill shadow-sm fw-semibold">
+									<i className="bi bi-plus-lg me-1"></i>
+									Sessione
+								</button>
+							</AddSessionModal>
+							<ResourcesModal />
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>

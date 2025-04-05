@@ -17,43 +17,11 @@ import { Calendar, View, momentLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { Container } from "react-bootstrap";
 import useSWR from "swr";
+import { ListView } from "./ListView";
 import "./calendar.css";
 
 const localizer = momentLocalizer(moment);
 moment.locale("it");
-
-const ListView = ({ events }: { events: CalendarEvent[] }) => {
-	return (
-		<div className="list-view">
-			<div className="list-header">
-				<div className="header-item">Data</div>
-				<div className="header-item">Attività</div>
-			</div>
-			{events
-				.filter((event) => event.typology === "activity") // Filtra solo le attività
-				.map(
-					(event, index) =>
-						event.originalElement.status !== "COMPLETED" && (
-							<div key={index} className="list-event">
-								<div className="list-date">
-									{moment(event.start).format(
-										"dddd D MMMM YYYY - HH:mm"
-									)}
-								</div>
-								<div className="list-title">
-									{event.title}
-									{event.isRecurring && (
-										<span className="recurring-badge">
-											Ricorrente
-										</span>
-									)}
-								</div>
-							</div>
-						)
-				)}
-		</div>
-	);
-};
 
 export default function CalendarPage() {
 	const router = useRouter();
@@ -129,7 +97,7 @@ export default function CalendarPage() {
 							toolbar: () => null
 						}}
 						eventPropGetter={(event) => ({
-							className: `event-${event.typology}${event.isRecurring ? " recurring" : ""}`
+							className: `${event.typology}-color`
 						})}
 					/>
 				)}
