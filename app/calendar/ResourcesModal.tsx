@@ -1,3 +1,6 @@
+"use client";
+
+import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { IoMdGlobe } from "react-icons/io";
 import useSWR from "swr";
@@ -21,6 +24,8 @@ export function ResourcesModal() {
 	const [searchValue, setSearchValue] = useState("");
 
 	const [resources, setResources] = useState<Resource[]>([]);
+
+	const router = useRouter();
 
 	// Fetch della lista delle risorse
 	const { data: raw_resources, error: error_resources } = useSWR(
@@ -65,11 +70,11 @@ export function ResourcesModal() {
 					className="btn btn-light rounded-pill px-4 hover-lift"
 					onClick={(e: any) => {
 						e.preventDefault();
-						alert("Risorsa prenotata: " + resource);
+						router.push("/calendar/" + resource.id);
 					}}
 				>
 					<i className="bi bi-calendar3 me-2"></i>
-					Prenota
+					Visualizza
 				</button>
 			</div>
 		);
