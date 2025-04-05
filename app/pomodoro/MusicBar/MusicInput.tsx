@@ -31,6 +31,7 @@ interface ModalInteface {
 	setVideoList: React.Dispatch<React.SetStateAction<string[]>>;
 	videoTitleList: string[];
 	setVideoTitleList: React.Dispatch<React.SetStateAction<string[]>>;
+	show: boolean;
 }
 
 // Componente principale per la gestione della coda di riproduzione musicale
@@ -38,7 +39,8 @@ export function MusicInput({
 	videoList,
 	setVideoList,
 	videoTitleList,
-	setVideoTitleList
+	setVideoTitleList,
+	show
 }: ModalInteface) {
 	// Stati locali per gestire il modale e i video
 	const [newVideo, setNewVideo] = useState(""); // Input per nuovo video
@@ -90,41 +92,43 @@ export function MusicInput({
 
 	return (
 		<>
-			<Form.Group className="d-flex flex-column align-items-center mt-4">
-				<Form.Label className="mb-3 fs-5 fw-bold text-primary">
-					Aggiungi un video YouTube
-				</Form.Label>
-				<div className="d-flex w-100 shadow-sm position-relative">
-					<Form.Control
-						type="text"
-						value={newVideo}
-						onChange={handleNewVideoChange}
-						placeholder="Inserisci il link qui..."
-						className="py-3 border-primary"
-						style={{ borderRadius: "12px 0 0 12px" }}
-						onKeyDown={(e) => {
-							if (e.key === "Enter") {
-								handleAddNewVideo();
-							}
-						}}
-					/>
-					<Button
-						onClick={handleAddNewVideo}
-						className="px-4 btn-primary"
-						style={{
-							borderRadius: "0 12px 12px 0",
-							transition: "all 0.2s ease"
-						}}
-					>
-						<FaPlus size={18} />
-					</Button>
-				</div>
-				{error && (
-					<div className="text-danger fw-semibold fs-6 mt-2 d-flex align-items-center">
-						{error}
+			{show && (
+				<Form.Group className="d-flex flex-column align-items-center mt-4">
+					<Form.Label className="mb-3 fs-5 fw-bold text-primary">
+						Aggiungi un video YouTube
+					</Form.Label>
+					<div className="d-flex w-100 shadow-sm position-relative">
+						<Form.Control
+							type="text"
+							value={newVideo}
+							onChange={handleNewVideoChange}
+							placeholder="Inserisci il link qui..."
+							className="py-3 border-primary"
+							style={{ borderRadius: "12px 0 0 12px" }}
+							onKeyDown={(e) => {
+								if (e.key === "Enter") {
+									handleAddNewVideo();
+								}
+							}}
+						/>
+						<Button
+							onClick={handleAddNewVideo}
+							className="px-4 btn-primary"
+							style={{
+								borderRadius: "0 12px 12px 0",
+								transition: "all 0.2s ease"
+							}}
+						>
+							<FaPlus size={18} />
+						</Button>
 					</div>
-				)}
-			</Form.Group>
+					{error && (
+						<div className="text-danger fw-semibold fs-6 mt-2 d-flex align-items-center">
+							{error}
+						</div>
+					)}
+				</Form.Group>
+			)}
 			{curVideo !== "" && (
 				<YouTube
 					videoId={curVideo}

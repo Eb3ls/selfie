@@ -45,7 +45,7 @@ function formatTime(seconds: number) {
 // Non utilizzata una playlist in quando vogliamo che sia una coda di riproduzione
 // Utilizzandola andrebbe comunque ricaricato il componente dovendo eliminare il video corrente
 // Componente MusicBar - player YouTube personalizzato con controlli di riproduzione
-export function MusicView() {
+export function MusicView({ show }: { show: boolean }): JSX.Element {
 	// Stati relativi al player e al video
 	const player = useRef<any>(null); // Riferimento al player YouTube
 	const [videoDuration, setVideoDuration] = useState<number>(0); // Durata totale del video
@@ -239,115 +239,134 @@ export function MusicView() {
 	}
 
 	return (
-		<div className="container-sm d-flex flex-column h-100">
-			<Script
-				src="https://www.youtube.com/iframe_api"
-				strategy="afterInteractive"
-			/>
-			<MusicInput
-				videoList={videoList}
-				setVideoList={setVideoList}
-				videoTitleList={videoTitleList}
-				setVideoTitleList={setVideoTitleList}
-			/>
-			<div className="mt-4">
-				<div className="d-flex align-items-center mb-3">
-					<h5 className="m-0 fw-bold text-secondary">Coda</h5>
-					<span className="ms-2 badge bg-primary rounded-pill">
-						{videoTitleList.length}
-					</span>
-				</div>
-				<div
-					className="overflow-y-auto"
-					style={{
-						maxHeight: "60vh",
-						scrollbarWidth: "none"
-					}}
-				>
-					{videoTitleList.length > 0 ? (
-						videoTitleList.map((video, index) =>
-							videoItem(video, index)
-						)
-					) : (
-						<p className="text-muted text-center p-3">
-							Nessun video in coda
-						</p>
+		<>
+			{show && (
+				<div className="container-sm d-flex flex-column h-100">
+					<Script
+						src="https://www.youtube.com/iframe_api"
+						strategy="afterInteractive"
+					/>
+					<MusicInput
+						videoList={videoList}
+						setVideoList={setVideoList}
+						videoTitleList={videoTitleList}
+						setVideoTitleList={setVideoTitleList}
+						show={show}
+					/>
+					<div className="mt-4">
+						<div className="d-flex align-items-center mb-3">
+							<h5 className="m-0 fw-bold text-secondary">Coda</h5>
+							<span className="ms-2 badge bg-primary rounded-pill">
+								{videoTitleList.length}
+							</span>
+						</div>
+						<div
+							className="overflow-y-auto"
+							style={{
+								maxHeight: "60vh",
+								scrollbarWidth: "none"
+							}}
+						>
+							{videoTitleList.length > 0 ? (
+								videoTitleList.map((video, index) =>
+									videoItem(video, index)
+								)
+							) : (
+								<p className="text-muted text-center p-3">
+									Nessun video in coda
+								</p>
+							)}
+						</div>
+					</div>
+					{videoList.length !== 0 && (
+						<>
+							<div className="flex-grow-1"></div>
+							<div className="w-100 bg-primary-green p-3 my-5 rounded-pill d-flex flex-column align-items-center">
+								<TitleBar
+									videoTitleList={videoTitleList}
+								></TitleBar>
+								<input
+									type="range"
+									id="videoRange"
+									className="form-range"
+									min={0}
+									max={videoDuration}
+									value={currentTime}
+									onChange={handleProgressBarChange}
+									onMouseDown={handleMouseDown}
+									onMouseUp={handleMouseUp}
+								/>
+								<div className="d-flex justify-content-between w-100">
+									<p className="m-0">
+										{formatTime(currentTime)}
+									</p>
+									<p className="m-0">
+										{formatTime(videoDuration)}
+									</p>
+								</div>
+
+								<div className="d-flex w-100">
+									<div className="d-flex align-self-center position-absolute">
+										{VolumeBarBlock()}
+									</div>
+									<div className="d-flex mx-auto">
+										<Button
+											variant="link"
+											onClick={toggleLoop}
+										>
+											<FaArrowRotateRight
+												size={20}
+												className={
+													toLoop
+														? "text-primary"
+														: "text-muted"
+												}
+											></FaArrowRotateRight>
+										</Button>
+										<Button
+											variant="link"
+											onClick={togglePlay}
+											className="rounded-circle p-3"
+										>
+											{isPlaying ? (
+												<FaPause
+													className="color-brown"
+													size={20}
+												></FaPause>
+											) : (
+												<FaPlay
+													className="color-brown"
+													size={20}
+												></FaPlay>
+											)}
+										</Button>
+										<Button
+											variant="link"
+											onClick={handleEnd}
+										>
+											<FaAnglesRight
+												className="color-brown"
+												size={20}
+											></FaAnglesRight>
+										</Button>
+									</div>
+								</div>
+							</div>
+						</>
 					)}
 				</div>
-			</div>
-			<div className="flex-grow-1"></div>
-			{videoList.length !== 0 && (
-				<>
-					<div style={{ pointerEvents: "none" }}>
-						<Youtube
-							videoId={videoList[0]}
-							opts={opts}
-							onReady={onReady}
-							onEnd={handleEnd}
-							className="d-none"
-						/>
-					</div>
-					<div className="w-100 bg-primary-green p-3 my-5 rounded-pill d-flex flex-column align-items-center">
-						<TitleBar videoTitleList={videoTitleList}></TitleBar>
-						<input
-							type="range"
-							id="videoRange"
-							className="form-range"
-							min={0}
-							max={videoDuration}
-							value={currentTime}
-							onChange={handleProgressBarChange}
-							onMouseDown={handleMouseDown}
-							onMouseUp={handleMouseUp}
-						/>
-						<div className="d-flex justify-content-between w-100">
-							<p className="m-0">{formatTime(currentTime)}</p>
-							<p className="m-0">{formatTime(videoDuration)}</p>
-						</div>
-
-						<div className="d-flex w-100">
-							<div className="d-flex align-self-center position-absolute">
-								{VolumeBarBlock()}
-							</div>
-							<div className="d-flex mx-auto">
-								<Button variant="link" onClick={toggleLoop}>
-									<FaArrowRotateRight
-										size={20}
-										className={
-											toLoop
-												? "text-primary"
-												: "text-muted"
-										}
-									></FaArrowRotateRight>
-								</Button>
-								<Button
-									variant="link"
-									onClick={togglePlay}
-									className="rounded-circle p-3"
-								>
-									{isPlaying ? (
-										<FaPause
-											className="color-brown"
-											size={20}
-										></FaPause>
-									) : (
-										<FaPlay
-											className="color-brown"
-											size={20}
-										></FaPlay>
-									)}
-								</Button>
-								<Button variant="link" onClick={handleEnd}>
-									<FaAnglesRight
-										className="color-brown"
-										size={20}
-									></FaAnglesRight>
-								</Button>
-							</div>
-						</div>
-					</div>
-				</>
 			)}
-		</div>
+			{videoList.length !== 0 && (
+				<div style={{ pointerEvents: "none" }}>
+					<Youtube
+						videoId={videoList[0]}
+						opts={opts}
+						onReady={onReady}
+						onEnd={handleEnd}
+						className="d-none"
+					/>
+				</div>
+			)}
+		</>
 	);
 }

@@ -343,12 +343,8 @@ function PomodoroImplementation() {
 						</div>
 
 						<div className="d-flex flex-column h-100">
-							<div
-								className="flex-grow-1"
-								style={{
-									display: isMusicView ? "hide" : "block"
-								}}
-							>
+							<MusicView show={isMusicView} />
+							<div className="flex-grow-1">
 								{isStudying ? (
 									<Tree
 										resetTrigger={resetTrigger}
@@ -359,14 +355,6 @@ function PomodoroImplementation() {
 								) : (
 									<Coffee />
 								)}
-							</div>
-							<div
-								style={{
-									display: isMusicView ? "flex" : "none"
-								}}
-								className="h-100"
-							>
-								<MusicView />
 							</div>
 							<div
 								className="flex-column justify-content-center m-4"
@@ -382,19 +370,19 @@ function PomodoroImplementation() {
 											maxValue={600}
 											getter={studyTime}
 											setter={setStudyTime}
-										></Setting>
+										/>
 										<Setting
 											name="Sessioni"
 											maxValue={60}
 											getter={sessions}
 											setter={setSessions}
-										></Setting>
+										/>
 										<Setting
 											name="Pausa (min)"
 											maxValue={600}
 											getter={breakTime}
 											setter={setBreakTime}
-										></Setting>
+										/>
 									</div>
 								)}
 							</div>
