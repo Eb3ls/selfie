@@ -36,10 +36,9 @@ export const GET = async (
 
 	// Otteniamo l'ID della risorsa dall'URL
 	if (!ObjectId.isValid(params.id)) {
-		console.log("Invalid resource ID", params.id);
 		return generateMessageResponse("Invalid resource ID", 400);
 	}
-	const sessionId: string = params.id;
+	const resourceId: string = params.id;
 
 	// Otteniamo la collezione degli eventi
 	const eventClient: Collection<Event> =
@@ -47,7 +46,7 @@ export const GET = async (
 
 	// Otteniamo tutti gli eventi dell'utente
 	const outEvent = await findCollectionWrapper<Event>(
-		{ userIdList: { $in: [sessionId] } as any },
+		{ userIdList: { $in: [resourceId] } as any },
 		eventClient
 	);
 

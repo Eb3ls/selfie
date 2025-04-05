@@ -108,6 +108,7 @@ export default function CalendarIDPage() {
 						key={selectedCalendarEvent.id}
 						event={selectedCalendarEvent.originalElement}
 						show={showModal}
+						resourceId={resourceId}
 						setShow={setShowModal}
 					/>
 				)}

@@ -4,10 +4,12 @@ import "@/app/calendar/Modal.css";
 import { divideResourcesFromUserList } from "@/app/calendar/calendarUtils/calendarFetch";
 import { StandardToggleModal } from "@/app/components/StandardToggleModal";
 import { StandardViewField } from "@/app/components/StandardViewFIeld";
+import { useUser } from "@/app/components/UserContext";
 import { StringEvent } from "@/utils/db/db";
-import moment from "moment";
+import moment from "moment-timezone";
 import React from "react";
 import {
+	getDropContent,
 	getTextFromStatus,
 	getTextFromTriggerList
 } from "../calendarUtils/calendarUX";
@@ -19,15 +21,34 @@ type StringEventFrontend = Omit<StringEvent, "userIdList"> & {
 export function ViewEventModal({
 	event,
 	show,
+	resourceId,
 	setShow
 }: {
 	event: StringEventFrontend;
 	show: boolean;
+	resourceId: string | string[];
 	setShow: (show: boolean) => void;
 }) {
 	const { users, resources } = divideResourcesFromUserList(
 		event.usernameList
 	);
+
+	const { user } = useUser();
+
+	async function handleDrop() {
+		const response = await fetch("/api/calendar/quit/" + resourceId, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({ _id: event._id })
+		});
+
+		if (response.ok) {
+			alert("Evento abbandonato con successo!");
+			window.location.reload();
+		}
+	}
 
 	function getViewContent() {
 		function generateConversionProps(
@@ -124,11 +145,29 @@ export function ViewEventModal({
 		};
 	}
 
+	function getSingleViewMap() {
+		if (!user) return null;
+
+		const adminViews = {
+			Abbandona: {
+				title: "Abbandona Evento",
+				buttonColor: "danger",
+				saveBtnText: "",
+				onSubmit: undefined,
+				renderChildren: () => {
+					return getDropContent(event.summary, handleDrop, true);
+				}
+			}
+		};
+
+		return user.username === "admin" ? adminViews : null;
+	}
+
 	return (
 		<StandardToggleModal
 			show={show}
 			mainView={getMainView()}
-			singleViewsMap={null}
+			singleViewsMap={getSingleViewMap()}
 		/>
 	);
 }
