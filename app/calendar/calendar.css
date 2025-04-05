@@ -31,93 +31,18 @@
 	background: #7da9f7 !important;
 }
 
-/* Celle del mese */
-.rbc-month-view {
-	border-radius: 12px;
-	overflow: hidden;
-	box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+.rbc-events-container {
+	margin: 0 !important;
 }
 
-.date-cell.today {
-	background: #3498db;
-	color: white;
-	border-radius: 50%;
-	width: 30px;
-	height: 30px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
+.rbc-event-content {
+	/* Breaking text if too long */
+	white-space: normal !important;
+	overflow: hidden !important;
+	text-overflow: ellipsis !important;
+	font-size: smaller !important;
 }
 
-/* Eventi */
-.rbc-event {
-	border: none;
-	border-radius: 6px;
-	padding: 2px 4px;
-	margin: 1px;
-	font-size: 0.8rem;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-	.calendar-container {
-		padding: 20px 10px;
-		height: auto;
-	}
-
-	.rbc-toolbar {
-		flex-direction: column;
-		gap: 10px;
-	}
-
-	.toolbar-left {
-		flex-wrap: wrap;
-		justify-content: center;
-	}
-
-	.add-buttons-container {
-		flex-wrap: wrap;
-		justify-content: center;
-	}
-
-	.view-switch-button {
-		width: 100%;
-		text-align: center;
-	}
-}
-
-/* Aggiungi queste regole al media query mobile */
-@media (max-width: 768px) {
-	/* Forza un'altezza minima per il container del calendario */
-	.calendar-container {
-		min-height: 100vh;
-		padding-bottom: 20px;
-	}
-
-	/* Adatta l'altezza del calendario */
-	.custom-calendar {
-		height: 70vh !important;
-		min-height: 500px;
-	}
-
-	/* Ottimizza la visualizzazione degli eventi */
-	.rbc-event {
-		font-size: 0.7rem;
-		padding: 1px 2px;
-	}
-
-	/* Ottimizza la visualizzazione delle date */
-	.rbc-month-view {
-		min-height: 400px;
-	}
-
-	.rbc-row-bg {
-		min-height: 80px;
-	}
-}
-
-/* Aggiungi questa regola generale per il calendario */
-.custom-calendar {
-	flex-grow: 1;
-	min-height: 600px;
+.rbc-current-time-indicator {
+	background: #ff00158c !important;
 }

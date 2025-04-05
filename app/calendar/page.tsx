@@ -91,7 +91,6 @@ export default function CalendarPage() {
 						onSelectEvent={handleSelectEvent}
 						startAccessor="start"
 						endAccessor="end"
-						className="custom-calendar"
 						getNow={() => dateTime}
 						components={{
 							toolbar: () => null

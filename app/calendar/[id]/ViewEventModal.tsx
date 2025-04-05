@@ -1,6 +1,5 @@
 "use client";
 
-import "@/app/calendar/Modal.css";
 import { divideResourcesFromUserList } from "@/app/calendar/calendarUtils/calendarFetch";
 import { StandardToggleModal } from "@/app/components/StandardToggleModal";
 import { StandardViewField } from "@/app/components/StandardViewFIeld";

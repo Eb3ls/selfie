@@ -257,6 +257,7 @@ export function ModifyEventModal({
 					value={form.description}
 					onChange={handleChange}
 					placeholder="Inserisci descrizione"
+					isRequired={false}
 				/>
 				<StandardInput
 					type="select"

@@ -43,64 +43,70 @@ export function LittleCustomToolbar({
 	const formattedDate = obtainFormattedDate(currentDate, calendarView);
 
 	return (
-		<div className="rbc-toolbar">
-			<div className="toolbar-left">
-				<div className="toolbar-controls">
-					<button
-						onClick={() =>
-							setCurrentDate(
-								moment(currentDate)
-									.subtract(
-										1,
-										calendarView === "month"
-											? "month"
-											: calendarView === "week"
-												? "week"
-												: "day"
-									)
-									.toDate()
-							)
-						}
-						className="nav-button"
-					>
-						‹
-					</button>
-					<span className="current-date">{formattedDate}</span>
-					<button
-						onClick={() =>
-							setCurrentDate(
-								moment(currentDate)
-									.add(
-										1,
-										calendarView === "month"
-											? "month"
-											: calendarView === "week"
-												? "week"
-												: "day"
-									)
-									.toDate()
-							)
-						}
-						className="nav-button"
-					>
-						›
-					</button>
+		<div className="container-fluid py-3">
+			<div className="row align-items-center justify-content-between gy-3">
+				<div className="col-12 col-md-auto">
+					<div className="d-flex align-items-center gap-3">
+						<button
+							className="btn p-2"
+							onClick={() =>
+								setCurrentDate(
+									moment(currentDate)
+										.subtract(
+											1,
+											calendarView === "month"
+												? "month"
+												: calendarView === "week"
+													? "week"
+													: "day"
+										)
+										.toDate()
+								)
+							}
+						>
+							<i className="bi bi-chevron-left"></i>
+						</button>
+						<span className="fs-3 mb-0 fw-semibold">
+							{formattedDate}
+						</span>
+						<button
+							className="btn p-2"
+							onClick={() =>
+								setCurrentDate(
+									moment(currentDate)
+										.add(
+											1,
+											calendarView === "month"
+												? "month"
+												: calendarView === "week"
+													? "week"
+													: "day"
+										)
+										.toDate()
+								)
+							}
+						>
+							<i className="bi bi-chevron-right"></i>
+						</button>
+						<select
+							className="form-select w-auto rounded-pill"
+							value={calendarView}
+							onChange={(e) =>
+								setCalendarView(e.target.value as View)
+							}
+						>
+							{["month", "week", "day"].map((view) => (
+								<option key={view} value={view}>
+									{view === "month"
+										? "Mese"
+										: view === "week"
+											? "Settimana"
+											: "Giorno"}
+								</option>
+							))}
+						</select>
+					</div>
 				</div>
-				<select
-					value={calendarView}
-					onChange={(e) => setCalendarView(e.target.value as View)}
-					className="view-select"
-				>
-					{["month", "week", "day"].map((view) => (
-						<option key={view} value={view}>
-							{view === "month"
-								? "Mese"
-								: view === "week"
-									? "Settimana"
-									: "Giorno"}
-						</option>
-					))}
-				</select>
 			</div>
 		</div>
 	);

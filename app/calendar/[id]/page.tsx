@@ -93,13 +93,12 @@ export default function CalendarIDPage() {
 					onSelectEvent={handleSelectEvent}
 					startAccessor="start"
 					endAccessor="end"
-					className="custom-calendar"
 					getNow={() => dateTime}
 					components={{
 						toolbar: () => null
 					}}
 					eventPropGetter={(event) => ({
-						className: `event-${event.typology}${event.isRecurring ? " recurring" : ""}`
+						className: `${event.typology}-color`
 					})}
 				/>
 
