@@ -2,8 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import { Button, Card, Container } from "react-bootstrap";
-import { FaTrash, FaUserShield } from "react-icons/fa";
+import { Card, Container } from "react-bootstrap";
+import { FaUserShield } from "react-icons/fa";
+import { toast } from "react-toastify";
 import { GlobalSideBar } from "../components/GlobalSideBar";
 import { useUser } from "../components/UserContext";
 import styles from "./Projects.module.css";
@@ -28,13 +29,16 @@ export default function ProjectPage() {
 		async function fetchProjects() {
 			try {
 				const response = await fetch("/api/project/getProjects");
-				if (!response.ok)
-					throw new Error("Errore nella richiesta dei dati");
+
+				if (!response.ok) {
+					throw new Error();
+				}
+
 				const data: Project[] = await response.json();
 				setProjects(data);
 				setOldProjects(data);
 			} catch (error) {
-				console.error("Errore durante il fetch dei progetti:", error);
+				toast.error("Errore durante il caricamento dei dati");
 			}
 		}
 		fetchProjects();
@@ -89,18 +93,25 @@ export default function ProjectPage() {
 	}
 
 	async function handleAdd(project: { summary: string }) {
-		const response = await fetch("/api/project/add", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify(project)
-		});
-		if (!response.ok) {
-			alert("Errore durante il fetch dei progetti!");
-		} else {
+		try {
+			const response = await fetch("/api/project/add", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify(project)
+			});
+
+			if (!response.ok) {
+				throw new Error();
+			}
+
 			const fetched_data = await response.json();
-			window.location.href = "./projects/" + fetched_data._id;
+
+			toast.success("Progetto creato con successo");
+			router.push("/projects/" + fetched_data._id);
+		} catch (error) {
+			toast.error("Errore durante la creazione del progetto");
 		}
 	}
 

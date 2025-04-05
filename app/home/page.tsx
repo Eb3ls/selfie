@@ -11,6 +11,7 @@ import {
 	FaRedoAlt,
 	FaStickyNote
 } from "react-icons/fa";
+import { toast } from "react-toastify";
 import { GlobalSideBar } from "../components/GlobalSideBar";
 import { useUser } from "../components/UserContext";
 import "./home.css";
@@ -377,15 +378,13 @@ export default function Home() {
 				const response = await fetch("/api/preview");
 
 				if (!response.ok) {
-					throw new Error(
-						"Errore nell'ottenimento dei dati di preview"
-					);
+					throw new Error();
 				}
 
 				const data: PreviewsResponse = await response.json();
 				setPreviews(data);
 			} catch (error) {
-				console.error("Errore nell'ottenimento dei dati di preview");
+				toast.error("Errore durante il caricamento dei dati");
 			}
 		}
 

@@ -2,7 +2,7 @@
 
 import { DEFAULT_PROFILE_URL } from "@/app/constants";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import React, { useMemo, useState } from "react";
 import {
 	Button,
@@ -116,6 +116,7 @@ export function GlobalSideBar() {
 	const [showModal, setShowModal] = useState(false);
 	const { user, logOut } = useUser();
 	const pathname = usePathname(); // Ottieni il percorso corrente
+	const router = useRouter();
 
 	const handleLogout = () => setShowModal(true);
 	const confirmLogout = () => {
@@ -133,7 +134,12 @@ export function GlobalSideBar() {
 				style={{ zIndex: 102 }}
 			>
 				<Container>
-					<Navbar.Brand href="/home" className="fw-bold">
+					<Navbar.Brand
+						onClick={() => {
+							router.push("/home");
+						}}
+						className="fw-bold"
+					>
 						<Image
 							src="/Sloth.png"
 							alt="Logo"
@@ -152,7 +158,9 @@ export function GlobalSideBar() {
 						{mainLinks.map((item, i) => (
 							<Nav.Link
 								key={i}
-								href={item.link}
+								onClick={() => {
+									router.push(item.link);
+								}}
 								className={`px-4 py-3 nav-link-hover text-black ${pathname === item.link ? "active" : ""}`}
 							>
 								{item.name}
@@ -166,7 +174,12 @@ export function GlobalSideBar() {
 							className="px-3"
 						>
 							{otherLinks.map((item, idx) => (
-								<NavDropdown.Item href={item.link} key={idx}>
+								<NavDropdown.Item
+									onClick={() => {
+										router.push(item.link);
+									}}
+									key={idx}
+								>
 									{item.name}
 								</NavDropdown.Item>
 							))}
@@ -207,7 +220,12 @@ export function GlobalSideBar() {
 				}}
 			>
 				<Offcanvas.Header closeButton>
-					<a className="navbar-brand" href="./home">
+					<a
+						className="navbar-brand"
+						onClick={() => {
+							router.push("/home");
+						}}
+					>
 						<Image
 							src="/Sloth.png"
 							alt="Logo"
@@ -233,7 +251,9 @@ export function GlobalSideBar() {
 									{section.items.map((item, i) => (
 										<Nav.Link
 											key={i}
-											href={item.link}
+											onClick={() => {
+												router.push(item.link);
+											}}
 											className={`px-3 py-2 d-flex align-items-center ${pathname === item.link ? "active" : ""}`}
 											style={{
 												transition: "all 0.2s",
