@@ -6,6 +6,7 @@ interface TreeProps {
 	started: boolean;
 	paused: boolean;
 	resetTrigger: number;
+	show: boolean;
 }
 
 interface LeafConfig {
@@ -20,7 +21,7 @@ const leavesConfig: LeafConfig[] = [
 	// You can add more leaf or blossom parts here
 ];
 
-export function Tree({ time, started, paused, resetTrigger }: TreeProps) {
+export function Tree({ time, started, paused, resetTrigger, show }: TreeProps) {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const [containerSize, setContainerSize] = useState(0);
 
@@ -55,7 +56,7 @@ export function Tree({ time, started, paused, resetTrigger }: TreeProps) {
 		<div
 			key={resetTrigger}
 			ref={containerRef}
-			className="tree-container position-relative h-100"
+			className={`tree-container position-relative h-100 ${show ? "" : "hidden"}`}
 		>
 			{leavesConfig.map((leaf) => (
 				<div

@@ -335,9 +335,15 @@ function PomodoroImplementation() {
 								style={{ zIndex: 1 }}
 							>
 								{isMusicView ? (
-									<IoTimerOutline size={30} />
+									<IoTimerOutline
+										size={30}
+										className="hover-lift"
+									/>
 								) : (
-									<IoMusicalNotes size={30} />
+									<IoMusicalNotes
+										size={30}
+										className="hover-lift"
+									/>
 								)}
 							</Button>
 						</div>
@@ -351,9 +357,10 @@ function PomodoroImplementation() {
 										time={studyTime * 60}
 										started={isStarted}
 										paused={isPaused}
+										show={!isMusicView}
 									/>
 								) : (
-									<Coffee />
+									<Coffee show={!isMusicView} />
 								)}
 							</div>
 							<div

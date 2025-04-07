@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import "./Coffee.css";
 
-export function Coffee() {
+export function Coffee({ show }: { show: boolean }) {
 	// New container reference and state for dynamic sizing
 	const containerRef = useRef<HTMLDivElement>(null);
 	const [containerSize, setContainerSize] = useState(0);
@@ -9,6 +9,7 @@ export function Coffee() {
 	useEffect(() => {
 		if (containerRef.current) {
 			const updateSize = () => {
+				if (!containerRef) return;
 				const { width, height } =
 					containerRef.current!.getBoundingClientRect();
 				setContainerSize(Math.min(width, height));
@@ -33,7 +34,7 @@ export function Coffee() {
 	return (
 		<div
 			ref={containerRef}
-			className="position-relative w-100 h-100"
+			className={`position-relative w-100 h-100 ${show ? "" : "hidden"}`}
 			style={style}
 		>
 			<div className="top-cup-up position-absolute translate-middle"></div>

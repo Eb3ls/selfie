@@ -49,15 +49,16 @@ export function Setting({ name, maxValue, getter, setter }: SettingsProps) {
 	}
 
 	return (
-		<div className="d-flex flex-column align-items-center p-2 container-sm">
-			<Form.Label className="mb-2">{name}</Form.Label>
-			<div className="d-flex align-items-center bg-primary rounded-pill p-3 flex-grow-1 w-100 gap-2">
+		<div className="d-flex flex-column gap-2 p-4 container-sm">
+			<h5 className="text-primary mb-1 text-center">{name}</h5>
+			<div className="d-flex align-items-center bg-light shadow-sm rounded-4 p-3 gap-3">
 				<Button
-					className="btn-sm bg-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+					variant="primary"
+					className="rounded-circle d-flex align-items-center justify-content-center p-2"
 					onClick={() => changeValue(-1)}
-					style={{ width: "32px", height: "32px" }}
+					style={{ width: "40px", height: "40px" }}
 				>
-					<FaMinus className="text-primary" />
+					<FaMinus size={16} />
 				</Button>
 				<Form.Control
 					type="number"
@@ -71,19 +72,21 @@ export function Setting({ name, maxValue, getter, setter }: SettingsProps) {
 						}
 					}}
 					onBlur={handleInputBlur}
-					className="text-center mx-2 rounded-pill flex-grow-1"
+					ref={inputRef}
+					className="text-center border-0 bg-transparent fs-4 fw-bold flex-grow-1"
 					style={{
+						width: "80px",
 						WebkitAppearance: "none",
 						MozAppearance: "textfield"
 					}}
-					ref={inputRef}
 				/>
 				<Button
-					className="btn-sm bg-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+					variant="primary"
+					className="rounded-circle d-flex align-items-center justify-content-center p-2"
 					onClick={() => changeValue(1)}
-					style={{ width: "32px", height: "32px" }}
+					style={{ width: "40px", height: "40px" }}
 				>
-					<FaPlus className="text-primary" />
+					<FaPlus size={16} />
 				</Button>
 			</div>
 		</div>
