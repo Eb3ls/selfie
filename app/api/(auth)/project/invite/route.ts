@@ -53,7 +53,7 @@ export const POST = async (request: NextRequest) => {
 	}
 
 	// Otteniamo la lista degli id degli utenti
-	const userIdList: string[] = (await convertionOut.json()).userIdList;
+	const userIdList: string[] = (await convertionOut.json()).users;
 
 	// Otteniamo la collezione dei progetti
 	const projectClient: Collection<Project> =
@@ -77,9 +77,9 @@ export const POST = async (request: NextRequest) => {
 	}
 
 	// Rimuoviamo dalla lista degli id quelli già presenti
-	const usersToBeInvited: string[] = userIdList.filter((userId) => {
-		!project.userIdList.includes(userId);
-	});
+	const usersToBeInvited: string[] = userIdList.filter(
+		(userId) => !project.userIdList.includes(userId)
+	);
 
 	// Invitiamo gli utenti
 	const inviteOut = await addInvitations(

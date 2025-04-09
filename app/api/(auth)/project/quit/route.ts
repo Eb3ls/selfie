@@ -129,10 +129,15 @@ export const POST = async (request: NextRequest) => {
 
 	const userIdList = project.userIdList.filter((id) => id !== userId);
 
+	// Creiamo un oggetto con i campi da modificare
+	const newFields: Partial<StringProject> = {
+		userIdList: userIdList
+	};
+
 	// Modifichiamo il progetto
 	const updateOut = await updateCollectionWrapper<Project>(
 		{ _id: projectId },
-		{ $set: userIdList } as any,
+		{ $set: newFields } as any,
 		projectClient
 	);
 

@@ -61,7 +61,9 @@ class ProjectSettings extends HTMLElement {
 		this.updateModalContent("VIEW");
 	}
 
-	private updateModalContent(type: "VIEW" | "EDIT" | "DELETE" | "INVITE") {
+	private updateModalContent(
+		type: "VIEW" | "EDIT" | "DELETE" | "INVITE" | "QUIT"
+	) {
 		const modalContent = this.querySelector(".modal-content");
 		if (!modalContent) return;
 
@@ -78,24 +80,34 @@ class ProjectSettings extends HTMLElement {
 		} else if (type === "INVITE") {
 			modalContent.innerHTML = this.createInviteTemplate();
 			this.setupInviteEventListeners();
+		} else if (type === "QUIT") {
+			modalContent.innerHTML = this.createQuitTemplate();
+			this.setupQuitEventListeners();
 		}
 	}
 
 	private setupViewEventListeners() {
-		const editBtn = this.querySelector("#editBtn");
-		editBtn?.addEventListener("click", () =>
-			this.updateModalContent("EDIT")
-		);
+		if (this.currentUser?.name !== this.owner.name) {
+			const quitBtn = this.querySelector("#quitBtn");
+			quitBtn?.addEventListener("click", () =>
+				this.updateModalContent("QUIT")
+			);
+		} else {
+			const editBtn = this.querySelector("#editBtn");
+			editBtn?.addEventListener("click", () =>
+				this.updateModalContent("EDIT")
+			);
 
-		const deleteBtn = this.querySelector("#deleteBtn");
-		deleteBtn?.addEventListener("click", () =>
-			this.updateModalContent("DELETE")
-		);
+			const deleteBtn = this.querySelector("#deleteBtn");
+			deleteBtn?.addEventListener("click", () =>
+				this.updateModalContent("DELETE")
+			);
 
-		const inviteBtn = this.querySelector("#inviteBtn");
-		inviteBtn?.addEventListener("click", () =>
-			this.updateModalContent("INVITE")
-		);
+			const inviteBtn = this.querySelector("#inviteBtn");
+			inviteBtn?.addEventListener("click", () =>
+				this.updateModalContent("INVITE")
+			);
+		}
 
 		const userListView = this.querySelector("#userListView");
 		if (userListView) {
@@ -133,7 +145,12 @@ class ProjectSettings extends HTMLElement {
 									Invita utenti
 								</button>
 							`
-							: ""
+							: `
+								<button type="button" class="btn btn-sm btn-danger me-2" id="quitBtn">
+									<i class="bi bi-box-arrow-right"></i>
+									Abbandona
+								</button>
+							`
 					}
 					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
 				</div>
@@ -262,6 +279,35 @@ class ProjectSettings extends HTMLElement {
         `;
 	}
 
+	private async handleInviteSubmit(event: Event) {
+		event?.preventDefault();
+
+		if (this.usersToInvite.length === 0) {
+			return;
+		}
+
+		const method = "POST";
+		const url = "/api/project/invite";
+		const body: any = {
+			projectId: this.projectId,
+			usernameList: this.usersToInvite
+		};
+
+		try {
+			await fetcher(method, url, body);
+			const viewToggler = document.querySelector(
+				"view-toggler"
+			) as ViewToggler | null;
+			if (viewToggler) {
+				await viewToggler.updatePage();
+			} else {
+				window.location.reload();
+			}
+		} catch (error) {
+			alert("Errore durante l'invito degli utenti");
+		}
+	}
+
 	private setupInviteEventListeners() {
 		const addInviteUserBtn = this.querySelector("#addInviteUserBtn");
 		const inviteInput = this.querySelector(
@@ -322,10 +368,7 @@ class ProjectSettings extends HTMLElement {
 		});
 
 		const saveBtn = this.querySelector("#saveChanges");
-		saveBtn?.addEventListener("click", (e) => {
-			e.preventDefault();
-			alert("Invitando i seguenti utenti: " + this.usersToInvite);
-		});
+		saveBtn?.addEventListener("click", (e) => this.handleInviteSubmit(e));
 
 		const cancelBtn = this.querySelector("#toggleEditBtn");
 		cancelBtn?.addEventListener("click", () =>
@@ -417,6 +460,52 @@ class ProjectSettings extends HTMLElement {
                 <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Elimina Progetto</button>
             </div>
         `;
+	}
+
+	private createQuitTemplate() {
+		return `
+			<div class="modal-header">
+				<h5 class="modal-title text-danger">
+					<i class="bi bi-exclamation-triangle-fill"></i>
+					<span>Abbandona Progetto</span>
+				</h5>
+				<div class="ms-auto d-flex align-items-center">
+					<button type="button" class="btn btn-sm btn-warning me-2" id="toggleEditBtn">
+						<i class="bi bi-x"></i>
+						Annulla
+					</button>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+				</div>
+			</div>
+			<div class="modal-body">
+				<p class="fs-5">Sei sicuro di voler abbandonare il progetto?</p>
+				<p class="text-danger">Questa operazione non potrà essere annullata!</p>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-danger" id="confirmQuitBtn">Abbandona Progetto</button>
+			</div>
+		`;
+	}
+
+	private setupQuitEventListeners() {
+		const cancelBtn = this.querySelector("#toggleEditBtn");
+		cancelBtn?.addEventListener("click", () =>
+			this.updateModalContent("VIEW")
+		);
+		const confirmBtn = this.querySelector("#confirmQuitBtn");
+		confirmBtn?.addEventListener("click", async () => {
+			const method = "POST";
+			const url = "/api/project/quit";
+			const body = {
+				projectId: this.projectId
+			};
+			try {
+				await fetcher(method, url, body);
+				window.location.href = "/projects";
+			} catch (error) {
+				alert("Impossibile abbandonare il progetto");
+			}
+		});
 	}
 }
 
