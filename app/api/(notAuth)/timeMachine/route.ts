@@ -4,6 +4,7 @@ import {
 	isTemplateValid,
 	parseJSONInput
 } from "@/utils/api/api";
+import { handleOverdues } from "@/utils/projects/projects";
 import { notifyAll } from "@/utils/timeMachine/getFromDB";
 import { timeMachine } from "@/utils/timeMachine/timeMachine";
 import { NextRequest } from "next/server";
@@ -35,6 +36,15 @@ function backgroundServiceFunction() {
 	// e notificare gli utenti interessati.
 	// Non facciamo await qui, perché non ci interessa aspettare che la funzione finisca.
 	notifyAll(new_time);
+
+	// Se è mezzanotte, avviamo la funzione per gestire le scadenze dei progetti
+	if (
+		new_time.getHours() === 0 &&
+		new_time.getMinutes() === 0 &&
+		new_time.getSeconds() === 0
+	) {
+		handleOverdues(new_time);
+	}
 }
 
 export const PATCH = async (request: NextRequest) => {

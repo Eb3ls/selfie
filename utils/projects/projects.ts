@@ -12,7 +12,6 @@ import {
 	getCollection,
 	updateCollectionWrapper
 } from "@/utils/db/db";
-import { timeMachine } from "@/utils/timeMachine/timeMachine";
 import { Collection } from "mongodb";
 import { NextResponse } from "next/server";
 
@@ -417,7 +416,7 @@ async function updateNextActivitiesDates(
 	return generateMessageResponse("Next activities dates updated", 200);
 }
 
-export async function handleOverdues() {
+export async function handleOverdues(timeMachineDate: Date) {
 	// Otteniamo la collezione delle project activities
 	const projectActivityClient: Collection<ProjectActivity> =
 		await getCollection<ProjectActivity>(PROJECT_ACTIVITY_COLLECTION);
@@ -439,15 +438,16 @@ export async function handleOverdues() {
 	const allActivities: StringProjectActivity[] =
 		await allActivitiesOut.json();
 
-	const today00 = new Date(timeMachine.timeMachineTime.toISOString());
+	const today00 = new Date(timeMachineDate.toISOString());
 	// Prendiamo il timestamp di oggi a mezzanotte
 	// Creare nuovo valore perché é per riferimento
-	console.log("today ", today00.toISOString());
+	console.log("[DEBUG] Avvio di handleOverdues");
+	console.log("[DEBUG] Data attuale: ", today00.toISOString());
 	today00.setHours(0, 0, 0, 0);
-	console.log("At midnight ", today00.toISOString());
+	console.log("[DEBUG] Data impostata a mezzanotte: ", today00.toISOString());
 	const today2359 = new Date(today00.toISOString());
 	today2359.setHours(23, 59, 59, 999);
-	console.log("At 23:59 ", today2359.toISOString());
+	console.log("[DEBUG] Data impostata alle 23:59: ", today2359.toISOString());
 
 	// Filtriamo le attività scadute
 	const overdueActivities = allActivities.filter((activity) => {
