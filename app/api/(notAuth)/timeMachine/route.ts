@@ -83,6 +83,20 @@ export const POST = async (request: NextRequest) => {
 
 	const currentDate: Date = new Date();
 
+	// Controlliamo se la data richiesta è nel futuro
+	if (new Date(body.requestedDate) > currentDate) {
+		const dateAt00: Date = new Date(currentDate);
+		dateAt00.setHours(0, 0, 0, 0);
+		dateAt00.setDate(dateAt00.getDate() + 1);
+
+		// Per ogni giornata fra la data attuale e la data richiesta, dobbiamo
+		// richiamare la funzione per gestire le scadenze dei progetti
+		while (dateAt00 <= new Date(body.requestedDate)) {
+			await handleOverdues(dateAt00);
+			dateAt00.setDate(dateAt00.getDate() + 1);
+		}
+	}
+
 	// Se l'utente vuole la data in tempo reale
 	if (body.realTime) {
 		baseDate = currentDate;
