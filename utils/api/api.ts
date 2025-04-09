@@ -439,6 +439,18 @@ export async function addInvitations(
 
 	// Per ogni utente nella lista, creiamo un invito
 	for (const userId of userIdList) {
+		// Controlliamo che non esista già un invito per questo utente
+		const existingInvitation = await findCollectionWrapper<Invitation>(
+			{ userId: userId, type: type, targetId: targetId },
+			invitationClient
+		);
+
+		if (existingInvitation.status === 200) {
+			continue;
+		} else if (existingInvitation.status !== 404) {
+			return existingInvitation;
+		}
+
 		const newInvitation = generateStringModel<StringInvitation>(
 			{ userId: userId, type: type, targetId: targetId },
 			"Invitation"
