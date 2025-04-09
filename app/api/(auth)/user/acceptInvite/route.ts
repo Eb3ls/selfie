@@ -8,12 +8,15 @@ import {
 	Invitation,
 	NOTE_COLLECTION,
 	Note,
+	PROJECT_COLLECTION,
+	Project,
 	SESSION_COLLECTION,
 	Session,
 	StringActivity,
 	StringEvent,
 	StringInvitation,
 	StringNote,
+	StringProject,
 	StringSession,
 	addCollectionWrapper,
 	deleteCollectionWrapper,
@@ -269,7 +272,80 @@ export const POST = async (request: NextRequest) => {
 
 		return generateMessageResponse("Invito accettato", 200);
 	} else if (type === "PROJECT") {
-		// TODO
+		// Otteniamo la collezione dei progetti
+		const projectClient: Collection<Project> =
+			await getCollection<Project>(PROJECT_COLLECTION);
+
+		// Otteniamo il progetto
+		const outProject = await findCollectionWrapper<Project>(
+			{
+				_id: targetId
+			},
+			projectClient
+		);
+
+		if (outProject.status !== 200) {
+			return outProject;
+		}
+
+		const project: StringProject = (await outProject.json())[0];
+
+		// Aggiungiamo l'utente alla lista degli utenti che hanno accesso al progetto
+		project.userIdList.push(userId);
+
+		// Aggiorniamo il progetto
+		const updateOut = await updateCollectionWrapper<Project>(
+			{ _id: project._id },
+			{ $set: { userIdList: project.userIdList } } as any,
+			projectClient
+		);
+
+		if (updateOut.status !== 200) {
+			return updateOut;
+		}
+
+		// Aggiungiamo l'utente alla lista degli utenti che hanno accesso alla nota del progetto
+		const noteClient: Collection<Note> =
+			await getCollection<Note>(NOTE_COLLECTION);
+
+		const outNote = await findCollectionWrapper<Note>(
+			{
+				_id: project.noteId
+			},
+			noteClient
+		);
+
+		if (outNote.status !== 200) {
+			return outNote;
+		}
+
+		const note: StringNote = (await outNote.json())[0];
+
+		// Aggiungiamo l'utente alla lista degli utenti che hanno accesso alla nota
+		note.userIdList.push(userId);
+
+		// Aggiorniamo la nota
+		const updateNoteOut = await updateCollectionWrapper<Note>(
+			{ _id: note._id },
+			{ $set: { userIdList: note.userIdList } } as any,
+			noteClient
+		);
+
+		if (updateNoteOut.status !== 200) {
+			return updateNoteOut;
+		}
+
+		// Eliminiamo l'invito
+		const deleteOut = await deleteCollectionWrapper<Invitation>(
+			{ _id: invitationId },
+			invitationClient
+		);
+
+		if (deleteOut.status !== 200) {
+			return deleteOut;
+		}
+
+		return generateMessageResponse("Invito accettato", 200);
 	} else if (type === "NOTE") {
 		// Ottieni la collezione delle note
 		const noteClient: Collection<Note> =
