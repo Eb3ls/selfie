@@ -15,6 +15,7 @@ import {
 } from "@/utils/db/db";
 import { Collection } from "mongodb";
 import { NextRequest } from "next/server";
+import { rrulestr } from "rrule";
 
 const requestTemplate = {
 	summary: "",
@@ -57,6 +58,24 @@ export const POST = async (request: NextRequest) => {
 	// Controlliamo che la dtStart sia prima della dtEnd
 	if (new Date(newBody.dtStart) >= new Date(newBody.dtEnd)) {
 		return generateMessageResponse("dtStart must be before dtEnd", 400);
+	}
+
+	// Controlliamo che gli eventi ricorrenti generati dalla rrule siano almeno 1
+	if (newBody.rrule) {
+		const start = new Date(newBody.dtStart);
+		const end = new Date(newBody.dtEnd);
+		end.setFullYear(end.getFullYear() + 5);
+
+		const rule = rrulestr(newBody.rrule, { dtstart: start });
+
+		const occurrences = rule.between(start, end, true);
+
+		if (occurrences.length === 0) {
+			return generateMessageResponse(
+				"rrule must generate at least one occurrence",
+				400
+			);
+		}
 	}
 
 	// Dividiamo e convertiamo la lista degli username e risorse in una lista di id

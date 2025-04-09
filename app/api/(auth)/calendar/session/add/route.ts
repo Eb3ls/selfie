@@ -13,6 +13,7 @@ import {
 import { timeMachine } from "@/utils/timeMachine/timeMachine";
 import { Collection } from "mongodb";
 import { NextRequest } from "next/server";
+import { rrulestr } from "rrule";
 
 const requestTemplate = {
 	summary: "",
@@ -88,6 +89,24 @@ export const POST = async (request: NextRequest) => {
 			"Start date and end date are not in the same day",
 			400
 		);
+	}
+
+	// Controlliamo che gli eventi ricorrenti generati dalla rrule siano almeno 1
+	if (newSession.rrule) {
+		const start = new Date(newSession.dtStart);
+		const end = new Date(newSession.dtEnd);
+		end.setFullYear(end.getFullYear() + 5);
+
+		const rule = rrulestr(newSession.rrule, { dtstart: start });
+
+		const occurrences = rule.between(start, end, true);
+
+		if (occurrences.length === 0) {
+			return generateMessageResponse(
+				"rrule must generate at least one occurrence",
+				400
+			);
+		}
 	}
 
 	// Aggiungiamo il campo 'owner' a newSession
