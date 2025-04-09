@@ -7,6 +7,8 @@ import {
 	stringsToObjectId
 } from "@/utils/api/common";
 import {
+	EVENT_COLLECTION,
+	Event,
 	INVITATION_COLLECTION,
 	Invitation,
 	StringInvitation,
@@ -38,6 +40,7 @@ import { JWTPayload } from "jose";
 import { ObjectId } from "mongodb";
 import { Collection } from "mongodb";
 import { NextRequest, NextResponse } from "next/server";
+import { RRule, rrulestr } from "rrule";
 
 export { generateObjectResponse, generateMessageResponse, stringsToObjectId };
 
@@ -548,4 +551,79 @@ export async function divideResourcesAndConvert(
 		{ userIdList: userIdList, resourceIdList: resourceIdList },
 		200
 	);
+}
+
+export async function isResourceAvailable(
+	resourceId: string,
+	rrule: string,
+	dtStart: string,
+	dtEnd: string
+) {
+	// Otteniamo la collezione degli eventi
+	const client: Collection<Event> =
+		await getCollection<Event>(EVENT_COLLECTION);
+
+	// Otteniamo tutti gli eventi in cui è presente l'id della risorsa in userIdList
+	const out = await findCollectionWrapper<Event>(
+		{
+			userIdList: { $in: [resourceId] } as any
+		},
+		client
+	);
+
+	if (out.status !== 200) {
+		return out;
+	}
+
+	const events: Event[] = await out.json();
+
+	const newEventDuration =
+		new Date(dtEnd).getTime() - new Date(dtStart).getTime();
+
+	for (const event of events) {
+		const eventDuration =
+			new Date(event.dtEnd).getTime() - new Date(event.dtStart).getTime();
+
+		const ruleNewEvent = rrulestr(rrule, { dtstart: new Date(dtStart) });
+		const ruleEvent = rrulestr(event.rrule, {
+			dtstart: new Date(event.dtStart)
+		});
+
+		const yearsAgo = new Date(dtStart);
+		yearsAgo.setFullYear(yearsAgo.getFullYear() - 100);
+		const yearsLater = new Date(dtEnd);
+		yearsLater.setFullYear(yearsLater.getFullYear() + 100);
+
+		const occurrences1 = ruleNewEvent.between(yearsAgo, yearsLater, true);
+		const occurrences2 = ruleEvent.between(yearsAgo, yearsLater, true);
+
+		// Se ci sono sovrapposizioni tra le due regole, allora la risorsa non è disponibile
+		for (const occurrence1 of occurrences1) {
+			for (const occurrence2 of occurrences2) {
+				// Consideriamo anche la durata dell'evento
+				const start1 = new Date(occurrence1);
+				const end1 = new Date(start1);
+				end1.setMilliseconds(end1.getMilliseconds() + newEventDuration);
+
+				const start2 = new Date(occurrence2);
+				const end2 = new Date(start2);
+				end2.setMilliseconds(end2.getMilliseconds() + eventDuration);
+
+				// Controlliamo se c'è sovrapposizione
+				if (
+					(start1 >= start2 && start1 <= end2) ||
+					(end1 >= start2 && end1 <= end2) ||
+					(start2 >= start1 && start2 <= end1) ||
+					(end2 >= start1 && end2 <= end1)
+				) {
+					return generateMessageResponse(
+						"Resource is not available",
+						400
+					);
+				}
+			}
+		}
+	}
+
+	return generateMessageResponse("Resource is available", 200);
 }

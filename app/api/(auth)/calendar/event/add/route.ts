@@ -4,6 +4,7 @@ import {
 	generateMessageResponse,
 	generateObjectResponse,
 	generateStringModel,
+	isResourceAvailable,
 	validate
 } from "@/utils/api/api";
 import {
@@ -93,6 +94,20 @@ export const POST = async (request: NextRequest) => {
 		userIdList: string[];
 		resourceIdList: string[];
 	};
+
+	// Controlliamo che non ci siano sovrapposizioni di eventi con le risorse
+	for (const resourceId of resourceIdList) {
+		const out = await isResourceAvailable(
+			resourceId,
+			newBody.rrule,
+			newBody.dtStart,
+			newBody.dtEnd
+		);
+
+		if (out.status !== 200) {
+			return out;
+		}
+	}
 
 	// Sostituiamo la lista degli username con quella degli id, rimuovendo usernameList
 	const { usernameList: _, ...smallBody } = newBody;
