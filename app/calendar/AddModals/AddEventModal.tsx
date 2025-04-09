@@ -85,25 +85,37 @@ export function AddEventModal({ children }: any) {
 		event.preventDefault();
 
 		// Converti le date in formato ISO
-		form.dtStart = new Date(form.dtStart).toISOString();
-		form.dtEnd = new Date(form.dtEnd).toISOString();
+		const startTime = new Date(form.dtStart).toISOString();
+		const endTime = new Date(form.dtEnd).toISOString();
 
 		// Aggiungiamo le risorse
 		const usernames = form.usernameList.concat(resourceList);
 
 		// Genera l'rrule se la ripetizione è abilitata
-		if (enableRecurrence) {
-			form.rrule = generateRRule();
-		}
+		const newRrule = enableRecurrence ? generateRRule() : "";
 
-		console.log("Form inviato:", { ...form });
+		const formData = {
+			summary: form.summary,
+			description: form.description,
+			status: form.status,
+			rrule: newRrule,
+			dtStart: startTime,
+			dtEnd: endTime,
+			categories: form.categories,
+			location: form.location,
+			geo: form.geo,
+			usernameList: usernames,
+			alarms: form.alarms
+		};
+
+		console.log("Form inviato:", formData);
 
 		const response = await fetch("/api/calendar/event/add", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json"
 			},
-			body: JSON.stringify({ ...form, usernameList: usernames })
+			body: JSON.stringify(formData)
 		});
 
 		if (response.status === 200) {

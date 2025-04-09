@@ -42,7 +42,7 @@ export function AddActivityModal({ children }: any) {
 		event.preventDefault();
 
 		// Converti la data di consegna in formato ISO
-		form.due = new Date(form.due).toISOString();
+		const endTime = new Date(form.due).toISOString();
 
 		// Aggiungiamo le risorse
 		const usernames = form.usernameList.concat(resourceList);
@@ -53,19 +53,28 @@ export function AddActivityModal({ children }: any) {
 		// TODO: Implementare la selezione delle attività genitore
 		form.parentActivityId = null as any;
 
-		console.log("Form inviato:", { ...form, dtStart });
+		const formData = {
+			summary: form.summary,
+			description: form.description,
+			status: "NEEDS-ACTION",
+			dtStart: dtStart,
+			due: endTime,
+			categories: form.categories,
+			location: form.location,
+			geo: form.geo,
+			parentActivityId: form.parentActivityId,
+			usernameList: usernames,
+			alarms: form.alarms
+		};
+
+		console.log("Form inviato:", formData);
 
 		const response = await fetch("/api/calendar/activity/add", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json"
 			},
-			body: JSON.stringify({
-				...form,
-				dtStart,
-				usernameList: usernames,
-				status: "NEEDS-ACTION"
-			}) // Includi dtStart e lo stato di default
+			body: JSON.stringify(formData)
 		});
 
 		if (response.status === 200) {

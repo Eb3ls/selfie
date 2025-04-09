@@ -59,8 +59,8 @@ export function ModifyEventModal({
 		event.preventDefault();
 
 		// Converti le date in formato ISO
-		form.dtStart = new Date(form.dtStart).toISOString();
-		form.dtEnd = new Date(form.dtEnd).toISOString();
+		const startTime = new Date(form.dtStart).toISOString();
+		const endTime = new Date(form.dtEnd).toISOString();
 
 		// Aggiungiamo le risorse
 		const usernames = form.usernameList.concat(resourceList);
@@ -71,8 +71,8 @@ export function ModifyEventModal({
 			description: form.description,
 			status: form.status,
 			rrule: form.rrule,
-			dtStart: form.dtStart,
-			dtEnd: form.dtEnd,
+			dtStart: startTime,
+			dtEnd: endTime,
 			categories: form.categories,
 			location: form.location,
 			geo: form.geo,
@@ -80,14 +80,14 @@ export function ModifyEventModal({
 			alarms: form.alarms
 		};
 
-		console.log("Form inviato:", { ...newForm });
+		console.log("Form inviato:", newForm);
 
 		const response = await fetch("/api/calendar/event/modify", {
 			method: "PATCH",
 			headers: {
 				"Content-Type": "application/json"
 			},
-			body: JSON.stringify({ ...newForm })
+			body: JSON.stringify(newForm)
 		});
 
 		if (response.status === 200) {

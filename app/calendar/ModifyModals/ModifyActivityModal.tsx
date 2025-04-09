@@ -59,7 +59,7 @@ export function ModifyActivityModal({
 		event.preventDefault();
 
 		// Converti le date in formato ISO
-		form.due = new Date(form.due).toISOString();
+		const endTime = new Date(form.due).toISOString();
 
 		// Aggiungiamo le risorse
 		const usernames = form.usernameList.concat(resourceList);
@@ -69,7 +69,7 @@ export function ModifyActivityModal({
 			summary: form.summary,
 			description: form.description,
 			status: form.status,
-			due: form.due,
+			due: endTime,
 			categories: form.categories,
 			location: form.location,
 			geo: form.geo,
@@ -77,14 +77,14 @@ export function ModifyActivityModal({
 			alarms: form.alarms
 		};
 
-		console.log("Form inviato:", { ...newForm });
+		console.log("Form inviato:", newForm);
 
 		const response = await fetch("/api/calendar/activity/modify", {
 			method: "PATCH",
 			headers: {
 				"Content-Type": "application/json"
 			},
-			body: JSON.stringify({ ...newForm })
+			body: JSON.stringify(newForm)
 		});
 
 		if (response.status === 200) {

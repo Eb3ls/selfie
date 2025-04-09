@@ -153,14 +153,14 @@ export function ModifySessionModal({
 			dateToChange: startOfSelectedSession.toISOString()
 		};
 
-		console.log("Primo form inviato:", { ...newForm });
+		console.log("Primo form inviato:", newForm);
 
 		const response = await fetch("/api/calendar/session/modify", {
 			method: "PATCH",
 			headers: {
 				"Content-Type": "application/json"
 			},
-			body: JSON.stringify({ ...newForm })
+			body: JSON.stringify(newForm)
 		});
 
 		if (response.ok) {
