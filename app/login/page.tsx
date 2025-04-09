@@ -54,7 +54,17 @@ function CompleteFormComponent() {
 		});
 
 		if (!response.ok) {
-			toast.error("Accesso fallito! Controlla le tue credenziali");
+			const errorMessage = await response.json();
+			if (
+				errorMessage.message &&
+				errorMessage.message === "Cannot login as a resource"
+			) {
+				toast.error(
+					"Non puoi accedere come risorsa! Contatta un amministratore"
+				);
+			} else {
+				toast.error("Accesso fallito! Controlla le tue credenziali");
+			}
 			return;
 		}
 

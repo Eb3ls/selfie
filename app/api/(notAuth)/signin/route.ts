@@ -35,6 +35,11 @@ export const POST = async (request: NextRequest) => {
 
 	const castedUser: RequestType = body as RequestType;
 
+	// Se l'utente è una risorsa, blocchiamo l'accesso
+	if (castedUser.username.startsWith("[RES]-")) {
+		return generateMessageResponse("Cannot login as a resource", 400);
+	}
+
 	const passwordEncrypted: string = crypto
 		.createHash("sha256")
 		.update(castedUser.password)
