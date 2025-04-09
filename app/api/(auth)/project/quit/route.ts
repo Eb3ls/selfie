@@ -1,77 +1,57 @@
 import {
 	generateMessageResponse,
 	generateObjectResponse,
-	usernameListToIds,
 	validate
 } from "@/utils/api/api";
 import {
-	NOTE_COLLECTION,
 	Note,
-	PROJECT_ACTIVITY_COLLECTION,
-	PROJECT_COLLECTION,
 	Project,
 	ProjectActivity,
 	StringProject,
-	StringProjectActivity,
-	findCollectionWrapper,
-	getCollection,
-	updateCollectionWrapper
+	StringProjectActivity
 } from "@/utils/db/db";
+import {
+	NOTE_COLLECTION,
+	PROJECT_ACTIVITY_COLLECTION,
+	PROJECT_COLLECTION,
+	getCollection
+} from "@/utils/db/db_functions";
+import {
+	findCollectionWrapper,
+	updateCollectionWrapper
+} from "@/utils/db/db_wrappers";
 import { Collection } from "mongodb";
 import { NextRequest } from "next/server";
 
 const requestTemplate = {
-	_id: "",
-	summary: "",
-	usernameList: []
+	projectId: ""
 };
-
 type RequestType = typeof requestTemplate;
 
-export const PATCH = async (request: NextRequest) => {
-	// Validazione della richiesta
+export const POST = async (request: NextRequest) => {
 	const validation = await validate<RequestType>(
 		request,
 		requestTemplate,
 		false
 	);
 
-	// Se la validazione fallisce, ritorna il messaggio di errore
 	if (validation === null) {
 		return generateMessageResponse("Invalid request", 400);
 	}
 
-	// Estraiamo l'utente e il corpo della richiesta
 	const { user: user, body: newBody } = validation;
 
 	// Estraiamo l'id dell'utente
 	const userId: string = user._id!;
 
 	// Estraiamo l'id dal body
-	const projectId: string = newBody._id!;
+	const projectId: string = newBody.projectId!;
 
-	// Estraiamo la lista degli username dal body
-	const usernameList: string[] = newBody.usernameList;
-
-	// Se il titolo non é tra le 3 e le 50 lettere, ritorna un errore
-	if (newBody.summary.length < 3 || newBody.summary.length > 50) {
-		return generateMessageResponse("Invalid summary length", 400);
-	}
-
-	// Convertiamo lo username in id e aggiungiamo lo userId come primo elemento
-	const convertionOut = await usernameListToIds(usernameList, userId);
-
-	if (convertionOut.status !== 200) {
-		return convertionOut;
-	}
-
-	const userIdList: string[] = (await convertionOut.json()).users;
-
-	// Ottieniamo la collezione dei progetti
+	// Otteniamo la collezione dei progetti
 	const projectClient: Collection<Project> =
 		await getCollection<Project>(PROJECT_COLLECTION);
 
-	// Controlliamo che il progetto esista
+	// Otteniamo il progetto
 	const projectOut = await findCollectionWrapper<Project>(
 		{ _id: projectId },
 		projectClient
@@ -81,16 +61,16 @@ export const PATCH = async (request: NextRequest) => {
 		return projectOut;
 	}
 
-	const project: StringProject[] = await projectOut.json();
+	const project: StringProject = (await projectOut.json())[0];
 
-	// Controlliamo che l'owner sia l'utente corrispondente
-	if (project[0].ownerId !== userId) {
-		return generateMessageResponse("Unauthorized", 400);
+	// Controlliamo che l'utente non sia l'owner del progetto
+	if (project.ownerId === userId) {
+		return generateMessageResponse("Owner cannot quit project", 400);
 	}
 
-	// Controlliamo che la lista utenti sia un sottoinsieme di quelli già presenti
-	if (!userIdList.every((userId) => project[0].userIdList.includes(userId))) {
-		return generateMessageResponse("New userList is invalid", 400);
+	// Controlliamo che l'utente sia nella lista degli utenti
+	if (!project.userIdList.includes(userId)) {
+		return generateMessageResponse("User not in project", 400);
 	}
 
 	// Otteniamo la collezione delle attività
@@ -114,15 +94,15 @@ export const PATCH = async (request: NextRequest) => {
 		const projectActivities: StringProjectActivity[] =
 			await projectActivityOut.json();
 
-		// Troviamo le activity che hanno associato un utente che non fa più parte del progetto
+		// Troviamo le activity che hanno associato l'utente che sta uscendo
 		const activitiesToUpdate = projectActivities.filter((activity) =>
-			activity.userIdList.some((id) => !userIdList.includes(id))
+			activity.userIdList.includes(userId)
 		);
 
-		// Eliminiamo le persone che non fanno più parte del progetto dalle attività e dalle note associate
+		// Eliminiamo l'utente dalla lista degli utenti
 		for (const activity of activitiesToUpdate) {
-			const newUserIdList = activity.userIdList.filter((id) =>
-				userIdList.includes(id)
+			const newUserIdList = activity.userIdList.filter(
+				(id) => id !== userId
 			);
 
 			const updateOut = await updateCollectionWrapper<ProjectActivity>(
@@ -147,16 +127,12 @@ export const PATCH = async (request: NextRequest) => {
 		}
 	}
 
-	// Creiamo un oggetto con i campi da modificare
-	const newFields: Partial<StringProject> = {
-		summary: newBody.summary,
-		userIdList: userIdList
-	};
+	const userIdList = project.userIdList.filter((id) => id !== userId);
 
 	// Modifichiamo il progetto
 	const updateOut = await updateCollectionWrapper<Project>(
 		{ _id: projectId },
-		{ $set: newFields } as any,
+		{ $set: userIdList } as any,
 		projectClient
 	);
 
