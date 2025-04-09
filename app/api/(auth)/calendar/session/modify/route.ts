@@ -20,7 +20,6 @@ const requestTemplate = {
 	summary: "",
 	description: "",
 	status: "",
-	rrule: "",
 	dtStart: "",
 	dtEnd: "",
 	newSetting: {

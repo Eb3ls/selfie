@@ -22,7 +22,6 @@ const requestTemplate = {
 	summary: "",
 	description: "",
 	status: "",
-	rrule: "",
 	dtStart: "",
 	dtEnd: "",
 	categories: "",
@@ -104,7 +103,7 @@ export const PATCH = async (request: NextRequest) => {
 	for (const resourceId of resourceIdList) {
 		const out = await isResourceAvailable(
 			resourceId,
-			newBody.rrule,
+			event[0].rrule,
 			newBody.dtStart,
 			newBody.dtEnd
 		);

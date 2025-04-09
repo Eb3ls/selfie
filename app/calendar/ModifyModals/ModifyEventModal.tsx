@@ -70,7 +70,6 @@ export function ModifyEventModal({
 			summary: form.summary,
 			description: form.description,
 			status: form.status,
-			rrule: form.rrule,
 			dtStart: startTime,
 			dtEnd: endTime,
 			categories: form.categories,

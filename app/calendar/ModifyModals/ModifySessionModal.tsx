@@ -141,7 +141,6 @@ export function ModifySessionModal({
 			summary: form.summary,
 			description: form.description,
 			status: form.status,
-			rrule: form.rrule,
 			dtStart: startDateTime.toISOString(),
 			dtEnd: endDateTime.toISOString(),
 			newSetting: {
