@@ -54,6 +54,11 @@ export const POST = async (request: NextRequest) => {
 	// Estriamo la lista degli username dal body
 	const usernameList: string[] = newBody.usernameList;
 
+	// Controlliamo che la dtStart sia prima della dtEnd
+	if (new Date(newBody.dtStart) >= new Date(newBody.dtEnd)) {
+		return generateMessageResponse("dtStart must be before dtEnd", 400);
+	}
+
 	// Dividiamo e convertiamo la lista degli username e risorse in una lista di id
 	const convertionOut = await divideResourcesAndConvert(
 		usernameList,
