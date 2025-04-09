@@ -47,7 +47,7 @@ class ActivityForm extends HTMLElement {
 	// Renderizziamo il componente senza contenuto
 	connectedCallback() {
 		this.innerHTML = `
-            <div class="modal fade" id="ModifyActivity" tabindex="-1">
+            <div class="modal fade" id="ModifyActivity">
                 <div class="modal-dialog modal-lg">
                     <div class="modal-content">
                     </div>

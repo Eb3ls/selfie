@@ -36,7 +36,7 @@ class ProjectSettings extends HTMLElement {
                 <i class="bi bi-gear-fill fs-5 settings-btn"></i>
             </button>
 
-            <div class="modal fade" id="settingsModal" tabindex="-1">
+            <div class="modal fade" id="settingsModal">
                 <div class="modal-dialog modal-lg">
                     <div class="modal-content">
                     </div>

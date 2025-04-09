@@ -259,7 +259,7 @@ class PhaseForm extends HTMLElement {
 	// Renderizziamo il componente senza contenuto
 	connectedCallback() {
 		this.innerHTML = `
-            <div class="modal fade" id="ModifyPhase" tabindex="-1">
+            <div class="modal fade" id="ModifyPhase">
                 <div class="modal-dialog modal-lg">
                     <div class="modal-content">
                     </div>
