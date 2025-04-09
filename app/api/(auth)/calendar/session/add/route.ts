@@ -10,7 +10,6 @@ import {
 	addCollectionWrapper,
 	getCollection
 } from "@/utils/db/db";
-import { timeMachine } from "@/utils/timeMachine/timeMachine";
 import { Collection } from "mongodb";
 import { NextRequest } from "next/server";
 import { rrulestr } from "rrule";
@@ -73,7 +72,7 @@ export const POST = async (request: NextRequest) => {
 	// Aggiungiamo le impostazioni alla lista delle impostazioni
 	newSession.settingsList = [
 		{
-			modificationDate: timeMachine.timeMachineTime.toDateString(),
+			modificationDate: new Date(newBody.dtStart).toDateString(),
 			cycles: settings.cycles,
 			studyTime: settings.studyTime,
 			breakTime: settings.breakTime

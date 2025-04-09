@@ -9,12 +9,14 @@ import {
 	StringPomodoroSettings,
 	StringSession,
 	findCollectionWrapper,
-	getCollection
+	getCollection,
+	updateCollectionWrapper
 } from "@/utils/db/db";
 import { timeMachine } from "@/utils/timeMachine/timeMachine";
 import { Collection } from "mongodb";
 import { ObjectId } from "mongodb";
 import { NextRequest } from "next/server";
+import { rrulestr } from "rrule";
 
 interface SessionResponse {
 	settings: StringPomodoroSettings;
@@ -45,9 +47,41 @@ export const GET = async (
 	// Estraggo l'id dell'utente
 	const userId: string = user._id!;
 
+	// Otteniamo il giorno tramite timeMachine
+	const today: string = timeMachine.timeMachineTime.toDateString();
+
 	// Otteniamo la collezione delle sessioni
 	const sessionClient: Collection<Session> =
 		await getCollection<Session>(SESSION_COLLECTION);
+
+	const outBefore = await findCollectionWrapper<Session>(
+		{ _id: sessionId } as any,
+		sessionClient
+	);
+
+	if (outBefore.status !== 200) {
+		return outBefore;
+	}
+
+	const sessionBefore: StringSession = (await outBefore.json())[0];
+
+	// Rimuoviamo tutti gli elementi in completedCycles che sono futuri rispetto a TimeMachine
+	sessionBefore.completedCycles = sessionBefore.completedCycles.filter(
+		(element) => {
+			return new Date(element.date) <= new Date(today);
+		}
+	);
+
+	// Modifichiamo la sessione
+	const updateOut = await updateCollectionWrapper<Session>(
+		{ _id: sessionId },
+		{ $set: sessionBefore } as any,
+		sessionClient
+	);
+
+	if (updateOut.status !== 200) {
+		return updateOut;
+	}
 
 	const out = await findCollectionWrapper<Session>(
 		{ _id: sessionId } as any,
@@ -60,8 +94,16 @@ export const GET = async (
 
 	const session: StringSession = (await out.json())[0];
 
-	// Otteniamo il giorno tramite timeMachine
-	const today: string = timeMachine.timeMachineTime.toDateString();
+	// Controlliamo che la data dalla timeMachine sia successiva alla data di inizio della sessione
+	if (
+		new Date(timeMachine.timeMachineTime.toDateString()) <
+		new Date(new Date(session.dtStart).toDateString())
+	) {
+		return generateMessageResponse(
+			"TimeMachine date is before session start date",
+			400
+		);
+	}
 
 	// Cerchiamo quali sono le impostazioni che si applicano al momento corrente
 	const settingsListBeforeToday = session.settingsList
@@ -83,39 +125,43 @@ export const GET = async (
 	};
 
 	// Dobbiamo aggiungere il cicli di debito accumulato ai cicli dei settings
-	// Calcolo del debito accumulato
-	let totalDebt = 0;
-	let currentDate = new Date(session.settingsList[0].modificationDate);
-	const endDate = new Date(today);
+	// Prima troviamo i cicli svolti, poi quelli da svolgere e infine il debito
 
-	while (currentDate <= endDate) {
-		const dateStr = currentDate.toDateString();
-		// Troviamo il setting appropriato per questo giorno
-		const applicableSettings = session.settingsList
-			.filter((s) => new Date(s.modificationDate) <= currentDate)
+	// Cicli svolti
+	let workDone = 0;
+
+	for (const day of session.completedCycles) {
+		workDone += day.cycles;
+	}
+
+	// Cicli da svolgere
+	let workToDo = 0;
+
+	const startDate = new Date(session.dtStart);
+	const endDate = new Date(timeMachine.timeMachineTime);
+
+	// Calcoliamo le occorrenze tramite rrule
+	const rule = rrulestr(session.rrule, {
+		dtstart: new Date(session.dtStart)
+	});
+
+	const occurrences = rule.between(startDate, endDate, true);
+	// Calcoliamo il numero di cicli da svolgere
+	for (const occurrence of occurrences) {
+		// Cerchiamo quali sono le impostazioni che si applicano al momento corrente
+		const settingsListBeforeOccurrence = session.settingsList
+			.filter((s) => new Date(s.modificationDate) <= occurrence)
 			.sort(
 				(a, b) =>
 					new Date(b.modificationDate).getTime() -
 					new Date(a.modificationDate).getTime()
 			);
-		const dailySettings = applicableSettings[0];
-
-		// Calcoliamo i cicli svolti o 0 se il giorno non è presente
-		const dayEntry = session.completedCycles.find(
-			(dc) => dc.date === dateStr
-		);
-		const completed = dayEntry ? dayEntry.cycles : 0;
-
-		// Prendiamo i cicli che erano da fare in quel giorno
-		const dailyGoal = dailySettings.cycles;
-
-		// Aggiungiamo il debito di giornata
-		// (se è minore di 0, significa che ha recuperato debito)
-		totalDebt += dailyGoal - completed;
-
-		// Avanziamo di un giorno
-		currentDate.setDate(currentDate.getDate() + 1);
+		const lastSettings = settingsListBeforeOccurrence[0];
+		workToDo += lastSettings.cycles;
 	}
+
+	// Debito totale
+	let totalDebt = workToDo - workDone;
 
 	if (totalDebt < 0) {
 		console.warn("[POMODORO] Debito negativo trovato!");
