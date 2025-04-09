@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import { GrResources } from "react-icons/gr";
 import { IoMdGlobe } from "react-icons/io";
 import useSWR from "swr";
 import { StandardModal } from "../components/StandardModal";
@@ -63,7 +64,7 @@ export function ResourcesModal() {
 				}}
 			>
 				<div className="d-flex align-items-center flex-grow-1">
-					<i className="bi bi-person-badge fs-4 text-primary me-3"></i>
+					<GrResources className="fs-4 text-primary me-3" />
 					<span className="fw-medium">{resource.name}</span>
 				</div>
 				<button

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button, Form } from "react-bootstrap";
-import { FaTrash, FaUser } from "react-icons/fa";
+import { FaTrash } from "react-icons/fa";
+import { GrResources } from "react-icons/gr";
 
 interface ResourceInvitationComponentProps {
 	mainId: string;
@@ -98,7 +99,7 @@ export function ResourceInvitationComponent({
 									className="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
 								>
 									<div className="d-flex align-items-center">
-										<FaUser className="text-primary me-3" />
+										<GrResources className="text-primary me-3" />
 										<span className="fw-medium">
 											{resource.substring(6)}
 										</span>
@@ -136,7 +137,7 @@ export function ResourceInvitationComponent({
 									className="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
 								>
 									<div className="d-flex align-items-center">
-										<FaUser className="text-primary me-3" />
+										<GrResources className="text-primary me-3" />
 										<span className="fw-medium">
 											{resource.substring(6)}
 										</span>
