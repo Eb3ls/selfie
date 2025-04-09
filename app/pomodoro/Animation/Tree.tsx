@@ -41,7 +41,7 @@ export function Tree({ time, started, paused, resetTrigger, show }: TreeProps) {
 
 			return () => observer.disconnect();
 		}
-	}, []);
+	}, [resetTrigger]);
 
 	const style = useMemo<React.CSSProperties>(() => {
 		return {
