@@ -313,7 +313,7 @@ export function AddEventModal({ mutate, children }: AddEventModalProps) {
 				/>
 
 				<ResourceInvitationComponent
-					mainId={"42"}
+					originalResourceList={[]}
 					resourceList={resourceList}
 					setResourceList={setResourceList}
 				/>

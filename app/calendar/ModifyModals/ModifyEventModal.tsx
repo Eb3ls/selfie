@@ -323,7 +323,7 @@ export function ModifyEventModal({
 				/>
 
 				<ResourceInvitationComponent
-					mainId={form._id!}
+					originalResourceList={resources}
 					resourceList={resourceList}
 					setResourceList={setResourceList}
 				/>

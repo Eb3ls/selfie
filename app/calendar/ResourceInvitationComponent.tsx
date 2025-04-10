@@ -1,39 +1,26 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button, Form } from "react-bootstrap";
 import { FaTrash } from "react-icons/fa";
 import { GrResources } from "react-icons/gr";
 
 interface ResourceInvitationComponentProps {
-	mainId: string;
+	originalResourceList: string[];
 	resourceList: string[];
 	setResourceList: (resourceList: string[]) => void;
 }
 
 export function ResourceInvitationComponent({
-	mainId,
+	originalResourceList,
 	resourceList,
 	setResourceList
 }: ResourceInvitationComponentProps) {
-	const [currentMainId, setCurrentMainId] = useState("");
-	const [currentOriginalResources, setCurrentOriginalResources] = useState<
-		string[]
-	>([]);
-
-	// Se cambia l'id dell'attività, aggiorna la lista delle risorse che erano già presenti
-	useEffect(() => {
-		if (currentMainId !== mainId) {
-			setCurrentMainId(mainId);
-			setCurrentOriginalResources(resourceList);
-		}
-	}, [mainId, currentMainId, resourceList]);
-
-	// Troviamo le risorse in resourceList che erano presenti anche in currentOriginalResources
-	// E troviamo le risorse in currentOriginalResources che non sono presenti in resourceList
-	const oldResources = currentOriginalResources.filter((resource) =>
+	// Troviamo le risorse in resourceList che erano presenti anche in originalResourceList
+	// E troviamo le risorse in originalResourceList che non sono presenti in resourceList
+	const oldResources = originalResourceList.filter((resource) =>
 		resourceList.includes(resource)
 	);
 	const newResources = resourceList.filter(
-		(resource) => !currentOriginalResources.includes(resource)
+		(resource) => !originalResourceList.includes(resource)
 	);
 
 	const [resourceInput, setResourceInput] = useState("");
