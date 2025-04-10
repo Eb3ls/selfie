@@ -36,7 +36,7 @@ export default function CalendarPage() {
 	const { dateTime } = useTime();
 	const [currentDate, setCurrentDate] = useState(dateTime);
 
-	const { data: pulledCalendar } = useSWR(
+	const { data: pulledCalendar, mutate } = useSWR(
 		"/api/calendar/getCalendar",
 		fetchCalendar
 	);
@@ -76,6 +76,7 @@ export default function CalendarPage() {
 					setCurrentDate={setCurrentDate}
 					setCalendarView={setCalendarView}
 					setCurrentView={setCurrentView}
+					mutate={mutate}
 				/>
 
 				{currentView === "list" ? (
@@ -107,6 +108,7 @@ export default function CalendarPage() {
 						calendarEvent={selectedCalendarEvent}
 						showModal={showModal}
 						setShowModal={setShowModal}
+						mutate={mutate}
 					/>
 				)}
 			</Container>

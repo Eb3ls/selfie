@@ -46,7 +46,7 @@ export default function CalendarIDPage() {
 	const { dateTime } = useTime();
 	const [currentDate, setCurrentDate] = useState(dateTime);
 
-	const { data: pulledCalendar } = useSWR(
+	const { data: pulledCalendar, mutate } = useSWR(
 		"/api/calendar/getCalendar/" + resourceId,
 		fetchCalendarID
 	);
@@ -109,6 +109,7 @@ export default function CalendarIDPage() {
 						show={showModal}
 						resourceId={resourceId}
 						setShow={setShowModal}
+						mutate={mutate}
 					/>
 				)}
 			</Container>

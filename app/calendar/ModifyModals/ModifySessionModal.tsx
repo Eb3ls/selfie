@@ -13,6 +13,7 @@ import {
 import moment from "moment";
 import React, { useEffect, useState } from "react";
 import { Button, Form } from "react-bootstrap";
+import { toast } from "react-toastify";
 import {
 	PomodoroBlock,
 	getDeleteContent,
@@ -28,12 +29,14 @@ export function ModifySessionModal({
 	session,
 	show,
 	setShow,
-	startOfSelectedSession
+	startOfSelectedSession,
+	mutate
 }: {
 	session: StringSession;
 	show: boolean;
 	setShow: (show: boolean) => void;
 	startOfSelectedSession: Date;
+	mutate: () => void;
 }) {
 	const rawSession: StringSession = { ...session };
 	const newSession: StringSessionForm = {
@@ -116,9 +119,9 @@ export function ModifySessionModal({
 
 		if (response.ok) {
 			const fetched_data = await response.json();
-			alert("Successful: " + fetched_data.message);
+			toast.success("Impostazioni condivise con successo!");
 		} else {
-			alert("Failed! Status code: " + response.status);
+			toast.error("Errore durante la condivisione delle impostazioni");
 		}
 
 		setUserToInvite("");
@@ -152,8 +155,6 @@ export function ModifySessionModal({
 			dateToChange: startOfSelectedSession.toISOString()
 		};
 
-		console.log("Primo form inviato:", newForm);
-
 		const response = await fetch("/api/calendar/session/modify", {
 			method: "PATCH",
 			headers: {
@@ -163,10 +164,11 @@ export function ModifySessionModal({
 		});
 
 		if (response.ok) {
-			alert("Sessione modificata con successo!");
-			window.location.reload();
+			toast.success("Sessione modificata con successo!");
+			setShow(false);
+			mutate();
 		} else {
-			alert("Errore nella modifica della sessione!");
+			toast.error("Errore durante la modifica della sessione");
 		}
 	};
 
@@ -180,8 +182,9 @@ export function ModifySessionModal({
 		});
 
 		if (response.ok) {
-			alert("Sessione eliminata con successo!");
-			window.location.reload();
+			toast.success("Sessione eliminata con successo!");
+			setShow(false);
+			mutate();
 		}
 	}
 

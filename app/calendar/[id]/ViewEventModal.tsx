@@ -7,6 +7,7 @@ import { useUser } from "@/app/components/UserContext";
 import { StringEvent } from "@/utils/db/db";
 import moment from "moment-timezone";
 import React from "react";
+import { toast } from "react-toastify";
 import {
 	getDropContent,
 	getTextFromStatus,
@@ -21,12 +22,14 @@ export function ViewEventModal({
 	event,
 	show,
 	resourceId,
-	setShow
+	setShow,
+	mutate
 }: {
 	event: StringEventFrontend;
 	show: boolean;
 	resourceId: string | string[];
 	setShow: (show: boolean) => void;
+	mutate: () => void;
 }) {
 	const { users, resources } = divideResourcesFromUserList(
 		event.usernameList
@@ -44,8 +47,9 @@ export function ViewEventModal({
 		});
 
 		if (response.ok) {
-			alert("Evento abbandonato con successo!");
-			window.location.reload();
+			toast.success("Evento abbandonato con successo");
+			mutate();
+			setShow(false);
 		}
 	}
 

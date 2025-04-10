@@ -8,9 +8,15 @@ import { StandardUsersInput } from "@/app/components/StandardUsersInput";
 import { useTime } from "@/app/components/TimeContext";
 import { StringAlarm } from "@/utils/db/db";
 import React, { useState } from "react";
+import { toast } from "react-toastify";
 import { ResourceInvitationComponent } from "../ResourceInvitationComponent";
 
-export function AddActivityModal({ children }: any) {
+interface AddActivityModalProps {
+	mutate: () => void;
+	children: any;
+}
+
+export function AddActivityModal({ mutate, children }: AddActivityModalProps) {
 	const [show, setShow] = useState(false);
 	const [form, setForm] = useState({
 		summary: "",
@@ -67,8 +73,6 @@ export function AddActivityModal({ children }: any) {
 			alarms: form.alarms
 		};
 
-		console.log("Form inviato:", formData);
-
 		const response = await fetch("/api/calendar/activity/add", {
 			method: "POST",
 			headers: {
@@ -78,17 +82,33 @@ export function AddActivityModal({ children }: any) {
 		});
 
 		if (response.status === 200) {
-			alert("Successful!");
-			window.location.reload();
+			toast.success("Attività creata con successo!");
+			setShow(false);
+			setForm({
+				summary: "",
+				description: "",
+				due: "",
+				categories: "",
+				location: "",
+				geo: "",
+				parentActivityId: "",
+				usernameList: [],
+				alarms: []
+			});
+			setResourceList([]);
+			mutate();
 		} else if (response.status === 400) {
 			const out = await response.json();
 			if (out.message === undefined) {
-				alert("Failed! User not found: " + out.users[0]);
+				toast.error(
+					"Errore durante la creazione dell'attività. Non è stato trovato l'utente: " +
+						out.users[0]
+				);
 			} else {
-				alert("Failed! " + out.message);
+				toast.error("Errore durante la creazione dell'attività");
 			}
 		} else {
-			alert("Failed! Status code: " + response.status);
+			toast.error("Errore durante la creazione dell'attività");
 		}
 	};
 

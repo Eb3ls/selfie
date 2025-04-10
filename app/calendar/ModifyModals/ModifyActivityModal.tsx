@@ -9,6 +9,7 @@ import { StandardViewField } from "@/app/components/StandardViewFIeld";
 import { StringActivity, StringAlarm } from "@/utils/db/db";
 import moment from "moment";
 import React, { useState } from "react";
+import { toast } from "react-toastify";
 import { ResourceInvitationComponent } from "../ResourceInvitationComponent";
 import { divideResourcesFromUserList } from "../calendarUtils/calendarFetch";
 import {
@@ -26,12 +27,14 @@ export function ModifyActivityModal({
 	activity,
 	show,
 	setShow,
-	currentUserId
+	currentUserId,
+	mutate
 }: {
 	activity: StringActivityFrontend;
 	show: boolean;
 	setShow: (show: boolean) => void;
 	currentUserId: string;
+	mutate: () => void;
 }) {
 	const { users, resources } = divideResourcesFromUserList(
 		activity.usernameList
@@ -77,8 +80,6 @@ export function ModifyActivityModal({
 			alarms: form.alarms
 		};
 
-		console.log("Form inviato:", newForm);
-
 		const response = await fetch("/api/calendar/activity/modify", {
 			method: "PATCH",
 			headers: {
@@ -88,17 +89,21 @@ export function ModifyActivityModal({
 		});
 
 		if (response.status === 200) {
-			alert("Successful!");
-			window.location.reload();
+			toast.success("Attività modificata con successo!");
+			setShow(false);
+			mutate();
 		} else if (response.status === 400) {
 			const out = await response.json();
 			if (out.message === undefined) {
-				alert("Failed! User not found: " + out.users[0]);
+				toast.error(
+					"Errore durante la modifica dell'attività. Non è stato trovato l'utente: " +
+						out.users[0]
+				);
 			} else {
-				alert("Failed! " + out.message);
+				toast.error("Errore durante la creazione dell'attività");
 			}
 		} else {
-			alert("Failed! Status code: " + response.status);
+			toast.error("Errore durante la creazione dell'attività");
 		}
 	};
 
@@ -112,8 +117,9 @@ export function ModifyActivityModal({
 		});
 
 		if (response.ok) {
-			alert("Attività eliminata con successo!");
-			window.location.reload();
+			toast.error("Attività eliminata con successo!");
+			setShow(false);
+			mutate();
 		}
 	}
 
@@ -127,8 +133,9 @@ export function ModifyActivityModal({
 		});
 
 		if (response.ok) {
-			alert("Attività abbandonata con successo!");
-			window.location.reload();
+			toast.error("Attività abbandonata con successo!");
+			setShow(false);
+			mutate();
 		}
 	}
 

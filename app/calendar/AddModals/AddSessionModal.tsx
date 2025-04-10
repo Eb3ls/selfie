@@ -6,9 +6,15 @@ import { StandardModal } from "@/app/components/StandardModal";
 import { StandardRepetitionInput } from "@/app/components/StandardRepetitionInput";
 import { StringAlarm } from "@/utils/db/db";
 import React, { useState } from "react";
+import { toast } from "react-toastify";
 import { PomodoroBlock } from "../calendarUtils/calendarUX";
 
-export function AddSessionModal({ children }: any) {
+interface AddSessionModalProps {
+	mutate: () => void;
+	children: any;
+}
+
+export function AddSessionModal({ mutate, children }: AddSessionModalProps) {
 	const [show, setShow] = useState(false);
 	const [recurrenceType, setRecurrenceType] = useState<
 		"DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY"
@@ -104,8 +110,6 @@ export function AddSessionModal({ children }: any) {
 			alarms: form.alarms
 		};
 
-		console.log("Form inviato:", formData);
-
 		const response = await fetch("/api/calendar/session/add", {
 			method: "POST",
 			headers: {
@@ -115,17 +119,32 @@ export function AddSessionModal({ children }: any) {
 		});
 
 		if (response.status === 200) {
-			alert("Successful!");
-			window.location.reload();
-		} else if (response.status === 400) {
-			const out = await response.json();
-			if (out.message === undefined) {
-				alert("Failed! User not found: " + out.users[0]);
-			} else {
-				alert("Failed! " + out.message);
-			}
+			toast.success("Sessione creata con successo!");
+			setShow(false);
+			setForm({
+				summary: "",
+				description: "",
+				status: "CONFIRMED",
+				rrule: "",
+				dtStart: "",
+				dtEnd: "",
+				settings: {
+					cycles: 1,
+					studyTime: 1,
+					breakTime: 1
+				},
+				alarms: []
+			});
+			setRecurrenceType("DAILY");
+			setRecurrenceEnd("NEVER");
+			setRecurrenceEndDate("");
+			setRecurrenceCount(1);
+			setWeeklyDays([]);
+			setMonthlyDays([]);
+			setYearlyMonths([]);
+			mutate();
 		} else {
-			alert("Failed! Status code: " + response.status);
+			toast.error("Errore durante la creazione della sessione");
 		}
 	};
 

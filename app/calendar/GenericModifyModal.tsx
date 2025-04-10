@@ -15,12 +15,14 @@ interface ModifyModalProps {
 	calendarEvent: CalendarEvent;
 	showModal: boolean;
 	setShowModal: (value: boolean) => void;
+	mutate: () => void;
 }
 
 export function GenericModifyModal({
 	calendarEvent,
 	showModal,
-	setShowModal
+	setShowModal,
+	mutate
 }: ModifyModalProps) {
 	const { user } = useUser();
 
@@ -33,6 +35,7 @@ export function GenericModifyModal({
 				setShow={setShowModal}
 				activity={activity}
 				currentUserId={user?._id || ""}
+				mutate={mutate}
 			/>
 		);
 	} else if (calendarEvent.typology === "event") {
@@ -43,6 +46,7 @@ export function GenericModifyModal({
 				setShow={setShowModal}
 				event={event}
 				currentUserId={user?._id || ""}
+				mutate={mutate}
 			/>
 		);
 	} else if (calendarEvent.typology === "session") {
@@ -53,6 +57,7 @@ export function GenericModifyModal({
 				setShow={setShowModal}
 				session={session}
 				startOfSelectedSession={calendarEvent.start}
+				mutate={mutate}
 			/>
 		);
 	} else {

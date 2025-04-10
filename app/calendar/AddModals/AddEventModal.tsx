@@ -9,9 +9,15 @@ import { StandardUsersInput } from "@/app/components/StandardUsersInput";
 import { StringAlarm } from "@/utils/db/db";
 import React, { useState } from "react";
 import { Form } from "react-bootstrap";
+import { toast } from "react-toastify";
 import { ResourceInvitationComponent } from "../ResourceInvitationComponent";
 
-export function AddEventModal({ children }: any) {
+interface AddEventModalProps {
+	mutate: () => void;
+	children: any;
+}
+
+export function AddEventModal({ mutate, children }: AddEventModalProps) {
 	const [show, setShow] = useState(false);
 	const [enableRecurrence, setEnableRecurrence] = useState(false); // Stato per abilitare/disabilitare la ripetizione
 	const [recurrenceType, setRecurrenceType] = useState<
@@ -108,8 +114,6 @@ export function AddEventModal({ children }: any) {
 			alarms: form.alarms
 		};
 
-		console.log("Form inviato:", formData);
-
 		const response = await fetch("/api/calendar/event/add", {
 			method: "POST",
 			headers: {
@@ -119,17 +123,43 @@ export function AddEventModal({ children }: any) {
 		});
 
 		if (response.status === 200) {
-			alert("Successful!");
-			window.location.reload();
+			toast.success("Evento creato con successo!");
+			setShow(false);
+			setForm({
+				summary: "",
+				description: "",
+				status: "TENTATIVE",
+				rrule: "",
+				dtStart: "",
+				dtEnd: "",
+				categories: "",
+				location: "",
+				geo: "",
+				usernameList: [],
+				alarms: []
+			});
+			setResourceList([]);
+			setEnableRecurrence(false);
+			setRecurrenceType("DAILY");
+			setRecurrenceEnd("NEVER");
+			setRecurrenceEndDate("");
+			setRecurrenceCount(1);
+			setWeeklyDays([]);
+			setMonthlyDays([]);
+			setYearlyMonths([]);
+			mutate();
 		} else if (response.status === 400) {
 			const out = await response.json();
 			if (out.message === undefined) {
-				alert("Failed! User not found: " + out.users[0]);
+				toast.error(
+					"Errore durante la creazione dell'evento. Non è stato trovato l'utente: " +
+						out.users[0]
+				);
 			} else {
-				alert("Failed! " + out.message);
+				toast.error("Errore durante la creazione dell'evento");
 			}
 		} else {
-			alert("Failed! Status code: " + response.status);
+			toast.error("Errore durante la creazione dell'evento");
 		}
 	};
 

@@ -9,6 +9,7 @@ import { StandardViewField } from "@/app/components/StandardViewFIeld";
 import { StringAlarm, StringEvent } from "@/utils/db/db";
 import moment from "moment";
 import React, { useState } from "react";
+import { toast } from "react-toastify";
 import { ResourceInvitationComponent } from "../ResourceInvitationComponent";
 import { divideResourcesFromUserList } from "../calendarUtils/calendarFetch";
 import {
@@ -26,12 +27,14 @@ export function ModifyEventModal({
 	event,
 	show,
 	setShow,
-	currentUserId
+	currentUserId,
+	mutate
 }: {
 	event: StringEventFrontend;
 	show: boolean;
 	setShow: (show: boolean) => void;
 	currentUserId: string;
+	mutate: () => void;
 }) {
 	const { users, resources } = divideResourcesFromUserList(
 		event.usernameList
@@ -79,8 +82,6 @@ export function ModifyEventModal({
 			alarms: form.alarms
 		};
 
-		console.log("Form inviato:", newForm);
-
 		const response = await fetch("/api/calendar/event/modify", {
 			method: "PATCH",
 			headers: {
@@ -90,17 +91,21 @@ export function ModifyEventModal({
 		});
 
 		if (response.status === 200) {
-			alert("Successful!");
-			window.location.reload();
+			toast.success("Evento modificato con successo!");
+			setShow(false);
+			mutate();
 		} else if (response.status === 400) {
 			const out = await response.json();
 			if (out.message === undefined) {
-				alert("Failed! User not found: " + out.users[0]);
+				toast.error(
+					"Errore durante la modifica dell'evento. Non è stato trovato l'utente: " +
+						out.users[0]
+				);
 			} else {
-				alert("Failed! " + out.message);
+				toast.error("Errore durante la creazione dell'evento");
 			}
 		} else {
-			alert("Failed! Status code: " + response.status);
+			toast.error("Errore durante la creazione dell'evento");
 		}
 	};
 
@@ -114,8 +119,9 @@ export function ModifyEventModal({
 		});
 
 		if (response.ok) {
-			alert("Evento eliminato con successo!");
-			window.location.reload();
+			toast.error("Evento eliminato con successo!");
+			setShow(false);
+			mutate();
 		}
 	}
 
@@ -129,8 +135,9 @@ export function ModifyEventModal({
 		});
 
 		if (response.ok) {
-			alert("Evento abbandonato con successo!");
-			window.location.reload();
+			toast.error("Evento abbandonato con successo!");
+			setShow(false);
+			mutate();
 		}
 	}
 

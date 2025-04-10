@@ -38,6 +38,7 @@ interface CustomToolbarProps {
 	setCurrentDate: (value: SetStateAction<Date>) => void;
 	setCalendarView: (value: SetStateAction<View>) => void;
 	setCurrentView: (value: SetStateAction<"calendar" | "list">) => void;
+	mutate: () => void;
 }
 
 export function CustomToolbar({
@@ -46,7 +47,8 @@ export function CustomToolbar({
 	currentView,
 	setCurrentDate,
 	setCalendarView,
-	setCurrentView
+	setCurrentView,
+	mutate
 }: CustomToolbarProps) {
 	const formattedDate = obtainFormattedDate(currentDate, calendarView);
 
@@ -147,18 +149,18 @@ export function CustomToolbar({
 							)}
 						</button>
 						<div className="d-flex gap-2 align-items-center">
-							<AddActivityModal>
+							<AddActivityModal mutate={mutate}>
 								<button className="btn activity-color text-white hover-lift rounded-pill shadow-sm fw-semibold">
 									<i className="bi bi-plus-lg me-1"></i>
 									Attività
 								</button>
 							</AddActivityModal>
-							<AddEventModal>
+							<AddEventModal mutate={mutate}>
 								<button className="btn event-color text-white hover-lift rounded-pill shadow-sm fw-semibold">
 									<i className="bi bi-plus-lg me-1"></i>Evento
 								</button>
 							</AddEventModal>
-							<AddSessionModal>
+							<AddSessionModal mutate={mutate}>
 								<button className="btn session-color text-white hover-lift rounded-pill shadow-sm fw-semibold">
 									<i className="bi bi-plus-lg me-1"></i>
 									Sessione
