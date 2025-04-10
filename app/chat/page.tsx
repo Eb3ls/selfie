@@ -12,12 +12,13 @@ import { useTime } from "@/app/components/TimeContext";
 // Librerie
 import { StringMessage } from "@/utils/db/db";
 import React, { Fragment, useEffect, useRef, useState } from "react";
+import { toast } from "react-toastify";
 import useSWR from "swr";
 
 async function fetcher(url: string) {
 	const response = await fetch(url);
 	if (!response.ok) {
-		alert("Errore nell'ottenimento dei dati delle chat");
+		toast.error("Errore nel recupero dei dati delle chat");
 	}
 	return response.json();
 }
@@ -118,7 +119,7 @@ export default function ChatMain() {
 			};
 			setCurrentMessages([...currentMessages, newMessageObj]);
 		} else {
-			alert("Errore nell'invio del messaggio");
+			toast.error("Errore durante l'invio del messaggio");
 		}
 
 		setNewMessage("");
@@ -134,7 +135,7 @@ export default function ChatMain() {
 		);
 
 		if (requestedChat === undefined) {
-			alert("Errore durante il caricamento della chat");
+			toast.error("Errore durante il caricamento della chat");
 			return;
 		}
 

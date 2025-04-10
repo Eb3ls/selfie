@@ -3,6 +3,7 @@
 import { StandardInput } from "@/app/components/StandardInput";
 import { StandardModal } from "@/app/components/StandardModal";
 import React, { useState } from "react";
+import { toast } from "react-toastify";
 
 interface ChatModalProps {
 	updateChatList: () => void;
@@ -35,11 +36,11 @@ export function ChatModal({ updateChatList, children }: ChatModalProps) {
 		});
 
 		if (!response.ok) {
-			alert("Operazione fallita! Codice di stato: " + response.status);
+			toast.error("Errore durante la creazione della chat");
 			return;
 		}
 
-		alert("Chat creata con successo!");
+		toast.success("Chat creata con successo");
 		setShow(false);
 		setForm({ username: "" });
 		updateChatList();

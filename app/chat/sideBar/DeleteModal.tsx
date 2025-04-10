@@ -2,6 +2,7 @@
 
 import { StandardModal } from "@/app/components/StandardModal";
 import React, { useState } from "react";
+import { toast } from "react-toastify";
 
 interface DeleteModalProps {
 	chat_id: string;
@@ -34,11 +35,11 @@ export function DeleteModal({
 		});
 
 		if (!response.ok) {
-			alert("Operazione fallita! Codice di stato: " + response.status);
+			toast.error("Errore durante l'eliminazione della chat");
 			return;
 		}
 
-		alert("Chat eliminata con successo!");
+		toast.success("Chat eliminata con successo");
 		updateChatList();
 	};
 

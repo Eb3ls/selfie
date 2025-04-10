@@ -4,6 +4,7 @@ import { StandardInput } from "@/app/components/StandardInput";
 import { StandardModal } from "@/app/components/StandardModal";
 import { StandardUsersInput } from "@/app/components/StandardUsersInput";
 import React, { useState } from "react";
+import { toast } from "react-toastify";
 
 interface GroupChatModalProps {
 	updateChatList: () => void;
@@ -35,11 +36,11 @@ export function GroupChatModal({
 		});
 
 		if (!response.ok) {
-			alert("Operazione fallita! Codice di stato: " + response.status);
+			toast.error("Errore durante la creazione del gruppo");
 			return;
 		}
 
-		alert("Gruppo creato con successo!");
+		toast.success("Gruppo creato con successo");
 		setShow(false);
 		setGroupName("");
 		setUsers([]);
