@@ -591,18 +591,34 @@ export async function isResourceAvailable(
 		const eventDuration =
 			new Date(event.dtEnd).getTime() - new Date(event.dtStart).getTime();
 
-		const ruleNewEvent = rrulestr(rrule, { dtstart: new Date(dtStart) });
-		const ruleEvent = rrulestr(event.rrule, {
-			dtstart: new Date(event.dtStart)
-		});
-
 		const yearsAgo = new Date(dtStart);
 		yearsAgo.setFullYear(yearsAgo.getFullYear() - 100);
 		const yearsLater = new Date(dtEnd);
 		yearsLater.setFullYear(yearsLater.getFullYear() + 100);
 
-		const occurrences1 = ruleNewEvent.between(yearsAgo, yearsLater, true);
-		const occurrences2 = ruleEvent.between(yearsAgo, yearsLater, true);
+		let occurrences1: Date[] = [];
+
+		if (rrule) {
+			const ruleNewEvent = rrulestr(rrule, {
+				dtstart: new Date(dtStart)
+			});
+			occurrences1 = ruleNewEvent.between(yearsAgo, yearsLater, true);
+		} else {
+			// Se non c'è una regola, consideriamo solo l'evento stesso
+			occurrences1 = [new Date(dtStart)];
+		}
+
+		let occurrences2: Date[] = [];
+
+		if (event.rrule) {
+			const ruleEvent = rrulestr(event.rrule, {
+				dtstart: new Date(event.dtStart)
+			});
+			occurrences2 = ruleEvent.between(yearsAgo, yearsLater, true);
+		} else {
+			// Se non c'è una regola, consideriamo solo l'evento stesso
+			occurrences2 = [new Date(event.dtStart)];
+		}
 
 		// Se ci sono sovrapposizioni tra le due regole, allora la risorsa non è disponibile
 		for (const occurrence1 of occurrences1) {
