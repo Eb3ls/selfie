@@ -373,7 +373,6 @@ export function openPhaseForm(
 		"ModifyPhaseComponent"
 	) as PhaseForm | null;
 	if (!modifyModal) {
-		console.error("Errore: modale per modifica della phase non trovato");
 		return;
 	}
 	modifyModal.updateData(data, parentData);

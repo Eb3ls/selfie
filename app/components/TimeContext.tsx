@@ -7,6 +7,7 @@ import {
 	useEffect,
 	useState
 } from "react";
+import { toast } from "react-toastify";
 
 type ResponseType = {
 	time: Date;
@@ -28,13 +29,13 @@ export function TimeProvider({ children }: { children: ReactNode }) {
 		try {
 			const res = await fetch("/api/timeMachine");
 			if (!res.ok) {
-				throw new Error("Errore nel recupero del tempo dal server");
+				throw new Error("Errore nel recupero dell'orario dal server");
 			}
 			// Si assume che il server restituisca il tempo in formato stringa ISO o equivalente
 			const data: ResponseType = await res.json();
 			setDateTime(new Date(data.time));
 		} catch (error) {
-			console.error("Refresh time fallito:", error);
+			toast.error("Errore nel recupero dell'orario dalla time machine");
 		}
 	}
 
@@ -53,12 +54,12 @@ export function TimeProvider({ children }: { children: ReactNode }) {
 			});
 
 			if (!res.ok) {
-				throw new Error("Errore nel settaggio del tempo sul server");
+				throw new Error("Errore nella modifica dell'orario sul server");
 			}
 
 			await refreshTime();
 		} catch (error) {
-			console.error("Set time fallito:", error);
+			toast.error("Errore nella modifica dell'orario sulla time machine");
 		}
 	}
 

@@ -179,7 +179,6 @@ export const GET = async (request: NextRequest) => {
 		}
 	);
 	if (error) {
-		console.error(error);
 		return generateMessageResponse("Error generating ICS", 500);
 	}
 	return new Response(value, {
