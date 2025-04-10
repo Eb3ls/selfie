@@ -19,7 +19,7 @@ export function EditNoteModal({
 		access: note.access
 	});
 	const [usernameList, setUsernameList] = useState<string[]>(
-		note.usernameList || []
+		note.userNameList || []
 	);
 
 	function handleChange(

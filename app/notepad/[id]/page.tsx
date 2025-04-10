@@ -12,6 +12,20 @@ import useSWR from "swr";
 import { EditNoteModal } from "./EditNoteModal";
 import styles from "./Note.module.css";
 
+type noteData = {
+	_id?: string;
+	ownerId: string;
+	summary: string;
+	categories: string;
+	text: string;
+	length: number;
+	access: "PRIVATE" | "INVITED" | "PUBLIC";
+	dtStamp: string;
+	dtModified: string;
+	activityIdList: string[];
+	usernameList: string[] | undefined;
+};
+
 async function fetcher(url: string) {
 	const response = await fetch(url);
 	if (!response.ok) {
@@ -47,11 +61,20 @@ export default function Note() {
 	const params = useParams();
 	const id = params.id;
 
+	const [note, setNote] = useState<noteData | undefined>(undefined);
+
 	const {
-		data: note,
+		data: rawNote,
 		error,
 		mutate
 	} = useSWR(() => (id ? `/api/notepad/getNote?id=${id}` : null), fetcher);
+
+	useEffect(() => {
+		if (rawNote) {
+			const noteData = rawNote;
+			setNote(noteData);
+		}
+	}, [rawNote]);
 
 	const [noteText, setNoteText] = useState("");
 	const [showMarkdown, setShowMarkdown] = useState(false);
@@ -74,7 +97,7 @@ export default function Note() {
 					"Content-Type": "application/json"
 				},
 				body: JSON.stringify({
-					_id: note._id,
+					_id: note!._id,
 					text: noteText
 				})
 			});
