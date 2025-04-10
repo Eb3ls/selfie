@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import { GlobalSideBar } from "../components/GlobalSideBar";
 import { useUser } from "../components/UserContext";
 import ProfilePictureUpload from "./components/ProfilePictureUpload";
@@ -37,10 +38,6 @@ export default function SettingsPage() {
 	// Password fields
 	const [showPasswordFields, setShowPasswordFields] = useState(false);
 
-	// Response messages
-	const [errorMessage, setErrorMessage] = useState("");
-	const [successMessage, setSuccessMessage] = useState("");
-
 	useEffect(() => {
 		const loadUserData = async () => {
 			if (user) {
@@ -63,11 +60,9 @@ export default function SettingsPage() {
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		setErrorMessage("");
-		setSuccessMessage("");
 
 		if (!formData.email.includes("@")) {
-			setErrorMessage("Invalid email");
+			toast.error("Email non valida");
 			return;
 		}
 
@@ -75,7 +70,7 @@ export default function SettingsPage() {
 			showPasswordFields &&
 			(!formData.oldPassword || !formData.newPassword)
 		) {
-			setErrorMessage("Insert both current and new password");
+			toast.error("Compila tutti i campi della password");
 			return;
 		}
 
@@ -105,13 +100,12 @@ export default function SettingsPage() {
 					...formData,
 					birthDay: formData.birthDay
 				});
-				setSuccessMessage("Profilo aggiornato con successo");
+				toast.success("Modifiche salvate con successo");
 			} else {
-				setErrorMessage(data.message || "Errore di aggiornamento");
-				alert(data.message || "Errore di aggiornamento");
+				toast.error("Errore durante il salvataggio delle modifiche");
 			}
 		} catch (error) {
-			setErrorMessage("Errore di connessione");
+			toast.error("Errore durante il salvataggio delle modifiche");
 		}
 	};
 
@@ -130,8 +124,6 @@ export default function SettingsPage() {
 					showPasswordFields={showPasswordFields}
 					setShowPasswordFields={setShowPasswordFields}
 					onSubmit={handleSubmit}
-					errorMessage={errorMessage}
-					successMessage={successMessage}
 				/>
 			</div>
 		</div>

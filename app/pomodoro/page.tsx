@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "react-bootstrap";
 import { IoMusicalNotes, IoShareSocial, IoTimerOutline } from "react-icons/io5";
+import { toast } from "react-toastify";
 import useSWR from "swr";
 import { GlobalSideBar } from "../components/GlobalSideBar";
 import { Coffee } from "./Animation/Coffee";
@@ -13,7 +14,6 @@ import "./Pomodoro.css";
 import { Setting } from "./Setting";
 
 async function fetcher(url: string) {
-	console.log("Prendo dati da " + url);
 	const response = await fetch(url);
 
 	if (!response.ok) {
@@ -93,10 +93,11 @@ function PomodoroImplementation() {
 
 			if (!response.ok) {
 				if (retries > 0) {
-					console.log("Errore, nuovo tentativo...");
 					setTimeout(() => updatePomodoro(retries - 1), 1000);
 				} else {
-					console.log("Errore persistente. Impossibile aggiornare.");
+					toast.error(
+						"Errore persistente. Impossibile aggiornare i cicli sul server"
+					);
 				}
 			}
 		},
@@ -121,10 +122,11 @@ function PomodoroImplementation() {
 
 			if (!response.ok) {
 				if (retries > 0) {
-					console.log("Errore, nuovo tentativo...");
 					setTimeout(() => saveSettingsFetch(retries - 1), 1000);
 				} else {
-					console.log("Errore persistente. Impossibile aggiornare.");
+					toast.error(
+						"Errore persistente. Impossibile salvare le impostazioni"
+					);
 				}
 			}
 		},
@@ -140,7 +142,6 @@ function PomodoroImplementation() {
 			}
 
 			timeout.current = setTimeout(() => {
-				console.log("Salvataggio impostazioni...");
 				saveSettingsFetch();
 			}, 5000);
 		}
@@ -161,7 +162,6 @@ function PomodoroImplementation() {
 				setRemainingSessions(updatedSessions);
 				if (id) {
 					setSessions(updatedSessions);
-					console.log("Aggiornamento sessioni...");
 					updatePomodoro();
 					setDoneCycles(doneCycles + 1);
 				}

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Button, Spinner } from "react-bootstrap";
+import { toast } from "react-toastify";
 import { DEFAULT_PROFILE_URL } from "../../constants";
 
 interface ProfilePictureUploadProps {
@@ -21,7 +22,6 @@ export default function ProfilePictureUpload({
 
 	// Error messages
 	const [fetchImageError, setFetchImageError] = useState(false);
-	const [uploadImageError, setUploadImageError] = useState("");
 
 	useEffect(() => {
 		if (!userId) return;
@@ -44,7 +44,7 @@ export default function ProfilePictureUpload({
 		setIsUploading(false);
 
 		if (!response.ok) {
-			setUploadImageError("Errore durante il caricamento dell'immagine.");
+			toast.error("Errore durante il caricamento dell'immagine");
 			return;
 		}
 
@@ -57,7 +57,6 @@ export default function ProfilePictureUpload({
 		if (!file) return;
 
 		setIsUploading(true);
-		setUploadImageError("");
 
 		const reader = new FileReader();
 		reader.onload = () => {
@@ -65,7 +64,7 @@ export default function ProfilePictureUpload({
 			uploadImage(result);
 		};
 		reader.onerror = () => {
-			setUploadImageError("Errore durante la lettura del file.");
+			toast.error("Errore durante la lettura del file");
 			setIsUploading(false);
 		};
 		reader.readAsDataURL(file);
@@ -122,10 +121,6 @@ export default function ProfilePictureUpload({
 					<i className="bi bi-pencil"></i>
 				</Button>
 			</div>
-
-			{uploadImageError && (
-				<div className="text-danger mt-2">{uploadImageError}</div>
-			)}
 		</div>
 	);
 }

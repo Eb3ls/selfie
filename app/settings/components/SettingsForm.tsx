@@ -11,17 +11,13 @@ export default function SettingsForm({
 	setFormData,
 	showPasswordFields,
 	setShowPasswordFields,
-	onSubmit,
-	errorMessage,
-	successMessage
+	onSubmit
 }: {
 	formData: any;
 	setFormData: React.Dispatch<React.SetStateAction<any>>;
 	showPasswordFields: boolean;
 	setShowPasswordFields: React.Dispatch<React.SetStateAction<boolean>>;
 	onSubmit: (e: React.FormEvent) => void;
-	errorMessage: string;
-	successMessage: string;
 }) {
 	return (
 		<Form onSubmit={onSubmit}>
@@ -283,10 +279,6 @@ export default function SettingsForm({
 					/>
 				</div>
 			</div>
-
-			{(errorMessage || successMessage) && (
-				<div>{errorMessage || successMessage}</div>
-			)}
 
 			<Button
 				type="submit"
