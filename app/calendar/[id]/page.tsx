@@ -73,7 +73,7 @@ export default function CalendarIDPage() {
 	};
 
 	return (
-		<>
+		<div>
 			<GlobalSideBar />
 			<Container className="calendar-container">
 				<LittleCustomToolbar
@@ -112,6 +112,6 @@ export default function CalendarIDPage() {
 					/>
 				)}
 			</Container>
-		</>
+		</div>
 	);
 }

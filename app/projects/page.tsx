@@ -190,7 +190,7 @@ export default function ProjectPage() {
 	}
 
 	return (
-		<>
+		<div>
 			<GlobalSideBar />
 			<Container>
 				<div className="mb-4">
@@ -218,6 +218,6 @@ export default function ProjectPage() {
 					)}
 				</div>
 			</Container>
-		</>
+		</div>
 	);
 }

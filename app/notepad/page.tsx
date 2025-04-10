@@ -196,7 +196,7 @@ export default function Notepad() {
 	}
 
 	return (
-		<>
+		<div>
 			<GlobalSideBar />
 			<Container className={styles.container}>
 				<div className={styles.header}>
@@ -318,6 +318,6 @@ export default function Notepad() {
 					</div>
 				)}
 			</Container>
-		</>
+		</div>
 	);
 }

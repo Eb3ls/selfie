@@ -42,7 +42,7 @@ export default function Inbox() {
 	}
 
 	return (
-		<>
+		<div>
 			<GlobalSideBar />
 			<Container className="mt-4">
 				<h1 className="mb-4">Inbox</h1>
@@ -95,6 +95,6 @@ export default function Inbox() {
 							</div>
 						)}
 			</Container>
-		</>
+		</div>
 	);
 }

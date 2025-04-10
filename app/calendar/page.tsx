@@ -66,7 +66,7 @@ export default function CalendarPage() {
 	};
 
 	return (
-		<>
+		<div>
 			<GlobalSideBar />
 			<Container className="calendar-container">
 				<CustomToolbar
@@ -110,6 +110,6 @@ export default function CalendarPage() {
 					/>
 				)}
 			</Container>
-		</>
+		</div>
 	);
 }
