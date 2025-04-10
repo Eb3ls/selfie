@@ -9,7 +9,6 @@ import { useTime } from "@/app/components/TimeContext";
 import { StringAlarm } from "@/utils/db/db";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
-import { ResourceInvitationComponent } from "../ResourceInvitationComponent";
 
 interface AddActivityModalProps {
 	mutate: () => void;
@@ -31,8 +30,6 @@ export function AddActivityModal({ mutate, children }: AddActivityModalProps) {
 	});
 	const { dateTime } = useTime();
 
-	const [resourceList, setResourceList] = useState<string[]>([]);
-
 	const handleChange = (
 		e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
 	) => {
@@ -50,9 +47,6 @@ export function AddActivityModal({ mutate, children }: AddActivityModalProps) {
 		// Converti la data di consegna in formato ISO
 		const endTime = new Date(form.due).toISOString();
 
-		// Aggiungiamo le risorse
-		const usernames = form.usernameList.concat(resourceList);
-
 		// Imposta la data di inizio (dtStart) come la data di creazione (dtStamp)
 		const dtStart = dateTime.toISOString();
 
@@ -69,7 +63,7 @@ export function AddActivityModal({ mutate, children }: AddActivityModalProps) {
 			location: form.location,
 			geo: form.geo,
 			parentActivityId: form.parentActivityId,
-			usernameList: usernames,
+			usernameList: form.usernameList,
 			alarms: form.alarms
 		};
 
@@ -95,7 +89,6 @@ export function AddActivityModal({ mutate, children }: AddActivityModalProps) {
 				usernameList: [],
 				alarms: []
 			});
-			setResourceList([]);
 			mutate();
 		} else if (response.status === 400) {
 			const out = await response.json();
@@ -198,12 +191,6 @@ export function AddActivityModal({ mutate, children }: AddActivityModalProps) {
 					mainId={"42"}
 					usernameList={form.usernameList}
 					setUsernameList={handleUsernameListChange}
-				/>
-
-				<ResourceInvitationComponent
-					mainId={"42"}
-					resourceList={resourceList}
-					setResourceList={setResourceList}
 				/>
 
 				<AlarmSelector

@@ -36,15 +36,10 @@ export function ModifyActivityModal({
 	currentUserId: string;
 	mutate: () => void;
 }) {
-	const { users, resources } = divideResourcesFromUserList(
-		activity.usernameList
-	);
 	const newActivity: StringActivityFrontend = {
-		...activity,
-		usernameList: users
+		...activity
 	};
 	const [form, setForm] = useState(newActivity);
-	const [resourceList, setResourceList] = useState<string[]>(resources);
 
 	const handleChange = (
 		e: React.ChangeEvent<
@@ -64,9 +59,6 @@ export function ModifyActivityModal({
 		// Converti le date in formato ISO
 		const endTime = new Date(form.due).toISOString();
 
-		// Aggiungiamo le risorse
-		const usernames = form.usernameList.concat(resourceList);
-
 		const newForm = {
 			_id: form._id,
 			summary: form.summary,
@@ -76,7 +68,7 @@ export function ModifyActivityModal({
 			categories: form.categories,
 			location: form.location,
 			geo: form.geo,
-			usernameList: usernames,
+			usernameList: form.usernameList,
 			alarms: form.alarms
 		};
 
@@ -215,15 +207,7 @@ export function ModifyActivityModal({
 				/>
 				<StandardViewField
 					title="Partecipanti"
-					value={users.join(", ") || "-"}
-				/>
-				<StandardViewField
-					title="Risorse"
-					value={
-						resources
-							.map((resource) => resource.slice(6))
-							.join(", ") || "-"
-					}
+					value={form.usernameList.join(", ") || "-"}
 				/>
 				<StandardViewField
 					title="Promemoria"
@@ -296,11 +280,6 @@ export function ModifyActivityModal({
 					mainId={form._id!}
 					usernameList={form.usernameList}
 					setUsernameList={handleUsernameListChange}
-				/>
-				<ResourceInvitationComponent
-					mainId={form._id!}
-					resourceList={resourceList}
-					setResourceList={setResourceList}
 				/>
 				<AlarmSelector
 					alarms={form.alarms}
