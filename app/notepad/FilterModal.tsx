@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { Form } from "react-bootstrap";
 import { FaFilter } from "react-icons/fa";
+import { toast } from "react-toastify";
 import { StandardInput } from "../components/StandardInput";
 import { StandardModal } from "../components/StandardModal";
 
@@ -45,7 +46,7 @@ export function FilterModal({ children, handleFilters }: any) {
 			lengthMax !== undefined &&
 			lengthMin > lengthMax
 		) {
-			alert(
+			toast.error(
 				"Lunghezza minima non può essere superiore alla lunghezza massima."
 			);
 			return;
@@ -57,7 +58,7 @@ export function FilterModal({ children, handleFilters }: any) {
 			creationDateMax &&
 			creationDateMin > creationDateMax
 		) {
-			alert(
+			toast.error(
 				"La data di creazione minima non può essere superiore alla data di creazione massima."
 			);
 			return;

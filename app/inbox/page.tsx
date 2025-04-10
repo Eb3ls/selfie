@@ -3,12 +3,13 @@
 import { GlobalSideBar } from "@/app/components/GlobalSideBar";
 import React from "react";
 import { Button, Card, Container } from "react-bootstrap";
+import { toast } from "react-toastify";
 import useSWR from "swr";
 
 async function fetcher(url: string) {
 	const response = await fetch(url);
 	if (!response.ok) {
-		alert("Errore durante il fetch dell'API getInbox!");
+		toast.error("Errore durante il recupero degli inviti!");
 	}
 	return response.json();
 }
@@ -21,7 +22,7 @@ type ApiResponse = {
 };
 
 export default function Inbox() {
-	const { data, error } = useSWR<ApiResponse[]>(
+	const { data, error, mutate } = useSWR<ApiResponse[]>(
 		"/api/user/getInbox",
 		fetcher
 	);
@@ -35,9 +36,10 @@ export default function Inbox() {
 			body: JSON.stringify({ _id: id })
 		});
 		if (!response.ok) {
-			alert("Errore durante il fetch dell'API acceptInvite!");
+			toast.error("Errore durante l'accettazione dell'invito!");
 		} else {
-			window.location.reload();
+			toast.success("Invito accettato con successo!");
+			mutate();
 		}
 	}
 
@@ -50,9 +52,10 @@ export default function Inbox() {
 			body: JSON.stringify({ _id: id })
 		});
 		if (!response.ok) {
-			alert("Errore durante il fetch dell'API declineInvite!");
+			toast.error("Errore durante il rifiuto dell'invito!");
 		} else {
-			window.location.reload();
+			toast.success("Invito rifiutato con successo!");
+			mutate();
 		}
 	}
 

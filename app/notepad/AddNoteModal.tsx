@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { FaPlus } from "react-icons/fa";
+import { toast } from "react-toastify";
 import { StandardInput } from "../components/StandardInput";
 import { StandardModal } from "../components/StandardModal";
 
@@ -22,7 +23,7 @@ export function AddNoteModal({ children, handleAdd }: any) {
 
 		// Validazione minima degli input
 		if (!formData.summary) {
-			alert("Il titolo della nota è obbligatorio!");
+			toast.error("Il titolo della nota è obbligatorio.");
 			return;
 		}
 

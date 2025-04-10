@@ -8,6 +8,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import { FaGear } from "react-icons/fa6";
+import { toast } from "react-toastify";
 import useSWR from "swr";
 import { EditNoteModal } from "./EditNoteModal";
 import styles from "./Note.module.css";
@@ -29,7 +30,8 @@ type noteData = {
 async function fetcher(url: string) {
 	const response = await fetch(url);
 	if (!response.ok) {
-		throw new Error("Errore durante il fetch della nota");
+		toast.error("Errore durante il recupero della nota!");
+		return;
 	}
 	return response.json();
 }
@@ -102,13 +104,13 @@ export default function Note() {
 				})
 			});
 			if (response.ok) {
-				await mutate();
-				alert("Nota salvata con successo!");
+				toast.success("Nota salvata con successo!");
+				mutate();
 			} else {
-				alert("Errore durante il salvataggio della nota.");
+				toast.error("Errore durante il salvataggio della nota");
 			}
 		} catch (error) {
-			alert("Errore durante la comunicazione con l'API:" + error);
+			toast.error("Errore durante il salvataggio della nota");
 		}
 	};
 
@@ -128,13 +130,13 @@ export default function Note() {
 				body: JSON.stringify(body)
 			});
 			if (response.ok) {
-				await mutate();
-				alert("Permessi aggiornati con successo!");
+				toast.success("Permessi aggiornati con successo!");
+				mutate();
 			} else {
-				alert("Errore durante l'aggiornamento dei permessi.");
+				toast.error("Errore durante l'aggiornamento dei permessi");
 			}
 		} catch (error) {
-			alert("Errore durante la comunicazione con l'API:" + error);
+			toast.error("Errore durante l'aggiornamento dei permessi");
 		}
 	};
 

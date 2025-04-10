@@ -5,6 +5,7 @@ import { StandardModal } from "@/app/components/StandardModal";
 import { StandardUsersInput } from "@/app/components/StandardUsersInput";
 import React, { useState } from "react";
 import { FaEdit } from "react-icons/fa";
+import { toast } from "react-toastify";
 
 export function EditNoteModal({
 	note,
@@ -36,7 +37,7 @@ export function EditNoteModal({
 
 		// Validazione minima degli input
 		if (!formData.summary) {
-			alert("Il titolo è obbligatorio");
+			toast.error("Il titolo della nota è obbligatorio");
 			return;
 		}
 

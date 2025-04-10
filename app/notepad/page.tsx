@@ -3,10 +3,12 @@
 import { GlobalSideBar } from "@/app/components/GlobalSideBar";
 import { useUser } from "@/app/components/UserContext";
 import { StringNote } from "@/utils/db/db";
+import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { Button, Card, Container } from "react-bootstrap";
 import { FaLock, FaTrash, FaUser, FaUserShield } from "react-icons/fa";
 import { MdPublic } from "react-icons/md";
+import { toast } from "react-toastify";
 import useSWR from "swr";
 import styles from "./Notepad.module.css";
 import { SearchBar } from "./SearchBar";
@@ -14,18 +16,19 @@ import { SearchBar } from "./SearchBar";
 async function fetcher(url: string) {
 	const response = await fetch(url);
 	if (!response.ok) {
-		alert("Errore durante il fetch delle note!");
+		toast.error("Errore durante il recupero delle note!");
 	}
 	return response.json();
 }
 
 export default function Notepad() {
 	const { user } = useUser();
+	const router = useRouter();
 
 	const [notes, setNotes] = useState<StringNote[]>([]);
 	const [oldNotes, setOldNotes] = useState<StringNote[]>([]);
 
-	const { data, error } = useSWR("/api/notepad/getNotes", fetcher);
+	const { data, error, mutate } = useSWR("/api/notepad/getNotes", fetcher);
 
 	// Aggiorna notes quando i dati vengono recuperati
 	useEffect(() => {
@@ -138,10 +141,11 @@ export default function Notepad() {
 			body: JSON.stringify(note)
 		});
 		if (!response.ok) {
-			alert("Errore durante il fetch delle note!");
+			toast.error("Errore durante la creazione della nota!");
 		} else {
 			const fetched_data = await response.json();
-			window.location.href = "./notepad/" + fetched_data._id;
+			toast.success("Nota creata con successo!");
+			router.push("/notepad/" + fetched_data._id);
 		}
 	}
 
@@ -160,14 +164,15 @@ export default function Notepad() {
 
 		if (!response.ok) {
 			if (response.status == 401) {
-				alert(
+				toast.error(
 					"La nota appartiene a un progetto o a una attività di progetto!"
 				);
 			} else {
-				alert("Errore nell'eliminazione della nota!");
+				toast.error("Errore durante l'eliminazione della nota!");
 			}
 		} else {
-			window.location.reload();
+			toast.success("Nota eliminata con successo!");
+			mutate();
 		}
 	}
 
@@ -192,7 +197,7 @@ export default function Notepad() {
 
 	function handleNoteClick(note: any) {
 		sessionStorage.setItem("selectedNote", JSON.stringify(note));
-		window.location.href = "./notepad/" + note._id;
+		router.push("/notepad/" + note._id);
 	}
 
 	return (
