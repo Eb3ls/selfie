@@ -11,6 +11,7 @@ import {
 	Event,
 	INVITATION_COLLECTION,
 	Invitation,
+	StringEvent,
 	StringInvitation,
 	USER_COLLECTION,
 	User,
@@ -557,7 +558,8 @@ export async function isResourceAvailable(
 	resourceId: string,
 	rrule: string,
 	dtStart: string,
-	dtEnd: string
+	dtEnd: string,
+	excludedEventId?: string
 ) {
 	// Otteniamo la collezione degli eventi
 	const client: Collection<Event> =
@@ -575,12 +577,17 @@ export async function isResourceAvailable(
 		return out;
 	}
 
-	const events: Event[] = await out.json();
+	const events: StringEvent[] = await out.json();
 
 	const newEventDuration =
 		new Date(dtEnd).getTime() - new Date(dtStart).getTime();
 
 	for (const event of events) {
+		// Se l'evento è quello escluso, lo saltiamo
+		if (event._id === excludedEventId) {
+			continue;
+		}
+
 		const eventDuration =
 			new Date(event.dtEnd).getTime() - new Date(event.dtStart).getTime();
 

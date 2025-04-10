@@ -105,7 +105,8 @@ export const PATCH = async (request: NextRequest) => {
 			resourceId,
 			event[0].rrule,
 			newBody.dtStart,
-			newBody.dtEnd
+			newBody.dtEnd,
+			event[0]._id
 		);
 
 		if (out.status !== 200) {
