@@ -38,10 +38,6 @@
 	border-radius: 1rem;
 }
 
-.message-bubble:hover {
-	transform: scale(1.05);
-}
-
 .bubble-own {
 	background-color: var(--bs-primary);
 	color: white;
