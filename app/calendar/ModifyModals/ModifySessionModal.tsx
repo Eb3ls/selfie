@@ -11,6 +11,7 @@ import {
 	StringSession
 } from "@/utils/db/db";
 import moment from "moment";
+import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { Button, Form } from "react-bootstrap";
 import { toast } from "react-toastify";
@@ -55,6 +56,8 @@ export function ModifySessionModal({
 	};
 	const [form, setForm] = useState(newSession);
 	const [userToInvite, setUserToInvite] = useState("");
+
+	const router = useRouter();
 
 	useEffect(() => {
 		const rawSession: StringSession = { ...session };
@@ -189,7 +192,7 @@ export function ModifySessionModal({
 	}
 
 	function handleRedirect() {
-		window.location.href = "/pomodoro?id=" + form._id;
+		router.push("/pomodoro?id=" + form._id);
 	}
 
 	const handleAlarmsChange = (newAlarms: StringAlarm[]) => {
