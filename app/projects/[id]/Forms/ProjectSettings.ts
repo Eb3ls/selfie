@@ -1,3 +1,4 @@
+import { toast } from "react-toastify";
 import {
 	User,
 	clearError,
@@ -211,7 +212,7 @@ class ProjectSettings extends HTMLElement {
 				window.location.reload();
 			}
 		} catch (error) {
-			alert("Errore durante la modifica del progetto");
+			toast.error("Errore durante la modifica del progetto");
 		}
 	}
 
@@ -304,7 +305,7 @@ class ProjectSettings extends HTMLElement {
 				window.location.reload();
 			}
 		} catch (error) {
-			alert("Errore durante l'invito degli utenti");
+			toast.error("Errore durante l'invito degli utenti");
 		}
 	}
 
@@ -432,7 +433,7 @@ class ProjectSettings extends HTMLElement {
 				await fetcher(method, url, body);
 				window.location.href = "/projects";
 			} catch (error) {
-				alert("Impossibile eliminare il progetto");
+				toast.error("Errore durante l'eliminazione del progetto");
 			}
 		});
 	}
@@ -503,7 +504,7 @@ class ProjectSettings extends HTMLElement {
 				await fetcher(method, url, body);
 				window.location.href = "/projects";
 			} catch (error) {
-				alert("Impossibile abbandonare il progetto");
+				toast.error("Errore durante l'abbandono del progetto");
 			}
 		});
 	}

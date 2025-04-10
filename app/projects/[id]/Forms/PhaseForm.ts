@@ -2,6 +2,7 @@ import {
 	PhaseResponse,
 	SubPhaseResponse
 } from "@/app/api/(auth)/project/[id]/route";
+import { toast } from "react-toastify";
 import {
 	clearError,
 	escapeHTML,
@@ -209,7 +210,7 @@ class PhaseForm extends HTMLElement {
 				window.location.reload();
 			}
 		} catch (error) {
-			alert("Errore nell'eliminazione della fase");
+			toast.error("Errore nell'eliminazione della fase");
 		}
 	}
 
@@ -252,7 +253,7 @@ class PhaseForm extends HTMLElement {
 				window.location.reload();
 			}
 		} catch (error) {
-			alert("Errore nell'aggiornamento della fase");
+			toast.error("Errore nell'aggiornamento della fase");
 		}
 	}
 

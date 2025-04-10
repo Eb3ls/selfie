@@ -3,6 +3,7 @@ import {
 	ProjectActivityResponse,
 	SubPhaseResponse
 } from "@/app/api/(auth)/project/[id]/route";
+import { toast } from "react-toastify";
 import ViewToggler from "./ViewToggler";
 
 export const ROW_HEIGHT_PX = "70px";
@@ -193,7 +194,7 @@ export function createStatusEntry(
 				window.location.reload();
 			}
 		} catch (error) {
-			alert("Errore durante la modifica dello stato");
+			toast.error("Errore durante la modifica dello stato");
 		}
 	};
 

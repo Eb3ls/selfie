@@ -11,7 +11,6 @@ import {
 	PhaseToggleMap,
 	ROW_HEIGHT_PX,
 	calculateCells,
-	formatDate,
 	getToggleState,
 	statusConfig
 } from "../Utils";

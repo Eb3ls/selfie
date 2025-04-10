@@ -1,4 +1,5 @@
 import { ProjectActivityResponse } from "@/app/api/(auth)/project/[id]/route";
+import { toast } from "react-toastify";
 import ModifyActivity from "../Forms/ActivityForm";
 import { SortedActivity, User, createStatusIcon, formatDate } from "../Utils";
 
@@ -35,8 +36,8 @@ class TimeList extends HTMLElement {
 		) as ModifyActivity;
 
 		if (!modifyModal) {
-			console.error(
-				`Errore: modale per modifica delle activity non trovato`
+			toast.error(
+				"Errore: modale per modifica delle activity non trovato"
 			);
 			return;
 		}

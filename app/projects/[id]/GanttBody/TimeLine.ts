@@ -114,8 +114,6 @@ class TimeLine extends HTMLElement {
 				inline: "center",
 				behavior: smooth ? "smooth" : "auto"
 			});
-		} else {
-			console.error("Elemento a cui scrollare non trovato: ", id);
 		}
 	}
 
@@ -184,7 +182,6 @@ class TimeLine extends HTMLElement {
 		const rightScrollBtn = document.getElementById("rightScroll");
 
 		if (!leftScrollBtn || !rightScrollBtn) {
-			console.error("Elementi per lo scroll non trovati");
 			return;
 		}
 
@@ -224,7 +221,6 @@ class TimeLine extends HTMLElement {
 		this.innerHTML = "";
 		this.phaseRowsHandler = document.querySelector("project-phase-row");
 		if (!this.phaseRowsHandler) {
-			console.error("Elemento project-phase-row non trovato");
 			return;
 		}
 		const cells = calculateCells(this);

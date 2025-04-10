@@ -3,6 +3,7 @@ import {
 	ProjectActivityResponse,
 	SubPhaseResponse
 } from "@/app/api/(auth)/project/[id]/route";
+import { toast } from "react-toastify";
 import {
 	User,
 	clearError,
@@ -427,7 +428,7 @@ class ActivityLinkForm extends HTMLElement {
 				window.location.reload();
 			}
 		} catch (error) {
-			alert("Errore nell'associazione delle attività");
+			toast.error("Errore nell'associazione delle attività");
 		}
 	}
 
@@ -563,7 +564,7 @@ class ActivityDeleteForm extends HTMLElement {
 				window.location.reload();
 			}
 		} catch (error) {
-			alert("Errore nell'eliminazione dell'attività");
+			toast.error("Errore durante l'eliminazione dell'attività");
 		}
 	}
 
@@ -666,7 +667,7 @@ class ActivityModifyForm extends HTMLElement {
 				window.location.reload();
 			}
 		} catch (error) {
-			alert("Errore durante la modifica dell'attività");
+			toast.error("Errore durante la modifica dell'attività");
 		}
 	}
 
@@ -921,7 +922,6 @@ export function openActivityForm(
 		"ModifyActivityComponent"
 	) as ActivityForm | null;
 	if (!modifyModal) {
-		console.error("Errore: modale per modifica dell'attività non trovato");
 		return;
 	}
 	modifyModal.updateData(data, parentData);

@@ -2,6 +2,7 @@ import {
 	PhaseResponse,
 	SubPhaseResponse
 } from "@/app/api/(auth)/project/[id]/route";
+import { toast } from "react-toastify";
 import {
 	User,
 	checkDate,
@@ -209,7 +210,7 @@ class AddPhaseForm extends HTMLElement {
 				window.location.reload();
 			}
 		} catch (error) {
-			alert("Errore nella creazione della fase");
+			toast.error("Errore nella creazione della fase");
 		}
 	}
 
@@ -307,7 +308,7 @@ class AddSubPhaseForm extends HTMLElement {
 				window.location.reload();
 			}
 		} catch (error) {
-			alert("Errore nella creazione della sottofase");
+			toast.error("Errore nella creazione della sottofase");
 		}
 	}
 
@@ -508,7 +509,7 @@ class AddActivityForm extends HTMLElement {
 				window.location.reload();
 			}
 		} catch (error) {
-			alert("Errore nella creazione dell'attività");
+			toast.error("Errore nella creazione dell'attività");
 		}
 	}
 

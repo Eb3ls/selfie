@@ -18,8 +18,7 @@ import {
 	ROW_HEIGHT_PX,
 	SortedActivity,
 	User,
-	escapeHTML,
-	hideModal
+	escapeHTML
 } from "./Utils";
 
 class ViewToggler extends HTMLElement {
@@ -416,16 +415,17 @@ class ViewToggler extends HTMLElement {
 
 			return data;
 		} catch (error) {
-			console.warn("Failed to get data:", error);
 			const errorContainer = document.createElement("div");
-			errorContainer.className = "container-fluid p-3";
+			errorContainer.className = "container-fluid p-4";
 
 			errorContainer.innerHTML = `
-				<div class="alert alert-danger d-flex align-items-center" role="alert">
-					<i class="bi bi-exclamation-triangle-fill me-2"></i>
-					<div>
-						Unable to load project data. 
-						<button class="btn btn-link p-0 ms-2" onclick="location.reload()">Try again</button>
+				<div class="alert alert-danger d-flex align-items-center shadow-sm rounded-3" role="alert">
+					<i class="bi bi-exclamation-triangle-fill fs-5 me-3"></i>
+					<div class="fs-6">
+						Impossibile caricare i dati del progetto.
+						<button class="btn btn-link text-danger p-0 ms-2 fw-semibold" onclick="location.reload()">
+							Riprova
+						</button>
 					</div>
 				</div>
 			`;
