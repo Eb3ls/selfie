@@ -7,7 +7,6 @@ import { FaUserShield } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { GlobalSideBar } from "../components/GlobalSideBar";
 import { useUser } from "../components/UserContext";
-import styles from "./Projects.module.css";
 import { SearchBar } from "./SearchBar";
 
 export interface Project {
@@ -117,7 +116,7 @@ export default function ProjectPage() {
 
 	// Controlla se l'utente è il proprietario del progetto
 	function isOwner(ownerName: string) {
-		return ownerName === user?._id;
+		return ownerName === user?.username;
 	}
 
 	function handleProjectClick(project: Project) {
@@ -130,11 +129,71 @@ export default function ProjectPage() {
 		router.push(`/notepad/${noteId}`);
 	}
 
+	function createProjectEntry(project: Project, isOwner: boolean) {
+		return (
+			<div className="col-12 col-md-6 col-lg-4 mb-4">
+				<Card
+					className="h-100 shadow-sm hover-shadow transition-all"
+					style={{
+						borderRadius: "12px",
+						border: "1px solid rgba(0,0,0,0.1)",
+						cursor: "pointer",
+						transition: "all 0.2s ease-in-out"
+					}}
+					onClick={() => handleProjectClick(project)}
+				>
+					<Card.Body className="d-flex flex-column">
+						<Card.Title className="h5 fw-bold mb-3 d-flex align-items-center">
+							{isOwner && (
+								<FaUserShield
+									title="Owner"
+									className="text-primary me-2"
+									size={20}
+								/>
+							)}
+							{project.summary}
+						</Card.Title>
+
+						<div className="mb-3">
+							<div className="text-muted mb-2">
+								<small>Proprietario</small>
+							</div>
+							<div className="fw-medium">{project.ownerName}</div>
+						</div>
+
+						{project.userNameList.length > 0 && (
+							<div className="mb-3">
+								<div className="text-muted mb-2">
+									<small>Collaboratori</small>
+								</div>
+								<div className="text-truncate">
+									{project.userNameList.join(", ")}
+								</div>
+							</div>
+						)}
+
+						<div className="mt-auto">
+							<button
+								className="btn btn-primary w-100"
+								onClick={(e) => {
+									e.stopPropagation();
+									handleNoteClick(project.noteId);
+								}}
+							>
+								Apri nota 📝
+							</button>
+						</div>
+					</Card.Body>
+				</Card>
+			</div>
+		);
+	}
+
 	return (
 		<>
 			<GlobalSideBar />
-			<Container className={styles.container}>
-				<div className={styles.header}>
+			<Container>
+				<div className="mb-4">
 					<SearchBar
 						handleSort={handleSort}
 						handleSearch={handleSearch}
@@ -142,64 +201,20 @@ export default function ProjectPage() {
 					/>
 				</div>
 
-				<div className={styles.projectsGrid}>
+				<div className="row">
 					{projects.length === 0 ? (
-						<div className={styles.emptyState}>
-							<p>Nessun progetto trovato</p>
+						<div className="col-12 text-center py-5">
+							<p className="text-muted">
+								Nessun progetto trovato
+							</p>
 						</div>
 					) : (
-						projects.map((project) => (
-							<Card
-								key={project._id}
-								className={styles.projectCard}
-							>
-								<div className={styles.cardHeader}>
-									<div className={styles.iconsContainer}>
-										{isOwner(project.ownerName) && (
-											<FaUserShield
-												className={`${styles.icon} ${styles.ownerIcon}`}
-												title="Owner"
-											/>
-										)}
-									</div>
-								</div>
-
-								<Card.Body
-									className={styles.cardBody}
-									onClick={() => handleProjectClick(project)}
-								>
-									<Card.Title className={styles.cardTitle}>
-										{project.summary}
-									</Card.Title>
-									<Card.Subtitle
-										className={styles.cardSubtitle}
-									>
-										Proprietario: {project.ownerName}
-									</Card.Subtitle>
-
-									{project.userNameList.length > 0 && (
-										<div
-											className={`${styles.projectUsers} text-truncate`}
-										>
-											<span>Collaboratori: </span>
-											{project.userNameList.join(", ")}
-										</div>
-									)}
-
-									<div className={styles.actionBar}>
-										<span
-											className={styles.noteLink}
-											onClick={(e) => {
-												e.stopPropagation();
-												handleNoteClick(project.noteId);
-											}}
-										>
-											Apri nota 📝
-										</span>
-									</div>
-								</Card.Body>
-							</Card>
-						))
+						projects.map((project) =>
+							createProjectEntry(
+								project,
+								isOwner(project.ownerName)
+							)
+						)
 					)}
 				</div>
 			</Container>
