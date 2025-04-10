@@ -1,7 +1,6 @@
 "use client";
 
 import { GlobalSideBar } from "@/app/components/GlobalSideBar";
-import { StringInvitation } from "@/utils/db/db";
 import React from "react";
 import { Button, Card, Container } from "react-bootstrap";
 import useSWR from "swr";
@@ -14,8 +13,15 @@ async function fetcher(url: string) {
 	return response.json();
 }
 
+type ApiResponse = {
+	_id: string;
+	username: string;
+	type: "ACTIVITY" | "EVENT" | "SESSION" | "PROJECT" | "NOTE";
+	targetSummary: string;
+};
+
 export default function Inbox() {
-	const { data, error } = useSWR<StringInvitation[]>(
+	const { data, error } = useSWR<ApiResponse[]>(
 		"/api/user/getInbox",
 		fetcher
 	);
@@ -46,7 +52,7 @@ export default function Inbox() {
 					</div>
 				)}
 				{data && data.length > 0
-					? data.map((invitation: StringInvitation) => (
+					? data.map((invitation: ApiResponse) => (
 							<Card
 								key={invitation._id}
 								className="mb-3 shadow-sm"
@@ -57,15 +63,15 @@ export default function Inbox() {
 								<Card.Body>
 									<Card.Text>
 										<strong>Utente:</strong>{" "}
-										{invitation.userId}
+										{invitation.username}
 									</Card.Text>
 									<Card.Text>
 										<strong>Tipologia:</strong>{" "}
 										{invitation.type}
 									</Card.Text>
 									<Card.Text>
-										<strong>Target ID:</strong>{" "}
-										{invitation.targetId}
+										<strong>Titolo:</strong>{" "}
+										{invitation.targetSummary}
 									</Card.Text>
 								</Card.Body>
 								<Card.Footer>
