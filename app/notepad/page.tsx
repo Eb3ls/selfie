@@ -4,7 +4,7 @@ import { GlobalSideBar } from "@/app/components/GlobalSideBar";
 import { useUser } from "@/app/components/UserContext";
 import { StringNote } from "@/utils/db/db";
 import React, { useEffect, useState } from "react";
-import { Button, Card, Col, Container, Row } from "react-bootstrap";
+import { Button, Card, Container } from "react-bootstrap";
 import { FaLock, FaTrash, FaUser, FaUserShield } from "react-icons/fa";
 import { MdPublic } from "react-icons/md";
 import useSWR from "swr";
