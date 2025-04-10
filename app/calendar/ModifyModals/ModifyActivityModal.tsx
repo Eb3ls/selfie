@@ -10,8 +10,6 @@ import { StringActivity, StringAlarm } from "@/utils/db/db";
 import moment from "moment";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
-import { ResourceInvitationComponent } from "../ResourceInvitationComponent";
-import { divideResourcesFromUserList } from "../calendarUtils/calendarFetch";
 import {
 	getDeleteContent,
 	getDropContent,
@@ -174,44 +172,44 @@ export function ModifyActivityModal({
 
 		return (
 			<>
-				<StandardViewField title="Titolo" value={activity.summary} />
+				<StandardViewField title="Titolo" value={newActivity.summary} />
 				<StandardViewField
 					title="Descrizione"
-					value={activity.description || "-"}
+					value={newActivity.description || "-"}
 				/>
 				<StandardViewField
 					title="Stato"
-					value={getTextFromStatus(activity.status)}
+					value={getTextFromStatus(newActivity.status)}
 				/>
 				<StandardViewField
 					title="Consegna"
-					value={moment(activity.due).format("DD/MM/YYYY HH:mm")}
+					value={moment(newActivity.due).format("DD/MM/YYYY HH:mm")}
 				/>
 				<StandardViewField
 					title="Categorie"
-					value={activity.categories || "-"}
+					value={newActivity.categories || "-"}
 				/>
 				<StandardViewField
 					title="Fuso orario"
 					value={
 						<>
-							{activity.geo || "-"}
-							{activity.geo &&
+							{newActivity.geo || "-"}
+							{newActivity.geo &&
 								generateConversionProps(
 									"Consegna",
-									activity.due,
-									activity.geo
+									newActivity.due,
+									newActivity.geo
 								)}
 						</>
 					}
 				/>
 				<StandardViewField
 					title="Partecipanti"
-					value={form.usernameList.join(", ") || "-"}
+					value={newActivity.usernameList.join(", ") || "-"}
 				/>
 				<StandardViewField
 					title="Promemoria"
-					value={getTextFromTriggerList(form.alarms)}
+					value={getTextFromTriggerList(newActivity.alarms)}
 				/>
 			</>
 		);
@@ -277,7 +275,7 @@ export function ModifyActivityModal({
 					secondDateToConvert={undefined}
 				/>
 				<StandardUsersInput
-					mainId={form._id!}
+					originalUsenameList={newActivity.usernameList}
 					usernameList={form.usernameList}
 					setUsernameList={handleUsernameListChange}
 				/>

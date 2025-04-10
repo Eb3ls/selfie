@@ -188,7 +188,7 @@ export function AddActivityModal({ mutate, children }: AddActivityModalProps) {
 				/>
 
 				<StandardUsersInput
-					mainId={"42"}
+					originalUsenameList={[]}
 					usernameList={form.usernameList}
 					setUsernameList={handleUsernameListChange}
 				/>

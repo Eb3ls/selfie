@@ -74,7 +74,7 @@ export function GroupChatModal({
 				/>
 
 				<StandardUsersInput
-					mainId={"42"}
+					originalUsenameList={[]}
 					usernameList={users}
 					setUsernameList={setUsers}
 				/>

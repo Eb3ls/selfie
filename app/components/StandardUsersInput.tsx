@@ -1,36 +1,25 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button, Form } from "react-bootstrap";
 import { FaTrash, FaUser } from "react-icons/fa";
 
 interface StandardUsersInputProps {
-	mainId: string;
+	originalUsenameList: string[];
 	usernameList: string[];
 	setUsernameList: (usernameList: string[]) => void;
 }
 
 export function StandardUsersInput({
-	mainId,
+	originalUsenameList,
 	usernameList,
 	setUsernameList
 }: StandardUsersInputProps) {
-	const [currentMainId, setCurrentMainId] = useState("");
-	const [currentOriginalUL, setCurrentOriginalUL] = useState<string[]>([]);
-
-	// Se cambia l'id dell'attività, aggiorna la lista degli utenti che erano già presenti
-	useEffect(() => {
-		if (currentMainId !== mainId) {
-			setCurrentMainId(mainId || "");
-			setCurrentOriginalUL(usernameList);
-		}
-	}, [mainId, currentMainId, usernameList]);
-
-	// Troviamo gli utenti in usernameList che erano presenti anche in currentOriginalUsernameList
-	// E troviamo gli utenti in currentOriginalUsernameList che non sono presenti in usernameList
-	const oldUsernames = currentOriginalUL.filter((username) =>
+	// Troviamo gli utenti in usernameList che erano presenti anche in originalUsenameList
+	// E troviamo gli utenti in originalUsenameList che non sono presenti in usernameList
+	const oldUsernames = originalUsenameList.filter((username) =>
 		usernameList.includes(username)
 	);
 	const newUsernames = usernameList.filter(
-		(username) => !currentOriginalUL.includes(username)
+		(username) => !originalUsenameList.includes(username)
 	);
 
 	const [usernameInput, setUsernameInput] = useState("");

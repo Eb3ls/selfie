@@ -307,7 +307,7 @@ export function AddEventModal({ mutate, children }: AddEventModalProps) {
 				/>
 
 				<StandardUsersInput
-					mainId={"42"}
+					originalUsenameList={[]}
 					usernameList={form.usernameList}
 					setUsernameList={handleUsernameListChange}
 				/>

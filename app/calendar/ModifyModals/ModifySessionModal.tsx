@@ -205,34 +205,36 @@ export function ModifySessionModal({
 	function getViewContent() {
 		return (
 			<>
-				<StandardViewField title="Titolo" value={form.summary} />
+				<StandardViewField title="Titolo" value={newSession.summary} />
 				<StandardViewField
 					title="Descrizione"
-					value={session.description || "-"}
+					value={newSession.description || "-"}
 				/>
 				<StandardViewField
 					title="Stato"
-					value={getTextFromStatus(session.status)}
+					value={getTextFromStatus(newSession.status)}
 				/>
 				<StandardViewField
 					title="Inizio"
-					value={moment(session.dtStart).format("DD/MM/YYYY HH:mm")}
+					value={moment(newSession.dtStart).format(
+						"DD/MM/YYYY HH:mm"
+					)}
 				/>
 				<StandardViewField
 					title="Fine"
-					value={moment(session.dtEnd).format("DD/MM/YYYY HH:mm")}
+					value={moment(newSession.dtEnd).format("DD/MM/YYYY HH:mm")}
 				/>
 
 				<PomodoroBlock
-					cycles={form.settings.cycles}
-					studyTime={form.settings.studyTime}
-					breakTime={form.settings.breakTime}
+					cycles={newSession.settings.cycles}
+					studyTime={newSession.settings.studyTime}
+					breakTime={newSession.settings.breakTime}
 					mode={"view"}
 				/>
 
 				<StandardViewField
 					title="Promemoria"
-					value={getTextFromTriggerList(form.alarms)}
+					value={getTextFromTriggerList(newSession.alarms)}
 				/>
 				<div className="text-center mt-4">
 					<Button

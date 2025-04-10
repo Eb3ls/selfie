@@ -184,43 +184,43 @@ export function ModifyEventModal({
 
 		return (
 			<>
-				<StandardViewField title="Titolo" value={event.summary} />
+				<StandardViewField title="Titolo" value={newEvent.summary} />
 				<StandardViewField
 					title="Descrizione"
-					value={event.description || "-"}
+					value={newEvent.description || "-"}
 				/>
 				<StandardViewField
 					title="Stato"
-					value={getTextFromStatus(event.status)}
+					value={getTextFromStatus(newEvent.status)}
 				/>
 				<StandardViewField
 					title="Inizio"
-					value={moment(event.dtStart).format("DD/MM/YYYY HH:mm")}
+					value={moment(newEvent.dtStart).format("DD/MM/YYYY HH:mm")}
 				/>
 				<StandardViewField
 					title="Fine"
-					value={moment(event.dtEnd).format("DD/MM/YYYY HH:mm")}
+					value={moment(newEvent.dtEnd).format("DD/MM/YYYY HH:mm")}
 				/>
 				<StandardViewField
 					title="Categorie"
-					value={event.categories || "-"}
+					value={newEvent.categories || "-"}
 				/>
 				<StandardViewField
 					title="Fuso orario"
 					value={
 						<>
-							{event.geo || "-"}
-							{event.geo &&
+							{newEvent.geo || "-"}
+							{newEvent.geo &&
 								generateConversionProps(
 									"Inizio",
-									event.dtStart,
-									event.geo
+									newEvent.dtStart,
+									newEvent.geo
 								)}
-							{event.geo &&
+							{newEvent.geo &&
 								generateConversionProps(
 									"Fine",
-									event.dtEnd,
-									event.geo
+									newEvent.dtEnd,
+									newEvent.geo
 								)}
 						</>
 					}
@@ -239,7 +239,7 @@ export function ModifyEventModal({
 				/>
 				<StandardViewField
 					title="Promemoria"
-					value={getTextFromTriggerList(event.alarms)}
+					value={getTextFromTriggerList(newEvent.alarms)}
 				/>
 			</>
 		);
@@ -317,7 +317,7 @@ export function ModifyEventModal({
 				/>
 
 				<StandardUsersInput
-					mainId={form._id!}
+					originalUsenameList={users}
 					usernameList={form.usernameList}
 					setUsernameList={handleUsernameListChange}
 				/>

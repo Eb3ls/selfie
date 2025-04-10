@@ -103,7 +103,7 @@ export function EditNoteModal({
 
 				{formData.access === "INVITED" && (
 					<StandardUsersInput
-						mainId={"42"}
+						originalUsenameList={note.userNameList}
 						usernameList={usernameList}
 						setUsernameList={setUsernameList}
 					/>
