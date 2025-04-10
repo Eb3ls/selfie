@@ -26,16 +26,31 @@ export default function Inbox() {
 		fetcher
 	);
 
-	async function handleAccept(id: string, type: string) {
+	async function handleAccept(id: string) {
 		const response = await fetch("/api/user/acceptInvite", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json"
 			},
-			body: JSON.stringify({ _id: id, type: type })
+			body: JSON.stringify({ _id: id })
 		});
 		if (!response.ok) {
 			alert("Errore durante il fetch dell'API acceptInvite!");
+		} else {
+			window.location.reload();
+		}
+	}
+
+	async function handleDecline(id: string) {
+		const response = await fetch("/api/user/declineInvite", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({ _id: id })
+		});
+		if (!response.ok) {
+			alert("Errore durante il fetch dell'API declineInvite!");
 		} else {
 			window.location.reload();
 		}
@@ -77,14 +92,20 @@ export default function Inbox() {
 								<Card.Footer>
 									<Button
 										variant="success"
+										className="me-2"
 										onClick={() =>
-											handleAccept(
-												invitation._id!,
-												invitation.type
-											)
+											handleAccept(invitation._id!)
 										}
 									>
 										Accetta
+									</Button>
+									<Button
+										variant="danger"
+										onClick={() =>
+											handleDecline(invitation._id!)
+										}
+									>
+										Rifiuta
 									</Button>
 								</Card.Footer>
 							</Card>

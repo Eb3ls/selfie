@@ -30,8 +30,7 @@ import { NextRequest } from "next/server";
 import { rrulestr } from "rrule";
 
 const requestTemplate = {
-	_id: "",
-	type: ""
+	_id: ""
 };
 
 type RequestType = typeof requestTemplate;
