@@ -196,7 +196,6 @@ export default function Notepad() {
 	}
 
 	function handleNoteClick(note: any) {
-		sessionStorage.setItem("selectedNote", JSON.stringify(note));
 		router.push("/notepad/" + note._id);
 	}
 

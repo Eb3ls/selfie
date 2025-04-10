@@ -4,6 +4,7 @@ import { useTime } from "@/app/components/TimeContext";
 import { useState } from "react";
 import { Button } from "react-bootstrap";
 import { FaClock, FaPlus, FaSync, FaUndo } from "react-icons/fa";
+import { toast } from "react-toastify";
 
 export function TimeButton() {
 	const { dateTime, refreshTime, setTime } = useTime();
@@ -13,7 +14,7 @@ export function TimeButton() {
 
 	async function handleSetTime() {
 		if (inputTime === "") {
-			alert("Inserisci una data valida!");
+			toast.error("La data inserita non è valida!");
 			return;
 		}
 
@@ -25,10 +26,10 @@ export function TimeButton() {
 	async function handleConnect() {
 		const response = await fetch("/api/timeMachine", { method: "PATCH" });
 		if (!response.ok) {
-			alert("Errore durante la connessione!");
+			toast.error("Errore durante la connessione!");
 			return;
 		}
-		alert("Connessione riuscita!");
+		toast.success("Connessione riuscita!");
 		await refreshTime();
 	}
 

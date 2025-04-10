@@ -1,7 +1,9 @@
 "use client";
 
 import { PomodoroSettings } from "@/utils/db/db";
+import { useRouter } from "next/navigation";
 import { createContext, useContext, useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 type ReducedUser = {
 	_id: string;
@@ -45,6 +47,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
+	const router = useRouter();
+
 	// Funzione per aggiornare lo stato dell'utente
 	const updateUser = (newUserData: ReducedUser) => {
 		setUserData(newUserData);
@@ -72,13 +76,13 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 			const response = await fetch("/api/user/logout");
 
 			if (!response.ok || response.redirected) {
-				alert("Logout failed!");
+				toast.error("Impossibile effettuare il logout");
 				throw new Error("Failed to logout");
 			}
 
 			setUserData(null);
-			alert("Logout successful!");
-			window.location.href = "/";
+			toast.success("Logout effettuato con successo");
+			router.push("/");
 		} catch (error: any) {
 			setError(error.message);
 		}
