@@ -17,6 +17,28 @@ import {
 } from "./previews";
 import { PreviewsResponse } from "./types";
 
+function sortCalendar(calendar: PreviewsResponse["calendar"]) {
+	const sortedActivities = calendar.activities.sort(
+		(a, b) => new Date(a.data).getTime() - new Date(b.data).getTime()
+	);
+	const sortedEvents = calendar.events.sort(
+		(a, b) => new Date(a.data).getTime() - new Date(b.data).getTime()
+	);
+	const sortedSessions = calendar.sessions.sort(
+		(a, b) => new Date(a.data).getTime() - new Date(b.data).getTime()
+	);
+	const sortedProjectActivities = calendar.projectActivities.sort(
+		(a, b) => new Date(a.data).getTime() - new Date(b.data).getTime()
+	);
+
+	return {
+		activities: sortedActivities,
+		projectActivities: sortedProjectActivities,
+		events: sortedEvents,
+		sessions: sortedSessions
+	};
+}
+
 function WelcomeSection({ username }: { username: string | undefined }) {
 	return (
 		<div className="text-center py-4 mb-4">
@@ -127,6 +149,7 @@ export default function Home() {
 				}
 
 				const data: PreviewsResponse = await response.json();
+				data.calendar = sortCalendar(data.calendar);
 				setPreviews(data);
 			} catch (error) {
 				toast.error("Errore durante il caricamento dei dati");

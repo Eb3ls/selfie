@@ -176,24 +176,45 @@ const CalendarItemPreview = ({
 	</div>
 );
 
+const CalendarItemListPreview = ({
+	item
+}: {
+	item:
+		| ReducedActivity[]
+		| ReducedEvent[]
+		| ReducedProjectActivity[]
+		| ReducedSession[];
+}) => {
+	if (item.length === 0) {
+		return (
+			<div className="p-3 border-0 rounded mb-2 hover-shadow">
+				<p className="mb-1 small text-truncate">Nessun elemento</p>
+			</div>
+		);
+	}
+
+	return (
+		<div className="list-group">
+			{item.map((activity, index) => (
+				<CalendarItemPreview key={index} item={activity} />
+			))}
+		</div>
+	);
+};
+
 export const CalendarPreviews = ({
 	calendar
 }: {
 	calendar: ReducedCalendar;
 }) => (
-	<div className="list-group">
-		{[
-			...calendar.activities,
-			...calendar.events,
-			...calendar.projectActivities,
-			...calendar.sessions
-		]
-			.sort(
-				(a, b) =>
-					new Date(a.data).getTime() - new Date(b.data).getTime()
-			)
-			.map((item, index) => (
-				<CalendarItemPreview key={index} item={item} />
-			))}
+	<div>
+		<p className="badge bg-primary">Attività</p>
+		<CalendarItemListPreview item={calendar.activities} />
+		<p className="badge bg-warning">Eventi</p>
+		<CalendarItemListPreview item={calendar.events} />
+		<p className="badge bg-success">Sessioni</p>
+		<CalendarItemListPreview item={calendar.sessions} />
+		<p className="badge bg-info">Attività di progetto</p>
+		<CalendarItemListPreview item={calendar.projectActivities} />
 	</div>
 );
