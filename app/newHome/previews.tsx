@@ -36,11 +36,8 @@ export const NotePreviews = ({ notes }: { notes: ReducedNote[] }) => (
 				</div>
 				<div className="d-flex align-items-center text-truncate">
 					{note.categories &&
-						note.categories.split(",").map((category) => (
-							<span
-								key={category}
-								className="badge bg-primary me-1"
-							>
+						note.categories.split(",").map((category, index) => (
+							<span key={index} className="badge bg-primary me-1">
 								{category.trim()}
 							</span>
 						))}
@@ -48,9 +45,15 @@ export const NotePreviews = ({ notes }: { notes: ReducedNote[] }) => (
 				<div className="d-flex justify-content-between align-items-center">
 					<small className="text-muted text-truncate">
 						<span className="fw-bold">Ultima modifica:</span>{" "}
-						{note.dtModified}
+						{formatDate(note.dtModified)}
 					</small>
 				</div>
+				<Link
+					href={`/notepad/${note._id}`}
+					className="btn btn-primary btn-sm mt-2"
+				>
+					Apri nota
+				</Link>
 			</div>
 		))}
 	</div>
@@ -70,12 +73,20 @@ export const ProjectPreviews = ({
 				<div className="d-flex justify-content-between align-items-center">
 					<h6 className="mb-1 text-truncate">{project.summary}</h6>
 				</div>
-				<Link
-					href={`/notepad/${project.noteId}`}
-					className="btn btn-warning btn-sm mt-2"
-				>
-					Apri nota
-				</Link>
+				<div className="d-flex align-items-center gap-2">
+					<Link
+						href={`/projects/${project._id}`}
+						className="btn btn-warning btn-sm mt-2"
+					>
+						Apri progetto
+					</Link>
+					<Link
+						href={`/notepad/${project.noteId}`}
+						className="btn btn-primary btn-sm mt-2"
+					>
+						Apri nota
+					</Link>
+				</div>
 			</div>
 		))}
 	</div>
@@ -181,8 +192,8 @@ export const CalendarPreviews = ({
 				(a, b) =>
 					new Date(a.data).getTime() - new Date(b.data).getTime()
 			)
-			.map((item) => (
-				<CalendarItemPreview key={item._id} item={item} />
+			.map((item, index) => (
+				<CalendarItemPreview key={index} item={item} />
 			))}
 	</div>
 );

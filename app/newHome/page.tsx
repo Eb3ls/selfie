@@ -2,7 +2,9 @@
 
 import { GlobalSideBar } from "@/app/components/GlobalSideBar";
 import { useUser } from "@/app/components/UserContext";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Button } from "react-bootstrap";
 import { FaBook, FaCalendarAlt, FaCoffee, FaStickyNote } from "react-icons/fa";
 import { toast } from "react-toastify";
 import "./home.css";
@@ -30,31 +32,77 @@ function WelcomeSection({ username }: { username: string | undefined }) {
 	);
 }
 
+function CardHeader({
+	title,
+	icon,
+	description,
+	routeLink,
+	accentColor
+}: {
+	title: string;
+	icon: React.ReactNode;
+	description: string;
+	routeLink: () => void;
+	accentColor: string;
+}) {
+	return (
+		<div className={"p-3"}>
+			<div className="d-flex align-items-center gap-3 mb-3">
+				<div className={`p-2 text-${accentColor}`}>{icon}</div>
+				<div className="flex-grow-1">
+					<h3 className="h4 mb-1">{title}</h3>
+					<p className="text-muted mb-0 small">{description}</p>
+				</div>
+			</div>
+			<Button
+				variant={accentColor}
+				size="sm"
+				className="rounded-pill px-4 py-2"
+				onClick={routeLink}
+			>
+				Apri {title}
+			</Button>
+		</div>
+	);
+}
+
 function ModernCard({
 	title,
 	icon,
 	description,
 	content,
-	link,
+	routeLink,
 	accentColor = "primary"
 }: {
 	title: string;
 	icon: React.ReactNode;
 	description: string;
 	content: React.ReactNode;
-	link: string;
+	routeLink: () => void;
 	accentColor?: string;
 }) {
 	return (
-		<div className={`card h-100 shadow-sm border-${accentColor}`}>
+		<div className={"card h-100 shadow-sm rounded-4 shadow-lg border-0"}>
+			<div
+				className={`bg-${accentColor}`}
+				style={{
+					position: "absolute",
+					top: 0,
+					left: "50%",
+					transform: "translateX(-50%)",
+					height: "4px",
+					width: "60%",
+					borderRadius: "0 0 8px 8px"
+				}}
+			/>
 			<div className="card-body h-100 d-flex flex-column">
-				<div className="d-flex align-items-center mb-3">
-					<span className={`text-${accentColor} me-2 fs-4`}>
-						{icon}
-					</span>
-					<h5 className="card-title mb-0">{title}</h5>
-				</div>
-				<p className="card-text text-muted small">{description}</p>
+				<CardHeader
+					title={title}
+					icon={icon}
+					description={description}
+					routeLink={routeLink}
+					accentColor={accentColor}
+				/>
 				<div className="card-text mb-3 overflow-auto h-max">
 					{content}
 				</div>
@@ -66,6 +114,8 @@ function ModernCard({
 export default function Home() {
 	const [previews, setPreviews] = useState<PreviewsResponse | null>(null);
 	const { user } = useUser();
+
+	const router = useRouter();
 
 	useEffect(() => {
 		async function fetchPreviews() {
@@ -103,7 +153,7 @@ export default function Home() {
 										chats={previews?.chats || []}
 									/>
 								}
-								link="/chat"
+								routeLink={() => router.push("/chat")}
 								accentColor="success"
 							/>
 						</div>
@@ -124,7 +174,7 @@ export default function Home() {
 										}
 									/>
 								}
-								link="/calendar"
+								routeLink={() => router.push("/calendar")}
 								accentColor="info"
 							/>
 						</div>
@@ -145,7 +195,7 @@ export default function Home() {
 											notes={previews?.notes || []}
 										/>
 									}
-									link="/notepad"
+									routeLink={() => router.push("/notepad")}
 									accentColor="primary"
 								/>
 							</div>
@@ -159,7 +209,7 @@ export default function Home() {
 											projects={previews?.projects || []}
 										/>
 									}
-									link="/projects"
+									routeLink={() => router.push("/projects")}
 									accentColor="warning"
 								/>
 							</div>
@@ -173,7 +223,7 @@ export default function Home() {
 											pomodoro={user?.pomodoro}
 										/>
 									}
-									link="/pomodoro"
+									routeLink={() => router.push("/pomodoro")}
 									accentColor="danger"
 								/>
 							</div>
