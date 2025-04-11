@@ -17,6 +17,9 @@ async function fetcher(url: string) {
 	const response = await fetch(url);
 
 	if (!response.ok) {
+		if (response.status === 475) {
+			throw new Error("TimeMachine date is before session start date");
+		}
 		throw new Error("Errore durante il fetch dei dati");
 	}
 
@@ -303,6 +306,23 @@ function PomodoroImplementation() {
 		);
 	}
 
+	function TooEarlyBlock() {
+		return (
+			<div className="d-flex flex-column align-items-center justify-content-center h-100">
+				<h1 className="display-4 text-danger mb-3">
+					Sessione non ancora iniziata
+				</h1>
+				<p className="text-muted">
+					La sessione a cui stai tentando di accedere non è ancora
+					iniziata
+				</p>
+				<Button href="/home" variant="primary" className="mt-3">
+					Torna alla home
+				</Button>
+			</div>
+		);
+	}
+
 	function LoadingBlock() {
 		return (
 			<div className="d-flex flex-column align-items-center justify-content-center h-100">
@@ -321,7 +341,13 @@ function PomodoroImplementation() {
 				className="d-flex flex-column position-relative flex-grow-1"
 				style={{ backgroundColor: "rgb(240, 240, 240)" }}
 			>
-				{error && <InvalidSessionBlock />}
+				{error &&
+					(error.message ===
+					"TimeMachine date is before session start date" ? (
+						<TooEarlyBlock />
+					) : (
+						<InvalidSessionBlock />
+					))}
 				{!data && !error && <LoadingBlock />}
 				{data && !error && (
 					<>

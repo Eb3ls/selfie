@@ -101,7 +101,7 @@ export const GET = async (
 	) {
 		return generateMessageResponse(
 			"TimeMachine date is before session start date",
-			400
+			475
 		);
 	}
 
