@@ -8,6 +8,7 @@ import { toast } from "react-toastify";
 import { GlobalSideBar } from "../components/GlobalSideBar";
 import { useUser } from "../components/UserContext";
 import { SearchBar } from "./SearchBar";
+import "./style.css";
 
 export interface Project {
 	_id: string; // ID del progetto (stringa)
