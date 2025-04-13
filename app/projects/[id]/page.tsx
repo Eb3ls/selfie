@@ -3,7 +3,7 @@
 import { GlobalSideBar } from "@/app/components/GlobalSideBar";
 import { useTime } from "@/app/components/TimeContext";
 import { useUser } from "@/app/components/UserContext";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ViewToggler from "./ViewToggler";
 import "./styles.css";
 
@@ -43,18 +43,33 @@ export default function Projects() {
 		}
 	}, [user]);
 
+	const prevDayRef = useRef<number | null>(null);
+
 	useEffect(() => {
-		if (!showContent) return;
+		if (!showContent || !dateTime || !user) return;
 		const viewToggler = document.querySelector(
 			"view-toggler"
 		) as ViewToggler;
-		if (viewToggler && dateTime && user) {
-			viewToggler.currentDate = new Date(dateTime);
-			viewToggler.currentUser = {
-				id: user._id,
-				name: user.username
-			};
+
+		if (!viewToggler) {
+			return;
 		}
+		const currentDate = new Date(dateTime);
+		const currentDay = currentDate.getDate();
+
+		// Se la data non é ancora stata impostata o il giorno é lo stesso non facciamo nulla
+		if (prevDayRef.current !== null && prevDayRef.current === currentDay) {
+			return;
+		}
+		prevDayRef.current = currentDay;
+
+		viewToggler.currentDate = currentDate;
+		viewToggler.currentUser = {
+			id: user._id,
+			name: user.username
+		};
+
+		viewToggler.updatePage();
 	}, [showContent, user, dateTime]);
 
 	return (
