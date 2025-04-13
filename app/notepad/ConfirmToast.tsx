@@ -1,35 +1,28 @@
 import React from "react";
-import { toast } from "react-toastify";
+import { Id, toast } from "react-toastify";
 
-function ConfirmToast({ onConfirm, onCancel, summary }: any) {
+interface ConfirmToastProps {
+	onConfirm: () => void;
+	onCancel: () => void;
+	summary: string;
+}
+
+function ConfirmToast({ onConfirm, onCancel, summary }: ConfirmToastProps) {
 	return (
-		<div>
-			<p>Sei sicuro di voler eliminare la nota &quot;{summary}&quot;?</p>
-			<div
-				style={{
-					display: "flex",
-					justifyContent: "flex-end",
-					gap: "0.5rem"
-				}}
-			>
+		<div className="p-3" style={{ minWidth: "320px", maxWidth: "500px" }}>
+			<p className="text-break mb-3">
+				Sei sicuro di voler eliminare la nota &quot;{summary}&quot;?
+			</p>
+			<div className="d-flex justify-content-end gap-2">
 				<button
 					onClick={onCancel}
-					style={{
-						backgroundColor: "#ccc",
-						border: "none",
-						padding: "0.5rem 1rem"
-					}}
+					className="btn btn-secondary btn-sm hover-lift"
 				>
 					Annulla
 				</button>
 				<button
 					onClick={onConfirm}
-					style={{
-						backgroundColor: "#f37b85",
-						border: "none",
-						color: "white",
-						padding: "0.5rem 1rem"
-					}}
+					className="btn btn-danger btn-sm hover-lift"
 				>
 					Conferma
 				</button>
@@ -38,23 +31,39 @@ function ConfirmToast({ onConfirm, onCancel, summary }: any) {
 	);
 }
 
-// Funzione per mostrare il toast di conferma
-export function showConfirmToast(onConfirm: any, summary: string) {
+let currentToastId: Id | null = null;
+
+export function showConfirmToast(onConfirm: () => void, summary: string) {
 	const toastId = toast(
 		<ConfirmToast
 			onConfirm={() => {
 				toast.dismiss(toastId);
+				currentToastId = null;
 				onConfirm();
 			}}
 			onCancel={() => {
 				toast.dismiss(toastId);
+				currentToastId = null;
 			}}
 			summary={summary}
 		/>,
 		{
-			autoClose: false,
+			position: "top-center",
+			autoClose: 3000,
+			hideProgressBar: true,
 			closeOnClick: false,
-			draggable: false
+			draggable: false,
+			closeButton: true,
+			className: "confirm-toast",
+			style: { maxWidth: "500px", width: "max-content" }
 		}
 	);
+	// Se c'é un toast attivo lo chiudiamo
+	setTimeout(() => {
+		if (currentToastId && toast.isActive(currentToastId)) {
+			toast.dismiss(currentToastId);
+			currentToastId = null;
+		}
+		currentToastId = toastId;
+	}, 200);
 }
