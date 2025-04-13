@@ -11,6 +11,7 @@ import { FaChartGantt, FaTimeline } from "react-icons/fa6";
 import { MdPublic } from "react-icons/md";
 import { toast } from "react-toastify";
 import useSWR from "swr";
+import { showConfirmToast } from "./ConfirmToast";
 import styles from "./Notepad.module.css";
 import { SearchBar } from "./SearchBar";
 
@@ -157,10 +158,6 @@ export default function Notepad() {
 	}
 
 	async function handleDelete(id: string) {
-		const conf = confirm("Sicuro di voler eliminare?");
-
-		if (!conf) return;
-
 		const response = await fetch("/api/notepad/delete", {
 			method: "DELETE",
 			headers: {
@@ -283,7 +280,13 @@ export default function Notepad() {
 													variant="link"
 													className={styles.deleteBtn}
 													onClick={() =>
-														handleDelete(note._id!)
+														showConfirmToast(
+															() =>
+																handleDelete(
+																	note._id!
+																),
+															note.summary
+														)
 													}
 												>
 													<FaTrash />
