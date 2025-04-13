@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { Button, Card, Container } from "react-bootstrap";
 import { FaLock, FaTrash, FaUser, FaUserShield } from "react-icons/fa";
+import { FaChartGantt, FaTimeline } from "react-icons/fa6";
 import { MdPublic } from "react-icons/md";
 import { toast } from "react-toastify";
 import useSWR from "swr";
@@ -21,12 +22,18 @@ async function fetcher(url: string) {
 	return response.json();
 }
 
+// Tipo che estende StringNote per includere il campo type
+
+interface ExtendedStringNote extends StringNote {
+	type: string;
+}
+
 export default function Notepad() {
 	const { user } = useUser();
 	const router = useRouter();
 
-	const [notes, setNotes] = useState<StringNote[]>([]);
-	const [oldNotes, setOldNotes] = useState<StringNote[]>([]);
+	const [notes, setNotes] = useState<ExtendedStringNote[]>([]);
+	const [oldNotes, setOldNotes] = useState<ExtendedStringNote[]>([]);
 
 	const { data, error, mutate } = useSWR("/api/notepad/getNotes", fetcher);
 
@@ -190,6 +197,18 @@ export default function Notepad() {
 		}
 	}
 
+	// Funzione per restituire l'icona corretta per il campo type
+	function getTypeIcon(type: string) {
+		switch (type) {
+			case "project":
+				return <FaChartGantt title="Progetto" />;
+			case "activity":
+				return <FaTimeline title="Attività di Progetto" />;
+			default:
+				return null;
+		}
+	}
+
 	// Funzione per verificare se l'utente è il proprietario della nota
 	function isOwner(ownerId: string) {
 		return ownerId === user?._id;
@@ -225,7 +244,7 @@ export default function Notepad() {
 								</p>
 							</div>
 						) : (
-							notes.map((note: StringNote) => (
+							notes.map((note: ExtendedStringNote) => (
 								<Card
 									key={note._id}
 									className={styles.noteCard}
@@ -244,6 +263,13 @@ export default function Notepad() {
 											>
 												{getAccessIcon(note.access)}
 											</span>
+											{note.type !== "note" && (
+												<span
+													className={`${styles.icon} ${styles.projectIcon}`}
+												>
+													{getTypeIcon(note.type)}
+												</span>
+											)}
 											{isOwner(note.ownerId) && (
 												<FaUserShield
 													className={`${styles.icon} ${styles.ownerIcon}`}
@@ -251,17 +277,18 @@ export default function Notepad() {
 												/>
 											)}
 										</div>
-										{note.ownerId === user?._id && (
-											<Button
-												variant="link"
-												className={styles.deleteBtn}
-												onClick={() =>
-													handleDelete(note._id!)
-												}
-											>
-												<FaTrash />
-											</Button>
-										)}
+										{note.ownerId === user?._id &&
+											note.type === "note" && (
+												<Button
+													variant="link"
+													className={styles.deleteBtn}
+													onClick={() =>
+														handleDelete(note._id!)
+													}
+												>
+													<FaTrash />
+												</Button>
+											)}
 									</div>
 
 									<Card.Body

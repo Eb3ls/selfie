@@ -81,6 +81,11 @@ export const POST = async (request: NextRequest) => {
 
 	const userIdList: string[] = (await convertionOut.json()).users;
 
+	// se non c'è l'owner nella userIdList, lo mettiamo
+	if (!userIdList.includes(userId)) {
+		userIdList.unshift(userId);
+	}
+
 	// Otteniamo la collezione delle fasi
 	const phaseClient: Collection<Phase> =
 		await getCollection<Phase>(PHASE_COLLECTION);

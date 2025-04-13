@@ -7,6 +7,10 @@ import {
 import {
 	NOTE_COLLECTION,
 	Note,
+	PROJECT_ACTIVITY_COLLECTION,
+	PROJECT_COLLECTION,
+	Project,
+	ProjectActivity,
 	findCollectionWrapper,
 	getCollection
 } from "@/utils/db/db";
@@ -80,7 +84,38 @@ export const GET = async (request: NextRequest) => {
 			// Rimuoviamo la lista di userIdList per evitare di esporla
 			delete note.userIdList;
 
-			// TODO: controllo che se non è l'owner, oltre a essere nella lista la nota deve essere INVITED
+			// Controllo che la nota sia di un progetto o di una project activity
+
+			// Ottengo la collezione dei progetti
+			const projectClient: Collection<Project> =
+				await getCollection(PROJECT_COLLECTION);
+
+			// Verifica se la nota è di un progetto
+			const project = await findCollectionWrapper(
+				{ noteId: note._id },
+				projectClient
+			);
+
+			if (project.status === 200) {
+				note.type = "project";
+			}
+
+			// Ottengo la collezione delle attività di progetto
+			const projectActivityClient: Collection<ProjectActivity> =
+				await getCollection(PROJECT_ACTIVITY_COLLECTION);
+			// Verifica se la nota è di un'attività di progetto
+
+			const projectActivity = await findCollectionWrapper(
+				{ noteId: note._id },
+				projectActivityClient
+			);
+			if (projectActivity.status === 200) {
+				note.type = "activity";
+			}
+			// Se la nota non è di un progetto o di un'attività di progetto, la consideriamo una nota normale
+			if (project.status !== 200 && projectActivity.status !== 200) {
+				note.type = "note";
+			}
 		}
 	}
 
