@@ -302,8 +302,12 @@ export default function Notepad() {
 											<Card.Title
 												className={styles.noteTitle}
 											>
-												{note.summary ||
-													"Untitled Note"}
+												{note.summary.length < 15
+													? note.summary
+													: note.summary.substring(
+															0,
+															15
+														) + "..."}
 											</Card.Title>
 										</div>
 
@@ -311,7 +315,12 @@ export default function Notepad() {
 											<div
 												className={styles.noteCategory}
 											>
-												{note.categories}
+												{note.categories.length < 25
+													? note.categories
+													: note.categories.substring(
+															0,
+															25
+														) + "..."}
 											</div>
 										)}
 
