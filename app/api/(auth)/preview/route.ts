@@ -191,7 +191,7 @@ export const GET = async (request: NextRequest) => {
 		{ _id: user._id } as any,
 		userClient
 	);
-	if (userOut.status !== 200) {
+	if (userOut.status !== 200 && userOut.status !== 404) {
 		return userOut;
 	}
 	if (!userOut.body) {
@@ -209,7 +209,7 @@ export const GET = async (request: NextRequest) => {
 		{ userIdList: { $in: [user._id] } } as any,
 		noteClient
 	);
-	if (noteOut.status !== 200) {
+	if (noteOut.status !== 200 && noteOut.status !== 404) {
 		return noteOut;
 	}
 	if (!noteOut.body) {
@@ -217,21 +217,25 @@ export const GET = async (request: NextRequest) => {
 	}
 	const notes = await noteOut.json();
 	// Ordina le note dalla più recente alla più vecchia
-	const sortedNotes = notes.sort(
-		(a: Note, b: Note) =>
-			new Date(b.dtModified).getTime() - new Date(a.dtModified).getTime()
-	);
+	let reducedNotes: ReducedNote[] = [];
+	if (notes.length > 0) {
+		const sortedNotes = notes.sort(
+			(a: Note, b: Note) =>
+				new Date(b.dtModified).getTime() -
+				new Date(a.dtModified).getTime()
+		);
 
-	// Applica il limite delle preview
-	const limitedNotes = sortedNotes.slice(0, previews.maxNotes);
+		// Applica il limite delle preview
+		const limitedNotes = sortedNotes.slice(0, previews.maxNotes);
 
-	// Mappa alla struttura ReducedNote
-	const reducedNotes: ReducedNote[] = limitedNotes.map((note: Note) => ({
-		_id: note._id,
-		summary: note.summary,
-		categories: note.categories,
-		dtModified: note.dtModified
-	}));
+		// Mappa alla struttura ReducedNote
+		reducedNotes = limitedNotes.map((note: Note) => ({
+			_id: note._id,
+			summary: note.summary,
+			categories: note.categories,
+			dtModified: note.dtModified
+		}));
+	}
 
 	// ======================
 	// Preview dei PROGETTI
@@ -242,18 +246,21 @@ export const GET = async (request: NextRequest) => {
 		{ userIdList: { $in: [user._id] } } as any,
 		projectClient
 	);
-	if (projectOut.status !== 200) {
+	if (projectOut.status !== 200 && projectOut.status !== 404) {
 		return projectOut;
 	}
 	if (!projectOut.body) {
 		return generateMessageResponse("No data found", 404);
 	}
 	const projects = await projectOut.json();
-	const reducedProjects: ReducedProject[] = projects.map((project: any) => ({
-		_id: project._id,
-		summary: project.summary,
-		noteId: project.noteId
-	}));
+	let reducedProjects: ReducedProject[] = [];
+	if (projects.length > 0) {
+		reducedProjects = projects.map((project: any) => ({
+			_id: project._id,
+			summary: project.summary,
+			noteId: project.noteId
+		}));
+	}
 
 	// ======================
 	// Preview delle CHAT (privata e di gruppo)
@@ -264,7 +271,7 @@ export const GET = async (request: NextRequest) => {
 		{ userIdList: { $in: [user._id] } } as any,
 		chatClient
 	);
-	if (chatOut.status !== 200) {
+	if (chatOut.status !== 200 && chatOut.status !== 404) {
 		return chatOut;
 	}
 	if (!chatOut.body) {
@@ -273,36 +280,41 @@ export const GET = async (request: NextRequest) => {
 	const chatsData = await chatOut.json();
 	let reducedChats: ReducedChat[] = [];
 
-	for (const chat of chatsData) {
-		const currentUserIndex = chat.userIdList.indexOf(user._id);
-		const otherUserIndex = 1 - currentUserIndex;
+	if (chatsData.length > 0) {
+		for (const chat of chatsData) {
+			const currentUserIndex = chat.userIdList.indexOf(user._id);
+			const otherUserIndex = 1 - currentUserIndex;
 
-		try {
-			const otherUser: string = await getNameFromId(
-				chat.userIdList[otherUserIndex]
-			);
-			const summary = "Chat con " + otherUser;
-			const lastMessageOwnerId =
-				chat.messages[chat.messages.length - 1].ownerId;
-			let lastMessageOwner: string = "Tu";
-			if (lastMessageOwnerId === chat.userIdList[otherUserIndex]) {
-				lastMessageOwner = otherUser;
+			try {
+				const otherUser: string = await getNameFromId(
+					chat.userIdList[otherUserIndex]
+				);
+				const summary = "Chat con " + otherUser;
+				const lastMessageOwnerId =
+					chat.messages[chat.messages.length - 1].ownerId;
+				let lastMessageOwner: string = "Tu";
+				if (lastMessageOwnerId === chat.userIdList[otherUserIndex]) {
+					lastMessageOwner = otherUser;
+				}
+				const lastMessageAt = new Date(
+					chat.lastMessageAt
+				).toISOString();
+				const lastMessage =
+					chat.messages[chat.messages.length - 1].content;
+
+				reducedChats.push({
+					_id: chat._id,
+					summary,
+					lastMessage,
+					lastMessageOwner,
+					lastMessageAt
+				});
+			} catch (error) {
+				return generateMessageResponse(
+					"Error getting chat informations",
+					400
+				);
 			}
-			const lastMessageAt = new Date(chat.lastMessageAt).toISOString();
-			const lastMessage = chat.messages[chat.messages.length - 1].content;
-
-			reducedChats.push({
-				_id: chat._id,
-				summary,
-				lastMessage,
-				lastMessageOwner,
-				lastMessageAt
-			});
-		} catch (error) {
-			return generateMessageResponse(
-				"Error getting chat informations",
-				400
-			);
 		}
 	}
 
@@ -313,7 +325,7 @@ export const GET = async (request: NextRequest) => {
 		{ userIdList: { $in: [user._id] } } as any,
 		groupChatClient
 	);
-	if (groupChatOut.status !== 200) {
+	if (groupChatOut.status !== 200 && groupChatOut.status !== 404) {
 		return groupChatOut;
 	}
 	if (!groupChatOut.body) {
@@ -321,43 +333,45 @@ export const GET = async (request: NextRequest) => {
 	}
 	const groupChats = await groupChatOut.json();
 
-	for (const groupChat of groupChats) {
-		const currentUserIndex = groupChat.userIdList.indexOf(user._id);
+	if (groupChats.length > 0) {
+		for (const groupChat of groupChats) {
+			const currentUserIndex = groupChat.userIdList.indexOf(user._id);
 
-		try {
-			const summary = groupChat.summary;
+			try {
+				const summary = groupChat.summary;
 
-			if (groupChat.messages.length === 0) {
-				continue; // Se non ci sono messaggi, salta
+				if (groupChat.messages.length === 0) {
+					continue; // Se non ci sono messaggi, salta
+				}
+
+				const lastMessageOwnerId =
+					groupChat.messages[groupChat.messages.length - 1].ownerId;
+				let lastMessageOwner: string = "Tu";
+
+				// Se il proprietario dell'ultimo messaggio non è l'utente corrente, lo recupera
+				if (lastMessageOwnerId !== user._id) {
+					lastMessageOwner = await getNameFromId(lastMessageOwnerId);
+				}
+
+				const lastMessageAt = new Date(
+					groupChat.lastMessageAt
+				).toISOString();
+				const lastMessage =
+					groupChat.messages[groupChat.messages.length - 1].content;
+
+				reducedChats.push({
+					_id: groupChat._id,
+					summary,
+					lastMessage,
+					lastMessageOwner,
+					lastMessageAt
+				});
+			} catch (error) {
+				return generateMessageResponse(
+					"Error getting group chat informations",
+					400
+				);
 			}
-
-			const lastMessageOwnerId =
-				groupChat.messages[groupChat.messages.length - 1].ownerId;
-			let lastMessageOwner: string = "Tu";
-
-			// Se il proprietario dell'ultimo messaggio non è l'utente corrente, lo recupera
-			if (lastMessageOwnerId !== user._id) {
-				lastMessageOwner = await getNameFromId(lastMessageOwnerId);
-			}
-
-			const lastMessageAt = new Date(
-				groupChat.lastMessageAt
-			).toISOString();
-			const lastMessage =
-				groupChat.messages[groupChat.messages.length - 1].content;
-
-			reducedChats.push({
-				_id: groupChat._id,
-				summary,
-				lastMessage,
-				lastMessageOwner,
-				lastMessageAt
-			});
-		} catch (error) {
-			return generateMessageResponse(
-				"Error getting group chat informations",
-				400
-			);
 		}
 	}
 
