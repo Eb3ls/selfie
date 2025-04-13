@@ -228,11 +228,6 @@ export function MusicView({ show }: { show: boolean }): JSX.Element {
 						value={volume}
 						onChange={handleVolumeChange}
 					/>
-					<FaVolumeHigh
-						className="color-brown"
-						size={20}
-						style={{ flexShrink: 0 }}
-					/>
 				</div>
 			</Button>
 		);
