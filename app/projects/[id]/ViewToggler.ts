@@ -201,7 +201,10 @@ class ViewToggler extends HTMLElement {
 	loadUpperHeaderData() {
 		if (!this.projectData) return;
 		if (this.isOwner) {
-			const addForm = this.querySelector("add-form-component") as AddForm;
+			const addForm = this.querySelector(
+				"add-form-component"
+			) as AddForm | null;
+			if (!addForm) return;
 			addForm.loadProjectData(
 				this.projectData._id,
 				this.projectData.phases,
@@ -209,12 +212,16 @@ class ViewToggler extends HTMLElement {
 			);
 		}
 
-		const phaseForm = document.querySelector("phase-form") as PhaseForm;
+		const phaseForm = document.querySelector(
+			"phase-form"
+		) as PhaseForm | null;
+		if (!phaseForm) return;
 		phaseForm.isOwner = this.isOwner;
 
 		const projectSettings = this.querySelector(
 			"project-settings"
-		) as ProjectSettings;
+		) as ProjectSettings | null;
+		if (!projectSettings) return;
 		projectSettings.loadProjectData(
 			this.projectData.summary,
 			this.projectData._id,
@@ -224,7 +231,8 @@ class ViewToggler extends HTMLElement {
 
 		const activityForm = document.querySelector(
 			"activity-form"
-		) as ActivityForm;
+		) as ActivityForm | null;
+		if (!activityForm) return;
 		if (activityForm) {
 			activityForm.loadProjectData(
 				this.sortedActivities,

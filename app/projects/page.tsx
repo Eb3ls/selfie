@@ -132,69 +132,66 @@ export default function ProjectPage() {
 
 	function createProjectEntry(project: Project, isOwner: boolean) {
 		return (
-			<div className="col-12 col-md-6 col-lg-4 mb-4" key={project._id}>
-				<Card
-					className="h-100 shadow-sm hover-shadow transition-all"
-					style={{
-						borderRadius: "12px",
-						border: "1px solid rgba(0,0,0,0.1)",
-						cursor: "pointer",
-						transition: "all 0.2s ease-in-out"
-					}}
-					onClick={() => handleProjectClick(project)}
-				>
-					<Card.Body className="d-flex flex-column">
-						<Card.Title className="h5 fw-bold mb-3 d-flex align-items-center">
-							{isOwner && (
-								<FaUserShield
-									title="Owner"
-									className="text-primary me-2"
-									size={20}
-								/>
-							)}
+			<div
+				className="project-card bg-white rounded-4 h-100 hover-lift-2"
+				key={project._id}
+				onClick={() => handleProjectClick(project)}
+			>
+				<div className="p-4">
+					<div className="d-flex align-items-center gap-2 mb-3">
+						{isOwner && (
+							<FaUserShield
+								title="Owner"
+								className="owner-icon flex-shrink-0"
+								size={20}
+							/>
+						)}
+						<h3 className="h5 fw-bold m-0 text-truncate">
 							{project.summary}
-						</Card.Title>
+						</h3>
+					</div>
 
-						<div className="mb-3">
-							<div className="text-muted mb-2">
-								<small>Proprietario</small>
-							</div>
-							<div className="fw-medium">{project.ownerName}</div>
+					<div className="d-flex flex-column gap-3">
+						<div>
+							<span className="label d-block mb-1">
+								Proprietario
+							</span>
+							<span className="fw-medium">
+								{project.ownerName}
+							</span>
 						</div>
 
 						{project.userNameList.length > 0 && (
-							<div className="mb-3">
-								<div className="text-muted mb-2">
-									<small>Collaboratori</small>
-								</div>
-								<div className="text-truncate">
+							<div>
+								<span className="label d-block mb-1">
+									Collaboratori
+								</span>
+								<span className="text-truncate">
 									{project.userNameList.join(", ")}
-								</div>
+								</span>
 							</div>
 						)}
+					</div>
 
-						<div className="mt-auto">
-							<button
-								className="btn btn-primary w-100"
-								onClick={(e) => {
-									e.stopPropagation();
-									handleNoteClick(project.noteId);
-								}}
-							>
-								Apri nota 📝
-							</button>
-						</div>
-					</Card.Body>
-				</Card>
+					<button
+						className="btn w-100 mt-4 note-button text-white"
+						onClick={(e) => {
+							e.stopPropagation();
+							handleNoteClick(project.noteId);
+						}}
+					>
+						Apri nota 📝
+					</button>
+				</div>
 			</div>
 		);
 	}
 
 	return (
-		<div>
+		<div className="min-vh-100 bg-light">
 			<GlobalSideBar />
-			<Container>
-				<div className="mb-4">
+			<main className="container py-5">
+				<div className="bg-white rounded-4 shadow-sm p-4 mb-5">
 					<SearchBar
 						handleSort={handleSort}
 						handleSearch={handleSearch}
@@ -202,12 +199,10 @@ export default function ProjectPage() {
 					/>
 				</div>
 
-				<div className="row">
+				<div className="projects-grid gap-3">
 					{projects.length === 0 ? (
-						<div className="col-12 text-center py-5">
-							<p className="text-muted">
-								Nessun progetto trovato
-							</p>
+						<div className="text-center text-muted py-5">
+							<p className="mb-0">Nessun progetto trovato</p>
 						</div>
 					) : (
 						projects.map((project) =>
@@ -218,7 +213,7 @@ export default function ProjectPage() {
 						)
 					)}
 				</div>
-			</Container>
+			</main>
 		</div>
 	);
 }

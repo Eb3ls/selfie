@@ -1,8 +1,29 @@
-.hover-shadow {
-	transition: all 0.2s ease-in-out;
+.projects-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
 }
 
-.hover-shadow:hover {
-	transform: scale(1.05);
-	box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05);
+.project-card {
+	cursor: pointer;
+	border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.owner-icon {
+	color: #4f46e5;
+}
+
+.label {
+	font-size: 0.75rem;
+	color: #6b7280;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+
+.note-button {
+	background-color: #4f46e5 !important;
+	transition: background-color 0.3s ease !important;
+}
+
+.note-button:hover {
+	background-color: #4338ca !important;
 }
