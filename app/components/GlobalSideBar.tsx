@@ -3,7 +3,7 @@
 import { DEFAULT_PROFILE_URL } from "@/app/constants";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
 	Button,
 	Container,
@@ -123,6 +123,18 @@ export function GlobalSideBar() {
 		setShowModal(false);
 		logOut();
 	};
+
+	// Se l'utente allarga la finestra, chiudiamo la sidebar
+	useEffect(() => {
+		function handleResize() {
+			if (window.innerWidth >= 992) {
+				setShowSidebar(false);
+			}
+		}
+		window.addEventListener("resize", handleResize);
+		handleResize();
+		return () => window.removeEventListener("resize", handleResize);
+	}, []);
 
 	return (
 		<>
