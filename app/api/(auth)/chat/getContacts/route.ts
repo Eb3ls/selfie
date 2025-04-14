@@ -205,11 +205,17 @@ export const GET = async (request: NextRequest) => {
 	}
 
 	// Otteniamo l'utente che ha fatto la richiesta
-	const whoAmI = userList.find((user) => user._id === userId);
+	const whoAmIList = await getUserElementFromList([userId]);
 
-	if (whoAmI === undefined) {
+	if (whoAmIList === null) {
 		return generateMessageResponse("Internal error", 500);
 	}
+
+	if (whoAmIList.length === 0) {
+		return generateMessageResponse("Internal error", 500);
+	}
+
+	const whoAmI = whoAmIList[0];
 
 	const response: ChatResponse = {
 		chatList,
