@@ -40,6 +40,8 @@ export function GenericModifyModal({
 		);
 	} else if (calendarEvent.typology === "event") {
 		const event = calendarEvent.originalElement as StringEventFrontend;
+		event.dtStart = calendarEvent.start.toISOString();
+		event.dtEnd = calendarEvent.end.toISOString();
 		return (
 			<ModifyEventModal
 				show={showModal}
@@ -51,6 +53,8 @@ export function GenericModifyModal({
 		);
 	} else if (calendarEvent.typology === "session") {
 		const session = calendarEvent.originalElement as StringSessionFrontend;
+		session.dtStart = calendarEvent.start.toISOString();
+		session.dtEnd = calendarEvent.end.toISOString();
 		return (
 			<ModifySessionModal
 				show={showModal}
