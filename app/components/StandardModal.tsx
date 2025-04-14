@@ -8,7 +8,6 @@ interface StandardModalProps {
 	show: boolean;
 	showCloseButton?: boolean;
 	handleClose?: () => void;
-	// Se saveBtnText o handleSubmit non sono definiti, non mostriamo il pulsante di salvataggio
 	saveBtnText?: string;
 	handleSubmit?: (event: React.FormEvent<HTMLFormElement>) => void;
 	extraHeaderButtons?: React.ReactNode;
@@ -25,11 +24,15 @@ export function StandardModal({
 	handleSubmit,
 	extraHeaderButtons
 }: StandardModalProps) {
-	// Se handleSubmit o saveBtnText non sono definiti, non mostriamo il pulsante di salvataggio
 	function getSubmitButton() {
 		if (handleSubmit && saveBtnText) {
 			return (
-				<Button type="submit" variant="primary" form="modalForm">
+				<Button
+					type="submit"
+					variant="primary"
+					form="modalForm"
+					className="px-4 py-2 border-0 rounded-3 hover-lift"
+				>
 					{saveBtnText}
 				</Button>
 			);
@@ -37,12 +40,14 @@ export function StandardModal({
 		return null;
 	}
 
-	// Se handleClose o showCloseButton non sono definiti, non mostriamo il pulsante di chiusura
-	// La funzione di close é sempre definita e chiamata quando si preme la X
 	function getCloseButton() {
 		if (handleClose && showCloseButton) {
 			return (
-				<Button variant="secondary" onClick={handleClose}>
+				<Button
+					variant="light"
+					onClick={handleClose}
+					className="px-4 py-2 border-0 rounded-3 hover-lift"
+				>
 					Chiudi
 				</Button>
 			);
@@ -54,7 +59,7 @@ export function StandardModal({
 	function getFooter() {
 		if (getCloseButton() || getSubmitButton()) {
 			return (
-				<Modal.Footer>
+				<Modal.Footer className="border-0 px-4 pb-4">
 					{getCloseButton()}
 					{getSubmitButton()}
 				</Modal.Footer>
@@ -71,24 +76,27 @@ export function StandardModal({
 			size="lg"
 			fullscreen="md-down"
 			scrollable={true}
+			style={
+				{
+					"--bs-modal-border-radius": "1rem"
+				} as React.CSSProperties
+			}
 		>
-			<Modal.Header closeButton>
+			<Modal.Header className="border-0 px-4 pt-4">
 				<div className="d-flex align-items-center w-100">
-					<div className="d-flex align-items-center justify-content-center">
+					<div className="d-flex align-items-center">
 						{titleIcon && (
-							<span className="modal-icon me-2">{titleIcon}</span>
+							<span className="me-3 opacity-75">{titleIcon}</span>
 						)}
-						<Modal.Title>{title}</Modal.Title>
+						<Modal.Title className="fw-bold">{title}</Modal.Title>
 					</div>
 					{extraHeaderButtons && (
-						<div className="ms-auto d-flex align-items-center me-2">
-							{extraHeaderButtons}
-						</div>
+						<div className="ms-auto">{extraHeaderButtons}</div>
 					)}
 				</div>
 			</Modal.Header>
 
-			<Modal.Body>
+			<Modal.Body className="px-4">
 				<Form onSubmit={handleSubmit || undefined} id="modalForm">
 					{children}
 				</Form>
