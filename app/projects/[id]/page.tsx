@@ -61,15 +61,20 @@ export default function Projects() {
 		if (prevDayRef.current !== null && prevDayRef.current === currentDay) {
 			return;
 		}
-		prevDayRef.current = currentDay;
 
 		viewToggler.currentDate = currentDate;
-		viewToggler.currentUser = {
-			id: user._id,
-			name: user.username
-		};
 
-		viewToggler.updatePage();
+		// Se abbiamo giá impostato la data e il giorno é diverso, aggiorniamo la pagina
+		if (prevDayRef.current !== null) {
+			viewToggler.updatePage();
+		} else {
+			viewToggler.currentUser = {
+				id: user._id,
+				name: user.username
+			};
+		}
+
+		prevDayRef.current = currentDay;
 	}, [showContent, user, dateTime]);
 
 	return (
