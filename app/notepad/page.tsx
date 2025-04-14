@@ -11,7 +11,7 @@ import { FaChartGantt, FaTimeline } from "react-icons/fa6";
 import { MdPublic } from "react-icons/md";
 import { toast } from "react-toastify";
 import useSWR from "swr";
-import { showConfirmToast } from "./ConfirmToast";
+import { DeleteNoteModal } from "./DeleteNoteModal";
 import styles from "./Notepad.module.css";
 import { SearchBar } from "./SearchBar";
 
@@ -276,21 +276,20 @@ export default function Notepad() {
 										</div>
 										{note.ownerId === user?._id &&
 											note.type === "note" && (
-												<Button
-													variant="link"
-													className={styles.deleteBtn}
-													onClick={() =>
-														showConfirmToast(
-															() =>
-																handleDelete(
-																	note._id!
-																),
-															note.summary
-														)
+												<DeleteNoteModal
+													handleDelete={() =>
+														handleDelete(note._id!)
 													}
 												>
-													<FaTrash />
-												</Button>
+													<Button
+														variant="link"
+														className={
+															styles.deleteBtn
+														}
+													>
+														<FaTrash />
+													</Button>
+												</DeleteNoteModal>
 											)}
 									</div>
 

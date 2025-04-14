@@ -61,7 +61,7 @@ export function DeleteModal({
 
 			<StandardModal
 				title="Elimina chat"
-				titleIcon={<i className="bi bi-person-plus me-2" />}
+				titleIcon={<i className="bi bi-trash me-2" />}
 				saveBtnText="Cancella"
 				show={show}
 				handleClose={() => {
