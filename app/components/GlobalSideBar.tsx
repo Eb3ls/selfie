@@ -76,7 +76,8 @@ function UserInfo({ user }: { user: any }) {
 					width: "50px",
 					height: "50px",
 					overflow: "hidden",
-					borderRadius: "50%"
+					borderRadius: "50%",
+					flexShrink: 0
 				}}
 			>
 				<Image
@@ -103,9 +104,13 @@ function UserInfo({ user }: { user: any }) {
 	return (
 		<div className="d-flex align-items-center gap-3">
 			{iconToShow}
-			<div className="d-flex flex-column">
-				<span className="fw-bold fs-3">{user?.username}</span>
-				<span className="text-muted small">{user?.email}</span>
+			<div className="d-flex flex-column overflow-hidden">
+				<span className="fw-bold fs-3 text-truncate">
+					{user?.username}
+				</span>
+				<span className="text-muted small text-truncate">
+					{user?.email}
+				</span>
 			</div>
 		</div>
 	);
@@ -163,7 +168,7 @@ export function GlobalSideBar() {
 					</Navbar.Brand>
 
 					{/* Aggiunta UserInfo nella navbar */}
-					<div className="ms-4">
+					<div className="ms-4 overflow-hidden">
 						<UserInfo user={user} />
 					</div>
 
