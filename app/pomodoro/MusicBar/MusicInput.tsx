@@ -95,7 +95,7 @@ export function MusicInput({
 			{show && (
 				<Form.Group className="d-flex flex-column align-items-center mt-4">
 					<Form.Label className="mb-3 fs-5 fw-bold text-primary">
-						Aggiungi un video YouTube
+						Aggiungi video
 					</Form.Label>
 					<div className="d-flex w-100 shadow-sm position-relative">
 						<Form.Control

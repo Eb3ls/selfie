@@ -2,7 +2,6 @@
 .calendar-container {
 	max-width: 1400px;
 	margin: 0 auto;
-	padding: 30px 20px;
 	height: 86vh;
 }
 
@@ -49,4 +48,12 @@
 
 .rbc-current-time-indicator {
 	background: #ff00158c !important;
+}
+
+.text-responsive {
+	font-size: 2rem !important;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
 }

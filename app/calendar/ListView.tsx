@@ -30,7 +30,7 @@ export function ListView({ events }: { events: CalendarEvent[] }): JSX.Element {
 		<div className="h-100 overflow-auto" ref={listRef}>
 			{Object.entries(groupedEvents).map(([date, dayEvents]) => (
 				<div key={date} id={`date-${date}`}>
-					<div className="p-3 bg-light rounded-3 mb-3 sticky-top">
+					<div className="p-3 bg-light rounded-3 mb-3 sticky-top z-0">
 						<h5 className="m-0 fw-bold activity-color-text">
 							{moment(date).format("dddd D MMMM YYYY")}
 						</h5>

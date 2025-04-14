@@ -60,48 +60,50 @@ export function CustomToolbar({
 		<div className="container-fluid py-3">
 			<div className="row align-items-center justify-content-between gy-3">
 				<div className="col-12 col-md-auto">
-					<div className="d-flex align-items-center gap-3">
-						<button
-							className="btn p-2"
-							onClick={() =>
-								setCurrentDate(
-									moment(currentDate)
-										.subtract(
-											1,
-											calendarView === "month"
-												? "month"
-												: calendarView === "week"
-													? "week"
-													: "day"
-										)
-										.toDate()
-								)
-							}
-						>
-							<i className="bi bi-chevron-left"></i>
-						</button>
-						<span className="fs-3 mb-0 fw-semibold">
-							{formattedDate}
-						</span>
-						<button
-							className="btn p-2"
-							onClick={() =>
-								setCurrentDate(
-									moment(currentDate)
-										.add(
-											1,
-											calendarView === "month"
-												? "month"
-												: calendarView === "week"
-													? "week"
-													: "day"
-										)
-										.toDate()
-								)
-							}
-						>
-							<i className="bi bi-chevron-right"></i>
-						</button>
+					<div className="d-flex align-items-center gap-3 flex-column flex-md-row">
+						<div className="w-100 d-flex justify-content-center align-items-center">
+							<button
+								className="btn p-2 me-2"
+								onClick={() =>
+									setCurrentDate(
+										moment(currentDate)
+											.subtract(
+												1,
+												calendarView === "month"
+													? "month"
+													: calendarView === "week"
+														? "week"
+														: "day"
+											)
+											.toDate()
+									)
+								}
+							>
+								<i className="bi bi-chevron-left"></i>
+							</button>
+							<span className="mb-0 fw-semibold fs-3 text-center">
+								{formattedDate}
+							</span>
+							<button
+								className="btn p-2 ms-2"
+								onClick={() =>
+									setCurrentDate(
+										moment(currentDate)
+											.add(
+												1,
+												calendarView === "month"
+													? "month"
+													: calendarView === "week"
+														? "week"
+														: "day"
+											)
+											.toDate()
+									)
+								}
+							>
+								<i className="bi bi-chevron-right"></i>
+							</button>
+						</div>
 						<select
 							className="form-select w-auto rounded-pill"
 							value={calendarView}
@@ -124,7 +126,7 @@ export function CustomToolbar({
 				</div>
 
 				<div className="col-12 col-md-auto">
-					<div className="d-flex flex-wrap gap-2 align-items-center">
+					<div className="d-flex flex-wrap gap-2 align-items-center justify-content-center justify-content-md-end">
 						<a
 							href="/api/calendar/exportCalendar"
 							className="text-decoration-none"
@@ -148,6 +150,9 @@ export function CustomToolbar({
 								</>
 							)}
 						</button>
+						<div className="d-block d-md-none">
+							<ResourcesModal />
+						</div>
 						<div className="d-flex gap-2 align-items-center">
 							<AddActivityModal mutate={mutate}>
 								<button className="btn activity-color text-white hover-lift rounded-pill shadow-sm fw-semibold">
@@ -166,7 +171,9 @@ export function CustomToolbar({
 									Sessione
 								</button>
 							</AddSessionModal>
-							<ResourcesModal />
+							<div className="d-none d-md-block">
+								<ResourcesModal />
+							</div>
 						</div>
 					</div>
 				</div>

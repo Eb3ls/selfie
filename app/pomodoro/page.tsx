@@ -390,7 +390,7 @@ function PomodoroImplementation() {
 								)}
 							</div>
 							<div
-								className="flex-column justify-content-center m-4"
+								className="flex-column justify-content-center m-2 mb-4"
 								style={{
 									display: isMusicView ? "none" : "flex"
 								}}
