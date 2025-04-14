@@ -185,7 +185,7 @@ export default function Note() {
 	);
 
 	return (
-		<div className={styles.container}>
+		<div className={`${styles.container} pt-5`}>
 			<GlobalSideBar />
 			<Container className={`${styles.mainContainer} mt-3`}>
 				<div className={styles.header}>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Form, InputGroup } from "react-bootstrap";
+import { Button, Form } from "react-bootstrap";
 import { FaFilter, FaPlus, FaSort } from "react-icons/fa";
 import { AddNoteModal } from "./AddNoteModal";
 import { FilterModal } from "./FilterModal";
@@ -15,15 +15,19 @@ export function SearchBar({
 }: any) {
 	return (
 		<div className={styles.searchContainer}>
-			<div className={styles.searchGroup}>
-				<Form.Control
-					className={styles.searchInput}
-					type="text"
-					placeholder="Cerca note..."
-					aria-label="Search"
-					name="searchBar"
-					onChange={handleSearch}
-				/>
+			<div
+				className={`${styles.searchGroup} d-flex justify-content-center align-items-center`}
+			>
+				<div className="w-75">
+					<Form.Control
+						className={styles.searchInput}
+						type="text"
+						placeholder="Cerca note..."
+						aria-label="Search"
+						name="searchBar"
+						onChange={handleSearch}
+					/>
+				</div>
 
 				<div className={styles.actionsGroup}>
 					<FilterModal handleFilters={handleFilters}>
