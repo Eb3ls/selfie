@@ -470,7 +470,7 @@ export async function addInvitations(
 		// Inviamo la notifica all'utente
 		const notificationData = {
 			title: "Nuova notifica",
-			body: "Hai ricevuto un invito, premi per visualizzarlo",
+			body: "Hai ricevuto un nuovo invito, controlla l'inbox per visualizzarlo",
 			image: "",
 			icon: "",
 			url: "/inbox"
