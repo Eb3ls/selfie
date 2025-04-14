@@ -63,7 +63,7 @@ export default function Inbox() {
 		<div>
 			<GlobalSideBar />
 			<Container className="mt-4">
-				<h1 className="mb-4">Inbox</h1>
+				<h1 className="mb-4 mt-5 mt-lg-0 pt-4 pt-lg-0">Inbox</h1>
 				{error && (
 					<div className="text-danger mb-3">
 						Errore nel caricamento degli inviti.
