@@ -134,21 +134,11 @@ export function ModifySessionModal({
 	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 
-		const startDateTime = new Date(form.dtStart);
-		const pomodoroDuration =
-			form.settings.cycles *
-			(form.settings.studyTime + form.settings.breakTime);
-		const endDateTime = new Date(
-			startDateTime.getTime() + pomodoroDuration * 60000
-		);
-
 		const newForm = {
 			_id: form._id,
 			summary: form.summary,
 			description: form.description,
 			status: form.status,
-			dtStart: startDateTime.toISOString(),
-			dtEnd: endDateTime.toISOString(),
 			newSetting: {
 				cycles: form.settings.cycles,
 				studyTime: form.settings.studyTime,
@@ -284,15 +274,6 @@ export function ModifySessionModal({
 						CONFIRMED: "Confermato",
 						CANCELLED: "Cancellato"
 					}}
-				/>
-
-				<StandardInput
-					type="datetime-local"
-					name="dtStart"
-					title="Data di inizio"
-					value={moment(form.dtStart).format("YYYY-MM-DDTHH:mm")}
-					onChange={handleChange}
-					placeholder="Inserisci data di inizio"
 				/>
 
 				<PomodoroBlock

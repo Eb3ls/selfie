@@ -20,8 +20,6 @@ const requestTemplate = {
 	summary: "",
 	description: "",
 	status: "",
-	dtStart: "",
-	dtEnd: "",
 	newSetting: {
 		cycles: 0,
 		studyTime: 0,
@@ -84,9 +82,20 @@ export const PATCH = async (request: NextRequest) => {
 		return generateMessageResponse("Unauthorized", 400);
 	}
 
+	// Calcoliamo quanto dura la nuova impostazione
+	const startDate = new Date(session[0].dtStart);
+	const endDate = new Date(session[0].dtStart);
+	endDate.setTime(
+		endDate.getTime() +
+			newSetting.cycles *
+				(newSetting.studyTime + newSetting.breakTime) *
+				60 *
+				1000
+	);
+
 	// Controlliamo che la data di inizio sia nello stesso giorno della data di fine
-	const dtStart = new Date(newBody.dtStart).toDateString();
-	const dtEnd = new Date(newBody.dtEnd).toDateString();
+	const dtStart = new Date(startDate).toDateString();
+	const dtEnd = new Date(endDate).toDateString();
 
 	if (dtStart !== dtEnd) {
 		return generateMessageResponse(

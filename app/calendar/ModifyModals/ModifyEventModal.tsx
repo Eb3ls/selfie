@@ -61,10 +61,6 @@ export function ModifyEventModal({
 	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 
-		// Converti le date in formato ISO
-		const startTime = new Date(form.dtStart).toISOString();
-		const endTime = new Date(form.dtEnd).toISOString();
-
 		// Aggiungiamo le risorse
 		const usernames = form.usernameList.concat(resourceList);
 
@@ -73,8 +69,6 @@ export function ModifyEventModal({
 			summary: form.summary,
 			description: form.description,
 			status: form.status,
-			dtStart: startTime,
-			dtEnd: endTime,
 			categories: form.categories,
 			location: form.location,
 			geo: form.geo,
@@ -276,22 +270,6 @@ export function ModifyEventModal({
 						CONFIRMED: "Confermato",
 						CANCELLED: "Cancellato"
 					}}
-				/>
-				<StandardInput
-					type="datetime-local"
-					name="dtStart"
-					title="Data di inizio"
-					value={moment(form.dtStart).format("YYYY-MM-DDTHH:mm")}
-					onChange={handleChange}
-					placeholder="Inserisci data di inizio"
-				/>
-				<StandardInput
-					type="datetime-local"
-					name="dtEnd"
-					title="Data di fine"
-					value={moment(form.dtEnd).format("YYYY-MM-DDTHH:mm")}
-					onChange={handleChange}
-					placeholder="Inserisci data di fine"
 				/>
 				<StandardInput
 					type="text"

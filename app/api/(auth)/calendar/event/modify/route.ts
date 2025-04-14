@@ -22,8 +22,6 @@ const requestTemplate = {
 	summary: "",
 	description: "",
 	status: "",
-	dtStart: "",
-	dtEnd: "",
 	categories: "",
 	location: "",
 	geo: "",
@@ -54,11 +52,6 @@ export const PATCH = async (request: NextRequest) => {
 
 	// Estraiamo l'id dal body
 	const eventId: string = newBody._id!;
-
-	// Controlliamo che la dtStart sia prima della dtEnd
-	if (new Date(newBody.dtStart) >= new Date(newBody.dtEnd)) {
-		return generateMessageResponse("dtStart must be before dtEnd", 400);
-	}
 
 	// Creiamo un oggetto senza il campo id
 	const { _id, ...newFields } = newBody;
@@ -98,21 +91,6 @@ export const PATCH = async (request: NextRequest) => {
 		userIdList: string[];
 		resourceIdList: string[];
 	};
-
-	// Controlliamo che non ci siano sovrapposizioni di eventi con le risorse
-	for (const resourceId of resourceIdList) {
-		const out = await isResourceAvailable(
-			resourceId,
-			event[0].rrule,
-			newBody.dtStart,
-			newBody.dtEnd,
-			event[0]._id
-		);
-
-		if (out.status !== 200) {
-			return out;
-		}
-	}
 
 	// Sostituiamo la lista degli username con quella degli id, rimuovendo usernameList
 	const { usernameList: _, ...smallBody } = newFields;
