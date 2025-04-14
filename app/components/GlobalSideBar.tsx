@@ -164,6 +164,7 @@ export function GlobalSideBar() {
 							width="110"
 							className="d-inline-block align-text-top"
 							priority
+							style={{ cursor: "pointer" }}
 						/>
 					</Navbar.Brand>
 
@@ -250,6 +251,7 @@ export function GlobalSideBar() {
 							height="50"
 							width="110"
 							className="d-inline-block align-text-top"
+							style={{ cursor: "pointer" }}
 						/>
 					</a>
 				</Offcanvas.Header>
