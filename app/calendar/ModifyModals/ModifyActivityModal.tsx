@@ -288,7 +288,7 @@ export function ModifyActivityModal({
 	}
 
 	function getMainView() {
-		let title = "Dettagli Attività";
+		let title = "Dettagli";
 		if (activity.ownerId !== currentUserId) {
 			title += " (Ospite)";
 		}

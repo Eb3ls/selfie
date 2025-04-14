@@ -69,6 +69,7 @@ export function StandardModal({
 			show={show}
 			onHide={handleClose || undefined}
 			size="lg"
+			fullscreen="md-down"
 			scrollable={true}
 		>
 			<Modal.Header closeButton>

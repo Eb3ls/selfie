@@ -69,7 +69,7 @@ export function StandardToggleModal({
 		if (currentViewKey) {
 			return (
 				<button
-					className="btn btn-warning"
+					className="btn btn-warning ms-2 btn-sm"
 					onClick={() => handleToggle(null)}
 				>
 					Annulla
@@ -79,7 +79,7 @@ export function StandardToggleModal({
 		return Object.entries(singleViewsMap).map(([name, view]) => (
 			<button
 				onClick={() => handleToggle(name)}
-				className={`btn btn-${view.buttonColor} me-2`}
+				className={`btn btn-${view.buttonColor} ms-2 btn-sm`}
 				key={name}
 			>
 				{name}

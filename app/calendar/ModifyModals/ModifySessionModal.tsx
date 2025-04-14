@@ -310,14 +310,14 @@ export function ModifySessionModal({
 	}
 
 	const mainView = {
-		title: "Dettagli Sessione",
+		title: "Dettagli",
 		handleClose: () => setShow(false),
 		renderChildren: () => getViewContent()
 	};
 
 	const singleViewsMap = {
 		Condividi: {
-			title: "Condividi Impostazioni Sessione",
+			title: "Condividi Sessione",
 			buttonColor: "success",
 			icon: <i className="bi bi-person-plus me-2" />,
 			saveBtnText: "Condividi",

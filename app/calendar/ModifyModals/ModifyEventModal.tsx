@@ -315,7 +315,7 @@ export function ModifyEventModal({
 	}
 
 	function getMainView() {
-		let title = "Dettagli Evento";
+		let title = "Dettagli";
 		if (event.ownerId !== currentUserId) {
 			title += " (Ospite)";
 		}

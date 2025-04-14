@@ -144,8 +144,8 @@ export default function Note() {
 		return (
 			<div className={styles.container}>
 				<GlobalSideBar />
-				<Container className={`${styles.mainContainer} mt-3`}>
-					<div className="d-flex flex-column align-items-center justify-content-center h-100">
+				<Container>
+					<div className="d-flex flex-column align-items-center justify-content-center h-100 mt-3">
 						<h1 className="display-4 text-danger mb-3">
 							Nota non valida
 						</h1>
@@ -164,8 +164,8 @@ export default function Note() {
 		return (
 			<div className={styles.container}>
 				<GlobalSideBar />
-				<Container className={`${styles.mainContainer} mt-3`}>
-					<div className="d-flex flex-column align-items-center justify-content-center h-100">
+				<Container>
+					<div className="d-flex flex-column align-items-center justify-content-center h-100 mt-3">
 						<div
 							className="spinner-border text-primary mb-3"
 							role="status"
@@ -185,23 +185,17 @@ export default function Note() {
 	);
 
 	return (
-		<div className={`${styles.container} pt-5`}>
+		<div className={styles.container} id="CIAO">
 			<GlobalSideBar />
-			<Container className={`${styles.mainContainer} mt-3`}>
-				<div className={styles.header}>
-					<div className={styles.headerLeft}>
-						<h1 className={styles.title}>{note.summary}</h1>
-						{note.categories && (
-							<div className={styles.categories}>
-								<span className={styles.categoryBadge}>
-									{note.categories}
-								</span>
-							</div>
-						)}
-					</div>
-
-					<div className={styles.headerRight}>
-						<div className={styles.buttonGroup}>
+			<Container>
+				<div
+					className={`${styles.header} pt-5 pt-md-3 d-flex flex-column`}
+				>
+					<div className="w-100 d-flex justify-content-between align-items-center mt-2 mt-md-0">
+						<div className={styles.headerTitle}>
+							<h1 className={styles.title}>{note.summary}</h1>
+						</div>
+						<div className={styles.headerActions}>
 							{note.ownerId.toString() === user?._id && (
 								<EditNoteModal
 									note={note}
@@ -222,6 +216,13 @@ export default function Note() {
 							</Button>
 						</div>
 					</div>
+					{note.categories && (
+						<div>
+							<span className={styles.categoryBadge}>
+								{note.categories}
+							</span>
+						</div>
+					)}
 				</div>
 
 				{isMobile && (
