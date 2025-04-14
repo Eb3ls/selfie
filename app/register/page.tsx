@@ -129,6 +129,14 @@ function CompleteFormComponent() {
 					<Form.Group controlId="formBasicUsername">
 						<Form.Label className="fw-semibold mb-2">
 							<i className="bi bi-person me-2"></i>Nome utente
+							<span
+								className="ms-1"
+								data-bs-toggle="tooltip"
+								data-bs-placement="right"
+								title="Se il nome utente inizia con '[RES]-' verrà creata una risorsa e non sarà possibile effettuare il login"
+							>
+								<i className="bi bi-info-circle"></i>
+							</span>
 						</Form.Label>
 						<Form.Control
 							type="text"

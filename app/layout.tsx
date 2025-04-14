@@ -7,7 +7,7 @@ import { ToastWrapper } from "./components/ToastWrapper";
 import { UserProvider } from "./components/UserContext";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"], preload: false });
 
 export const metadata: Metadata = {
 	title: "Create Next App",
