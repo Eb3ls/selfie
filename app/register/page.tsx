@@ -124,19 +124,27 @@ function CompleteFormComponent() {
 	return (
 		<Form onSubmit={handleSubmit} className="w-100">
 			<div className="row g-3">
+				<div className="col-12">
+					<div className="p-3 rounded-3 mb-2 bg-light border border-light/10 shadow-sm">
+						<div className="d-flex align-items-center">
+							<i className="bi bi-info-circle text-primary me-2" />
+							<p
+								className="mb-0 text-muted"
+								style={{ fontSize: "0.85rem" }}
+							>
+								Nota: Gli username che iniziano con
+								&apos;[RES]-&apos; sono riservati per le risorse
+								di sistema e non possono essere utilizzati per
+								il login.
+							</p>
+						</div>
+					</div>
+				</div>
 				{/* Campo Username */}
 				<div className="col-12">
 					<Form.Group controlId="formBasicUsername">
 						<Form.Label className="fw-semibold mb-2">
 							<i className="bi bi-person me-2"></i>Nome utente
-							<span
-								className="ms-1"
-								data-bs-toggle="tooltip"
-								data-bs-placement="right"
-								title="Se il nome utente inizia con '[RES]-' verrà creata una risorsa e non sarà possibile effettuare il login"
-							>
-								<i className="bi bi-info-circle"></i>
-							</span>
 						</Form.Label>
 						<Form.Control
 							type="text"
@@ -332,7 +340,6 @@ export default function Register() {
 			style={{ background: "#f8f9fa" }}
 		>
 			<Container fluid="xxl">
-				{" "}
 				{/* Cambiato a fluid="xxl" per più controllo */}
 				<Row className="justify-content-center">
 					<Col xs={11} lg={10} xxl={9}>
