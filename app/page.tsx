@@ -15,38 +15,84 @@ import {
 
 function NavbarComponent() {
 	return (
-		<Navbar expand="lg" className="py-3 bg-white shadow-sm" sticky="top">
+		<Navbar
+			expand="md"
+			className="py-3 fixed-top bg-white"
+			style={{ boxShadow: "0 2px 15px rgba(0,0,0,0.04)" }}
+		>
 			<Container>
-				<Navbar.Brand href="#" className="d-flex align-items-center">
+				<Navbar.Brand href="/" className="d-flex align-items-center">
 					<Image
 						src="/Sloth.png"
 						alt="Logo"
-						height="50"
-						width="110"
+						height="45"
+						width="100"
 						className="d-inline-block align-text-top"
+						style={{ transition: "transform 0.2s" }}
+						onMouseOver={(e) =>
+							(e.currentTarget.style.transform = "scale(1.05)")
+						}
+						onMouseOut={(e) =>
+							(e.currentTarget.style.transform = "scale(1)")
+						}
 					/>
 					<span
-						className="ms-3 fs-3 fw-bold"
+						className="ms-3 fs-4 fw-bold"
 						style={{ color: greenColor }}
 					>
 						Selfie Calendar
 					</span>
 				</Navbar.Brand>
-				<Navbar.Toggle aria-controls="basic-navbar-nav" />
+				<Navbar.Toggle className="border-0 p-0">
+					<div className="d-flex flex-column gap-2 p-2">
+						<span
+							className="line"
+							style={{
+								height: "2px",
+								width: "25px",
+								backgroundColor: greenColor,
+								transition: "all 0.3s ease"
+							}}
+						></span>
+						<span
+							className="line"
+							style={{
+								height: "2px",
+								width: "25px",
+								backgroundColor: greenColor,
+								transition: "all 0.3s ease"
+							}}
+						></span>
+						<span
+							className="line"
+							style={{
+								height: "2px",
+								width: "25px",
+								backgroundColor: greenColor,
+								transition: "all 0.3s ease"
+							}}
+						></span>
+					</div>
+				</Navbar.Toggle>
 				<Navbar.Collapse id="basic-navbar-nav">
-					<Nav className="ms-auto">
-						<Nav.Link href="/register" className="mx-2 fw-semibold">
+					<Nav className="ms-auto gap-3 mt-3 mt-md-0">
+						<Link
+							href="/register"
+							className="btn btn-outline-dark rounded-pill px-4 fw-semibold"
+							style={{ transition: "all 0.2s" }}
+						>
 							Registrati
-						</Nav.Link>
-						<Nav.Link href="/login" className="mx-2 fw-semibold">
+						</Link>
+						<Link
+							href="/login"
+							className="btn rounded-pill px-4 fw-semibold text-white"
+							style={{
+								backgroundColor: greenColor,
+								transition: "all 0.2s"
+							}}
+						>
 							Accedi
-						</Nav.Link>
-						<Nav.Link href="#" className="mx-2 fw-semibold">
-							Chi Siamo
-						</Nav.Link>
-						<Nav.Link href="#" className="mx-2 fw-semibold">
-							Aiuto
-						</Nav.Link>
+						</Link>
 					</Nav>
 				</Navbar.Collapse>
 			</Container>
@@ -89,11 +135,9 @@ function HeroSection() {
 					<Link href="/register">
 						<Button
 							variant="light"
-							className="rounded-pill px-5 py-3 fw-bold shadow-lg"
+							className="rounded-pill px-3 px-md-5 py-3 fw-bold shadow-lg text-white border-0"
 							style={{
-								backgroundColor: greenColor,
-								color: "white",
-								border: "none"
+								backgroundColor: greenColor
 							}}
 						>
 							Inizia Gratuitamente
@@ -101,7 +145,7 @@ function HeroSection() {
 					</Link>
 					<Button
 						variant="outline-light"
-						className="rounded-pill px-5 py-3 fw-bold"
+						className="rounded-pill px-md-5 py-md-3 fw-bold"
 					>
 						Scopri di più
 					</Button>
@@ -120,7 +164,7 @@ function CarouselComponent() {
 					style={{ height: "400px" }}
 				>
 					<h2 className="display-4 mb-4">Organizza la Tua Vita</h2>
-					<p className="lead mb-4">
+					<p className="mb-4">
 						Gestisci i tuoi impegni in modo semplice ed efficace con
 						il nostro calendario smart. Sincronizza tutti i tuoi
 						dispositivi e non perdere mai un appuntamento
