@@ -236,7 +236,7 @@ export function MusicView({ show }: { show: boolean }): JSX.Element {
 	return (
 		<>
 			{show && (
-				<div className="container-sm d-flex flex-column h-100">
+				<div className="container-sm d-flex flex-column dvh-100">
 					<Script
 						src="https://www.youtube.com/iframe_api"
 						strategy="afterInteractive"
@@ -248,99 +248,86 @@ export function MusicView({ show }: { show: boolean }): JSX.Element {
 						setVideoTitleList={setVideoTitleList}
 						show={show}
 					/>
-					<div className="mt-4">
-						<div className="d-flex align-items-center mb-3">
+					<div
+						className="mt-4 flex-grow-1 overflow-auto"
+						style={{ minHeight: "0" }}
+					>
+						<div
+							className="d-flex align-items-center mb-3 sticky-top"
+							style={{ backgroundColor: "rgb(240, 240, 240)" }}
+						>
 							<h5 className="m-0 fw-bold text-secondary">Coda</h5>
 							<span className="ms-2 badge bg-primary rounded-pill">
 								{videoTitleList.length}
 							</span>
 						</div>
-						<div
-							className="overflow-y-auto"
-							style={{
-								maxHeight: "60vh",
-								scrollbarWidth: "none"
-							}}
-						>
-							{videoTitleList.length > 0 ? (
-								videoTitleList.map((video, index) =>
-									videoItem(video, index)
-								)
-							) : (
-								<p className="text-muted text-center p-3">
-									Nessun video in coda
-								</p>
-							)}
-						</div>
+						{videoTitleList.length > 0 ? (
+							videoTitleList.map((video, index) =>
+								videoItem(video, index)
+							)
+						) : (
+							<p className="text-muted text-center p-3">
+								Nessun video in coda
+							</p>
+						)}
 					</div>
 					{videoList.length !== 0 && (
-						<>
-							<div className="flex-grow-1"></div>
-							<div className="w-100 bg-primary-green p-3 my-5 rounded-pill d-flex flex-column align-items-center">
-								<TitleBar
-									videoTitleList={videoTitleList}
-								></TitleBar>
-								<input
-									type="range"
-									id="videoRange"
-									className="form-range"
-									min={0}
-									max={videoDuration}
-									value={currentTime}
-									onChange={handleProgressBarChange}
-									onMouseDown={handleMouseDown}
-									onMouseUp={handleMouseUp}
-								/>
-								<div className="d-flex justify-content-between w-100">
-									<p className="m-0">
-										{formatTime(currentTime)}
-									</p>
-									<p className="m-0">
-										{formatTime(videoDuration)}
-									</p>
-								</div>
+						<div className="w-100 bg-primary-green p-3 rounded-pill d-flex flex-column align-items-center flex-shrink-0">
+							<TitleBar
+								videoTitleList={videoTitleList}
+							></TitleBar>
+							<input
+								type="range"
+								id="videoRange"
+								className="form-range"
+								min={0}
+								max={videoDuration}
+								value={currentTime}
+								onChange={handleProgressBarChange}
+								onMouseDown={handleMouseDown}
+								onMouseUp={handleMouseUp}
+							/>
+							<div className="d-flex justify-content-between w-100">
+								<p className="m-0">{formatTime(currentTime)}</p>
+								<p className="m-0">
+									{formatTime(videoDuration)}
+								</p>
+							</div>
 
-								<div className="d-flex w-100">
-									<div className="d-flex align-self-center position-absolute">
-										{VolumeBarBlock()}
-									</div>
-									<div className="d-flex mx-auto">
-										<Button
-											variant="link"
-											onClick={toggleLoop}
-										>
-											<FaArrowRotateRight
-												size={20}
-												className={
-													toLoop
-														? "text-primary"
-														: "text-muted"
-												}
-											></FaArrowRotateRight>
-										</Button>
-										<Button
-											variant="link"
-											onClick={togglePlay}
-											className="rounded-circle p-3"
-										>
-											{isPlaying ? (
-												<FaPause size={20}></FaPause>
-											) : (
-												<FaPlay size={20}></FaPlay>
-											)}
-										</Button>
-										<Button
-											variant="link"
-											onClick={handleEnd}
-										>
-											<FaAnglesRight
-												size={20}
-											></FaAnglesRight>
-										</Button>
-									</div>
+							<div className="d-flex w-100">
+								<div className="d-flex align-self-center position-absolute">
+									{VolumeBarBlock()}
+								</div>
+								<div className="d-flex mx-auto">
+									<Button variant="link" onClick={toggleLoop}>
+										<FaArrowRotateRight
+											size={20}
+											className={
+												toLoop
+													? "text-primary"
+													: "text-muted"
+											}
+										></FaArrowRotateRight>
+									</Button>
+									<Button
+										variant="link"
+										onClick={togglePlay}
+										className="rounded-circle p-3"
+									>
+										{isPlaying ? (
+											<FaPause size={20}></FaPause>
+										) : (
+											<FaPlay size={20}></FaPlay>
+										)}
+									</Button>
+									<Button variant="link" onClick={handleEnd}>
+										<FaAnglesRight
+											size={20}
+										></FaAnglesRight>
+									</Button>
 								</div>
 							</div>
-						</>
+						</div>
 					)}
 				</div>
 			)}

@@ -335,70 +335,58 @@ function CompleteFormComponent() {
 
 export default function Register() {
 	return (
-		<main
-			className="min-vh-100 d-flex align-items-center py-4"
-			style={{ background: "#f8f9fa" }}
-		>
-			<Container fluid="xxl">
-				{/* Cambiato a fluid="xxl" per più controllo */}
-				<Row className="justify-content-center">
-					<Col xs={11} lg={10} xxl={9}>
-						<div
-							className="bg-white p-3 p-md-4 rounded-4 shadow-lg"
-							style={{ transition: "all 0.3s ease" }}
+		<main className="dvh-100 overflow-auto d-flex align-items-start align-items-md-center justify-content-center">
+			<Col xs={11} lg={10} xxl={9} className="py-3 py-md-0">
+				<div
+					className="bg-white p-3 p-md-4 rounded-4 shadow-lg"
+					style={{ transition: "all 0.3s ease" }}
+				>
+					<Row className="align-items-center g-4">
+						<Col
+							xs={12}
+							lg={7}
+							className="order-2 order-lg-1 d-flex flex-column"
 						>
-							<Row className="align-items-center g-4">
-								<Col
-									xs={12}
-									lg={7}
-									className="order-2 order-lg-1 d-flex flex-column"
+							<h1 className="mb-4 fw-bold">Crea un account</h1>
+							<CompleteFormComponent />
+							<p className="text-center mb-0">
+								Hai già un account?{" "}
+								<Link
+									href="/login"
+									className="ms-1 text-decoration-none"
+									style={{
+										color: greenColor,
+										transition: "all 0.2s ease"
+									}}
+									onMouseOver={(e) => {
+										e.currentTarget.style.opacity = "0.8";
+									}}
+									onMouseOut={(e) => {
+										e.currentTarget.style.opacity = "1";
+									}}
 								>
-									<h1 className="mb-4 fw-bold">
-										Crea un account
-									</h1>
-									<CompleteFormComponent />
-									<p className="text-center mb-0">
-										Hai già un account?{" "}
-										<Link
-											href="/login"
-											className="ms-1 text-decoration-none"
-											style={{
-												color: greenColor,
-												transition: "all 0.2s ease"
-											}}
-											onMouseOver={(e) => {
-												e.currentTarget.style.opacity =
-													"0.8";
-											}}
-											onMouseOut={(e) => {
-												e.currentTarget.style.opacity =
-													"1";
-											}}
-										>
-											Accedi
-										</Link>
-									</p>
-								</Col>
-								<Col
-									xs={12}
-									lg={5}
-									className="order-1 order-lg-2 text-center mb-4 mb-lg-0"
-								>
-									<Image
-										src="/Sloth.png"
-										alt="Logo"
-										width={400}
-										height={400}
-										priority={true}
-										draggable={false}
-										className="img-fluid"
-									/>
-								</Col>
-							</Row>
-						</div>
-					</Col>
-				</Row>
-			</Container>
+									Accedi
+								</Link>
+							</p>
+						</Col>
+						<Col
+							xs={12}
+							lg={5}
+							className="order-1 order-lg-2 text-center mb-4 mb-lg-0"
+						>
+							<Image
+								src="/Sloth.png"
+								alt="Logo"
+								width={400}
+								height={400}
+								priority={true}
+								draggable={false}
+								className="img-fluid"
+							/>
+						</Col>
+					</Row>
+				</div>
+			</Col>
 		</main>
 	);
 }

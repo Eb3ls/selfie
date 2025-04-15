@@ -256,7 +256,7 @@ export function GlobalSideBar() {
 					</a>
 				</Offcanvas.Header>
 
-				<Offcanvas.Body className="d-flex flex-column">
+				<Offcanvas.Body className="d-flex flex-column pt-0">
 					{/* Aggiunta UserInfo nella sidebar mobile */}
 					<UserInfo user={user} />
 

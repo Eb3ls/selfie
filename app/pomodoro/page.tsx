@@ -394,14 +394,14 @@ function PomodoroImplementation() {
 								)}
 							</div>
 							<div
-								className="flex-column justify-content-center m-2 mb-4"
+								className="flex-column justify-content-center m-2"
 								style={{
 									display: isMusicView ? "none" : "flex"
 								}}
 							>
 								<TimerBlock></TimerBlock>
 								{!isStarted && id === null && (
-									<div className="d-flex flex-column justify-content-center m-4">
+									<div className="d-flex flex-column justify-content-center m-2">
 										<Setting
 											name="Tempo di studio (min)"
 											maxValue={600}
