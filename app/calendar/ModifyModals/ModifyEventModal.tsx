@@ -7,7 +7,7 @@ import { StandardToggleModal } from "@/app/components/StandardToggleModal";
 import { StandardUsersInput } from "@/app/components/StandardUsersInput";
 import { StandardViewField } from "@/app/components/StandardViewFIeld";
 import { StringAlarm, StringEvent } from "@/utils/db/db";
-import moment from "moment";
+import moment from "moment-timezone";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
 import { ResourceInvitationComponent } from "../ResourceInvitationComponent";

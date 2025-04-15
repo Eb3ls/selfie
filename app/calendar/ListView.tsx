@@ -1,4 +1,4 @@
-import moment from "moment";
+import moment from "moment-timezone";
 import { useRef } from "react";
 import { CalendarEvent } from "./calendarUtils/calendarTypes";
 

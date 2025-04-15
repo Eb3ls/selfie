@@ -3,7 +3,7 @@
 import { AddActivityModal } from "@/app/calendar/AddModals/AddActivityModal";
 import { AddEventModal } from "@/app/calendar/AddModals/AddEventModal";
 import { AddSessionModal } from "@/app/calendar/AddModals/AddSessionModal";
-import moment from "moment";
+import moment from "moment-timezone";
 import { SetStateAction } from "react";
 import { View } from "react-big-calendar";
 import { ResourcesModal } from "./ResourcesModal";

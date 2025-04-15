@@ -9,7 +9,7 @@ import {
 import { CalendarEvent } from "@/app/calendar/calendarUtils/calendarTypes";
 import { GlobalSideBar } from "@/app/components/GlobalSideBar";
 import { useTime } from "@/app/components/TimeContext";
-import moment from "moment";
+import moment from "moment-timezone";
 import "moment/locale/it";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";

@@ -10,7 +10,7 @@ import {
 	StringPomodoroSettings,
 	StringSession
 } from "@/utils/db/db";
-import moment from "moment";
+import moment from "moment-timezone";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { Button, Form } from "react-bootstrap";

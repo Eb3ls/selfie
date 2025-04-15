@@ -6,7 +6,7 @@ import {
 	StringProjectActivityFrontend,
 	StringSessionFrontend
 } from "@/app/calendar/calendarUtils/calendarTypes";
-import moment from "moment";
+import moment from "moment-timezone";
 
 interface CalendarResponse {
 	activities: StringActivityFrontend[];

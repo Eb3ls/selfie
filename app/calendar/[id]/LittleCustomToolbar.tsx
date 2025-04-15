@@ -1,6 +1,6 @@
 "use client";
 
-import moment from "moment";
+import moment from "moment-timezone";
 import { SetStateAction } from "react";
 import { View } from "react-big-calendar";
 
