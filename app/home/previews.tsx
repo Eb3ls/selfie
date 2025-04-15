@@ -102,15 +102,19 @@ export const ChatPreviews = ({ chats }: { chats: ReducedChat[] }) => (
 				<div className="d-flex justify-content-between align-items-center">
 					<h6 className="mb-1 text-truncate">{chat.summary}</h6>
 					<small className="text-muted text-nowrap">
-						{formatDate(chat.lastMessageAt)}
+						{chat.lastMessageAt
+							? formatDate(chat.lastMessageAt)
+							: ""}
 					</small>
 				</div>
 				<div className="d-flex justify-content-between align-items-center">
 					<small className="text-muted text-truncate">
 						<span className="fw-bold">
-							{chat.lastMessageOwner}:
+							{chat.lastMessageOwner
+								? chat.lastMessageOwner + ":"
+								: ""}
 						</span>{" "}
-						{chat.lastMessage}
+						{chat.lastMessage || "Nessun messaggio"}
 					</small>
 				</div>
 			</div>

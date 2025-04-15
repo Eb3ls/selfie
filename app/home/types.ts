@@ -14,9 +14,9 @@ export interface ReducedProject {
 export interface ReducedChat {
 	_id: string;
 	summary: string;
-	lastMessage: string;
-	lastMessageOwner: string;
-	lastMessageAt: string;
+	lastMessage: string | null;
+	lastMessageOwner: string | null;
+	lastMessageAt: string | null;
 }
 
 export interface ReducedActivity {

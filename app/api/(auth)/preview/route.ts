@@ -53,9 +53,9 @@ interface ReducedProject {
 interface ReducedChat {
 	_id: string;
 	summary: string;
-	lastMessage: string;
-	lastMessageOwner: string;
-	lastMessageAt: string;
+	lastMessage: string | null;
+	lastMessageOwner: string | null;
+	lastMessageAt: string | null;
 }
 
 //
@@ -290,6 +290,20 @@ export const GET = async (request: NextRequest) => {
 					chat.userIdList[otherUserIndex]
 				);
 				const summary = "Chat con " + otherUser;
+
+				const lastMessageObj = chat.messages[chat.messages.length - 1];
+
+				if (!lastMessageObj) {
+					reducedChats.push({
+						_id: chat._id,
+						summary,
+						lastMessage: null,
+						lastMessageOwner: null,
+						lastMessageAt: null
+					});
+					continue; // Se non ci sono messaggi, salta
+				}
+
 				const lastMessageOwnerId =
 					chat.messages[chat.messages.length - 1].ownerId;
 				let lastMessageOwner: string = "Tu";
@@ -378,8 +392,8 @@ export const GET = async (request: NextRequest) => {
 	// Ordina le chat per lastMessageAt dalla più recente alla più vecchia
 	reducedChats = reducedChats.sort(
 		(a, b) =>
-			new Date(b.lastMessageAt).getTime() -
-			new Date(a.lastMessageAt).getTime()
+			(b.lastMessageAt ? new Date(b.lastMessageAt).getTime() : 0) -
+			(a.lastMessageAt ? new Date(a.lastMessageAt).getTime() : 0)
 	);
 
 	// Riduci il numero di chat a maxChats
