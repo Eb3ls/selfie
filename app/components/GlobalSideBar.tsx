@@ -302,19 +302,31 @@ export function GlobalSideBar() {
 			</Offcanvas>
 
 			{/* Modal di conferma logout */}
-			<Modal show={showModal} onHide={() => setShowModal(false)} centered>
-				<Modal.Header closeButton>
-					<Modal.Title>Logout</Modal.Title>
+			<Modal
+				show={showModal}
+				onHide={() => setShowModal(false)}
+				size="lg"
+				fullscreen="md-down"
+				scrollable={true}
+				style={
+					{
+						"--bs-modal-border-radius": "1rem"
+					} as React.CSSProperties
+				}
+			>
+				<Modal.Header closeButton className="border-0 px-4 pt-4">
+					<Modal.Title className="fw-bold">Logout</Modal.Title>
 				</Modal.Header>
-				<Modal.Body>
+				<Modal.Body className="px-4">
 					<p>Sei sicuro di voler effettuare il logout?</p>
 				</Modal.Body>
-				<Modal.Footer>
+				<Modal.Footer className="border-0 px-4 pb-4">
 					<Button
-						variant="secondary"
+						variant="light"
 						onClick={() => setShowModal(false)}
+						className="px-4 py-2 border-0 rounded-3 hover-lift"
 					>
-						Annulla
+						Chiudi
 					</Button>
 					<Button variant="danger" onClick={confirmLogout}>
 						Logout
