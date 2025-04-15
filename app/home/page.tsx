@@ -5,7 +5,13 @@ import { useUser } from "@/app/components/UserContext";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
-import { FaBook, FaCalendarAlt, FaCoffee, FaStickyNote } from "react-icons/fa";
+import {
+	FaCalendarAlt,
+	FaCoffee,
+	FaComments,
+	FaStickyNote
+} from "react-icons/fa";
+import { FaChartGantt } from "react-icons/fa6";
 import { toast } from "react-toastify";
 import "./home.css";
 import {
@@ -169,7 +175,7 @@ export default function Home() {
 						<div className="col-xl-4 mb-4 mb-xl-0 h-100">
 							<ModernCard
 								title="Chat"
-								icon={<FaStickyNote size={24} />}
+								icon={<FaComments size={24} />}
 								description="Messaggia con i tuoi colleghi"
 								content={
 									<ChatPreviews
@@ -211,7 +217,7 @@ export default function Home() {
 							<div style={{ flex: "1", minHeight: 0 }}>
 								<ModernCard
 									title="Note"
-									icon={<FaBook size={24} />}
+									icon={<FaStickyNote size={24} />}
 									description="Gestisci i tuoi appunti"
 									content={
 										<NotePreviews
@@ -225,7 +231,7 @@ export default function Home() {
 							<div style={{ flex: "1", minHeight: 0 }}>
 								<ModernCard
 									title="Progetti"
-									icon={<FaStickyNote size={24} />}
+									icon={<FaChartGantt size={24} />}
 									description="Coordina le tue attività"
 									content={
 										<ProjectPreviews

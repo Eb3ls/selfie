@@ -1,7 +1,15 @@
 import { PomodoroSettings } from "@/utils/db/db";
 import Link from "next/link";
 import React from "react";
-import { FaBook, FaCoffee, FaRedoAlt } from "react-icons/fa";
+import {
+	FaBook,
+	FaCalendarAlt,
+	FaCoffee,
+	FaComments,
+	FaRedoAlt,
+	FaStickyNote
+} from "react-icons/fa";
+import { FaChartGantt } from "react-icons/fa6";
 import {
 	ReducedActivity,
 	ReducedCalendar,
@@ -24,103 +32,152 @@ function formatDate(dateString: string): string {
 	return `${day}/${month}/${year} ${hours}:${minutes}`;
 }
 
-export const NotePreviews = ({ notes }: { notes: ReducedNote[] }) => (
-	<div className="list-group">
-		{notes.map((note) => (
-			<div
-				key={note._id}
-				className="list-group-item list-group-item-action p-3 border-0 rounded mb-2 hover-shadow"
-			>
-				<div className="d-flex justify-content-between align-items-center">
-					<h6 className="mb-1 text-truncate">{note.summary}</h6>
+export const NotePreviews = ({ notes }: { notes: ReducedNote[] }) => {
+	if (notes.length === 0) {
+		return (
+			<div className="p-3 border-0 rounded mb-2 hover-shadow">
+				<div className="text-center text-muted">
+					<FaStickyNote size={24} className="mb-2" />
+					<p className="mb-1">Non ci sono note disponibili</p>
+					<small>Crea o partecipa ad una nota per iniziare</small>
 				</div>
-				<div className="d-flex align-items-center text-truncate">
-					{note.categories &&
-						note.categories.split(",").map((category, index) => (
-							<span key={index} className="badge bg-primary me-1">
-								{category.trim()}
-							</span>
-						))}
-				</div>
-				<div className="d-flex justify-content-between align-items-center">
-					<small className="text-muted text-truncate">
-						<span className="fw-bold">Ultima modifica:</span>{" "}
-						{formatDate(note.dtModified)}
-					</small>
-				</div>
-				<Link
-					href={`/notepad/${note._id}`}
-					className="btn btn-primary btn-sm mt-2"
-				>
-					Apri nota
-				</Link>
 			</div>
-		))}
-	</div>
-);
+		);
+	}
 
-export const ProjectPreviews = ({
-	projects
-}: {
-	projects: ReducedProject[];
-}) => (
-	<div className="list-group">
-		{projects.map((project) => (
-			<div
-				key={project._id}
-				className="list-group-item list-group-item-action p-3 border-0 rounded mb-2 hover-shadow"
-			>
-				<div className="d-flex justify-content-between align-items-center">
-					<h6 className="mb-1 text-truncate">{project.summary}</h6>
-				</div>
-				<div className="d-flex align-items-center gap-2">
+	return (
+		<div className="list-group">
+			{notes.map((note) => (
+				<div
+					key={note._id}
+					className="list-group-item list-group-item-action p-3 border-0 rounded mb-2 hover-shadow"
+				>
+					<div className="d-flex justify-content-between align-items-center">
+						<h6 className="mb-1 text-truncate">{note.summary}</h6>
+					</div>
+					<div className="d-flex align-items-center text-truncate">
+						{note.categories &&
+							note.categories
+								.split(",")
+								.map((category, index) => (
+									<span
+										key={index}
+										className="badge bg-primary me-1"
+									>
+										{category.trim()}
+									</span>
+								))}
+					</div>
+					<div className="d-flex justify-content-between align-items-center">
+						<small className="text-muted text-truncate">
+							<span className="fw-bold">Ultima modifica:</span>{" "}
+							{formatDate(note.dtModified)}
+						</small>
+					</div>
 					<Link
-						href={`/projects/${project._id}`}
-						className="btn btn-warning btn-sm mt-2"
-					>
-						Apri progetto
-					</Link>
-					<Link
-						href={`/notepad/${project.noteId}`}
+						href={`/notepad/${note._id}`}
 						className="btn btn-primary btn-sm mt-2"
 					>
 						Apri nota
 					</Link>
 				</div>
-			</div>
-		))}
-	</div>
-);
+			))}
+		</div>
+	);
+};
 
-export const ChatPreviews = ({ chats }: { chats: ReducedChat[] }) => (
-	<div className="list-group">
-		{chats.map((chat) => (
-			<div
-				key={chat._id}
-				className="list-group-item list-group-item-action p-3 border-0 rounded mb-2 hover-shadow"
-			>
-				<div className="d-flex justify-content-between align-items-center">
-					<h6 className="mb-1 text-truncate">{chat.summary}</h6>
-					<small className="text-muted text-nowrap">
-						{chat.lastMessageAt
-							? formatDate(chat.lastMessageAt)
-							: ""}
-					</small>
-				</div>
-				<div className="d-flex justify-content-between align-items-center">
-					<small className="text-muted text-truncate">
-						<span className="fw-bold">
-							{chat.lastMessageOwner
-								? chat.lastMessageOwner + ":"
-								: ""}
-						</span>{" "}
-						{chat.lastMessage || "Nessun messaggio"}
-					</small>
+export const ProjectPreviews = ({
+	projects
+}: {
+	projects: ReducedProject[];
+}) => {
+	if (projects.length === 0) {
+		return (
+			<div className="p-3 border-0 rounded mb-2 hover-shadow">
+				<div className="text-center text-muted">
+					<FaChartGantt size={24} className="mb-2" />
+					<p className="mb-1">Non ci sono progetti disponibili</p>
+					<small>Crea o partecipa ad un progetto per iniziare</small>
 				</div>
 			</div>
-		))}
-	</div>
-);
+		);
+	}
+
+	return (
+		<div className="list-group">
+			{projects.map((project) => (
+				<div
+					key={project._id}
+					className="list-group-item list-group-item-action p-3 border-0 rounded mb-2 hover-shadow"
+				>
+					<div className="d-flex justify-content-between align-items-center">
+						<h6 className="mb-1 text-truncate">
+							{project.summary}
+						</h6>
+					</div>
+					<div className="d-flex align-items-center gap-2">
+						<Link
+							href={`/projects/${project._id}`}
+							className="btn btn-warning btn-sm mt-2"
+						>
+							Apri progetto
+						</Link>
+						<Link
+							href={`/notepad/${project.noteId}`}
+							className="btn btn-primary btn-sm mt-2"
+						>
+							Apri nota
+						</Link>
+					</div>
+				</div>
+			))}
+		</div>
+	);
+};
+
+export const ChatPreviews = ({ chats }: { chats: ReducedChat[] }) => {
+	if (chats.length === 0) {
+		return (
+			<div className="p-3 border-0 rounded mb-2 hover-shadow">
+				<div className="text-center text-muted">
+					<FaComments size={24} className="mb-2" />
+					<p className="mb-1">Non ci sono chat disponibili</p>
+					<small>Inizia una nuova conversazione</small>
+				</div>
+			</div>
+		);
+	}
+
+	return (
+		<div className="list-group">
+			{chats.map((chat) => (
+				<div
+					key={chat._id}
+					className="list-group-item list-group-item-action p-3 border-0 rounded mb-2 hover-shadow"
+				>
+					<div className="d-flex justify-content-between align-items-center">
+						<h6 className="mb-1 text-truncate">{chat.summary}</h6>
+						<small className="text-muted text-nowrap">
+							{chat.lastMessageAt
+								? formatDate(chat.lastMessageAt)
+								: ""}
+						</small>
+					</div>
+					<div className="d-flex justify-content-between align-items-center">
+						<small className="text-muted text-truncate">
+							<span className="fw-bold">
+								{chat.lastMessageOwner
+									? chat.lastMessageOwner + ":"
+									: ""}
+							</span>{" "}
+							{chat.lastMessage || "Nessun messaggio"}
+						</small>
+					</div>
+				</div>
+			))}
+		</div>
+	);
+};
 
 export const PomodoroPreview = ({
 	pomodoro
@@ -181,18 +238,24 @@ const CalendarItemPreview = ({
 );
 
 const CalendarItemListPreview = ({
-	item
+	item,
+	emptyString
 }: {
 	item:
 		| ReducedActivity[]
 		| ReducedEvent[]
 		| ReducedProjectActivity[]
 		| ReducedSession[];
+	emptyString: string;
 }) => {
 	if (item.length === 0) {
 		return (
 			<div className="p-3 border-0 rounded mb-2 hover-shadow">
-				<p className="mb-1 small text-truncate">Nessun elemento</p>
+				<div className="text-center text-muted">
+					<FaCalendarAlt size={24} className="mb-2" />
+					<p className="mb-1">{emptyString}</p>
+					<small>Aggiungi nuovi elementi al calendario</small>
+				</div>
 			</div>
 		);
 	}
@@ -212,13 +275,25 @@ export const CalendarPreviews = ({
 	calendar: ReducedCalendar;
 }) => (
 	<div>
-		<p className="badge bg-primary">Attività</p>
-		<CalendarItemListPreview item={calendar.activities} />
-		<p className="badge bg-warning">Eventi</p>
-		<CalendarItemListPreview item={calendar.events} />
-		<p className="badge bg-success">Sessioni</p>
-		<CalendarItemListPreview item={calendar.sessions} />
-		<p className="badge bg-info">Attività di progetto</p>
-		<CalendarItemListPreview item={calendar.projectActivities} />
+		<p className="badge bg-primary mx-3">Attività</p>
+		<CalendarItemListPreview
+			item={calendar.activities}
+			emptyString="Nessuna attività in programma"
+		/>
+		<p className="badge bg-warning mx-3">Eventi</p>
+		<CalendarItemListPreview
+			item={calendar.events}
+			emptyString="Nessun evento in programma"
+		/>
+		<p className="badge bg-success mx-3">Sessioni</p>
+		<CalendarItemListPreview
+			item={calendar.sessions}
+			emptyString="Nessuna sessione in programma"
+		/>
+		<p className="badge bg-info mx-3">Attività di progetto</p>
+		<CalendarItemListPreview
+			item={calendar.projectActivities}
+			emptyString="Nessuna attività di progetto in programma"
+		/>
 	</div>
 );
