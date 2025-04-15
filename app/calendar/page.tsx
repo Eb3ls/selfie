@@ -66,9 +66,9 @@ export default function CalendarPage() {
 	};
 
 	return (
-		<div>
+		<div className="dvh-100 overflow-y-auto">
 			<GlobalSideBar />
-			<Container className="calendar-container">
+			<Container className="mt-2 d-flex flex-column gap-3 calendar-container">
 				<CustomToolbar
 					currentDate={currentDate}
 					calendarView={calendarView}
@@ -99,6 +99,7 @@ export default function CalendarPage() {
 						eventPropGetter={(event) => ({
 							className: `${event.typology}-color`
 						})}
+						className="flex-grow-1 overflow-auto"
 					/>
 				)}
 

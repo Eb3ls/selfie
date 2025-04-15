@@ -142,7 +142,7 @@ export default function ProjectPage() {
 						{isOwner && (
 							<FaUserShield
 								title="Proprietario"
-								className="owner-icon flex-shrink-0"
+								className="text-warning flex-shrink-0"
 								size={20}
 							/>
 						)}
@@ -174,7 +174,7 @@ export default function ProjectPage() {
 					</div>
 
 					<button
-						className="btn w-100 mt-4 note-button text-white"
+						className="btn w-100 mt-4 btn-primary text-white"
 						onClick={(e) => {
 							e.stopPropagation();
 							handleNoteClick(project.noteId);
@@ -188,7 +188,7 @@ export default function ProjectPage() {
 	}
 
 	return (
-		<div className="min-vh-100 bg-light">
+		<div className="dvh-100 bg-light overflow-auto">
 			<GlobalSideBar />
 			<main className="container py-5">
 				<div className="bg-white rounded-4 shadow-sm p-4 mb-5">

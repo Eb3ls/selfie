@@ -185,7 +185,7 @@ export default function Note() {
 	);
 
 	return (
-		<div className={styles.container} id="CIAO">
+		<div className="dvh-100 overflow-auto" id="CIAO">
 			<GlobalSideBar />
 			<Container>
 				<div

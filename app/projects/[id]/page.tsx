@@ -80,13 +80,13 @@ export default function Projects() {
 	return (
 		<>
 			{!showContent ? (
-				<div className="d-flex justify-content-center align-items-center vh-100">
+				<div className="d-flex justify-content-center align-items-center dvh-100 overflow-auto">
 					<div className="spinner-border text-primary" role="status">
 						<span className="visually-hidden">Caricamento...</span>
 					</div>
 				</div>
 			) : (
-				<div className="d-flex flex-column vh-100 vw-100">
+				<div className="d-flex flex-column dvh-100 vw-100">
 					<GlobalSideBar />
 					<view-toggler />
 					<activity-form />

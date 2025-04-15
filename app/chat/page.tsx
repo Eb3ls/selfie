@@ -299,7 +299,7 @@ export default function ChatMain() {
 	}
 
 	return (
-		<div className="d-flex flex-column vh-100">
+		<div className="d-flex flex-column dvh-100">
 			<GlobalSideBar />
 			<div className="d-flex flex-grow-1 overflow-hidden">
 				{/* Sidebar */}

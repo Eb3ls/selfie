@@ -27,7 +27,11 @@ export function ListView({ events }: { events: CalendarEvent[] }): JSX.Element {
 	);
 
 	return (
-		<div className="h-100 overflow-auto" ref={listRef}>
+		<div
+			className="flex-grow-1 overflow-auto px-3"
+			style={{ minHeight: 0 }}
+			ref={listRef}
+		>
 			{Object.entries(groupedEvents).map(([date, dayEvents]) => (
 				<div key={date} id={`date-${date}`}>
 					<div className="p-3 bg-light rounded-3 mb-3 sticky-top z-0">

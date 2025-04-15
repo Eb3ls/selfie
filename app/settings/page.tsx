@@ -110,7 +110,7 @@ export default function SettingsPage() {
 	};
 
 	return (
-		<div className="d-flex flex-column min-vh-100">
+		<div className="d-flex flex-column overflow-y-auto dvh-100">
 			<GlobalSideBar />
 			<div className="container flex-grow-1 d-flex flex-column justify-content-center mt-3">
 				<ProfilePictureUpload

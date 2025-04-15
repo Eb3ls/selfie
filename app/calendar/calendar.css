@@ -1,8 +1,7 @@
 /* Stile generale del container */
 .calendar-container {
 	max-width: 1400px;
-	margin: 0 auto;
-	height: 86vh;
+	height: 95dvh;
 }
 
 .activity-color {

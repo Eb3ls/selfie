@@ -110,7 +110,7 @@ export function ResourcesModal() {
 	return (
 		<div>
 			<button
-				className="btn resource-color rounded-pill hover-lift text-white shadow-sm fw-semibold"
+				className="btn btn-sm p-2 resource-color rounded-pill hover-lift text-white shadow-sm fw-semibold"
 				onClick={() => setIsModalOpen(true)}
 			>
 				<i className="bi bi-search me-2" />

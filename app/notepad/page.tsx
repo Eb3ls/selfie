@@ -216,7 +216,7 @@ export default function Notepad() {
 	}
 
 	return (
-		<div>
+		<div className="dvh-100 overflow-auto">
 			<GlobalSideBar />
 			<Container className={styles.container}>
 				<div className={styles.header}>

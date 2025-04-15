@@ -58,8 +58,8 @@ class ViewToggler extends HTMLElement {
 		this.populateOpenToggleList();
 
 		// Grafica fissa
-		this.className = "d-flex flex-column";
-		this.style.height = `calc(100vh - 82px)`;
+		this.className = "d-flex flex-column flex-grow-1";
+		this.style.minHeight = "0";
 		this.insertUpperHeader();
 
 		this.render(this.viewType, true);
@@ -281,8 +281,8 @@ class ViewToggler extends HTMLElement {
 
 	private insertGanttBody(): void {
 		const container = document.createElement("div");
-		container.className = "row overflow-y-auto g-0";
-		container.style.minHeight = `calc(100% - ${ROW_HEIGHT * 2}px)`;
+		container.className = "row overflow-y-auto g-0 flex-grow-1";
+		container.style.minHeight = "0";
 		container.id = "ganttContainer";
 
 		container.innerHTML = `
@@ -333,8 +333,8 @@ class ViewToggler extends HTMLElement {
 		this.listViewType = view;
 		// Creiamo il container per gestire l'overflow
 		const container = document.createElement("div");
-		container.className = "row overflow-y-auto g-0";
-		container.style.minHeight = `calc(100% - ${ROW_HEIGHT * 2}px)`;
+		container.className = "row overflow-y-auto g-0 flex-grow-1";
+		container.style.minHeight = "0";
 
 		if (this.listViewType === "USER") {
 			const listBlock = document.createElement("users-list") as UsersList;

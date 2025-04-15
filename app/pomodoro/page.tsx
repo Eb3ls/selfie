@@ -339,7 +339,7 @@ function PomodoroImplementation() {
 	}
 
 	return (
-		<div className="d-flex vh-100 flex-column">
+		<div className="d-flex dvh-100 flex-column">
 			<GlobalSideBar />
 			<div
 				className="d-flex flex-column position-relative flex-grow-1"

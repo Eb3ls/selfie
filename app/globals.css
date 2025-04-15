@@ -37,3 +37,7 @@ body {
 .hover-lift:hover .feature-icon-container {
 	transform: scale(1.1);
 }
+
+.dvh-100 {
+	height: 100dvh;
+}

@@ -156,7 +156,7 @@ function CompleteFormComponent() {
 export default function Login() {
 	return (
 		<main
-			className="min-vh-100 d-flex align-items-center py-5"
+			className="dvh-100 d-flex align-items-center py-5"
 			style={{ background: "#f8f9fa" }}
 		>
 			<Container>

@@ -57,7 +57,7 @@ export function CustomToolbar({
 	}
 
 	return (
-		<div className="container-fluid py-3">
+		<div className="container-fluid py-2">
 			<div className="row align-items-center justify-content-between gy-3">
 				<div className="col-12 col-md-auto">
 					<div className="d-flex align-items-center gap-3 flex-column flex-md-row">
@@ -131,12 +131,12 @@ export function CustomToolbar({
 							href="/api/calendar/exportCalendar"
 							className="text-decoration-none"
 						>
-							<button className="btn rounded-pill download-color text-white hover-lift rounded-pill shadow-sm fw-semibold">
+							<button className="btn btn-sm p-2 rounded-pill download-color text-white hover-lift rounded-pill shadow-sm fw-semibold">
 								<i className="bi bi-download me-1"></i>Scarica
 							</button>
 						</a>
 						<button
-							className="btn rounded-pill list-color text-white hover-lift rounded-pill shadow-sm fw-semibold"
+							className="btn btn-sm p-2 rounded-pill list-color text-white hover-lift rounded-pill shadow-sm fw-semibold"
 							onClick={switchView}
 						>
 							{currentView === "list" ? (
@@ -155,18 +155,18 @@ export function CustomToolbar({
 						</div>
 						<div className="d-flex gap-2 align-items-center">
 							<AddActivityModal mutate={mutate}>
-								<button className="btn activity-color text-white hover-lift rounded-pill shadow-sm fw-semibold">
+								<button className="btn btn-sm p-2 activity-color text-white hover-lift rounded-pill shadow-sm fw-semibold">
 									<i className="bi bi-plus-lg me-1"></i>
 									Attività
 								</button>
 							</AddActivityModal>
 							<AddEventModal mutate={mutate}>
-								<button className="btn event-color text-white hover-lift rounded-pill shadow-sm fw-semibold">
+								<button className="btn btn-sm p-2 event-color text-white hover-lift rounded-pill shadow-sm fw-semibold">
 									<i className="bi bi-plus-lg me-1"></i>Evento
 								</button>
 							</AddEventModal>
 							<AddSessionModal mutate={mutate}>
-								<button className="btn session-color text-white hover-lift rounded-pill shadow-sm fw-semibold">
+								<button className="btn btn-sm p-2 session-color text-white hover-lift rounded-pill shadow-sm fw-semibold">
 									<i className="bi bi-plus-lg me-1"></i>
 									Sessione
 								</button>
