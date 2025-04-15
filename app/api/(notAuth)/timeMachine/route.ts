@@ -28,8 +28,6 @@ function backgroundServiceFunction() {
 
 	const new_time = new Date(baseDate.getTime() + ms_diff);
 
-	console.log("Data attuale:", new_time.toString());
-
 	timeMachine.timeMachineTime = new_time;
 
 	// Dobbiamo verificare nel database se ci sono eventi che iniziano in questo momento
