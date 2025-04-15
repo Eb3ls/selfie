@@ -8,11 +8,13 @@ import { toast } from "react-toastify";
 
 interface GroupChatModalProps {
 	updateChatList: () => void;
+	setShowOptions: React.Dispatch<React.SetStateAction<boolean>>;
 	children: any;
 }
 
 export function GroupChatModal({
 	updateChatList,
+	setShowOptions,
 	children
 }: GroupChatModalProps) {
 	const [show, setShow] = useState(false);
@@ -42,6 +44,7 @@ export function GroupChatModal({
 
 		toast.success("Gruppo creato con successo");
 		setShow(false);
+		setShowOptions(false);
 		setGroupName("");
 		setUsers([]);
 		updateChatList();

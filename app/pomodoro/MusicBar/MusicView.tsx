@@ -324,15 +324,9 @@ export function MusicView({ show }: { show: boolean }): JSX.Element {
 											className="rounded-circle p-3"
 										>
 											{isPlaying ? (
-												<FaPause
-													className="color-brown"
-													size={20}
-												></FaPause>
+												<FaPause size={20}></FaPause>
 											) : (
-												<FaPlay
-													className="color-brown"
-													size={20}
-												></FaPlay>
+												<FaPlay size={20}></FaPlay>
 											)}
 										</Button>
 										<Button
@@ -340,7 +334,6 @@ export function MusicView({ show }: { show: boolean }): JSX.Element {
 											onClick={handleEnd}
 										>
 											<FaAnglesRight
-												className="color-brown"
 												size={20}
 											></FaAnglesRight>
 										</Button>

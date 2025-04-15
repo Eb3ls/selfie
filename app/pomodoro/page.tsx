@@ -250,7 +250,11 @@ function PomodoroImplementation() {
 			} else if (!isStudying && sessions === 0) {
 				return <>Ultima pausa!</>;
 			}
-			return <>Sessioni rimanenti: {remainingSessions}</>;
+			return (
+				<div className="fs-3 text-muted fw-semibold">
+					Sessioni rimanenti: {remainingSessions}
+				</div>
+			);
 		};
 
 		const getMainButtonText = () => {

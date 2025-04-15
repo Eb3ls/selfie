@@ -28,7 +28,10 @@ export function FloatingMenu({ updateChatList }: FloatingMenuProps) {
 					minWidth: "200px"
 				}}
 			>
-				<ChatModal updateChatList={updateChatList}>
+				<ChatModal
+					updateChatList={updateChatList}
+					setShowOptions={setShowOptions}
+				>
 					<Button
 						variant="light"
 						className="dropdown-item d-flex align-items-center gap-2"
@@ -37,7 +40,10 @@ export function FloatingMenu({ updateChatList }: FloatingMenuProps) {
 						Crea nuova chat
 					</Button>
 				</ChatModal>
-				<GroupChatModal updateChatList={updateChatList}>
+				<GroupChatModal
+					updateChatList={updateChatList}
+					setShowOptions={setShowOptions}
+				>
 					<Button
 						variant="light"
 						className="dropdown-item d-flex align-items-center gap-2"

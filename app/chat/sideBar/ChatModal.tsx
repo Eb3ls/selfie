@@ -7,10 +7,15 @@ import { toast } from "react-toastify";
 
 interface ChatModalProps {
 	updateChatList: () => void;
+	setShowOptions: React.Dispatch<React.SetStateAction<boolean>>;
 	children: any;
 }
 
-export function ChatModal({ updateChatList, children }: ChatModalProps) {
+export function ChatModal({
+	updateChatList,
+	setShowOptions,
+	children
+}: ChatModalProps) {
 	const [show, setShow] = useState(false);
 	const [form, setForm] = useState({
 		username: ""
@@ -41,6 +46,7 @@ export function ChatModal({ updateChatList, children }: ChatModalProps) {
 		}
 
 		toast.success("Chat creata con successo");
+		setShowOptions(false);
 		setShow(false);
 		setForm({ username: "" });
 		updateChatList();

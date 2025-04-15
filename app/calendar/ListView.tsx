@@ -53,6 +53,13 @@ export function ListView({ events }: { events: CalendarEvent[] }): JSX.Element {
 					</div>
 				</div>
 			))}
+			{Object.entries(groupedEvents).length === 0 && (
+				<div className="p-3 ms-4 mb-3 bg-white shadow-sm hover-lift rounded-3 activity-color-border">
+					<div className="text-muted mb-1">
+						Non ci sono attività in programma
+					</div>
+				</div>
+			)}
 		</div>
 	);
 }
