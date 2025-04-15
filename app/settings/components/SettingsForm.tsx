@@ -1,6 +1,7 @@
 "use client";
 
 import { StandardInput } from "@/app/components/StandardInput";
+import { useTime } from "@/app/components/TimeContext";
 import { Col, Form, Row } from "react-bootstrap";
 import Button from "react-bootstrap/Button";
 import { FaSave } from "react-icons/fa";
@@ -19,6 +20,8 @@ export default function SettingsForm({
 	setShowPasswordFields: React.Dispatch<React.SetStateAction<boolean>>;
 	onSubmit: (e: React.FormEvent) => void;
 }) {
+	const { dateTime } = useTime();
+
 	return (
 		<Form onSubmit={onSubmit}>
 			{/* Username */}
@@ -94,6 +97,7 @@ export default function SettingsForm({
 							birthDay: e.target.value
 						})
 					}
+					max={new Date(dateTime).toISOString().split("T")[0]}
 				/>
 
 				<PasswordSection

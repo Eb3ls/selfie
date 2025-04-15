@@ -9,8 +9,8 @@ interface StandardInputProps {
 		HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
 	>;
 	value: string | number;
-	min?: number;
-	max?: number;
+	min?: number | string;
+	max?: number | string;
 	optionMap?: { [key: string]: string };
 	isRequired?: boolean;
 }

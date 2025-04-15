@@ -12,6 +12,7 @@ import {
 	getCollection,
 	updateCollectionWrapper
 } from "@/utils/db/db";
+import { timeMachine } from "@/utils/timeMachine/timeMachine";
 import crypto from "crypto";
 import { Collection } from "mongodb";
 import { NextRequest } from "next/server";
@@ -61,6 +62,13 @@ export const PATCH = async (request: NextRequest) => {
 
 	if (!isEmailValid(newBody.email)) {
 		return generateMessageResponse("Invalid email", 400);
+	}
+
+	// Controlliamo che il compleanno non sia una data futura
+	const today = new Date(timeMachine.timeMachineTime);
+	const birthDate = new Date(newBody.birthDay);
+	if (birthDate > today) {
+		return generateMessageResponse("Invalid birth date", 400);
 	}
 
 	// Estraiamo l'id dell'utente

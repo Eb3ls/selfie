@@ -3,7 +3,7 @@
 }
 
 .search-input:focus {
-	border-color: #4f46e5 !important;
+	border-color: #ffc107 !important;
 	box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1) !important;
 }
 
@@ -13,9 +13,9 @@
 }
 
 .primary {
-	background: #4f46e5;
+	background: #ffc107;
 }
 
 .primary:hover {
-	background: #4338ca;
+	background: #eeb200;
 }

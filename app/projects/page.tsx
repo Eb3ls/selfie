@@ -141,7 +141,7 @@ export default function ProjectPage() {
 					<div className="d-flex align-items-center gap-2 mb-3">
 						{isOwner && (
 							<FaUserShield
-								title="Owner"
+								title="Proprietario"
 								className="owner-icon flex-shrink-0"
 								size={20}
 							/>
