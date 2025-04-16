@@ -185,7 +185,7 @@ export default function ProjectPage() {
 		<div className="dvh-100 bg-light overflow-auto">
 			<GlobalSideBar />
 			<div className="container py-5">
-				<div className="bg-white rounded-4 shadow-sm p-4 mb-5">
+				<div className="bg-white rounded-4 shadow-sm p-4 mb-4 mb-lg-5">
 					<SearchBar
 						handleSort={handleSort}
 						handleSearch={handleSearch}

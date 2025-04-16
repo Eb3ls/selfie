@@ -97,7 +97,7 @@ export function MusicInput({
 					<Form.Label className="mb-3 fs-5 fw-bold text-primary">
 						Aggiungi video
 					</Form.Label>
-					<div className="d-flex w-100 shadow-sm position-relative">
+					<div className="d-flex w-100 shadow-sm position-relative rounded-4">
 						<Form.Control
 							type="text"
 							value={newVideo}

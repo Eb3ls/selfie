@@ -169,7 +169,7 @@ export function MusicView({ show }: { show: boolean }): JSX.Element {
 		return (
 			<div
 				key={index}
-				className="d-flex justify-content-between align-items-center mb-2 p-2 bg-light rounded hover-shadow"
+				className="d-flex justify-content-between align-items-center mb-3 p-3 bg-white rounded-4 hover-shadow hover-lift small-border"
 				style={{
 					transition: "all 0.2s ease",
 					cursor: "default"
@@ -236,7 +236,7 @@ export function MusicView({ show }: { show: boolean }): JSX.Element {
 	return (
 		<>
 			{show && (
-				<div className="container-sm d-flex flex-column dvh-100">
+				<div className="container-sm d-flex flex-column h-100">
 					<Script
 						src="https://www.youtube.com/iframe_api"
 						strategy="afterInteractive"
@@ -252,10 +252,7 @@ export function MusicView({ show }: { show: boolean }): JSX.Element {
 						className="mt-4 flex-grow-1 overflow-auto"
 						style={{ minHeight: "0" }}
 					>
-						<div
-							className="d-flex align-items-center mb-3 sticky-top"
-							style={{ backgroundColor: "rgb(240, 240, 240)" }}
-						>
+						<div className="d-flex align-items-center mb-3 p-3 sticky-top bg-light">
 							<h5 className="m-0 fw-bold text-secondary">Coda</h5>
 							<span className="ms-2 badge bg-primary rounded-pill">
 								{videoTitleList.length}

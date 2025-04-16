@@ -72,7 +72,7 @@ export function UserItem({
 
 	return (
 		<div
-			className={`fw-bold p-3 mb-3 rounded-4 border d-flex align-items-center position-relative hover-shadow`}
+			className={`fw-bold p-3 mb-3 rounded-4 border d-flex align-items-center position-relative hover-shadow hover-lift`}
 			onClick={entry.loader}
 			style={{ minHeight: "81px", cursor: "pointer" }}
 		>

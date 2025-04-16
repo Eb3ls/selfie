@@ -34,7 +34,7 @@ export function ListView({ events }: { events: CalendarEvent[] }): JSX.Element {
 		>
 			{Object.entries(groupedEvents).map(([date, dayEvents]) => (
 				<div key={date} id={`date-${date}`}>
-					<div className="p-3 bg-light rounded-3 mb-3 sticky-top z-0">
+					<div className="p-3 bg-white rounded-3 mb-3 sticky-top z-0 small-border">
 						<h5 className="m-0 fw-bold activity-color-text">
 							{moment(date).format("dddd D MMMM YYYY")}
 						</h5>
@@ -43,7 +43,7 @@ export function ListView({ events }: { events: CalendarEvent[] }): JSX.Element {
 						{dayEvents.map((event, index) => (
 							<div
 								key={`${date}-${index}`}
-								className="p-3 ms-4 mb-3 bg-white shadow-sm hover-lift rounded-3 activity-color-border"
+								className="p-3 ms-2 mb-3 bg-white shadow-sm hover-lift rounded-3 activity-color-border"
 								style={{
 									borderLeft: "5px solid"
 								}}

@@ -166,7 +166,7 @@ export default function Home() {
 	}, []);
 
 	return (
-		<div className="dvh-100 overflow-y-auto">
+		<div className="dvh-100 overflow-y-auto bg-light">
 			<GlobalSideBar />
 			<div className="pt-5">
 				<WelcomeSection username={user?.firstName} />

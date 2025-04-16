@@ -67,9 +67,12 @@ export default function CalendarPage() {
 	};
 
 	return (
-		<div className="dvh-100 overflow-y-auto">
+		<div className="dvh-100 overflow-y-auto bg-light d-flex flex-column">
 			<GlobalSideBar />
-			<Container className="mt-2 d-flex flex-column gap-3 calendar-container">
+			<Container
+				className="mt-2 d-flex flex-column gap-3 flex-grow-1 mb-3 mb-lg-5"
+				style={{ minHeight: 0 }}
+			>
 				<CustomToolbar
 					currentDate={currentDate}
 					calendarView={calendarView}

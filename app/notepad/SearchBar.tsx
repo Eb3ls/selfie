@@ -48,7 +48,7 @@ export function SearchBar({
 					<AddNoteModal handleAdd={handleAdd}>
 						<button className="action-button btn btn-primary p-2 rounded-3 border-0 text-white d-flex align-items-center fw-semibold hover-lift">
 							<FaPlus />
-							<span className="ms-2">Nuova nota</span>
+							<span className="ms-2">Crea</span>
 						</button>
 					</AddNoteModal>
 				</div>

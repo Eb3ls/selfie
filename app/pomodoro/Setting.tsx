@@ -51,7 +51,7 @@ export function Setting({ name, maxValue, getter, setter }: SettingsProps) {
 	return (
 		<div className="d-flex flex-column gap-2 mt-2 container-sm">
 			<h5 className="text-primary mb-1 text-center">{name}</h5>
-			<div className="d-flex align-items-center bg-light shadow-sm rounded-4 p-3 gap-3">
+			<div className="d-flex align-items-center bg-light shadow-sm rounded-4 p-3 bg-white small-border">
 				<Button
 					variant="primary"
 					className="rounded-circle d-flex align-items-center justify-content-center p-2"

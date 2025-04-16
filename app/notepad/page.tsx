@@ -352,7 +352,7 @@ export default function Notepad() {
 		<div className="dvh-100 overflow-auto bg-light">
 			<GlobalSideBar />
 			<div className="container py-5">
-				<div className="bg-white rounded-4 shadow-sm p-4 mb-5">
+				<div className="bg-white rounded-4 shadow-sm p-4 mb-4 mb-lg-5">
 					<SearchBar
 						handleFilters={handleFilters}
 						handleSort={handleSort}

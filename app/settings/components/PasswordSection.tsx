@@ -19,7 +19,7 @@ export default function PasswordSection({
 		<div>
 			<Button
 				onClick={() => setShowPasswordFields(!showPasswordFields)}
-				className="mb-3 w-100"
+				className="mb-3 w-100 rounded-4"
 			>
 				<FaKey />
 				{showPasswordFields

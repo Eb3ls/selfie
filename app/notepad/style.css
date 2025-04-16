@@ -37,15 +37,6 @@
 	font-weight: 500;
 }
 
-.hide-scrollbar {
-	-ms-overflow-style: 1px;
-	scrollbar-width: 1px;
-}
-
-.hide-scrollbar::-webkit-scrollbar {
-	display: none;
-}
-
 .text-calendar-projectActivity {
 	color: #ffcc42e8 !important;
 }

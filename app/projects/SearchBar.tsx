@@ -34,7 +34,7 @@ export function SearchBar({ handleSort, handleSearch, handleAdd }: any) {
 				<AddProjectModal handleAdd={handleAdd}>
 					<button className="action-button primary p-2 rounded-3 border-0 text-white d-flex align-items-center fw-semibold hover-lift">
 						<FaPlus />
-						<span className="ms-2">Nuovo progetto</span>
+						<span className="ms-2">Crea</span>
 					</button>
 				</AddProjectModal>
 			</div>

@@ -331,8 +331,8 @@ function PomodoroImplementation() {
 		<div className="d-flex dvh-100 flex-column">
 			<GlobalSideBar />
 			<div
-				className="d-flex flex-column position-relative flex-grow-1"
-				style={{ backgroundColor: "rgb(240, 240, 240)" }}
+				className="d-flex flex-column position-relative flex-grow-1 bg-light"
+				style={{ minHeight: "0" }}
 			>
 				{error &&
 					(error.message ===
@@ -390,7 +390,7 @@ function PomodoroImplementation() {
 							>
 								<TimerBlock></TimerBlock>
 								{!isStarted && id === null && (
-									<div className="d-flex flex-column justify-content-center m-2">
+									<div className="d-flex flex-column justify-content-center m-2 mb-4">
 										<Setting
 											name="Tempo di studio (min)"
 											maxValue={600}

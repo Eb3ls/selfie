@@ -58,3 +58,7 @@ body {
 .bg-calendar-projectActivity {
 	background: #ffcc42e8 !important;
 }
+
+.small-border {
+	border: 1px solid rgba(0, 0, 0, 0.05);
+}
