@@ -225,8 +225,14 @@ export const GET = async (request: NextRequest) => {
 				new Date(a.dtModified).getTime()
 		);
 
+		// Filtriamo via tutte le note che sono private
+		const filteredNotes = sortedNotes.filter(
+			(note: any) =>
+				note.access !== "PRIVATE" || note.ownerId === user._id
+		);
+
 		// Applica il limite delle preview
-		const limitedNotes = sortedNotes.slice(0, previews.maxNotes);
+		const limitedNotes = filteredNotes.slice(0, previews.maxNotes);
 
 		// Mappa alla struttura ReducedNote
 		reducedNotes = limitedNotes.map((note: Note) => ({
