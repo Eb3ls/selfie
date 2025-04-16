@@ -3,6 +3,7 @@ import {
 	ProjectActivityResponse,
 	SubPhaseResponse
 } from "@/app/api/(auth)/project/[id]/route";
+import { safeFetch } from "@/utils/fetch/fetch";
 import { toast } from "react-toastify";
 import ViewToggler from "./ViewToggler";
 
@@ -177,24 +178,34 @@ export function createStatusEntry(
 
 	link.onclick = async (e) => {
 		e.preventDefault();
-		const url = `/api/project/activity/modifyStatus`;
-		const method = "PATCH";
+
 		const body = {
 			_id: activityId,
 			status: status
 		};
-		try {
-			await fetcher(method, url, body);
-			const viewToggler = document.querySelector(
-				"view-toggler"
-			) as ViewToggler | null;
-			if (viewToggler) {
-				await viewToggler.updatePage();
-			} else {
-				window.location.reload();
-			}
-		} catch (error) {
+
+		const response = await safeFetch(
+			fetch("/api/project/activity/modifyStatus", {
+				method: "PATCH",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify(body)
+			})
+		);
+
+		if (!response.ok) {
 			toast.error("Errore durante la modifica dello stato");
+			return;
+		}
+
+		const viewToggler = document.querySelector(
+			"view-toggler"
+		) as ViewToggler | null;
+		if (viewToggler) {
+			await viewToggler.updatePage();
+		} else {
+			window.location.reload();
 		}
 	};
 
@@ -283,26 +294,6 @@ export function createStatusIcon(
 }
 
 // Altro
-
-export async function fetcher(
-	method: "GET" | "POST" | "PATCH" | "DELETE",
-	url: string,
-	data?: any
-): Promise<any> {
-	const response = await fetch(url, {
-		method: method,
-		headers: {
-			"Content-Type": "application/json"
-		},
-		body: data ? JSON.stringify(data) : undefined
-	});
-
-	if (response.ok) {
-		return response.json();
-	} else {
-		throw new Error(response.statusText);
-	}
-}
 
 export function escapeHTML(text: string): string {
 	const div = document.createElement("div");

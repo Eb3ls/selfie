@@ -3,6 +3,7 @@ import {
 	ProjectActivityResponse,
 	SubPhaseResponse
 } from "@/app/api/(auth)/project/[id]/route";
+import { safeFetch } from "@/utils/fetch/fetch";
 import { toast } from "react-toastify";
 import {
 	User,
@@ -10,7 +11,6 @@ import {
 	createLinkEntry,
 	createUserEntry,
 	escapeHTML,
-	fetcher,
 	formatDate,
 	formatDueDate,
 	formatStartDate,
@@ -409,26 +409,34 @@ class ActivityLinkForm extends HTMLElement {
 
 	private async handleSave(e: Event) {
 		e.preventDefault();
-		const url = "/api/project/activity/link";
-		const method = "PATCH";
 
 		const body = {
 			prevIds: this.selectedLinks.map((link) => link._id),
 			nextId: this.activity._id
 		};
 
-		try {
-			await fetcher(method, url, body);
-			const viewToggler = document.querySelector(
-				"view-toggler"
-			) as ViewToggler | null;
-			if (viewToggler) {
-				await viewToggler.updatePage();
-			} else {
-				window.location.reload();
-			}
-		} catch (error) {
+		const response = await safeFetch(
+			fetch("/api/project/activity/link", {
+				method: "PATCH",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify(body)
+			})
+		);
+
+		if (!response.ok) {
 			toast.error("Errore nell'associazione delle attività");
+			return;
+		}
+
+		const viewToggler = document.querySelector(
+			"view-toggler"
+		) as ViewToggler | null;
+		if (viewToggler) {
+			await viewToggler.updatePage();
+		} else {
+			window.location.reload();
 		}
 	}
 
@@ -543,28 +551,36 @@ class ActivityDeleteForm extends HTMLElement {
 	}
 
 	async handleDelete() {
-		const url = "/api/project/activity/delete";
 		const body = {
 			_id: this.activity._id
 		};
-		const method = "DELETE";
 
-		try {
-			await fetcher(method, url, body);
-			const viewToggler = document.querySelector(
-				"view-toggler"
-			) as ViewToggler | null;
-			if (viewToggler) {
-				await viewToggler.updatePage();
-				const modal = document.querySelector(
-					"#ModifyActivity"
-				) as HTMLDivElement;
-				hideModal(modal);
-			} else {
-				window.location.reload();
-			}
-		} catch (error) {
+		const response = await safeFetch(
+			fetch("/api/project/activity/delete", {
+				method: "DELETE",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify(body)
+			})
+		);
+
+		if (!response.ok) {
 			toast.error("Errore durante l'eliminazione dell'attività");
+			return;
+		}
+
+		const viewToggler = document.querySelector(
+			"view-toggler"
+		) as ViewToggler | null;
+		if (viewToggler) {
+			await viewToggler.updatePage();
+			const modal = document.querySelector(
+				"#ModifyActivity"
+			) as HTMLDivElement;
+			hideModal(modal);
+		} else {
+			window.location.reload();
 		}
 	}
 
@@ -653,21 +669,28 @@ class ActivityModifyForm extends HTMLElement {
 			usernameList: this.modifiedUserlist.map((user) => user.name)
 		};
 
-		const url = `/api/project/activity/modify`;
-		const method = "PATCH";
+		const response = await safeFetch(
+			fetch("/api/project/activity/modify", {
+				method: "PATCH",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify(data)
+			})
+		);
 
-		try {
-			await fetcher(method, url, data);
-			const viewToggler = document.querySelector(
-				"view-toggler"
-			) as ViewToggler | null;
-			if (viewToggler) {
-				await viewToggler.updatePage();
-			} else {
-				window.location.reload();
-			}
-		} catch (error) {
+		if (!response.ok) {
 			toast.error("Errore durante la modifica dell'attività");
+			return;
+		}
+
+		const viewToggler = document.querySelector(
+			"view-toggler"
+		) as ViewToggler | null;
+		if (viewToggler) {
+			await viewToggler.updatePage();
+		} else {
+			window.location.reload();
 		}
 	}
 

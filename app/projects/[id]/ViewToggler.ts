@@ -3,6 +3,7 @@ import {
 	ProjectResponse,
 	SubPhaseResponse
 } from "@/app/api/(auth)/project/[id]/route";
+import { safeFetch } from "@/utils/fetch/fetch";
 import ActivityForm from "./Forms/ActivityForm";
 import AddForm from "./Forms/AddForm";
 import PhaseForm from "./Forms/PhaseForm";
@@ -412,17 +413,10 @@ class ViewToggler extends HTMLElement {
 	}
 
 	async getData(): Promise<ProjectResponse | null> {
-		try {
-			const projectID = window.location.pathname.split("/")[2];
-			const res = await fetch(`/api/project/${projectID}`);
-			const data = await res.json();
+		const projectID = window.location.pathname.split("/")[2];
+		const response = await safeFetch(fetch(`/api/project/${projectID}`));
 
-			if (!res.ok) {
-				throw new Error("Failed to get data");
-			}
-
-			return data;
-		} catch (error) {
+		if (!response.ok) {
 			const errorContainer = document.createElement("div");
 			errorContainer.className = "container-fluid p-4";
 
@@ -441,6 +435,8 @@ class ViewToggler extends HTMLElement {
 
 			return null;
 		}
+
+		return response.body;
 	}
 
 	// Funzione che dato un array di fasi ritorna un array ordinato sulla due di SortedActivity

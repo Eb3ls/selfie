@@ -1,10 +1,10 @@
+import { safeFetch } from "@/utils/fetch/fetch";
 import { toast } from "react-toastify";
 import {
 	User,
 	clearError,
 	createUserEntry,
 	escapeHTML,
-	fetcher,
 	showError,
 	validateLength
 } from "../Utils";
@@ -193,26 +193,34 @@ class ProjectSettings extends HTMLElement {
 			return;
 		}
 
-		const method = "PATCH";
-		const url = "/api/project/modify";
 		const body: any = {
 			_id: this.projectId,
 			summary: projectTitle,
 			usernameList: this.selectedUser.map((user) => user.name)
 		};
 
-		try {
-			await fetcher(method, url, body);
-			const viewToggler = document.querySelector(
-				"view-toggler"
-			) as ViewToggler | null;
-			if (viewToggler) {
-				await viewToggler.updatePage();
-			} else {
-				window.location.reload();
-			}
-		} catch (error) {
+		const response = await safeFetch(
+			fetch("/api/project/modify", {
+				method: "PATCH",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify(body)
+			})
+		);
+
+		if (!response.ok) {
 			toast.error("Errore durante la modifica del progetto");
+			return;
+		}
+
+		const viewToggler = document.querySelector(
+			"view-toggler"
+		) as ViewToggler | null;
+		if (viewToggler) {
+			await viewToggler.updatePage();
+		} else {
+			window.location.reload();
 		}
 	}
 
@@ -287,25 +295,33 @@ class ProjectSettings extends HTMLElement {
 			return;
 		}
 
-		const method = "POST";
-		const url = "/api/project/invite";
 		const body: any = {
 			projectId: this.projectId,
 			usernameList: this.usersToInvite
 		};
 
-		try {
-			await fetcher(method, url, body);
-			const viewToggler = document.querySelector(
-				"view-toggler"
-			) as ViewToggler | null;
-			if (viewToggler) {
-				await viewToggler.updatePage();
-			} else {
-				window.location.reload();
-			}
-		} catch (error) {
+		const response = await safeFetch(
+			fetch("/api/project/invite", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify(body)
+			})
+		);
+
+		if (!response.ok) {
 			toast.error("Errore durante l'invito degli utenti");
+			return;
+		}
+
+		const viewToggler = document.querySelector(
+			"view-toggler"
+		) as ViewToggler | null;
+		if (viewToggler) {
+			await viewToggler.updatePage();
+		} else {
+			window.location.reload();
 		}
 	}
 
@@ -426,15 +442,24 @@ class ProjectSettings extends HTMLElement {
 
 		const confirmBtn = this.querySelector("#confirmDeleteBtn");
 		confirmBtn?.addEventListener("click", async () => {
-			const url = `/api/project/delete`;
-			const method = "DELETE";
 			const body = { _id: this.projectId };
-			try {
-				await fetcher(method, url, body);
-				window.location.href = "/projects";
-			} catch (error) {
+
+			const response = await safeFetch(
+				fetch("/api/project/delete", {
+					method: "DELETE",
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify(body)
+				})
+			);
+
+			if (!response.ok) {
 				toast.error("Errore durante l'eliminazione del progetto");
+				return;
 			}
+
+			window.location.href = "/projects";
 		});
 	}
 
@@ -495,17 +520,26 @@ class ProjectSettings extends HTMLElement {
 		);
 		const confirmBtn = this.querySelector("#confirmQuitBtn");
 		confirmBtn?.addEventListener("click", async () => {
-			const method = "POST";
-			const url = "/api/project/quit";
 			const body = {
 				projectId: this.projectId
 			};
-			try {
-				await fetcher(method, url, body);
-				window.location.href = "/projects";
-			} catch (error) {
+
+			const response = await safeFetch(
+				fetch("/api/project/quit", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify(body)
+				})
+			);
+
+			if (!response.ok) {
 				toast.error("Errore durante l'abbandono del progetto");
+				return;
 			}
+
+			window.location.href = "/projects";
 		});
 	}
 }

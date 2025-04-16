@@ -2,6 +2,7 @@ import {
 	PhaseResponse,
 	SubPhaseResponse
 } from "@/app/api/(auth)/project/[id]/route";
+import { safeFetch } from "@/utils/fetch/fetch";
 import { toast } from "react-toastify";
 import {
 	User,
@@ -9,7 +10,6 @@ import {
 	clearError,
 	createUserEntry,
 	escapeHTML,
-	fetcher,
 	formatDate,
 	formatDueDate,
 	formatStartDate,
@@ -187,8 +187,6 @@ class AddPhaseForm extends HTMLElement {
 			return;
 		}
 
-		const method = "POST";
-		const url = "/api/project/phase/add";
 		const body = {
 			summary: data.Title,
 			projectId: this.projectId,
@@ -197,20 +195,30 @@ class AddPhaseForm extends HTMLElement {
 			due: formatDueDate(data.Due.toString())
 		};
 
-		try {
-			await fetcher(method, url, body);
-			const viewToggler = document.querySelector(
-				"view-toggler"
-			) as ViewToggler | null;
-			if (viewToggler) {
-				await viewToggler.updatePage();
-				const modal = document.querySelector("#AddForm") as HTMLElement;
-				hideModal(modal);
-			} else {
-				window.location.reload();
-			}
-		} catch (error) {
+		const response = await safeFetch(
+			fetch("/api/project/phase/add", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify(body)
+			})
+		);
+
+		if (!response.ok) {
 			toast.error("Errore nella creazione della fase");
+			return;
+		}
+
+		const viewToggler = document.querySelector(
+			"view-toggler"
+		) as ViewToggler | null;
+		if (viewToggler) {
+			await viewToggler.updatePage();
+			const modal = document.querySelector("#AddForm") as HTMLElement;
+			hideModal(modal);
+		} else {
+			window.location.reload();
 		}
 	}
 
@@ -285,8 +293,6 @@ class AddSubPhaseForm extends HTMLElement {
 			return;
 		}
 
-		const method = "POST";
-		const url = "/api/project/phase/add";
 		const body = {
 			summary: data.Title,
 			projectId: this.projectId,
@@ -295,20 +301,30 @@ class AddSubPhaseForm extends HTMLElement {
 			due: formatDueDate(data.Due.toString())
 		};
 
-		try {
-			await fetcher(method, url, body);
-			const viewToggler = document.querySelector(
-				"view-toggler"
-			) as ViewToggler | null;
-			if (viewToggler) {
-				await viewToggler.updatePage();
-				const modal = document.querySelector("#AddForm") as HTMLElement;
-				hideModal(modal);
-			} else {
-				window.location.reload();
-			}
-		} catch (error) {
+		const response = await safeFetch(
+			fetch("/api/project/phase/add", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify(body)
+			})
+		);
+
+		if (!response.ok) {
 			toast.error("Errore nella creazione della sottofase");
+			return;
+		}
+
+		const viewToggler = document.querySelector(
+			"view-toggler"
+		) as ViewToggler | null;
+		if (viewToggler) {
+			await viewToggler.updatePage();
+			const modal = document.querySelector("#AddForm") as HTMLElement;
+			hideModal(modal);
+		} else {
+			window.location.reload();
 		}
 	}
 
@@ -484,8 +500,6 @@ class AddActivityForm extends HTMLElement {
 			return;
 		}
 
-		const method = "POST";
-		const url = "/api/project/activity/add";
 		const body = {
 			summary: data.Title,
 			description: data.Description,
@@ -496,20 +510,30 @@ class AddActivityForm extends HTMLElement {
 			usernameList: this.users.map((user) => user.name)
 		};
 
-		try {
-			await fetcher(method, url, body);
-			const viewToggler = document.querySelector(
-				"view-toggler"
-			) as ViewToggler | null;
-			if (viewToggler) {
-				await viewToggler.updatePage();
-				const modal = document.querySelector("#AddForm") as HTMLElement;
-				hideModal(modal);
-			} else {
-				window.location.reload();
-			}
-		} catch (error) {
+		const response = await safeFetch(
+			fetch("/api/project/activity/add", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify(body)
+			})
+		);
+
+		if (!response.ok) {
 			toast.error("Errore nella creazione dell'attività");
+			return;
+		}
+
+		const viewToggler = document.querySelector(
+			"view-toggler"
+		) as ViewToggler | null;
+		if (viewToggler) {
+			await viewToggler.updatePage();
+			const modal = document.querySelector("#AddForm") as HTMLElement;
+			hideModal(modal);
+		} else {
+			window.location.reload();
 		}
 	}
 

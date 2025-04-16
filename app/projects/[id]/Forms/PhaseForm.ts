@@ -2,11 +2,11 @@ import {
 	PhaseResponse,
 	SubPhaseResponse
 } from "@/app/api/(auth)/project/[id]/route";
+import { safeFetch } from "@/utils/fetch/fetch";
 import { toast } from "react-toastify";
 import {
 	clearError,
 	escapeHTML,
-	fetcher,
 	formatDate,
 	formatDueDate,
 	formatStartDate,
@@ -188,29 +188,34 @@ class PhaseForm extends HTMLElement {
 	async handleDeleteSubmit(event: Event) {
 		event.preventDefault();
 
-		const method = "DELETE";
-		const url = `/api/project/phase/delete`;
 		const body = {
 			_id: this.phaseData._id
 		};
 
-		try {
-			await fetcher(method, url, body);
+		const response = await safeFetch(
+			fetch("/api/project/phase/delete", {
+				method: "DELETE",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify(body)
+			})
+		);
 
-			const viewToggler = document.querySelector(
-				"view-toggler"
-			) as ViewToggler | null;
-			if (viewToggler) {
-				await viewToggler.updatePage();
-				const modal = document.querySelector(
-					"#ModifyPhase"
-				) as HTMLElement;
-				hideModal(modal);
-			} else {
-				window.location.reload();
-			}
-		} catch (error) {
+		if (!response.ok) {
 			toast.error("Errore nell'eliminazione della fase");
+			return;
+		}
+
+		const viewToggler = document.querySelector(
+			"view-toggler"
+		) as ViewToggler | null;
+		if (viewToggler) {
+			await viewToggler.updatePage();
+			const modal = document.querySelector("#ModifyPhase") as HTMLElement;
+			hideModal(modal);
+		} else {
+			window.location.reload();
 		}
 	}
 
@@ -232,8 +237,6 @@ class PhaseForm extends HTMLElement {
 			return;
 		}
 
-		const method = "PATCH";
-		const url = `/api/project/phase/modify`;
 		const body = {
 			_id: this.phaseData._id,
 			summary: summary,
@@ -241,19 +244,28 @@ class PhaseForm extends HTMLElement {
 			due: formatDueDate(formData.get("due") as string)
 		};
 
-		try {
-			await fetcher(method, url, body);
+		const response = await safeFetch(
+			fetch("/api/project/phase/modify", {
+				method: "PATCH",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify(body)
+			})
+		);
 
-			const viewToggler = document.querySelector(
-				"view-toggler"
-			) as ViewToggler | null;
-			if (viewToggler) {
-				await viewToggler.updatePage();
-			} else {
-				window.location.reload();
-			}
-		} catch (error) {
+		if (!response.ok) {
 			toast.error("Errore nell'aggiornamento della fase");
+			return;
+		}
+
+		const viewToggler = document.querySelector(
+			"view-toggler"
+		) as ViewToggler | null;
+		if (viewToggler) {
+			await viewToggler.updatePage();
+		} else {
+			window.location.reload();
 		}
 	}
 
