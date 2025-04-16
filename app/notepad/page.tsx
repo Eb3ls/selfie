@@ -6,20 +6,21 @@ import { StringNote } from "@/utils/db/db";
 import { generalFetcher, safeFetch } from "@/utils/fetch/fetch";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import { Button, Card, Container } from "react-bootstrap";
+import { Button } from "react-bootstrap";
 import { FaLock, FaTrash, FaUser, FaUserShield } from "react-icons/fa";
 import { FaChartGantt, FaTimeline } from "react-icons/fa6";
 import { MdPublic } from "react-icons/md";
 import { toast } from "react-toastify";
 import useSWR from "swr";
 import { DeleteNoteModal } from "./DeleteNoteModal";
-import styles from "./Notepad.module.css";
 import { SearchBar } from "./SearchBar";
+import "./style.css";
 
 // Tipo che estende StringNote per includere il campo type
 
 interface ExtendedStringNote extends StringNote {
 	type: string;
+	ownerName: string;
 }
 
 export default function Notepad() {
@@ -188,11 +189,29 @@ export default function Notepad() {
 	function getAccessIcon(access: string) {
 		switch (access) {
 			case "PRIVATE":
-				return <FaLock title="Privata" />;
+				return (
+					<FaLock
+						title="Privata"
+						size={20}
+						className="flex-shrink-0 green-icon"
+					/>
+				);
 			case "INVITED":
-				return <FaUser title="A invito" />;
+				return (
+					<FaUser
+						title="A invito"
+						size={20}
+						className="flex-shrink-0 green-icon"
+					/>
+				);
 			case "PUBLIC":
-				return <MdPublic title="Pubblica" />;
+				return (
+					<MdPublic
+						title="Pubblica"
+						size={20}
+						className="flex-shrink-0 green-icon"
+					/>
+				);
 			default:
 				return null;
 		}
@@ -202,9 +221,25 @@ export default function Notepad() {
 	function getTypeIcon(type: string) {
 		switch (type) {
 			case "project":
-				return <FaChartGantt title="Progetto" />;
+				return (
+					<div className="text-warning">
+						<FaChartGantt
+							title="Progetto"
+							className="flex-shrink-0"
+							size={20}
+						/>
+					</div>
+				);
 			case "activity":
-				return <FaTimeline title="Attività di Progetto" />;
+				return (
+					<div className="text-calendar-projectActivity">
+						<FaTimeline
+							title="Attività di Progetto"
+							className="flex-shrink-0"
+							size={20}
+						/>
+					</div>
+				);
 			default:
 				return null;
 		}
@@ -219,11 +254,105 @@ export default function Notepad() {
 		router.push("/notepad/" + note._id);
 	}
 
+	function categoriesBlock(categories: string) {
+		if (!categories) {
+			return <div style={{ minHeight: "44px" }}></div>;
+		}
+
+		const categoriesArray = categories.split(",").map((cat) => cat.trim());
+
+		const block = categoriesArray.map((cat) => (
+			<span className="category-badge rounded-pill px-2 py-1" key={cat}>
+				{cat}
+			</span>
+		));
+
+		return (
+			<div className="rounded-3 p-2 d-flex gap-2 flex-nowrap overflow-auto hide-scrollbar">
+				{block}
+			</div>
+		);
+	}
+
+	function createNoteEntry(note: ExtendedStringNote) {
+		const noteEntry = (
+			<div
+				className="note-card bg-white rounded-4 h-100 hover-lift-2"
+				key={note._id}
+				onClick={() => handleNoteClick(note)}
+			>
+				<div className="p-4 h-100 d-flex flex-column">
+					<div
+						className="d-flex align-items-center gap-2 mb-3"
+						style={{ minHeight: "38px" }}
+					>
+						{getAccessIcon(note.access)}
+						{note.type !== "note" && getTypeIcon(note.type)}
+						{isOwner(note.ownerId) && (
+							<FaUserShield
+								title="Sei il proprietario"
+								className="text-primary flex-shrink-0"
+								size={20}
+							/>
+						)}
+						<h3 className="h5 fw-bold m-0 text-truncate">
+							{note.summary}
+						</h3>
+						<div className="ms-auto d-flex gap-2">
+							{note.ownerId === user?._id &&
+								note.type === "note" && (
+									<DeleteNoteModal
+										handleDelete={() =>
+											handleDelete(note._id!)
+										}
+									>
+										<Button
+											variant="link"
+											className="text-danger"
+										>
+											<FaTrash className="hover-lift hover-grow" />
+										</Button>
+									</DeleteNoteModal>
+								)}
+						</div>
+					</div>
+					<div className="d-flex flex-column gap-2 flex-grow-1">
+						<div>
+							<span className="label d-block mb-1">
+								Proprietario
+							</span>
+							<span className="fw-medium">{note.ownerName}</span>
+						</div>
+
+						{categoriesBlock(note.categories)}
+
+						{note.text ? (
+							<div className="multiline-truncate">
+								{note.text}
+							</div>
+						) : (
+							<div className="text-center text-muted py-3 flex-grow-1 d-flex flex-column justify-content-end">
+								<span className="fs-3 p-2">✏️</span>
+								<p>
+									Questa nota è vuota. Clicca per modificarla.
+								</p>
+							</div>
+						)}
+					</div>
+				</div>
+			</div>
+		);
+
+		// Calcola l'altezza massima del contenuto
+
+		return noteEntry;
+	}
+
 	return (
-		<div className="dvh-100 overflow-auto">
+		<div className="dvh-100 overflow-auto bg-light">
 			<GlobalSideBar />
-			<Container className={styles.container}>
-				<div className={styles.header}>
+			<div className="container py-5">
+				<div className="bg-white rounded-4 shadow-sm p-4 mb-5">
 					<SearchBar
 						handleFilters={handleFilters}
 						handleSort={handleSort}
@@ -258,134 +387,19 @@ export default function Notepad() {
 						</p>
 					</div>
 				) : (
-					<div className={styles.notesGrid}>
+					<div className="note-grid gap-3">
 						{notes.length === 0 ? (
-							<div className={styles.emptyState}>
-								<p>
-									Nessuna nota trovata. Creane una nuova per
-									cominciare!
-								</p>
+							<div className="text-center text-muted py-5">
+								<p className="mb-0">Nessuna nota trovata</p>
 							</div>
 						) : (
-							notes.map((note: ExtendedStringNote) => (
-								<Card
-									key={note._id}
-									className={styles.noteCard}
-								>
-									<div className={styles.cardHeader}>
-										<div className={styles.iconsContainer}>
-											<span
-												className={`${styles.icon} ${
-													note.access === "PRIVATE"
-														? styles.privateIcon
-														: note.access ===
-															  "PUBLIC"
-															? styles.publicIcon
-															: styles.invitedIcon
-												}`}
-											>
-												{getAccessIcon(note.access)}
-											</span>
-											{note.type !== "note" && (
-												<span
-													className={`${styles.icon} ${styles.projectIcon}`}
-												>
-													{getTypeIcon(note.type)}
-												</span>
-											)}
-											{isOwner(note.ownerId) && (
-												<FaUserShield
-													className={`${styles.icon} ${styles.ownerIcon}`}
-													title="Sei il proprietario"
-												/>
-											)}
-										</div>
-										{note.ownerId === user?._id &&
-											note.type === "note" && (
-												<DeleteNoteModal
-													handleDelete={() =>
-														handleDelete(note._id!)
-													}
-												>
-													<Button
-														variant="link"
-														className={
-															styles.deleteBtn
-														}
-													>
-														<FaTrash />
-													</Button>
-												</DeleteNoteModal>
-											)}
-									</div>
-
-									<Card.Body
-										className={styles.cardBody}
-										onClick={() => handleNoteClick(note)}
-									>
-										<div className={styles.noteHeader}>
-											<Card.Title
-												className={styles.noteTitle}
-											>
-												{note.summary.length < 15
-													? note.summary
-													: note.summary.substring(
-															0,
-															15
-														) + "..."}
-											</Card.Title>
-										</div>
-
-										{note.categories && (
-											<div
-												className={styles.noteCategory}
-											>
-												{note.categories.length < 25
-													? note.categories
-													: note.categories.substring(
-															0,
-															25
-														) + "..."}
-											</div>
-										)}
-
-										<div className={styles.noteContent}>
-											{note.text ? (
-												<Card.Text
-													className={styles.noteText}
-												>
-													{note.text.length < 200
-														? note.text
-														: note.text.substring(
-																0,
-																200
-															) + "..."}
-												</Card.Text>
-											) : (
-												<div
-													className={styles.emptyText}
-												>
-													<span
-														className={
-															styles.emptyIcon
-														}
-													>
-														✏️
-													</span>
-													<p>
-														Questa nota è vuota.
-														Clicca per modificarla.
-													</p>
-												</div>
-											)}
-										</div>
-									</Card.Body>
-								</Card>
-							))
+							notes.map((note: ExtendedStringNote) =>
+								createNoteEntry(note)
+							)
 						)}
 					</div>
 				)}
-			</Container>
+			</div>
 		</div>
 	);
 }

@@ -1,0 +1,63 @@
+.note-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+.note-card {
+	cursor: pointer;
+	border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.label {
+	font-size: 0.75rem;
+	color: #6b7280;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+
+.note-search-input {
+	border: 2px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+.note-search-input:focus {
+	border-color: #0d6efd !important;
+	box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1) !important;
+}
+
+.action-button {
+	border: 2px solid rgba(0, 0, 0, 0.08);
+	cursor: pointer;
+}
+
+.category-badge {
+	background: rgba(39, 174, 96, 0.08);
+	color: #27ae60;
+	border: 1px solid rgba(39, 174, 96, 0.15);
+	font-size: 0.75rem;
+	font-weight: 500;
+}
+
+.hide-scrollbar {
+	-ms-overflow-style: 1px;
+	scrollbar-width: 1px;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+	display: none;
+}
+
+.text-calendar-projectActivity {
+	color: #ffcc42e8 !important;
+}
+
+.green-icon {
+	color: #1e8047;
+}
+
+.multiline-truncate {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 5;
+	line-clamp: 5;
+	overflow: hidden;
+}

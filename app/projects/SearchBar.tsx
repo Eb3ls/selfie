@@ -4,7 +4,7 @@ import { Form } from "react-bootstrap";
 import { FaPlus, FaSort } from "react-icons/fa";
 import { AddProjectModal } from "./AddProjectModal";
 import { SortModal } from "./SortModal";
-import "./searchbar.css";
+import "./style.css";
 
 export function SearchBar({ handleSort, handleSearch, handleAdd }: any) {
 	return (
@@ -15,7 +15,7 @@ export function SearchBar({ handleSort, handleSearch, handleAdd }: any) {
 			<div className="w-100">
 				<Form.Control
 					type="text"
-					placeholder="Cerca progetti"
+					placeholder="Cerca progetti..."
 					aria-label="Search projects"
 					name="searchBar"
 					onChange={handleSearch}

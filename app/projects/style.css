@@ -14,3 +14,25 @@
 	text-transform: uppercase;
 	letter-spacing: 0.05em;
 }
+
+.search-input {
+	border: 2px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+.search-input:focus {
+	border-color: #ffc107 !important;
+	box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1) !important;
+}
+
+.action-button {
+	border: 2px solid rgba(0, 0, 0, 0.08);
+	cursor: pointer;
+}
+
+.primary {
+	background: #ffc107;
+}
+
+.primary:hover {
+	background: #eeb200;
+}

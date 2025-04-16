@@ -4,8 +4,8 @@ import { Button, Form } from "react-bootstrap";
 import { FaFilter, FaPlus, FaSort } from "react-icons/fa";
 import { AddNoteModal } from "./AddNoteModal";
 import { FilterModal } from "./FilterModal";
-import styles from "./Notepad.module.css";
 import { SortModal } from "./SortModal";
+import "./style.css";
 
 export function SearchBar({
 	handleFilters,
@@ -14,41 +14,42 @@ export function SearchBar({
 	handleAdd
 }: any) {
 	return (
-		<div className={styles.searchContainer}>
+		<div>
 			<div
-				className={`${styles.searchGroup} d-flex justify-content-center align-items-center`}
+				className="d-flex flex-column gap-4 mx-auto"
+				style={{ maxWidth: "800px" }}
 			>
-				<div className="w-75">
+				<div className="w-100">
 					<Form.Control
-						className={styles.searchInput}
 						type="text"
 						placeholder="Cerca note..."
-						aria-label="Search"
+						aria-label="Search notes"
 						name="searchBar"
 						onChange={handleSearch}
+						className="note-search-input p-3 rounded-3"
 					/>
 				</div>
 
-				<div className={styles.actionsGroup}>
+				<div className="d-flex justify-content-center align-items-center gap-3">
 					<FilterModal handleFilters={handleFilters}>
-						<Button variant="outline" className={styles.actionBtn}>
-							<FaFilter className={styles.btnIcon} />
-							<span className={styles.btnText}> Filtri</span>
-						</Button>
+						<button className="action-button p-2 px-3 rounded-3 bg-white d-flex align-items-center fw-semibold hover-lift">
+							<FaFilter />
+							<span> Filtri</span>
+						</button>
 					</FilterModal>
 
 					<SortModal handleSort={handleSort}>
-						<Button variant="outline" className={styles.actionBtn}>
-							<FaSort className={styles.btnIcon} />
-							<span className={styles.btnText}> Ordinamento</span>
-						</Button>
+						<button className="action-button p-2 rounded-3 bg-white d-flex align-items-center fw-semibold hover-lift">
+							<FaSort />
+							<span className="ms-2">Ordina</span>
+						</button>
 					</SortModal>
 
 					<AddNoteModal handleAdd={handleAdd}>
-						<Button variant="primary" className={styles.addBtn}>
-							<FaPlus className={`${styles.btnIcon} mb-1`} />
-							<span className={styles.btnText}> Nuova nota</span>
-						</Button>
+						<button className="action-button btn btn-primary p-2 rounded-3 border-0 text-white d-flex align-items-center fw-semibold hover-lift">
+							<FaPlus />
+							<span className="ms-2">Nuova nota</span>
+						</button>
 					</AddNoteModal>
 				</div>
 			</div>
