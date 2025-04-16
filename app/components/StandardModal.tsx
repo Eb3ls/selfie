@@ -82,7 +82,7 @@ export function StandardModal({
 				} as React.CSSProperties
 			}
 		>
-			<Modal.Header className="border-0 px-4 pt-4">
+			<Modal.Header className="border-0 px-3 pt-4">
 				<div className="d-flex align-items-center w-100">
 					<div className="d-flex align-items-center">
 						{titleIcon && (
