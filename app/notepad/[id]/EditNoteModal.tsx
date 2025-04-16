@@ -3,16 +3,18 @@
 import { StandardInput } from "@/app/components/StandardInput";
 import { StandardModal } from "@/app/components/StandardModal";
 import { StandardUsersInput } from "@/app/components/StandardUsersInput";
+import { safeFetch } from "@/utils/fetch/fetch";
 import React, { useState } from "react";
 import { FaEdit } from "react-icons/fa";
 import { toast } from "react-toastify";
 
-export function EditNoteModal({
-	note,
-	currentUserId,
-	handleEdit,
-	children
-}: any) {
+interface EditNoteModalProps {
+	note: any;
+	mutate: () => void;
+	children?: React.ReactNode;
+}
+
+export function EditNoteModal({ note, mutate, children }: EditNoteModalProps) {
 	const [show, setShow] = useState(false);
 	const [formData, setFormData] = useState({
 		summary: note.summary,
@@ -32,7 +34,7 @@ export function EditNoteModal({
 		setFormData({ ...formData, [name]: value });
 	}
 
-	function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+	async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 
 		// Validazione minima degli input
@@ -42,13 +44,33 @@ export function EditNoteModal({
 		}
 
 		// Aggiorna la nota con i nuovi dati
-		handleEdit({
+		const body = {
 			_id: note._id,
 			summary: formData.summary,
 			categories: formData.categories,
 			access: formData.access,
 			usernameList: usernameList
-		});
+		};
+
+		const response = await safeFetch(
+			fetch("/api/notepad/modifyPermission", {
+				method: "PATCH",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify(body)
+			})
+		);
+
+		if (response.ok) {
+			toast.success("Permessi aggiornati con successo!");
+			mutate();
+		} else {
+			toast.error("Errore durante l'aggiornamento dei permessi");
+		}
+
+		// Svuotiamo il modal
+		setUsernameList(note.userNameList);
 
 		// Chiude il modal
 		setShow(false);

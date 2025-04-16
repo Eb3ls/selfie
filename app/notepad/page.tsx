@@ -261,8 +261,8 @@ export default function Notepad() {
 
 		const categoriesArray = categories.split(",").map((cat) => cat.trim());
 
-		const block = categoriesArray.map((cat) => (
-			<span className="category-badge rounded-pill px-2 py-1" key={cat}>
+		const block = categoriesArray.map((cat, index) => (
+			<span className="category-badge rounded-pill px-2 py-1" key={index}>
 				{cat}
 			</span>
 		));

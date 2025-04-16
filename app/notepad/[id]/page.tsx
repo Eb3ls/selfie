@@ -7,12 +7,10 @@ import DOMPurify from "dompurify";
 import { marked } from "marked";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Button, Col, Container, Form, Row } from "react-bootstrap";
-import { FaGear } from "react-icons/fa6";
+import { Button, Container, Form } from "react-bootstrap";
 import { toast } from "react-toastify";
 import useSWR from "swr";
-import { EditNoteModal } from "./EditNoteModal";
-import styles from "./Note.module.css";
+import { NoteHeader } from "./NoteHeader";
 
 type noteData = {
 	_id?: string;
@@ -46,6 +44,36 @@ const useWindowSize = () => {
 
 	return windowSize;
 };
+
+function categoriesBlock(categories: string) {
+	if (!categories) {
+		return <div style={{ minHeight: "44px" }}></div>;
+	}
+
+	const categoriesArray = categories.split(",").map((cat) => cat.trim());
+
+	const block = categoriesArray.map((cat, index) => (
+		<span
+			className="rounded-pill px-2 py-1"
+			key={index}
+			style={{
+				background: "rgba(39, 174, 96, 0.08)",
+				color: "#27ae60",
+				border: "1px solid rgba(39, 174, 96, 0.15)",
+				fontSize: "0.75rem",
+				fontWeight: 500
+			}}
+		>
+			{cat}
+		</span>
+	));
+
+	return (
+		<div className="rounded-3 p-2 d-flex gap-2 flex-nowrap overflow-auto hide-scrollbar flex-shrink-0">
+			{block}
+		</div>
+	);
+}
 
 export default function Note() {
 	const { width } = useWindowSize();
@@ -106,33 +134,9 @@ export default function Note() {
 		}
 	};
 
-	const handleEdit = async (body: {
-		_id: string;
-		summary: string;
-		categories: string;
-		access: string;
-		usernameList: [string];
-	}) => {
-		const response = await safeFetch(
-			fetch("/api/notepad/modifyPermission", {
-				method: "PATCH",
-				headers: {
-					"Content-Type": "application/json"
-				},
-				body: JSON.stringify(body)
-			})
-		);
-		if (response.ok) {
-			toast.success("Permessi aggiornati con successo!");
-			mutate();
-		} else {
-			toast.error("Errore durante l'aggiornamento dei permessi");
-		}
-	};
-
 	if (error)
 		return (
-			<div className={styles.container}>
+			<div className="dvh-100 overflow-auto">
 				<GlobalSideBar />
 				<Container>
 					<div className="d-flex flex-column align-items-center justify-content-center h-100 mt-3">
@@ -150,9 +154,10 @@ export default function Note() {
 				</Container>
 			</div>
 		);
+
 	if (!note)
 		return (
-			<div className={styles.container}>
+			<div className="dvh-100 overflow-auto">
 				<GlobalSideBar />
 				<Container>
 					<div className="d-flex flex-column align-items-center justify-content-center h-100 mt-3">
@@ -175,84 +180,65 @@ export default function Note() {
 	);
 
 	return (
-		<div className="dvh-100 overflow-auto" id="CIAO">
+		<div className="dvh-100 d-flex flex-column overflow-auto bg-light">
 			<GlobalSideBar />
-			<Container>
-				<div
-					className={`${styles.header} pt-5 pt-md-3 d-flex flex-column`}
-				>
-					<div className="w-100 d-flex justify-content-between align-items-center mt-2 mt-md-0">
-						<div className={styles.headerTitle}>
-							<h1 className={styles.title}>{note.summary}</h1>
-						</div>
-						<div className={styles.headerActions}>
-							{note.ownerId.toString() === user?._id && (
-								<EditNoteModal
-									note={note}
-									currentUserId={user?._id}
-									handleEdit={handleEdit}
-								>
-									<button className={styles.editButton}>
-										<FaGear size={24} />
-									</button>
-								</EditNoteModal>
-							)}
-							<Button
-								variant="primary"
-								onClick={handleSave}
-								className={styles.saveButton}
-							>
-								Salva
-							</Button>
-						</div>
-					</div>
-					{note.categories && (
-						<div>
-							<span className={styles.categoryBadge}>
-								{note.categories}
-							</span>
-						</div>
-					)}
-				</div>
+			<Container
+				className="py-3 d-flex flex-column flex-grow-1"
+				style={{ minHeight: 0 }}
+			>
+				<NoteHeader
+					ownerId={note.ownerId.toString()}
+					userId={user?._id?.toString()}
+					summary={note.summary}
+					note={note}
+					mutate={mutate}
+					handleSave={handleSave}
+				/>
+
+				{categoriesBlock(note.categories)}
 
 				{isMobile && (
-					<Row className={styles.toggleRow}>
-						<Col>
-							<Button
-								variant="outline-primary"
-								onClick={handleToggleView}
-								className={styles.toggleButton}
-							>
-								{showMarkdown
-									? "Mostra Editor"
-									: "Mostra Anteprima"}
-							</Button>
-						</Col>
-					</Row>
+					<div className="my-3 d-flex justify-content-center flex-shrink-0">
+						<Button
+							variant="outline-primary"
+							onClick={handleToggleView}
+						>
+							{showMarkdown
+								? "Mostra Editor"
+								: "Mostra Anteprima"}
+						</Button>
+					</div>
 				)}
 
-				<div className={styles.editorContainer}>
+				<div
+					className="d-flex mt-3 flex-grow-1 gap-3"
+					style={{ minHeight: 0 }}
+				>
 					{(!isMobile || !showMarkdown) && (
-						<div className={styles.editorPane}>
-							<Form.Control
-								as="textarea"
-								value={noteText}
-								onChange={(e) => setNoteText(e.target.value)}
-								placeholder="Scrivi qui la tua nota..."
-								className={styles.textarea}
-							/>
-						</div>
+						<Form.Control
+							as="textarea"
+							value={noteText}
+							onChange={(e) => setNoteText(e.target.value)}
+							placeholder="Scrivi qui la tua nota..."
+							className="p-3 border rounded shadow-sm overflow-auto bg-white"
+							style={{
+								flexBasis: 0,
+								flexGrow: 1,
+								resize: "none"
+							}}
+						/>
 					)}
-
 					{(!isMobile || showMarkdown) && (
-						<div className={styles.previewPane}>
-							<div
-								className={styles.previewContent}
-								dangerouslySetInnerHTML={{
-									__html: sanitizedMarkdown
-								}}
-							/>
-						</div>
+						<div
+							className="p-3 border rounded shadow-sm overflow-auto bg-white"
+							style={{
+								flexBasis: 0,
+								flexGrow: 1
+							}}
+							dangerouslySetInnerHTML={{
+								__html: sanitizedMarkdown
+							}}
+						/>
 					)}
 				</div>
 			</Container>
