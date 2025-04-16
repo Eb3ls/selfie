@@ -1,5 +1,6 @@
 "use client";
 
+import { safeFetch } from "@/utils/fetch/fetch";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Button, Spinner } from "react-bootstrap";
@@ -33,13 +34,15 @@ export default function ProfilePictureUpload({
 		const body = {
 			base64Image: image
 		};
-		const response = await fetch("/api/user/setProfilePic", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify(body)
-		});
+		const response = await safeFetch(
+			fetch("/api/user/setProfilePic", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify(body)
+			})
+		);
 
 		setIsUploading(false);
 

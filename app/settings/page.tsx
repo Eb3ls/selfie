@@ -1,5 +1,6 @@
 "use client";
 
+import { safeFetch } from "@/utils/fetch/fetch";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { GlobalSideBar } from "../components/GlobalSideBar";
@@ -74,37 +75,34 @@ export default function SettingsPage() {
 			return;
 		}
 
-		try {
-			const body = {
-				username: formData.username,
-				firstName: formData.firstName,
-				lastName: formData.lastName,
-				email: formData.email,
-				birthDay: formData.birthDay,
-				oldPassword: showPasswordFields ? formData.oldPassword : "",
-				password: showPasswordFields ? formData.newPassword : "",
-				previews: formData.previews,
-				alarmPreferences: formData.alarmPreferences
-			};
+		const body = {
+			username: formData.username,
+			firstName: formData.firstName,
+			lastName: formData.lastName,
+			email: formData.email,
+			birthDay: formData.birthDay,
+			oldPassword: showPasswordFields ? formData.oldPassword : "",
+			password: showPasswordFields ? formData.newPassword : "",
+			previews: formData.previews,
+			alarmPreferences: formData.alarmPreferences
+		};
 
-			const response = await fetch("/api/user/modify", {
+		const response = await safeFetch(
+			fetch("/api/user/modify", {
 				method: "PATCH",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify(body)
-			});
+			})
+		);
 
-			const data = await response.json();
-			if (response.ok) {
-				updateUser({
-					...user!,
-					...formData,
-					birthDay: formData.birthDay
-				});
-				toast.success("Modifiche salvate con successo");
-			} else {
-				toast.error("Errore durante il salvataggio delle modifiche");
-			}
-		} catch (error) {
+		if (response.ok) {
+			updateUser({
+				...user!,
+				...formData,
+				birthDay: formData.birthDay
+			});
+			toast.success("Modifiche salvate con successo");
+		} else {
 			toast.error("Errore durante il salvataggio delle modifiche");
 		}
 	};

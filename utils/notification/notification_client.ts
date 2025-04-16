@@ -1,3 +1,5 @@
+import { safeFetch } from "@/utils/fetch/fetch";
+
 const SERVICE_WORKER_FILE_PATH = "./service_worker.js";
 
 export function areNotificationsSupported() {
@@ -73,22 +75,24 @@ export async function setupNotifications(): Promise<boolean> {
 	}
 
 	// 7. Invio al server
-	const response = await fetch("/api/user/setNotify", {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json"
-		},
-		body: JSON.stringify({
-			subscription: pushSubscription
+	const response = await safeFetch(
+		fetch("/api/user/setNotify", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({
+				subscription: pushSubscription
+			})
 		})
-	});
+	);
 
 	if (!response.ok) {
 		console.warn("Errore durante l'invio delle informazioni al server!");
 		return false;
 	}
 
-	const data = await response.json();
+	const data = response.body;
 	console.log("Risposta del server: ", data);
 
 	return true;
