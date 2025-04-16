@@ -1,6 +1,7 @@
 "use client";
 
 import { greenColor } from "@/app/color_palette";
+import { safeFetch } from "@/utils/fetch/fetch";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -82,15 +83,17 @@ function CompleteFormComponent() {
 
 	// Invia una mail di conferma
 	const sendVerificationEmail = async () => {
-		const response = await fetch("/api/verifyEmail", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify({
-				email: formData.email
+		const response = await safeFetch(
+			fetch("/api/verifyEmail", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify({
+					email: formData.email
+				})
 			})
-		});
+		);
 
 		if (!response.ok) {
 			toast.error("Invio email fallito! Controlla l'email");
@@ -104,13 +107,15 @@ function CompleteFormComponent() {
 	const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 
-		const response = await fetch("/api/signup", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify(formData)
-		});
+		const response = await safeFetch(
+			fetch("/api/signup", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify(formData)
+			})
+		);
 
 		if (!response.ok) {
 			toast.error("Registrazione fallita! Controlla i dati");

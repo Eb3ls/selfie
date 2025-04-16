@@ -2,6 +2,7 @@
 
 import { greenColor } from "@/app/color_palette";
 import { useUser } from "@/app/components/UserContext";
+import { safeFetch } from "@/utils/fetch/fetch";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -45,18 +46,20 @@ function CompleteFormComponent() {
 	const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 
-		const response = await fetch("/api/signin", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify(formData)
-		});
+		const response = await safeFetch(
+			fetch("/api/signin", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify(formData)
+			})
+		);
 
 		if (!response.ok) {
-			const errorMessage = await response.json();
+			const errorMessage = response.body;
 			if (
-				errorMessage.message &&
+				errorMessage &&
 				errorMessage.message === "Cannot login as a resource"
 			) {
 				toast.error(
