@@ -5,6 +5,7 @@ import { StandardToggleModal } from "@/app/components/StandardToggleModal";
 import { StandardViewField } from "@/app/components/StandardViewFIeld";
 import { useUser } from "@/app/components/UserContext";
 import { StringEvent } from "@/utils/db/db";
+import { safeFetch } from "@/utils/fetch/fetch";
 import moment from "moment-timezone";
 import React from "react";
 import { toast } from "react-toastify";
@@ -38,13 +39,15 @@ export function ViewEventModal({
 	const { user } = useUser();
 
 	async function handleDrop() {
-		const response = await fetch("/api/calendar/quit/" + resourceId, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify({ _id: event._id })
-		});
+		const response = await safeFetch(
+			fetch("/api/calendar/quit/" + resourceId, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify({ _id: event._id })
+			})
+		);
 
 		if (response.ok) {
 			toast.success("Evento abbandonato con successo");

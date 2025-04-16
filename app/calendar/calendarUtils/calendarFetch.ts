@@ -8,18 +8,11 @@ import {
 } from "@/app/calendar/calendarUtils/calendarTypes";
 import moment from "moment-timezone";
 
-interface CalendarResponse {
+export interface CalendarResponse {
 	activities: StringActivityFrontend[];
 	events: StringEventFrontend[];
 	sessions: StringSessionFrontend[];
 	projectActivities: StringProjectActivityFrontend[];
-}
-
-export async function fetchCalendar(url: string) {
-	const response = await fetch(url);
-	if (!response.ok)
-		throw new Error("Errore durante il fetch degli elementi!");
-	return response.json();
 }
 
 export function convertToCalendarEvents(

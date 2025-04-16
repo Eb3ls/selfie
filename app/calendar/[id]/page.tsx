@@ -1,12 +1,16 @@
 "use client";
 
-import { convertToCalendarEvents } from "@/app/calendar/calendarUtils/calendarFetch";
+import {
+	CalendarResponse,
+	convertToCalendarEvents
+} from "@/app/calendar/calendarUtils/calendarFetch";
 import {
 	CalendarEvent,
 	StringEventFrontend
 } from "@/app/calendar/calendarUtils/calendarTypes";
 import { GlobalSideBar } from "@/app/components/GlobalSideBar";
 import { useTime } from "@/app/components/TimeContext";
+import { generalFetcher } from "@/utils/fetch/fetch";
 import moment from "moment-timezone";
 import "moment/locale/it";
 import { useParams } from "next/navigation";
@@ -26,13 +30,6 @@ type NewCalendarEvent = Omit<CalendarEvent, "originalElement"> & {
 	originalElement: StringEventFrontend;
 };
 
-async function fetchCalendarID(url: string) {
-	const response = await fetch(url);
-	if (!response.ok)
-		throw new Error("Errore durante il fetch degli elementi!");
-	return response.json();
-}
-
 export default function CalendarIDPage() {
 	const params = useParams();
 	const resourceId = params.id;
@@ -46,9 +43,9 @@ export default function CalendarIDPage() {
 	const { dateTime } = useTime();
 	const [currentDate, setCurrentDate] = useState(dateTime);
 
-	const { data: pulledCalendar, mutate } = useSWR(
+	const { data: pulledCalendar, mutate } = useSWR<CalendarResponse>(
 		"/api/calendar/getCalendar/" + resourceId,
-		fetchCalendarID
+		generalFetcher
 	);
 
 	useEffect(() => {

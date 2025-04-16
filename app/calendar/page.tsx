@@ -3,12 +3,13 @@
 import { CustomToolbar } from "@/app/calendar/CustomToolbar";
 import { GenericModifyModal } from "@/app/calendar/GenericModifyModal";
 import {
-	convertToCalendarEvents,
-	fetchCalendar
+	CalendarResponse,
+	convertToCalendarEvents
 } from "@/app/calendar/calendarUtils/calendarFetch";
 import { CalendarEvent } from "@/app/calendar/calendarUtils/calendarTypes";
 import { GlobalSideBar } from "@/app/components/GlobalSideBar";
 import { useTime } from "@/app/components/TimeContext";
+import { generalFetcher } from "@/utils/fetch/fetch";
 import moment from "moment-timezone";
 import "moment/locale/it";
 import { useRouter } from "next/navigation";
@@ -36,9 +37,9 @@ export default function CalendarPage() {
 	const { dateTime } = useTime();
 	const [currentDate, setCurrentDate] = useState(dateTime);
 
-	const { data: pulledCalendar, mutate } = useSWR(
+	const { data: pulledCalendar, mutate } = useSWR<CalendarResponse>(
 		"/api/calendar/getCalendar",
-		fetchCalendar
+		generalFetcher
 	);
 
 	useEffect(() => {

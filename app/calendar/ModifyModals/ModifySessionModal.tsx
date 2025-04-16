@@ -10,6 +10,7 @@ import {
 	StringPomodoroSettings,
 	StringSession
 } from "@/utils/db/db";
+import { safeFetch } from "@/utils/fetch/fetch";
 import moment from "moment-timezone";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
@@ -109,19 +110,17 @@ export function ModifySessionModal({
 			username: userToInvite
 		};
 
-		const response = await fetch(
-			"/api/calendar/session/" + session._id + "/share",
-			{
+		const response = await safeFetch(
+			fetch("/api/calendar/session/" + session._id + "/share", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json"
 				},
 				body: JSON.stringify(body)
-			}
+			})
 		);
 
 		if (response.ok) {
-			const fetched_data = await response.json();
 			toast.success("Impostazioni condivise con successo!");
 		} else {
 			toast.error("Errore durante la condivisione delle impostazioni");
@@ -148,13 +147,15 @@ export function ModifySessionModal({
 			dateToChange: startOfSelectedSession.toISOString()
 		};
 
-		const response = await fetch("/api/calendar/session/modify", {
-			method: "PATCH",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify(newForm)
-		});
+		const response = await safeFetch(
+			fetch("/api/calendar/session/modify", {
+				method: "PATCH",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify(newForm)
+			})
+		);
 
 		if (response.ok) {
 			toast.success("Sessione modificata con successo!");
@@ -166,18 +167,22 @@ export function ModifySessionModal({
 	};
 
 	async function handleDelete() {
-		const response = await fetch("/api/calendar/session/delete", {
-			method: "DELETE",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify({ _id: form._id })
-		});
+		const response = await safeFetch(
+			fetch("/api/calendar/session/delete", {
+				method: "DELETE",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify({ _id: form._id })
+			})
+		);
 
 		if (response.ok) {
 			toast.success("Sessione eliminata con successo!");
 			setShow(false);
 			mutate();
+		} else {
+			toast.error("Errore durante l'eliminazione della sessione");
 		}
 	}
 

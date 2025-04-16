@@ -7,6 +7,7 @@ import { StandardModal } from "@/app/components/StandardModal";
 import { StandardRepetitionInput } from "@/app/components/StandardRepetitionInput";
 import { StandardUsersInput } from "@/app/components/StandardUsersInput";
 import { StringAlarm } from "@/utils/db/db";
+import { safeFetch } from "@/utils/fetch/fetch";
 import React, { useState } from "react";
 import { Form } from "react-bootstrap";
 import { toast } from "react-toastify";
@@ -114,15 +115,17 @@ export function AddEventModal({ mutate, children }: AddEventModalProps) {
 			alarms: form.alarms
 		};
 
-		const response = await fetch("/api/calendar/event/add", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify(formData)
-		});
+		const response = await safeFetch<any, any>(
+			fetch("/api/calendar/event/add", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify(formData)
+			})
+		);
 
-		if (response.status === 200) {
+		if (response.ok) {
 			toast.success("Evento creato con successo!");
 			setShow(false);
 			setForm({
@@ -149,8 +152,8 @@ export function AddEventModal({ mutate, children }: AddEventModalProps) {
 			setYearlyMonths([]);
 			mutate();
 		} else if (response.status === 400) {
-			const out = await response.json();
-			if (out.message === undefined) {
+			const out = response.body;
+			if (out && out.message === undefined) {
 				toast.error(
 					"Errore durante la creazione dell'evento. Non è stato trovato l'utente: " +
 						out.users[0]

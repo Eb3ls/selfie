@@ -1,5 +1,6 @@
 "use client";
 
+import { generalFetcher } from "@/utils/fetch/fetch";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { GrResources } from "react-icons/gr";
@@ -12,14 +13,6 @@ type Resource = {
 	name: string;
 };
 
-async function fetcher(url: string) {
-	const response = await fetch(url);
-	if (!response.ok) {
-		throw new Error("Errore durante il fetch delle risorse");
-	}
-	return response.json();
-}
-
 export function ResourcesModal() {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [searchValue, setSearchValue] = useState("");
@@ -29,9 +22,9 @@ export function ResourcesModal() {
 	const router = useRouter();
 
 	// Fetch della lista delle risorse
-	const { data: raw_resources, error: error_resources } = useSWR(
+	const { data: raw_resources, error: error_resources } = useSWR<Resource[]>(
 		"/api/calendar/getResources",
-		fetcher,
+		generalFetcher,
 		{
 			revalidateOnFocus: false
 		}

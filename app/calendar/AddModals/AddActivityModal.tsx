@@ -7,6 +7,7 @@ import { StandardModal } from "@/app/components/StandardModal";
 import { StandardUsersInput } from "@/app/components/StandardUsersInput";
 import { useTime } from "@/app/components/TimeContext";
 import { StringAlarm } from "@/utils/db/db";
+import { safeFetch } from "@/utils/fetch/fetch";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
 
@@ -67,15 +68,17 @@ export function AddActivityModal({ mutate, children }: AddActivityModalProps) {
 			alarms: form.alarms
 		};
 
-		const response = await fetch("/api/calendar/activity/add", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify(formData)
-		});
+		const response = await safeFetch<any, any>(
+			fetch("/api/calendar/activity/add", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify(formData)
+			})
+		);
 
-		if (response.status === 200) {
+		if (response.ok) {
 			toast.success("Attività creata con successo!");
 			setShow(false);
 			setForm({
@@ -91,8 +94,8 @@ export function AddActivityModal({ mutate, children }: AddActivityModalProps) {
 			});
 			mutate();
 		} else if (response.status === 400) {
-			const out = await response.json();
-			if (out.message === undefined) {
+			const out = response.body;
+			if (out && out.message === undefined) {
 				toast.error(
 					"Errore durante la creazione dell'attività. Non è stato trovato l'utente: " +
 						out.users[0]

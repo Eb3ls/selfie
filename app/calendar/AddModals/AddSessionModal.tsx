@@ -5,6 +5,7 @@ import { StandardInput } from "@/app/components/StandardInput";
 import { StandardModal } from "@/app/components/StandardModal";
 import { StandardRepetitionInput } from "@/app/components/StandardRepetitionInput";
 import { StringAlarm } from "@/utils/db/db";
+import { safeFetch } from "@/utils/fetch/fetch";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
 import { PomodoroBlock } from "../calendarUtils/calendarUX";
@@ -110,15 +111,17 @@ export function AddSessionModal({ mutate, children }: AddSessionModalProps) {
 			alarms: form.alarms
 		};
 
-		const response = await fetch("/api/calendar/session/add", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify(formData)
-		});
+		const response = await safeFetch(
+			fetch("/api/calendar/session/add", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify(formData)
+			})
+		);
 
-		if (response.status === 200) {
+		if (response.ok) {
 			toast.success("Sessione creata con successo!");
 			setShow(false);
 			setForm({

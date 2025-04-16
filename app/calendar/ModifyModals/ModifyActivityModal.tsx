@@ -7,6 +7,7 @@ import { StandardToggleModal } from "@/app/components/StandardToggleModal";
 import { StandardUsersInput } from "@/app/components/StandardUsersInput";
 import { StandardViewField } from "@/app/components/StandardViewFIeld";
 import { StringActivity, StringAlarm } from "@/utils/db/db";
+import { safeFetch } from "@/utils/fetch/fetch";
 import moment from "moment-timezone";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
@@ -70,21 +71,23 @@ export function ModifyActivityModal({
 			alarms: form.alarms
 		};
 
-		const response = await fetch("/api/calendar/activity/modify", {
-			method: "PATCH",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify(newForm)
-		});
+		const response = await safeFetch<any, any>(
+			fetch("/api/calendar/activity/modify", {
+				method: "PATCH",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify(newForm)
+			})
+		);
 
-		if (response.status === 200) {
+		if (response.ok) {
 			toast.success("Attività modificata con successo!");
 			setShow(false);
 			mutate();
 		} else if (response.status === 400) {
-			const out = await response.json();
-			if (out.message === undefined) {
+			const out = response.body;
+			if (out && out.message === undefined) {
 				toast.error(
 					"Errore durante la modifica dell'attività. Non è stato trovato l'utente: " +
 						out.users[0]
@@ -98,34 +101,42 @@ export function ModifyActivityModal({
 	};
 
 	async function handleDelete() {
-		const response = await fetch("/api/calendar/activity/delete", {
-			method: "DELETE",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify({ _id: form._id })
-		});
+		const response = await safeFetch(
+			fetch("/api/calendar/activity/delete", {
+				method: "DELETE",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify({ _id: form._id })
+			})
+		);
 
 		if (response.ok) {
 			toast.error("Attività eliminata con successo!");
 			setShow(false);
 			mutate();
+		} else {
+			toast.error("Errore durante l'eliminazione dell'attività");
 		}
 	}
 
 	async function handleDrop() {
-		const response = await fetch("/api/calendar/quit", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify({ _id: form._id, type: "ACTIVITY" })
-		});
+		const response = await safeFetch(
+			fetch("/api/calendar/quit", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify({ _id: form._id, type: "ACTIVITY" })
+			})
+		);
 
 		if (response.ok) {
 			toast.error("Attività abbandonata con successo!");
 			setShow(false);
 			mutate();
+		} else {
+			toast.error("Errore durante l'abbandono dell'attività");
 		}
 	}
 

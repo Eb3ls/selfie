@@ -61,3 +61,13 @@ export async function safeFetch<S = any, E = StandardErrorResponse>(
 		};
 	}
 }
+
+export async function generalFetcher<T = any>(url: string): Promise<T> {
+	const response = await safeFetch(fetch(url));
+
+	if (!response.ok) {
+		throw new Error(response.body?.message || "Unknown error");
+	}
+
+	return response.body;
+}

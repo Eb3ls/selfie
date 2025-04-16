@@ -7,6 +7,7 @@ import { StandardToggleModal } from "@/app/components/StandardToggleModal";
 import { StandardUsersInput } from "@/app/components/StandardUsersInput";
 import { StandardViewField } from "@/app/components/StandardViewFIeld";
 import { StringAlarm, StringEvent } from "@/utils/db/db";
+import { safeFetch } from "@/utils/fetch/fetch";
 import moment from "moment-timezone";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
@@ -76,21 +77,23 @@ export function ModifyEventModal({
 			alarms: form.alarms
 		};
 
-		const response = await fetch("/api/calendar/event/modify", {
-			method: "PATCH",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify(newForm)
-		});
+		const response = await safeFetch<any, any>(
+			fetch("/api/calendar/event/modify", {
+				method: "PATCH",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify(newForm)
+			})
+		);
 
-		if (response.status === 200) {
+		if (response.ok) {
 			toast.success("Evento modificato con successo!");
 			setShow(false);
 			mutate();
 		} else if (response.status === 400) {
-			const out = await response.json();
-			if (out.message === undefined) {
+			const out = response.body;
+			if (out && out.message === undefined) {
 				toast.error(
 					"Errore durante la modifica dell'evento. Non è stato trovato l'utente: " +
 						out.users[0]
@@ -104,34 +107,42 @@ export function ModifyEventModal({
 	};
 
 	async function handleDelete() {
-		const response = await fetch("/api/calendar/event/delete", {
-			method: "DELETE",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify({ _id: form._id })
-		});
+		const response = await safeFetch(
+			fetch("/api/calendar/event/delete", {
+				method: "DELETE",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify({ _id: form._id })
+			})
+		);
 
 		if (response.ok) {
 			toast.error("Evento eliminato con successo!");
 			setShow(false);
 			mutate();
+		} else {
+			toast.error("Errore durante l'eliminazione dell'evento");
 		}
 	}
 
 	async function handleDrop() {
-		const response = await fetch("/api/calendar/quit", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify({ _id: form._id, type: "EVENT" })
-		});
+		const response = await safeFetch(
+			fetch("/api/calendar/quit", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify({ _id: form._id, type: "EVENT" })
+			})
+		);
 
 		if (response.ok) {
 			toast.error("Evento abbandonato con successo!");
 			setShow(false);
 			mutate();
+		} else {
+			toast.error("Errore durante l'abbandono dell'evento");
 		}
 	}
 
