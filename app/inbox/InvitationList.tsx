@@ -95,14 +95,31 @@ export function InvitationList({
 }: InvitationListProps) {
 	if (error) {
 		return (
-			<div className="alert alert-danger" role="alert">
-				<i className="bi bi-exclamation-triangle me-2"></i>
-				Errore nel caricamento degli inviti.
+			<div className="text-center text-danger py-5 bg-white rounded-4 shadow-sm">
+				<i className="bi bi-exclamation-triangle-fill fs-1 mb-3 d-block"></i>
+				<p className="mb-0 fw-medium">
+					Si è verificato un errore durante il caricamento degli
+					inviti
+				</p>
+				<p className="text-muted small mb-0">Riprova più tardi</p>
 			</div>
 		);
 	}
 
-	if (!invitations || invitations.length === 0) {
+	if (!invitations) {
+		return (
+			<div className="text-center py-5 bg-white rounded-4 shadow-sm">
+				<div className="spinner-border text-primary mb-3" role="status">
+					<span className="visually-hidden">Caricamento...</span>
+				</div>
+				<p className="mb-0 text-muted">
+					Caricamento inviti in corso...
+				</p>
+			</div>
+		);
+	}
+
+	if (invitations.length === 0) {
 		return (
 			<div className="text-center py-5">
 				<i className="bi bi-inbox h1 text-muted"></i>
