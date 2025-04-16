@@ -10,9 +10,9 @@ type InvitationCardProps = {
 };
 
 const classes: { [key: string]: string } = {
-	ACTIVITY: "bg-primary",
-	EVENT: "bg-warning",
-	SESSION: "bg-success",
+	ACTIVITY: "bg-calendar-activity",
+	EVENT: "bg-calendar-event",
+	SESSION: "bg-calendar-session",
 	PROJECT: "bg-warning",
 	NOTE: "bg-primary"
 };

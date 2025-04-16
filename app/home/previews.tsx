@@ -275,22 +275,24 @@ export const CalendarPreviews = ({
 	calendar: ReducedCalendar;
 }) => (
 	<div>
-		<p className="badge bg-primary mx-3">Attività</p>
+		<p className="badge bg-calendar-activity mx-3">Attività</p>
 		<CalendarItemListPreview
 			item={calendar.activities}
 			emptyString="Nessuna attività in programma"
 		/>
-		<p className="badge bg-warning mx-3">Eventi</p>
+		<p className="badge bg-calendar-event mx-3">Eventi</p>
 		<CalendarItemListPreview
 			item={calendar.events}
 			emptyString="Nessun evento in programma"
 		/>
-		<p className="badge bg-success mx-3">Sessioni</p>
+		<p className="badge bg-calendar-session mx-3">Sessioni</p>
 		<CalendarItemListPreview
 			item={calendar.sessions}
 			emptyString="Nessuna sessione in programma"
 		/>
-		<p className="badge bg-info mx-3">Attività di progetto</p>
+		<p className="badge bg-calendar-projectActivity mx-3">
+			Attività di progetto
+		</p>
 		<CalendarItemListPreview
 			item={calendar.projectActivities}
 			emptyString="Nessuna attività di progetto in programma"
