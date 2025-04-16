@@ -98,7 +98,7 @@ export default function CalendarPage() {
 							toolbar: () => null
 						}}
 						eventPropGetter={(event) => ({
-							className: `${event.typology}-color`
+							className: `bg-calendar-${event.typology}`
 						})}
 						className="flex-grow-1 overflow-auto"
 					/>

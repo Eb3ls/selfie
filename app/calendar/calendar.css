@@ -4,21 +4,13 @@
 	height: 95dvh;
 }
 
-.activity-color {
-	background: #f37b85 !important;
-}
 .activity-color-text {
 	color: #f37b85 !important;
 }
 .activity-color-border {
 	border-color: #f37b85 !important;
 }
-.event-color {
-	background: #67d1bf !important;
-}
-.session-color {
-	background: #8d89f7 !important;
-}
+
 .download-color {
 	background: #f3d37a !important;
 }
@@ -27,10 +19,6 @@
 }
 .resource-color {
 	background: #7da9f7 !important;
-}
-
-.projectActivity-color {
-	background: #ffcc42e8 !important;
 }
 
 .rbc-events-container {
@@ -47,12 +35,4 @@
 
 .rbc-current-time-indicator {
 	background: #ff00158c !important;
-}
-
-.text-responsive {
-	font-size: 2rem !important;
-}
-
-/* Responsive styles */
-@media (max-width: 768px) {
 }

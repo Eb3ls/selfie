@@ -155,18 +155,18 @@ export function CustomToolbar({
 						</div>
 						<div className="d-flex gap-2 align-items-center">
 							<AddActivityModal mutate={mutate}>
-								<button className="btn btn-sm p-2 activity-color text-white hover-lift rounded-pill shadow-sm fw-semibold">
+								<button className="btn btn-sm p-2 bg-calendar-activity text-white hover-lift rounded-pill shadow-sm fw-semibold">
 									<i className="bi bi-plus-lg me-1"></i>
 									Attività
 								</button>
 							</AddActivityModal>
 							<AddEventModal mutate={mutate}>
-								<button className="btn btn-sm p-2 event-color text-white hover-lift rounded-pill shadow-sm fw-semibold">
+								<button className="btn btn-sm p-2 bg-calendar-event text-white hover-lift rounded-pill shadow-sm fw-semibold">
 									<i className="bi bi-plus-lg me-1"></i>Evento
 								</button>
 							</AddEventModal>
 							<AddSessionModal mutate={mutate}>
-								<button className="btn btn-sm p-2 session-color text-white hover-lift rounded-pill shadow-sm fw-semibold">
+								<button className="btn btn-sm p-2 bg-calendar-session text-white hover-lift rounded-pill shadow-sm fw-semibold">
 									<i className="bi bi-plus-lg me-1"></i>
 									Sessione
 								</button>
