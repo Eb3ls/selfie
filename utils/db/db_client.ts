@@ -8,7 +8,6 @@ class DB {
 	private selfie_dbPromise: Promise<MongoClient>;
 
 	private constructor() {
-		console.warn("Creating a new MongoClient");
 		const selfie_db = new MongoClient(MONGODB_URI, options);
 		this.selfie_dbPromise = selfie_db.connect();
 	}

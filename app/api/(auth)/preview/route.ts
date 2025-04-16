@@ -441,9 +441,7 @@ export const GET = async (request: NextRequest) => {
 						ownerName
 					});
 				}
-			} catch (e) {
-				console.error("Error processing activity", e);
-			}
+			} catch {}
 		}
 	}
 
@@ -473,9 +471,7 @@ export const GET = async (request: NextRequest) => {
 						ownerName
 					});
 				}
-			} catch (e) {
-				console.error("Error processing project activity", e);
-			}
+			} catch {}
 		}
 	}
 
@@ -516,9 +512,7 @@ export const GET = async (request: NextRequest) => {
 						});
 					}
 				}
-			} catch (e) {
-				console.error("Error processing event", e);
-			}
+			} catch {}
 		}
 	}
 
@@ -545,9 +539,7 @@ export const GET = async (request: NextRequest) => {
 					now
 				);
 				calendarOccurrences.push(...occurrences);
-			} catch (e) {
-				console.error("Error processing session", e);
-			}
+			} catch {}
 		}
 	}
 

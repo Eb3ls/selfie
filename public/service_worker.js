@@ -17,11 +17,10 @@ self.addEventListener("push", function (event) {
 	};
 
 	event.waitUntil(
-		self.registration
-			.showNotification(notificationTitle, notificationOptions)
-			.then(() => {
-				sendDeliveryReportAction();
-			})
+		self.registration.showNotification(
+			notificationTitle,
+			notificationOptions
+		)
 	);
 });
 
@@ -31,17 +30,5 @@ self.addEventListener("notificationclick", function (event) {
 
 	event.notification.close();
 
-	event.waitUntil(
-		clients.openWindow(url).then(() => {
-			sendClickReportAction();
-		})
-	);
+	event.waitUntil(clients.openWindow(url));
 });
-
-const sendDeliveryReportAction = () => {
-	console.log("Web push delivered.");
-};
-
-const sendClickReportAction = () => {
-	console.log("Web push clicked.");
-};

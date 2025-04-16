@@ -164,7 +164,7 @@ export const GET = async (
 	let totalDebt = workToDo - workDone;
 
 	if (totalDebt < 0) {
-		console.warn("[POMODORO] Debito negativo trovato!");
+		console.error("[POMODORO] Debito negativo trovato!");
 		totalDebt = 0;
 	}
 

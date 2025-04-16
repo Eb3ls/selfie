@@ -18,7 +18,6 @@ async function api_route_handler(request: NextRequest): Promise<boolean> {
 
 export async function middleware(request: NextRequest) {
 	const path: string = request.nextUrl.pathname;
-	// console.warn("Qualuno ha richiesto la risorsa: " + path);
 
 	let outcome: boolean = true;
 
@@ -41,11 +40,9 @@ export async function middleware(request: NextRequest) {
 	}
 
 	if (outcome) {
-		// console.warn("Controllo riuscito. Passaggio alla risorsa richiesta");
 		return await updateSession(request);
 	} else {
 		// Redirezione alla pagina di login
-		// console.warn("Controllo fallito, redirezione alla pagina di login");
 		return NextResponse.redirect(new URL("/login", request.url).toString());
 	}
 }
