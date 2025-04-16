@@ -1,21 +1,14 @@
 "use client";
 
 import { GlobalSideBar } from "@/app/components/GlobalSideBar";
+import { Invitation, InvitationList } from "@/app/inbox/InvitationList";
 import { generalFetcher, safeFetch } from "@/utils/fetch/fetch";
-import React from "react";
-import { Button, Card, Container } from "react-bootstrap";
+import { Container } from "react-bootstrap";
 import { toast } from "react-toastify";
 import useSWR from "swr";
 
-type ApiResponse = {
-	_id: string;
-	username: string;
-	type: "ACTIVITY" | "EVENT" | "SESSION" | "PROJECT" | "NOTE";
-	targetSummary: string;
-};
-
 export default function Inbox() {
-	const { data, error, mutate } = useSWR<ApiResponse[]>(
+	const { data, error, mutate } = useSWR<Invitation[]>(
 		"/api/user/getInbox",
 		generalFetcher
 	);
@@ -61,60 +54,12 @@ export default function Inbox() {
 			<GlobalSideBar />
 			<Container className="mt-4">
 				<h1 className="mb-4 mt-5 mt-lg-0 pt-4 pt-lg-0">Inbox</h1>
-				{error && (
-					<div className="text-danger mb-3">
-						Errore nel caricamento degli inviti.
-					</div>
-				)}
-				{data && data.length > 0
-					? data.map((invitation: ApiResponse) => (
-							<Card
-								key={invitation._id}
-								className="mb-3 shadow-sm"
-							>
-								<Card.Header>
-									Invito ID: {invitation._id}
-								</Card.Header>
-								<Card.Body>
-									<Card.Text>
-										<strong>Utente:</strong>{" "}
-										{invitation.username}
-									</Card.Text>
-									<Card.Text>
-										<strong>Tipologia:</strong>{" "}
-										{invitation.type}
-									</Card.Text>
-									<Card.Text>
-										<strong>Titolo:</strong>{" "}
-										{invitation.targetSummary}
-									</Card.Text>
-								</Card.Body>
-								<Card.Footer>
-									<Button
-										variant="success"
-										className="me-2"
-										onClick={() =>
-											handleAccept(invitation._id!)
-										}
-									>
-										Accetta
-									</Button>
-									<Button
-										variant="danger"
-										onClick={() =>
-											handleDecline(invitation._id!)
-										}
-									>
-										Rifiuta
-									</Button>
-								</Card.Footer>
-							</Card>
-						))
-					: !error && (
-							<div className="text-muted">
-								Nessun invito trovato.
-							</div>
-						)}
+				<InvitationList
+					invitations={data}
+					error={error}
+					onAccept={handleAccept}
+					onDecline={handleDecline}
+				/>
 			</Container>
 		</div>
 	);
