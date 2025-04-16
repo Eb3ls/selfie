@@ -136,7 +136,7 @@ export default function Note() {
 
 	if (error)
 		return (
-			<div className="dvh-100 overflow-auto">
+			<div className="dvh-100 overflow-auto bg-light">
 				<GlobalSideBar />
 				<Container>
 					<div className="d-flex flex-column align-items-center justify-content-center h-100 mt-3">
@@ -157,7 +157,7 @@ export default function Note() {
 
 	if (!note)
 		return (
-			<div className="dvh-100 overflow-auto">
+			<div className="dvh-100 overflow-auto bg-light">
 				<GlobalSideBar />
 				<Container>
 					<div className="d-flex flex-column align-items-center justify-content-center h-100 mt-3">
