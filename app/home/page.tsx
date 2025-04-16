@@ -2,6 +2,7 @@
 
 import { GlobalSideBar } from "@/app/components/GlobalSideBar";
 import { useUser } from "@/app/components/UserContext";
+import { safeFetch } from "@/utils/fetch/fetch";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
@@ -147,19 +148,18 @@ export default function Home() {
 
 	useEffect(() => {
 		async function fetchPreviews() {
-			try {
-				const response = await fetch("/api/preview");
+			const response = await safeFetch<PreviewsResponse>(
+				fetch("/api/preview")
+			);
 
-				if (!response.ok) {
-					throw new Error();
-				}
-
-				const data: PreviewsResponse = await response.json();
-				data.calendar = sortCalendar(data.calendar);
-				setPreviews(data);
-			} catch (error) {
+			if (!response.ok) {
 				toast.error("Errore durante il caricamento dei dati");
+				return;
 			}
+
+			const data: PreviewsResponse = response.body;
+			data.calendar = sortCalendar(data.calendar);
+			setPreviews(data);
 		}
 
 		fetchPreviews();
