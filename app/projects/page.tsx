@@ -1,8 +1,8 @@
 "use client";
 
+import { safeFetch } from "@/utils/fetch/fetch";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import { Card, Container } from "react-bootstrap";
 import { FaUserShield } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { GlobalSideBar } from "../components/GlobalSideBar";
@@ -27,19 +27,18 @@ export default function ProjectPage() {
 
 	useEffect(() => {
 		async function fetchProjects() {
-			try {
-				const response = await fetch("/api/project/getProjects");
+			const response = await safeFetch<Project[]>(
+				fetch("/api/project/getProjects")
+			);
 
-				if (!response.ok) {
-					throw new Error();
-				}
-
-				const data: Project[] = await response.json();
-				setProjects(data);
-				setOldProjects(data);
-			} catch (error) {
+			if (!response.ok) {
 				toast.error("Errore durante il caricamento dei dati");
+				return;
 			}
+
+			const data: Project[] = response.body;
+			setProjects(data);
+			setOldProjects(data);
 		}
 		fetchProjects();
 	}, []);
@@ -93,26 +92,25 @@ export default function ProjectPage() {
 	}
 
 	async function handleAdd(project: { summary: string }) {
-		try {
-			const response = await fetch("/api/project/add", {
+		const response = await safeFetch(
+			fetch("/api/project/add", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json"
 				},
 				body: JSON.stringify(project)
-			});
+			})
+		);
 
-			if (!response.ok) {
-				throw new Error();
-			}
-
-			const fetched_data = await response.json();
-
-			toast.success("Progetto creato con successo");
-			router.push("/projects/" + fetched_data._id);
-		} catch (error) {
+		if (!response.ok) {
 			toast.error("Errore durante la creazione del progetto");
+			return;
 		}
+
+		const fetched_data = response.body;
+
+		toast.success("Progetto creato con successo");
+		router.push("/projects/" + fetched_data._id);
 	}
 
 	// Controlla se l'utente è il proprietario del progetto

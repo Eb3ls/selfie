@@ -1,5 +1,6 @@
 "use client";
 
+import { generalFetcher, safeFetch } from "@/utils/fetch/fetch";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "react-bootstrap";
@@ -12,19 +13,6 @@ import { Tree } from "./Animation/Tree";
 import { MusicView } from "./MusicBar/MusicView";
 import "./Pomodoro.css";
 import { Setting } from "./Setting";
-
-async function fetcher(url: string) {
-	const response = await fetch(url);
-
-	if (!response.ok) {
-		if (response.status === 475) {
-			throw new Error("TimeMachine date is before session start date");
-		}
-		throw new Error("Errore durante il fetch dei dati");
-	}
-
-	return response.json();
-}
 
 function PomodoroImplementation() {
 	const [isStudying, setIsStudying] = useState(true); // true for studying, false for break
@@ -47,11 +35,11 @@ function PomodoroImplementation() {
 	}
 
 	// Prendimao il pomodoro generale o quello specifico se id é diverso da null
-	const { data, error } = useSWR(
+	const { data, error } = useSWR<any>(
 		id
 			? "/api/calendar/session/" + id + "/getSession"
 			: "/api/user/getUser",
-		fetcher
+		generalFetcher
 	);
 
 	useEffect(() => {
@@ -83,15 +71,14 @@ function PomodoroImplementation() {
 
 	const updatePomodoro = useCallback(
 		async (retries = 5) => {
-			const response = await fetch(
-				"/api/calendar/session/modifyPomodoro",
-				{
+			const response = await safeFetch(
+				fetch("/api/calendar/session/modifyPomodoro", {
 					method: "PATCH",
 					body: JSON.stringify({ _id: id, cycles: doneCycles + 1 }),
 					headers: {
 						"Content-Type": "application/json"
 					}
-				}
+				})
 			);
 
 			if (!response.ok) {
@@ -115,13 +102,15 @@ function PomodoroImplementation() {
 				breakTime: breakTime
 			};
 
-			const response = await fetch("/api/user/modifyPomodoro", {
-				method: "PATCH",
-				body: JSON.stringify(bodyData),
-				headers: {
-					"Content-Type": "application/json"
-				}
-			});
+			const response = await safeFetch(
+				fetch("/api/user/modifyPomodoro", {
+					method: "PATCH",
+					body: JSON.stringify(bodyData),
+					headers: {
+						"Content-Type": "application/json"
+					}
+				})
+			);
 
 			if (!response.ok) {
 				if (retries > 0) {

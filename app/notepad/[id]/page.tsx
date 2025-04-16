@@ -2,6 +2,7 @@
 
 import { GlobalSideBar } from "@/app/components/GlobalSideBar";
 import { useUser } from "@/app/components/UserContext";
+import { generalFetcher, safeFetch } from "@/utils/fetch/fetch";
 import DOMPurify from "dompurify";
 import { marked } from "marked";
 import { useParams } from "next/navigation";
@@ -26,15 +27,6 @@ type noteData = {
 	activityIdList: string[];
 	usernameList: string[] | undefined;
 };
-
-async function fetcher(url: string) {
-	const response = await fetch(url);
-	if (!response.ok) {
-		toast.error("Errore durante il recupero della nota!");
-		return;
-	}
-	return response.json();
-}
 
 const useWindowSize = () => {
 	const [windowSize, setWindowSize] = useState({
@@ -69,12 +61,14 @@ export default function Note() {
 		data: rawNote,
 		error,
 		mutate
-	} = useSWR(() => (id ? `/api/notepad/getNote?id=${id}` : null), fetcher);
+	} = useSWR<noteData>(
+		() => (id ? `/api/notepad/getNote?id=${id}` : null),
+		generalFetcher
+	);
 
 	useEffect(() => {
 		if (rawNote) {
-			const noteData = rawNote;
-			setNote(noteData);
+			setNote(rawNote);
 		}
 	}, [rawNote]);
 
@@ -92,8 +86,8 @@ export default function Note() {
 	};
 
 	const handleSave = async () => {
-		try {
-			const response = await fetch("/api/notepad/modifyText", {
+		const response = await safeFetch(
+			fetch("/api/notepad/modifyText", {
 				method: "PATCH",
 				headers: {
 					"Content-Type": "application/json"
@@ -102,14 +96,12 @@ export default function Note() {
 					_id: note!._id,
 					text: noteText
 				})
-			});
-			if (response.ok) {
-				toast.success("Nota salvata con successo!");
-				mutate();
-			} else {
-				toast.error("Errore durante il salvataggio della nota");
-			}
-		} catch (error) {
+			})
+		);
+		if (response.ok) {
+			toast.success("Nota salvata con successo!");
+			mutate();
+		} else {
 			toast.error("Errore durante il salvataggio della nota");
 		}
 	};
@@ -121,21 +113,19 @@ export default function Note() {
 		access: string;
 		usernameList: [string];
 	}) => {
-		try {
-			const response = await fetch("/api/notepad/modifyPermission", {
+		const response = await safeFetch(
+			fetch("/api/notepad/modifyPermission", {
 				method: "PATCH",
 				headers: {
 					"Content-Type": "application/json"
 				},
 				body: JSON.stringify(body)
-			});
-			if (response.ok) {
-				toast.success("Permessi aggiornati con successo!");
-				mutate();
-			} else {
-				toast.error("Errore durante l'aggiornamento dei permessi");
-			}
-		} catch (error) {
+			})
+		);
+		if (response.ok) {
+			toast.success("Permessi aggiornati con successo!");
+			mutate();
+		} else {
 			toast.error("Errore durante l'aggiornamento dei permessi");
 		}
 	};

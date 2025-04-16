@@ -3,6 +3,7 @@
 import { GlobalSideBar } from "@/app/components/GlobalSideBar";
 import { useUser } from "@/app/components/UserContext";
 import { StringNote } from "@/utils/db/db";
+import { generalFetcher, safeFetch } from "@/utils/fetch/fetch";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { Button, Card, Container } from "react-bootstrap";
@@ -14,14 +15,6 @@ import useSWR from "swr";
 import { DeleteNoteModal } from "./DeleteNoteModal";
 import styles from "./Notepad.module.css";
 import { SearchBar } from "./SearchBar";
-
-async function fetcher(url: string) {
-	const response = await fetch(url);
-	if (!response.ok) {
-		toast.error("Errore durante il recupero delle note!");
-	}
-	return response.json();
-}
 
 // Tipo che estende StringNote per includere il campo type
 
@@ -36,7 +29,10 @@ export default function Notepad() {
 	const [notes, setNotes] = useState<ExtendedStringNote[]>([]);
 	const [oldNotes, setOldNotes] = useState<ExtendedStringNote[]>([]);
 
-	const { data, error, mutate } = useSWR("/api/notepad/getNotes", fetcher);
+	const { data, error, mutate } = useSWR<ExtendedStringNote[]>(
+		"/api/notepad/getNotes",
+		generalFetcher
+	);
 
 	// Aggiorna notes quando i dati vengono recuperati
 	useEffect(() => {
@@ -56,6 +52,10 @@ export default function Notepad() {
 			lengthMax,
 			categories
 		} = filters;
+
+		if (!data) {
+			return;
+		}
 
 		const filteredNotes = data.filter((note: any) => {
 			// Controllo delle date
@@ -141,30 +141,34 @@ export default function Notepad() {
 	}
 
 	async function handleAdd(note: { summary: string; categories: string }) {
-		const response = await fetch("/api/notepad/add", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify(note)
-		});
+		const response = await safeFetch(
+			fetch("/api/notepad/add", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify(note)
+			})
+		);
 		if (!response.ok) {
 			toast.error("Errore durante la creazione della nota!");
 		} else {
-			const fetched_data = await response.json();
+			const fetched_data = response.body;
 			toast.success("Nota creata con successo!");
 			router.push("/notepad/" + fetched_data._id);
 		}
 	}
 
 	async function handleDelete(id: string) {
-		const response = await fetch("/api/notepad/delete", {
-			method: "DELETE",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify({ _id: id })
-		});
+		const response = await safeFetch(
+			fetch("/api/notepad/delete", {
+				method: "DELETE",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify({ _id: id })
+			})
+		);
 
 		if (!response.ok) {
 			if (response.status == 401) {
