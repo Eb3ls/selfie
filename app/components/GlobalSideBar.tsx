@@ -16,14 +16,14 @@ import {
 import {
 	FaBars,
 	FaCalendarAlt,
+	FaCoffee,
 	FaCog,
 	FaComments,
 	FaInbox,
-	FaProjectDiagram,
 	FaStickyNote,
-	FaStopwatch,
 	FaUser
 } from "react-icons/fa";
+import { FaChartGantt } from "react-icons/fa6";
 // Usa usePathname di Next.js
 import "./GlobalSideBar.css";
 import { useUser } from "./UserContext";
@@ -39,8 +39,8 @@ const mainLinks = [
 
 // Link secondari raggruppati in "Altro"
 const otherLinks = [
-	{ name: "Impostazioni", icon: FaCog, link: "/settings" },
-	{ name: "Inbox", icon: FaInbox, link: "/inbox" }
+	{ name: "Inbox", icon: FaInbox, link: "/inbox" },
+	{ name: "Impostazioni", icon: FaCog, link: "/settings" }
 ];
 
 // Struttura del menu principale
@@ -56,10 +56,10 @@ const menuItems = [
 		title: "Strumenti",
 		items: [
 			{ name: "Calendario", icon: FaCalendarAlt, link: "/calendar" },
-			{ name: "Progetti", icon: FaProjectDiagram, link: "/projects" },
+			{ name: "Progetti", icon: FaChartGantt, link: "/projects" },
 			{ name: "Note", icon: FaStickyNote, link: "/notepad" },
 			{ name: "Chat", icon: FaComments, link: "/chat" },
-			{ name: "Pomodoro", icon: FaStopwatch, link: "/pomodoro" }
+			{ name: "Pomodoro", icon: FaCoffee, link: "/pomodoro" }
 		]
 	}
 ];
