@@ -10,18 +10,11 @@ import { UserItem } from "@/app/chat/sideBar/UserItem";
 import { GlobalSideBar } from "@/app/components/GlobalSideBar";
 import { useTime } from "@/app/components/TimeContext";
 // Librerie
-import { StringMessage } from "@/utils/db/db";
+import { StringChat, StringGroupChat, StringMessage } from "@/utils/db/db";
+import { generalFetcher, safeFetch } from "@/utils/fetch/fetch";
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import useSWR from "swr";
-
-async function fetcher(url: string) {
-	const response = await fetch(url);
-	if (!response.ok) {
-		toast.error("Errore nel recupero dei dati delle chat");
-	}
-	return response.json();
-}
 
 function fromIdToUsername(
 	id: string,
@@ -48,7 +41,7 @@ export default function ChatMain() {
 		data: raw_contacts,
 		error: error_contacts,
 		mutate: mutateContacts
-	} = useSWR("/api/chat/getContacts", fetcher, {
+	} = useSWR<ChatResponse>("/api/chat/getContacts", generalFetcher, {
 		refreshInterval: 5000, // Ricarica i dati ogni 5 secondi
 		revalidateOnFocus: false // Disabilita il refetch quando si torna alla finestra
 	});
@@ -65,11 +58,11 @@ export default function ChatMain() {
 		data: raw_message_list,
 		error: error_message_list,
 		mutate: mutate
-	} = useSWR(
+	} = useSWR<StringChat | StringGroupChat>(
 		selectedChat !== null && selectedChat?._id
 			? "/api/chat/" + selectedChat?._id + "/get"
 			: null,
-		fetcher,
+		generalFetcher,
 		{
 			refreshInterval: 5000, // Ricarica i dati ogni 5 secondi
 			revalidateOnFocus: false // Disabilita il refetch quando si torna alla finestra
@@ -99,15 +92,14 @@ export default function ChatMain() {
 	async function sendMessage() {
 		if (newMessage.trim() === "" || selectedChat === null) return;
 
-		const response = await fetch(
-			"/api/chat/" + selectedChat._id + "/push",
-			{
+		const response = await safeFetch(
+			fetch("/api/chat/" + selectedChat._id + "/push", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json"
 				},
 				body: JSON.stringify({ content: newMessage })
-			}
+			})
 		);
 
 		if (response.ok) {

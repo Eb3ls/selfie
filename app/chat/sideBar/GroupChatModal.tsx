@@ -3,6 +3,7 @@
 import { StandardInput } from "@/app/components/StandardInput";
 import { StandardModal } from "@/app/components/StandardModal";
 import { StandardUsersInput } from "@/app/components/StandardUsersInput";
+import { safeFetch } from "@/utils/fetch/fetch";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
 
@@ -29,13 +30,18 @@ export function GroupChatModal({
 	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 
-		const response = await fetch("/api/chat/addGroup", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify({ summary: groupName, usernameList: users })
-		});
+		const response = await safeFetch(
+			fetch("/api/chat/addGroup", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify({
+					summary: groupName,
+					usernameList: users
+				})
+			})
+		);
 
 		if (!response.ok) {
 			toast.error("Errore durante la creazione del gruppo");

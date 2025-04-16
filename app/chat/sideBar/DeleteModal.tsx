@@ -1,6 +1,7 @@
 "use client";
 
 import { StandardModal } from "@/app/components/StandardModal";
+import { safeFetch } from "@/utils/fetch/fetch";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
 
@@ -26,13 +27,15 @@ export function DeleteModal({
 
 		setSelectedChat(null);
 
-		const response = await fetch("/api/chat/delete", {
-			method: "DELETE",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify({ _id: chat_id })
-		});
+		const response = await safeFetch(
+			fetch("/api/chat/delete", {
+				method: "DELETE",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify({ _id: chat_id })
+			})
+		);
 
 		if (!response.ok) {
 			toast.error("Errore durante l'eliminazione della chat");

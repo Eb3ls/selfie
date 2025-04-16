@@ -2,6 +2,7 @@
 
 import { StandardInput } from "@/app/components/StandardInput";
 import { StandardModal } from "@/app/components/StandardModal";
+import { safeFetch } from "@/utils/fetch/fetch";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
 
@@ -32,13 +33,15 @@ export function ChatModal({
 	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 
-		const response = await fetch("/api/chat/add", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify({ receiver: form.username })
-		});
+		const response = await safeFetch(
+			fetch("/api/chat/add", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify({ receiver: form.username })
+			})
+		);
 
 		if (!response.ok) {
 			toast.error("Errore durante la creazione della chat");
