@@ -140,6 +140,11 @@ export const GET = async (request: NextRequest) => {
 		note.ownerName = ownerConversion.userNameList![0];
 	}
 
+	// Filtriamo via tutte le note che sono private
+	const filteredNotes = notes.filter(
+		(note: any) => note.access !== "PRIVATE" || note.ownerId === user._id
+	);
+
 	// Restituiamo l'elenco delle note aggiornate
-	return generateObjectResponse(notes, 200);
+	return generateObjectResponse(filteredNotes, 200);
 };

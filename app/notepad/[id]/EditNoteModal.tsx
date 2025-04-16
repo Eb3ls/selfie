@@ -69,8 +69,13 @@ export function EditNoteModal({ note, mutate, children }: EditNoteModalProps) {
 			toast.error("Errore durante l'aggiornamento dei permessi");
 		}
 
+		// Troviamo gli utenti che appartengono sia alla lista originale che a quella nuova
+		const commonElements = note.userNameList.filter((element: string) =>
+			usernameList.includes(element)
+		);
+
 		// Svuotiamo il modal
-		setUsernameList(note.userNameList);
+		setUsernameList(commonElements);
 
 		// Chiude il modal
 		setShow(false);
