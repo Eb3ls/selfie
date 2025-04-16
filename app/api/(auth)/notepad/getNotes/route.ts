@@ -119,6 +119,27 @@ export const GET = async (request: NextRequest) => {
 		}
 	}
 
+	// Per ogni nota da esportare, aggiungiamo un campo "ownerName" con il nome dell'owner
+	for (let i = 0; i < notes.length; i++) {
+		const note = notes[i];
+		// Convertiamo l'ownerId in nome utente
+		const ownerConversion = await idListToNameList([
+			note.ownerId.toString()
+		]);
+
+		if (ownerConversion.status !== 200) {
+			// Gestione degli errori nella conversione dell'ownerId
+			return generateMessageResponse(
+				ownerConversion.error ||
+					`Error while converting owner ID for note at index ${i}`,
+				ownerConversion.status
+			);
+		}
+
+		// Aggiungiamo il nome dell'owner alla nota
+		note.ownerName = ownerConversion.userNameList![0];
+	}
+
 	// Restituiamo l'elenco delle note aggiornate
 	return generateObjectResponse(notes, 200);
 };
