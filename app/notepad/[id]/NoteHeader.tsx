@@ -20,7 +20,7 @@ export function NoteHeader({
 	handleSave
 }: NoteHeaderProps) {
 	return (
-		<div className="pt-4 pb-2 border-bottom d-flex justify-content-between align-items-center flex-shrink-0">
+		<div className="pt-4 pb-2 mt-4 border-bottom d-flex justify-content-between align-items-center flex-shrink-0">
 			<h1 className="fs-2 text-truncate">{summary}</h1>
 			<div className="d-flex align-items-center gap-2">
 				{ownerId === userId && (

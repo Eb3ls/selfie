@@ -12,6 +12,7 @@ import {
 	Navbar,
 	Row
 } from "react-bootstrap";
+import { FaBars } from "react-icons/fa";
 
 function NavbarComponent() {
 	return (
@@ -44,35 +45,7 @@ function NavbarComponent() {
 					</span>
 				</Navbar.Brand>
 				<Navbar.Toggle className="border-0 p-0">
-					<div className="d-flex flex-column gap-2 p-2">
-						<span
-							className="line"
-							style={{
-								height: "2px",
-								width: "25px",
-								backgroundColor: greenColor,
-								transition: "all 0.3s ease"
-							}}
-						></span>
-						<span
-							className="line"
-							style={{
-								height: "2px",
-								width: "25px",
-								backgroundColor: greenColor,
-								transition: "all 0.3s ease"
-							}}
-						></span>
-						<span
-							className="line"
-							style={{
-								height: "2px",
-								width: "25px",
-								backgroundColor: greenColor,
-								transition: "all 0.3s ease"
-							}}
-						></span>
-					</div>
+					<FaBars size={25} style={{ color: greenColor }} />
 				</Navbar.Toggle>
 				<Navbar.Collapse id="basic-navbar-nav">
 					<Nav className="ms-auto gap-3 mt-3 mt-md-0">

@@ -18,7 +18,7 @@ export function SideBarHeader({
 			className="d-flex justify-content-between p-3 border-bottom bg-light sticky-top"
 			style={{ zIndex: 1, minHeight: "75px" }}
 		>
-			<InputGroup className="ms-5 ps-2 me-2 ms-lg-0 ps-lg-0">
+			<InputGroup className="ms-4 ps-3 me-2 ms-lg-0 ps-lg-0">
 				<Form.Control
 					type="text"
 					name="searchUsersBar"

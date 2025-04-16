@@ -212,21 +212,22 @@ export function GlobalSideBar() {
 			</Navbar>
 
 			{/* Pulsante sidebar per schermi < md */}
-			<Button
-				variant="primary"
-				onClick={() => setShowSidebar(true)}
-				className="toggle_btn d-lg-none"
+			<div
+				className="bg-primary rounded-end-4"
 				style={{
 					position: "fixed",
 					top: "1rem",
-					left: "1rem",
 					zIndex: 100,
-					padding: "0.5rem",
 					display: showSidebar ? "none" : "block"
 				}}
 			>
-				<FaBars />
-			</Button>
+				<button
+					onClick={() => setShowSidebar(true)}
+					className="btn btn-link"
+				>
+					<FaBars size={25} className="text-white" />
+				</button>
+			</div>
 
 			{/* Offcanvas sidebar per schermi piccoli */}
 			<Offcanvas
