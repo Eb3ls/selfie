@@ -232,9 +232,31 @@ export default function Notepad() {
 					/>
 				</div>
 
-				{error && <div>Caricamento fallito</div>}
-				{!data ? (
-					<div className={styles.loadingState}>Caricamento...</div>
+				{error ? (
+					<div className="text-center text-danger py-5 bg-white rounded-4 shadow-sm">
+						<i className="bi bi-exclamation-triangle-fill fs-1 mb-3 d-block"></i>
+						<p className="mb-0 fw-medium">
+							Si è verificato un errore durante il caricamento
+							delle note
+						</p>
+						<p className="text-muted small mb-0">
+							Riprova più tardi
+						</p>
+					</div>
+				) : !data ? (
+					<div className="text-center py-5 bg-white rounded-4 shadow-sm">
+						<div
+							className="spinner-border text-primary mb-3"
+							role="status"
+						>
+							<span className="visually-hidden">
+								Caricamento...
+							</span>
+						</div>
+						<p className="mb-0 text-muted">
+							Caricamento note in corso...
+						</p>
+					</div>
 				) : (
 					<div className={styles.notesGrid}>
 						{notes.length === 0 ? (

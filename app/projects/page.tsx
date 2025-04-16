@@ -1,10 +1,11 @@
 "use client";
 
-import { safeFetch } from "@/utils/fetch/fetch";
+import { generalFetcher, safeFetch } from "@/utils/fetch/fetch";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { FaUserShield } from "react-icons/fa";
 import { toast } from "react-toastify";
+import useSWR from "swr";
 import { GlobalSideBar } from "../components/GlobalSideBar";
 import { useUser } from "../components/UserContext";
 import { SearchBar } from "./SearchBar";
@@ -25,23 +26,18 @@ export default function ProjectPage() {
 	const [oldProjects, setOldProjects] = useState<Project[]>([]);
 	const router = useRouter(); // Inizializza il router
 
+	const { data, error } = useSWR<Project[]>(
+		"/api/project/getProjects",
+		generalFetcher
+	);
+
+	// Aggiorna projects quando i dati vengono recuperati
 	useEffect(() => {
-		async function fetchProjects() {
-			const response = await safeFetch<Project[]>(
-				fetch("/api/project/getProjects")
-			);
-
-			if (!response.ok) {
-				toast.error("Errore durante il caricamento dei dati");
-				return;
-			}
-
-			const data: Project[] = response.body;
+		if (data) {
 			setProjects(data);
 			setOldProjects(data);
 		}
-		fetchProjects();
-	}, []);
+	}, [data]);
 
 	function handleSort(sortParams: {
 		field: string;
@@ -197,20 +193,47 @@ export default function ProjectPage() {
 					/>
 				</div>
 
-				<div className="projects-grid gap-3">
-					{projects.length === 0 ? (
-						<div className="text-center text-muted py-5">
-							<p className="mb-0">Nessun progetto trovato</p>
+				{error ? (
+					<div className="text-center text-danger py-5 bg-white rounded-4 shadow-sm">
+						<i className="bi bi-exclamation-triangle-fill fs-1 mb-3 d-block"></i>
+						<p className="mb-0 fw-medium">
+							Si è verificato un errore durante il caricamento dei
+							progetti
+						</p>
+						<p className="text-muted small mb-0">
+							Riprova più tardi
+						</p>
+					</div>
+				) : !data ? (
+					<div className="text-center py-5 bg-white rounded-4 shadow-sm">
+						<div
+							className="spinner-border text-primary mb-3"
+							role="status"
+						>
+							<span className="visually-hidden">
+								Caricamento...
+							</span>
 						</div>
-					) : (
-						projects.map((project) =>
-							createProjectEntry(
-								project,
-								isOwner(project.ownerName)
+						<p className="mb-0 text-muted">
+							Caricamento progetti in corso...
+						</p>
+					</div>
+				) : (
+					<div className="projects-grid gap-3">
+						{projects.length === 0 ? (
+							<div className="text-center text-muted py-5">
+								<p className="mb-0">Nessun progetto trovato</p>
+							</div>
+						) : (
+							projects.map((project) =>
+								createProjectEntry(
+									project,
+									isOwner(project.ownerName)
+								)
 							)
-						)
-					)}
-				</div>
+						)}
+					</div>
+				)}
 			</main>
 		</div>
 	);

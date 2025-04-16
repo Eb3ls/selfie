@@ -43,7 +43,10 @@ export default function ChatMain() {
 		mutate: mutateContacts
 	} = useSWR<ChatResponse>("/api/chat/getContacts", generalFetcher, {
 		refreshInterval: 5000, // Ricarica i dati ogni 5 secondi
-		revalidateOnFocus: false // Disabilita il refetch quando si torna alla finestra
+		revalidateOnFocus: false, // Disabilita il refetch quando si torna alla finestra
+		onError: () => {
+			toast.error("Errore durante il recupero dei contatti");
+		}
 	});
 
 	// Aggiorna chatResponse quando i dati vengono recuperati
@@ -65,7 +68,10 @@ export default function ChatMain() {
 		generalFetcher,
 		{
 			refreshInterval: 5000, // Ricarica i dati ogni 5 secondi
-			revalidateOnFocus: false // Disabilita il refetch quando si torna alla finestra
+			revalidateOnFocus: false, // Disabilita il refetch quando si torna alla finestra
+			onError: () => {
+				toast.error("Errore durante il recupero dei messaggi");
+			}
 		}
 	);
 
