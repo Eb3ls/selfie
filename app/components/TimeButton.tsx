@@ -1,6 +1,7 @@
 "use client";
 
 import { useTime } from "@/app/components/TimeContext";
+import { safeFetch } from "@/utils/fetch/fetch";
 import { useState } from "react";
 import { Button } from "react-bootstrap";
 import { FaClock, FaPlus, FaSync, FaUndo } from "react-icons/fa";
@@ -24,7 +25,9 @@ export function TimeButton() {
 	}
 
 	async function handleConnect() {
-		const response = await fetch("/api/timeMachine", { method: "PATCH" });
+		const response = await safeFetch(
+			fetch("/api/timeMachine", { method: "PATCH" })
+		);
 		if (!response.ok) {
 			toast.error("Errore durante la connessione!");
 			return;

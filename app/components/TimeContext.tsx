@@ -1,5 +1,6 @@
 "use client";
 
+import { safeFetch } from "@/utils/fetch/fetch";
 import {
 	ReactNode,
 	createContext,
@@ -26,23 +27,20 @@ export function TimeProvider({ children }: { children: ReactNode }) {
 
 	// Funzione per richiedere il tempo dal server
 	async function refreshTime() {
-		try {
-			const res = await fetch("/api/timeMachine");
-			if (!res.ok) {
-				throw new Error("Errore nel recupero dell'orario dal server");
-			}
-			// Si assume che il server restituisca il tempo in formato stringa ISO o equivalente
-			const data: ResponseType = await res.json();
-			setDateTime(new Date(data.time));
-		} catch (error) {
+		const res = await safeFetch<ResponseType>(fetch("/api/timeMachine"));
+		if (!res.ok) {
 			toast.error("Errore nel recupero dell'orario dalla time machine");
+			return;
 		}
+		// Si assume che il server restituisca il tempo in formato stringa ISO o equivalente
+		const data: ResponseType = res.body;
+		setDateTime(new Date(data.time));
 	}
 
 	// Funzione per impostare il tempo sul server
 	async function setTime(newTime: Date, realTime: boolean) {
-		try {
-			const res = await fetch("/api/timeMachine", {
+		const res = await safeFetch(
+			fetch("/api/timeMachine", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json"
@@ -51,16 +49,15 @@ export function TimeProvider({ children }: { children: ReactNode }) {
 					realTime,
 					requestedDate: newTime.toISOString()
 				})
-			});
+			})
+		);
 
-			if (!res.ok) {
-				throw new Error("Errore nella modifica dell'orario sul server");
-			}
-
-			await refreshTime();
-		} catch (error) {
+		if (!res.ok) {
 			toast.error("Errore nella modifica dell'orario sulla time machine");
+			return;
 		}
+
+		await refreshTime();
 	}
 
 	// Al montaggio del provider, sincronizza la data iniziale

@@ -1,6 +1,7 @@
 "use client";
 
 import { PomodoroSettings } from "@/utils/db/db";
+import { safeFetch } from "@/utils/fetch/fetch";
 import { useRouter } from "next/navigation";
 import { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -55,37 +56,34 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 	};
 
 	async function fetchUserData() {
-		try {
-			setLoading(true);
-			const response = await fetch("/api/user/getUser");
+		setLoading(true);
+		const response = await safeFetch<ReducedUser>(
+			fetch("/api/user/getUser")
+		);
 
-			if (!response.ok || response.redirected) {
-				throw new Error("Failed to fetch user data");
-			}
-
-			const data: ReducedUser = await response.json();
-			setUserData(data);
-		} catch (error: any) {
-			setError(error.message);
+		if (!response.ok || response.redirected) {
+			setError("Failed to fetch user data");
+			setLoading(false);
+			return;
 		}
+
+		const data: ReducedUser = response.body;
+		setUserData(data);
 		setLoading(false);
 	}
 
 	async function logOutFunction() {
-		try {
-			const response = await fetch("/api/user/logout");
+		const response = await safeFetch(fetch("/api/user/logout"));
 
-			if (!response.ok || response.redirected) {
-				toast.error("Impossibile effettuare il logout");
-				throw new Error("Failed to logout");
-			}
-
-			setUserData(null);
-			toast.success("Logout effettuato con successo");
-			router.push("/");
-		} catch (error: any) {
-			setError(error.message);
+		if (!response.ok || response.redirected) {
+			toast.error("Impossibile effettuare il logout");
+			setError("Failed to logout");
+			return;
 		}
+
+		setUserData(null);
+		toast.success("Logout effettuato con successo");
+		router.push("/");
 	}
 
 	useEffect(() => {
