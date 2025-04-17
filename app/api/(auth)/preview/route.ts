@@ -100,16 +100,6 @@ interface ReducedCalendar {
 	sessions: ReducedSession[];
 }
 
-type OccurrenceType = "event" | "activity" | "session" | "projectActivity";
-interface Occurrence {
-	type: OccurrenceType;
-	occurrenceDate: Date;
-	_id: string;
-	summary: string;
-	description: string;
-	ownerName: string;
-}
-
 //
 // Risposta finale che ora include anche il ReducedCalendar
 //
@@ -123,32 +113,19 @@ interface PreviewsResponse {
 async function generateRecurringCalendarEvents(
 	originalEvent: StringEvent | StringSession,
 	eventType: "event" | "session",
-	currentDate: Date
-): Promise<Occurrence[]> {
-	const calendarEvents: Occurrence[] = [];
+	currentDate: Date,
+	endDate: Date
+): Promise<ReducedEvent[] | ReducedSession[]> {
+	const calendarEvents: ReducedEvent[] | ReducedSession[] = [];
 	const start = new Date(originalEvent.dtStart);
 	const rrule = originalEvent.rrule;
 
 	// Vogliamo generare tutti gli eventi ricorrenti in un range che va
-	// dal primo del mese corrente all'ultimo del mese successivo
-
-	// Primo giorno del mese precedente
-	const firstDayPrevMonth = new Date(
-		currentDate.getFullYear(),
-		currentDate.getMonth() - 1,
-		1
-	);
-
-	// Ultimo giorno del mese successivo
-	const lastDayNextMonth = new Date(
-		currentDate.getFullYear(),
-		currentDate.getMonth() + 2,
-		0
-	);
+	// dalla data corrente, fino alla data massima specificata
 
 	const rule = rrulestr(rrule, { dtstart: new Date(start) });
 
-	const occurrences = rule.between(firstDayPrevMonth, lastDayNextMonth);
+	const occurrences = rule.between(currentDate, endDate, true);
 
 	// Per l'evento, prendo l'ownerName
 	const ownerName: string = await getNameFromId(
@@ -156,9 +133,8 @@ async function generateRecurringCalendarEvents(
 	);
 
 	occurrences.forEach((date) => {
-		const newEvent: Occurrence = {
-			type: eventType,
-			occurrenceDate: date,
+		const newEvent: ReducedEvent | ReducedSession = {
+			data: date.toISOString(),
 			_id: originalEvent._id!,
 			summary: originalEvent.summary,
 			description: originalEvent.description,
@@ -288,6 +264,10 @@ export const GET = async (request: NextRequest) => {
 
 	if (chatsData.length > 0) {
 		for (const chat of chatsData) {
+			if (chat.messages.length === 0) {
+				continue; // Se non ci sono messaggi, salta
+			}
+
 			const currentUserIndex = chat.userIdList.indexOf(user._id);
 			const otherUserIndex = 1 - currentUserIndex;
 
@@ -296,19 +276,6 @@ export const GET = async (request: NextRequest) => {
 					chat.userIdList[otherUserIndex]
 				);
 				const summary = "Chat con " + otherUser;
-
-				const lastMessageObj = chat.messages[chat.messages.length - 1];
-
-				if (!lastMessageObj) {
-					reducedChats.push({
-						_id: chat._id,
-						summary,
-						lastMessage: null,
-						lastMessageOwner: null,
-						lastMessageAt: null
-					});
-					continue; // Se non ci sono messaggi, salta
-				}
 
 				const lastMessageOwnerId =
 					chat.messages[chat.messages.length - 1].ownerId;
@@ -355,14 +322,12 @@ export const GET = async (request: NextRequest) => {
 
 	if (groupChats.length > 0) {
 		for (const groupChat of groupChats) {
-			const currentUserIndex = groupChat.userIdList.indexOf(user._id);
+			if (groupChat.messages.length === 0) {
+				continue; // Se non ci sono messaggi, salta
+			}
 
 			try {
 				const summary = groupChat.summary;
-
-				if (groupChat.messages.length === 0) {
-					continue; // Se non ci sono messaggi, salta
-				}
 
 				const lastMessageOwnerId =
 					groupChat.messages[groupChat.messages.length - 1].ownerId;
@@ -415,13 +380,14 @@ export const GET = async (request: NextRequest) => {
 	// - Sessioni: usa le occorrenze dalla rrule (che è obbligatoria)
 	// - ProjectActivity: usa il campo due
 	// Scegli se mettere o no ogni evento (in senso generico) in base alle impostazioni dell'utente
-	const now = timeMachine.timeMachineTime;
-	const futureLimit = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000); // ad es. 1 anno in avanti
-
-	// Array per raccogliere tutte le occorrenze
-	let calendarOccurrences: Occurrence[] = [];
+	const now = new Date(timeMachine.timeMachineTime);
+	const oneWeekLater = new Date(now);
+	oneWeekLater.setDate(now.getDate() + 7);
 
 	// --- Attività ---
+
+	let reducedActivities: ReducedActivity[] = [];
+
 	if (previews.calendar.activity) {
 		const activityClient: Collection<Activity> =
 			await getCollection<Activity>(ACTIVITY_COLLECTION);
@@ -437,10 +403,14 @@ export const GET = async (request: NextRequest) => {
 			try {
 				const ownerName = await getNameFromId(act.ownerId.toString());
 				const due = new Date(act.due);
-				if (due >= now) {
-					calendarOccurrences.push({
-						type: "activity",
-						occurrenceDate: due,
+				if (act.status !== "IN-PROCESS") {
+					// Se l'attività non è in corso, non la metto
+					continue;
+				}
+
+				if (due <= oneWeekLater) {
+					reducedActivities.push({
+						data: due.toISOString(),
 						_id: act._id?.toString()!,
 						summary: act.summary,
 						description: act.description,
@@ -452,6 +422,9 @@ export const GET = async (request: NextRequest) => {
 	}
 
 	// --- ProjectActivity ---
+
+	let reducedProjectsActivities: ReducedProjectActivity[] = [];
+
 	if (previews.calendar.projectActivity) {
 		const projectActivityClient: Collection<ProjectActivity> =
 			await getCollection<ProjectActivity>(PROJECT_ACTIVITY_COLLECTION);
@@ -467,10 +440,14 @@ export const GET = async (request: NextRequest) => {
 			try {
 				const ownerName = await getNameFromId(pa.ownerId.toString());
 				const due = new Date(pa.due);
-				if (due >= now) {
-					calendarOccurrences.push({
-						type: "projectActivity",
-						occurrenceDate: due,
+				if (pa.status !== "ACTIVE" && pa.status !== "REACTIVATED") {
+					// Se l'attività non è in corso, non la metto
+					continue;
+				}
+
+				if (due <= oneWeekLater) {
+					reducedProjectsActivities.push({
+						data: due.toISOString(),
 						_id: pa._id?.toString()!,
 						summary: pa.summary,
 						description: pa.description,
@@ -482,6 +459,9 @@ export const GET = async (request: NextRequest) => {
 	}
 
 	// --- Eventi ---
+
+	let reducedEvents: ReducedEvent[] = [];
+
 	if (previews.calendar.event) {
 		const eventClient: Collection<Event> =
 			await getCollection<Event>(EVENT_COLLECTION);
@@ -496,21 +476,32 @@ export const GET = async (request: NextRequest) => {
 		for (const ev of events) {
 			try {
 				const ownerName = await getNameFromId(ev.ownerId.toString());
+
+				if (ev.status !== "CONFIRMED") {
+					// Se l'evento non è confermato, non lo metto
+					continue;
+				}
+
 				if (ev.rrule && ev.rrule.trim() !== "") {
 					// Evento ricorrente: estrai le occorrenze
 					const occurrences = await generateRecurringCalendarEvents(
 						ev,
 						"event",
-						now
+						now,
+						oneWeekLater
 					);
-					calendarOccurrences.push(...occurrences);
+					reducedEvents.push(...occurrences);
 				} else {
 					// Evento non ricorrente: usa dtStart
 					const dtStart = new Date(ev.dtStart);
-					if (dtStart >= now) {
-						calendarOccurrences.push({
-							type: "event",
-							occurrenceDate: dtStart,
+					const dtEnd = new Date(ev.dtEnd);
+					if (
+						(dtEnd >= now && dtEnd <= oneWeekLater) ||
+						(dtStart >= now && dtStart <= oneWeekLater) ||
+						(dtStart <= now && dtEnd >= oneWeekLater)
+					) {
+						reducedEvents.push({
+							data: dtStart.toISOString(),
 							_id: ev._id?.toString()!,
 							summary: ev.summary,
 							description: ev.description,
@@ -523,6 +514,9 @@ export const GET = async (request: NextRequest) => {
 	}
 
 	// --- Sessioni ---
+
+	let reducedSessions: ReducedSession[] = [];
+
 	if (previews.calendar.session) {
 		const sessionClient: Collection<Session> =
 			await getCollection<Session>(SESSION_COLLECTION);
@@ -536,56 +530,44 @@ export const GET = async (request: NextRequest) => {
 		}
 
 		for (const sess of sessions) {
+			if (sess.status !== "CONFIRMED") {
+				// Se la sessione non è attiva, non la metto
+				continue;
+			}
+
 			try {
-				const ownerName = await getNameFromId(sess.ownerId.toString());
 				// Le sessioni hanno obbligatoria la rrule
 				const occurrences = await generateRecurringCalendarEvents(
 					sess,
 					"session",
-					now
+					now,
+					oneWeekLater
 				);
-				calendarOccurrences.push(...occurrences);
+				reducedSessions.push(...occurrences);
 			} catch {}
 		}
 	}
 
-	// Ordina tutte le occorrenze per data crescente
-	calendarOccurrences.sort(
-		(a, b) => a.occurrenceDate.getTime() - b.occurrenceDate.getTime()
+	// Ordiniamo tutte le occorrenze per data
+	reducedActivities.sort(
+		(a, b) => new Date(a.data).getTime() - new Date(b.data).getTime()
+	);
+	reducedProjectsActivities.sort(
+		(a, b) => new Date(a.data).getTime() - new Date(b.data).getTime()
+	);
+	reducedEvents.sort(
+		(a, b) => new Date(a.data).getTime() - new Date(b.data).getTime()
+	);
+	reducedSessions.sort(
+		(a, b) => new Date(a.data).getTime() - new Date(b.data).getTime()
 	);
 
-	// Prendi le prime 10 occorrenze
-	const nextSeven = calendarOccurrences.slice(
-		0,
-		previews.calendar.maxOccurrences
-	);
-
-	// Distribuisci le occorrenze nei rispettivi array in base al tipo
-	let reducedProjectsActivities: ReducedProjectActivity[] = [];
-	let reducedActivities: ReducedActivity[] = [];
-	let reducedEvents: ReducedEvent[] = [];
-	let reducedSessions: ReducedSession[] = [];
-
-	nextSeven.forEach((occ) => {
-		const reducedItem = {
-			_id: occ._id,
-			summary: occ.summary,
-			description: occ.description,
-			data: occ.occurrenceDate.toISOString(),
-			ownerName: occ.ownerName
-		};
-		if (occ.type === "activity") {
-			reducedActivities.push(reducedItem as ReducedActivity);
-		} else if (occ.type === "projectActivity") {
-			reducedProjectsActivities.push(
-				reducedItem as ReducedProjectActivity
-			);
-		} else if (occ.type === "event") {
-			reducedEvents.push(reducedItem as ReducedEvent);
-		} else if (occ.type === "session") {
-			reducedSessions.push(reducedItem as ReducedSession);
-		}
-	});
+	// Prendi le prime maxOccurrences occorrenze
+	const maxOcc = previews.calendar.maxOccurrences;
+	reducedActivities = reducedActivities.slice(0, maxOcc);
+	reducedProjectsActivities = reducedProjectsActivities.slice(0, maxOcc);
+	reducedEvents = reducedEvents.slice(0, maxOcc);
+	reducedSessions = reducedSessions.slice(0, maxOcc);
 
 	const reducedCalendar: ReducedCalendar = {
 		activities: reducedActivities,
