@@ -264,7 +264,7 @@ export default function Notepad() {
 
 	function categoriesBlock(categories: string) {
 		if (!categories) {
-			return <div style={{ minHeight: "44px" }}></div>;
+			return null;
 		}
 
 		const categoriesArray = categories.split(",").map((cat) => cat.trim());
@@ -290,10 +290,7 @@ export default function Notepad() {
 				onClick={() => handleNoteClick(note)}
 			>
 				<div className="p-4 h-100 d-flex flex-column">
-					<div
-						className="d-flex align-items-center gap-2 mb-3"
-						style={{ minHeight: "38px" }}
-					>
+					<div className="d-flex align-items-center gap-2 mb-3">
 						{getAccessIcon(note.access)}
 						{note.type !== "note" && getTypeIcon(note.type)}
 						{isOwner(note.ownerId) && (
@@ -396,7 +393,7 @@ export default function Notepad() {
 						</p>
 					</div>
 				) : (
-					<div className="note-grid gap-3">
+					<div className="note-grid gap-4">
 						{notes.length === 0 ? (
 							<div className="text-center text-muted py-5">
 								<p className="mb-0">Nessuna nota trovata</p>
