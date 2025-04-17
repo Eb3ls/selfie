@@ -11,6 +11,7 @@ import {
 	getCollection,
 	updateCollectionWrapper
 } from "@/utils/db/db";
+import { timeMachine } from "@/utils/timeMachine/timeMachine";
 import { Collection } from "mongodb";
 import { NextRequest } from "next/server";
 
@@ -64,13 +65,16 @@ export const PATCH = async (request: NextRequest) => {
 		return generateMessageResponse("Sender doesn't have access", 400);
 	}
 
-	const length = newBody.text.length;
+	const time = new Date(timeMachine.timeMachineTime);
 
 	// Creiamo un oggetto con i campi da modificare
 	const newFields: Partial<StringNote> = {
 		text: newBody.text,
-		length: newBody.text.length
+		length: newBody.text.length,
+		dtModified: time.toISOString()
 	};
+
+	console.log("newFields", newFields);
 
 	// Modifichiamo la nota
 	const updateOut = await updateCollectionWrapper<Note>(

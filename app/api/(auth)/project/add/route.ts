@@ -51,7 +51,7 @@ export const POST = async (request: NextRequest) => {
 		{
 			ownerId: userId,
 			summary: newBody.summary,
-			categories: "Project",
+			categories: "Progetto",
 			access: "INVITED",
 			userIdList: [userId]
 		},

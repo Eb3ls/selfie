@@ -38,8 +38,16 @@ export default function Notepad() {
 	// Aggiorna notes quando i dati vengono recuperati
 	useEffect(() => {
 		if (data) {
-			setOldNotes(data);
-			setNotes(data);
+			const orderedData = data.sort((a, b) => {
+				const dateA = new Date(a.dtModified).getTime();
+				const dateB = new Date(b.dtModified).getTime();
+				return dateB - dateA;
+			});
+
+			console.log(orderedData);
+
+			setOldNotes(orderedData);
+			setNotes(orderedData);
 		}
 	}, [data]);
 

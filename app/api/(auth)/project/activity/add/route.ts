@@ -162,7 +162,8 @@ export const POST = async (request: NextRequest) => {
 		{
 			summary: newBody.summary,
 			ownerId: userId,
-			userIdList: userIdList
+			userIdList: userIdList,
+			categories: "Attività di progetto"
 		},
 		"Note"
 	);
