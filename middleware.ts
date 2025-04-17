@@ -31,7 +31,6 @@ export async function middleware(request: NextRequest) {
 		path.startsWith("/home") ||
 		path.startsWith("/inbox") ||
 		path.startsWith("/notepad") ||
-		path.startsWith("/notifyPage") ||
 		path.startsWith("/pomodoro") ||
 		path.startsWith("/projects") ||
 		path.startsWith("/settings")

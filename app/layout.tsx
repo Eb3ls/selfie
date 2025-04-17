@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Script from "next/script";
+import { NotificationContainer } from "./components/NotificationsContainer";
 import { TimeButton } from "./components/TimeButton";
 import { TimeProvider } from "./components/TimeContext";
 import { ToastWrapper } from "./components/ToastWrapper";
@@ -36,6 +37,7 @@ export default function RootLayout({
 			<UserProvider>
 				<TimeProvider>
 					<body className={`${inter.className} m-0 p-0`}>
+						<NotificationContainer />
 						<ToastWrapper />
 						{children}
 						<TimeButton />
