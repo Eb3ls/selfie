@@ -97,7 +97,11 @@ export async function setupNotifications(): Promise<boolean> {
 }
 
 export async function removeNotifications(): Promise<boolean> {
-	// 1. Attendi la Service Worker registration
+	// 1. Verifica se il service worker è registrato
+	if (!(await isServiceWorkerRegistered())) {
+		return true;
+	}
+
 	const registration = await navigator.serviceWorker.ready;
 
 	// 2. Recupera la push subscription
