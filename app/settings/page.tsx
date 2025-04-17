@@ -75,6 +75,14 @@ export default function SettingsPage() {
 			return;
 		}
 
+		// Parsiamo il numero di maxOccorrences
+		formData.previews.calendar.maxOccurrences =
+			parseInt(formData.previews.calendar.maxOccurrences as any) || 10;
+		formData.previews.maxChats =
+			parseInt(formData.previews.maxChats as any) || 10;
+		formData.previews.maxNotes =
+			parseInt(formData.previews.maxNotes as any) || 10;
+
 		const body = {
 			username: formData.username,
 			firstName: formData.firstName,

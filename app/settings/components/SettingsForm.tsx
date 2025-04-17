@@ -26,7 +26,7 @@ export default function SettingsForm({
 		<Form onSubmit={onSubmit}>
 			{/* Username */}
 			<div className="bg-white rounded-4 p-3 mb-3 small-border">
-				<h4 className="text-primary">Impostazioni Utente</h4>
+				<h4 className="text-primary mb-4">Impostazioni Utente</h4>
 				<Card.Body>
 					<StandardInput
 						type="text"
@@ -111,7 +111,7 @@ export default function SettingsForm({
 			</div>
 
 			<div className="bg-white rounded-4 p-3 mb-3 small-border">
-				<h4 className="text-primary">Anteprime</h4>
+				<h4 className="text-primary mb-4">Anteprime</h4>
 				<Card.Body>
 					<Row className="mb-3 g-2">
 						<Col xs={6} md={3}>
@@ -207,8 +207,7 @@ export default function SettingsForm({
 									...formData.previews,
 									calendar: {
 										...formData.previews.calendar,
-										maxOccurrences:
-											parseInt(e.target.value) || 0
+										maxOccurrences: e.target.value
 									}
 								}
 							})
@@ -226,7 +225,7 @@ export default function SettingsForm({
 								...formData,
 								previews: {
 									...formData.previews,
-									maxChats: parseInt(e.target.value) || 0
+									maxChats: e.target.value
 								}
 							})
 						}
@@ -243,7 +242,7 @@ export default function SettingsForm({
 								...formData,
 								previews: {
 									...formData.previews,
-									maxNotes: parseInt(e.target.value) || 0
+									maxNotes: e.target.value
 								}
 							})
 						}
@@ -252,7 +251,7 @@ export default function SettingsForm({
 			</div>
 
 			<div className="bg-white rounded-4 p-3 mb-3 small-border">
-				<h4 className="text-primary">Notifiche</h4>
+				<h4 className="text-primary mb-4">Notifiche</h4>
 				<Card.Body>
 					<div className="mb-2">
 						<Form.Switch

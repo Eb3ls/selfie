@@ -262,7 +262,7 @@ export default function Notepad() {
 
 	function categoriesBlock(categories: string) {
 		if (!categories) {
-			return null;
+			return <div style={{ minHeight: "44px" }}></div>;
 		}
 
 		const categoriesArray = categories.split(",").map((cat) => cat.trim());

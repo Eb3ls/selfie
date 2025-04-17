@@ -52,7 +52,7 @@ export default function Inbox() {
 	return (
 		<div className="dvh-100 overflow-y-auto bg-light">
 			<GlobalSideBar />
-			<Container className="mt-4">
+			<Container className="my-4">
 				<h1 className="mb-4 mt-5 mt-lg-0 pt-4 pt-lg-0">Inbox</h1>
 				<InvitationList
 					invitations={data}

@@ -73,7 +73,7 @@ export function Setting({ name, maxValue, getter, setter }: SettingsProps) {
 					}}
 					onBlur={handleInputBlur}
 					ref={inputRef}
-					className="text-center border-0 bg-transparent fs-4 fw-bold flex-grow-1"
+					className="text-center border-0 bg-transparent fs-4 fw-bold flex-grow-1 mx-2"
 					style={{
 						width: "80px",
 						WebkitAppearance: "none",

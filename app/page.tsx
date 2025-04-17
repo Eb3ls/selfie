@@ -44,7 +44,14 @@ function NavbarComponent() {
 						Selfie Calendar
 					</span>
 				</Navbar.Brand>
-				<Navbar.Toggle className="border-0 p-0">
+				<Navbar.Toggle
+					className="border-0 p-0 focus-ring"
+					style={
+						{
+							"--bs-focus-ring-color": "none"
+						} as React.CSSProperties
+					}
+				>
 					<FaBars size={25} style={{ color: greenColor }} />
 				</Navbar.Toggle>
 				<Navbar.Collapse id="basic-navbar-nav">
