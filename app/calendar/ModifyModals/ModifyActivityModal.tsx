@@ -87,7 +87,7 @@ export function ModifyActivityModal({
 			mutate();
 		} else if (response.status === 400) {
 			const out = response.body;
-			if (out && out.message === undefined) {
+			if (out && out.message === undefined && out.users) {
 				toast.error(
 					"Errore durante la modifica dell'attività. Non è stato trovato l'utente: " +
 						out.users[0]

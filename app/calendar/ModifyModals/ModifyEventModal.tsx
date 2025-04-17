@@ -93,11 +93,18 @@ export function ModifyEventModal({
 			mutate();
 		} else if (response.status === 400) {
 			const out = response.body;
-			if (out && out.message === undefined) {
-				toast.error(
-					"Errore durante la modifica dell'evento. Non è stato trovato l'utente: " +
-						out.users[0]
-				);
+			if (out && out.message === undefined && out.users) {
+				if (out.users[0].startsWith("[RES]-")) {
+					toast.error(
+						"Errore durante la modifica dell'evento. Non è stata trovata la risorsa: " +
+							out.users[0].substring(6)
+					);
+				} else {
+					toast.error(
+						"Errore durante la modifica dell'evento. Non è stato trovato l'utente: " +
+							out.users[0]
+					);
+				}
 			} else {
 				toast.error("Errore durante la creazione dell'evento");
 			}

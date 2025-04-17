@@ -95,7 +95,7 @@ export default function CalendarIDPage() {
 						toolbar: () => null
 					}}
 					eventPropGetter={(event) => ({
-						className: `${event.typology}-color`
+						className: `bg-calendar-${event.typology}`
 					})}
 				/>
 
