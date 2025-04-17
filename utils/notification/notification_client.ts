@@ -43,29 +43,30 @@ export async function setupNotifications(): Promise<boolean> {
 	}
 
 	// 3. Verifica se il Service Worker è già registrato
-	if (await isServiceWorkerRegistered()) {
-		console.warn("Service Worker già registrato!");
-		return false;
+	if (!(await isServiceWorkerRegistered())) {
+		// 3.1. Registra il Service Worker
+		try {
+			await navigator.serviceWorker.register(SERVICE_WORKER_FILE_PATH);
+		} catch (error) {
+			console.warn("Registrazione del Service Worker fallita!", error);
+			return false;
+		}
 	}
 
-	// 4. Registra il Service Worker
-	try {
-		await navigator.serviceWorker.register(SERVICE_WORKER_FILE_PATH);
-	} catch (error) {
-		console.warn("Registrazione del Service Worker fallita!", error);
-		return false;
-	}
-
-	// 5. Attesa della registrazione del Service Worker
+	// 4. Attesa della registrazione del Service Worker
 	const registration = await navigator.serviceWorker.ready;
 
-	// 6. Sottoscrizione alle notifiche
+	// 5. Sottoscrizione alle notifiche
 	const options = {
 		userVisibleOnly: true,
 		applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
 	};
 
-	let pushSubscription;
+	let pushSubscription = await registration.pushManager.getSubscription();
+
+	if (pushSubscription) {
+		return true;
+	}
 
 	try {
 		pushSubscription = await registration.pushManager.subscribe(options);
@@ -74,7 +75,7 @@ export async function setupNotifications(): Promise<boolean> {
 		return false;
 	}
 
-	// 7. Invio al server
+	// 6. Invio al server
 	const response = await safeFetch(
 		fetch("/api/user/setNotify", {
 			method: "POST",
@@ -91,9 +92,6 @@ export async function setupNotifications(): Promise<boolean> {
 		console.warn("Errore durante l'invio delle informazioni al server!");
 		return false;
 	}
-
-	const data = response.body;
-	console.log("Risposta del server: ", data);
 
 	return true;
 }
