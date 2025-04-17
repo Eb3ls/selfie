@@ -43,6 +43,13 @@ export function EditNoteModal({ note, mutate, children }: EditNoteModalProps) {
 			return;
 		}
 
+		// Prendiamo la lista delle categorie separate da virgola non vuote
+		const categories = formData.categories
+			.split(",")
+			.map((category: string) => category.trim())
+			.filter((category: string) => category !== "");
+		formData.categories = categories.join(",");
+
 		// Aggiorna la nota con i nuovi dati
 		const body = {
 			_id: note._id,

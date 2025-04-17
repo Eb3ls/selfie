@@ -74,8 +74,6 @@ export const PATCH = async (request: NextRequest) => {
 		dtModified: time.toISOString()
 	};
 
-	console.log("newFields", newFields);
-
 	// Modifichiamo la nota
 	const updateOut = await updateCollectionWrapper<Note>(
 		{ _id: noteId },

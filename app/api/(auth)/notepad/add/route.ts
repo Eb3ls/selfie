@@ -45,6 +45,13 @@ export const POST = async (request: NextRequest) => {
 	// Aggiungiamo il campo 'ownerId' a newNote
 	newNote.ownerId = userId;
 
+	// Prendiamo la lista delle categorie separate da virgola non vuote
+	const categories = newNote.categories
+		.split(",")
+		.map((category: string) => category.trim())
+		.filter((category: string) => category !== "");
+	newNote.categories = categories.join(",");
+
 	// Aggiungiamo il campo 'userIdList' a newNote
 	newNote.userIdList.push(userId);
 

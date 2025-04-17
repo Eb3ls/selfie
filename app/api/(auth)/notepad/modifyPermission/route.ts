@@ -106,6 +106,13 @@ export const PATCH = async (request: NextRequest) => {
 		(userId: string) => !removedUsers.includes(userId)
 	);
 
+	// Prendiamo la lista delle categorie separate da virgola non vuote
+	const categories = convertedBody.categories
+		.split(",")
+		.map((category: string) => category.trim())
+		.filter((category: string) => category !== "");
+	convertedBody.categories = categories.join(",");
+
 	// Modifichiamo la nota
 	const updateOut = await updateCollectionWrapper<Note>(
 		{ _id: noteId },

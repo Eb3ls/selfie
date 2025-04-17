@@ -44,8 +44,6 @@ export default function Notepad() {
 				return dateB - dateA;
 			});
 
-			console.log(orderedData);
-
 			setOldNotes(orderedData);
 			setNotes(orderedData);
 		}
