@@ -3,6 +3,7 @@
 import { greenColor } from "@/app/color_palette";
 import { useUser } from "@/app/components/UserContext";
 import { safeFetch } from "@/utils/fetch/fetch";
+import { removeNotifications } from "@/utils/notification/notification_client";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -45,6 +46,8 @@ function CompleteFormComponent() {
 	// Gestisce il submit del form
 	const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
+
+		await removeNotifications();
 
 		const response = await safeFetch(
 			fetch("/api/signin", {

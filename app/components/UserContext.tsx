@@ -2,6 +2,7 @@
 
 import { PomodoroSettings } from "@/utils/db/db";
 import { safeFetch } from "@/utils/fetch/fetch";
+import { removeNotifications } from "@/utils/notification/notification_client";
 import { useRouter } from "next/navigation";
 import { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -73,6 +74,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 	}
 
 	async function logOutFunction() {
+		await removeNotifications();
 		const response = await safeFetch(fetch("/api/user/logout"));
 
 		if (!response.ok || response.redirected) {

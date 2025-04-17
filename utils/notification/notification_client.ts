@@ -95,3 +95,48 @@ export async function setupNotifications(): Promise<boolean> {
 
 	return true;
 }
+
+export async function removeNotifications(): Promise<boolean> {
+	// 1. Attendi la Service Worker registration
+	const registration = await navigator.serviceWorker.ready;
+
+	// 2. Recupera la push subscription
+	const subscription = await registration.pushManager.getSubscription();
+	if (!subscription) {
+		return true;
+	}
+
+	// 3. Disiscrizione lato client
+	let unsubscribed: boolean;
+	try {
+		unsubscribed = await subscription.unsubscribe();
+
+		if (!unsubscribed) {
+			console.warn("Disiscrizione fallita!");
+			return false;
+		}
+	} catch (error) {
+		console.warn("Errore durante la disiscrizione dalle notifiche!", error);
+		return false;
+	}
+
+	// 4. Notifica al server per rimuovere la subscription
+	const response = await safeFetch(
+		fetch("/api/user/removeNotify", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({
+				subscription
+			})
+		})
+	);
+
+	if (!response.ok) {
+		console.warn("Errore durante la rimozione delle notifiche sul server");
+		return false;
+	}
+
+	return true;
+}
