@@ -2,7 +2,7 @@
 
 import { GlobalSideBar } from "@/app/components/GlobalSideBar";
 import { useUser } from "@/app/components/UserContext";
-import { safeFetch } from "@/utils/fetch/fetch";
+import { generalFetcher } from "@/utils/fetch/fetch";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
@@ -14,6 +14,7 @@ import {
 } from "react-icons/fa";
 import { FaChartGantt } from "react-icons/fa6";
 import { toast } from "react-toastify";
+import useSWR from "swr";
 import "./home.css";
 import {
 	CalendarPreviews,
@@ -146,24 +147,26 @@ export default function Home() {
 
 	const router = useRouter();
 
-	useEffect(() => {
-		async function fetchPreviews() {
-			const response = await safeFetch<PreviewsResponse>(
-				fetch("/api/preview")
-			);
-
-			if (!response.ok) {
+	const { data: raw_previews } = useSWR<PreviewsResponse>(
+		"/api/preview",
+		generalFetcher,
+		{
+			revalidateOnFocus: true,
+			onError: () => {
 				toast.error("Errore durante il caricamento dei dati");
-				return;
 			}
-
-			const data: PreviewsResponse = response.body;
-			data.calendar = sortCalendar(data.calendar);
-			setPreviews(data);
 		}
+	);
 
-		fetchPreviews();
-	}, []);
+	useEffect(() => {
+		if (raw_previews) {
+			const new_previews = {
+				...raw_previews,
+				calendar: sortCalendar(raw_previews.calendar)
+			};
+			setPreviews(new_previews);
+		}
+	}, [raw_previews]);
 
 	return (
 		<div className="dvh-100 overflow-y-auto bg-light">
