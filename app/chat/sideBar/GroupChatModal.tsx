@@ -5,6 +5,7 @@ import { StandardModal } from "@/app/components/StandardModal";
 import { StandardUsersInput } from "@/app/components/StandardUsersInput";
 import { safeFetch } from "@/utils/fetch/fetch";
 import React, { useState } from "react";
+import { FaUserGroup } from "react-icons/fa6";
 import { toast } from "react-toastify";
 
 interface GroupChatModalProps {
@@ -65,7 +66,12 @@ export function GroupChatModal({
 
 			<StandardModal
 				title="Nuovo gruppo"
-				titleIcon={<i className="bi bi-people me-2"></i>}
+				titleIcon={
+					<FaUserGroup
+						className="text-primary d-flex justify-content-center ms-2"
+						size={20}
+					/>
+				}
 				saveBtnText="Crea"
 				show={show}
 				handleClose={() => {

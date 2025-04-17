@@ -4,6 +4,7 @@ import { StandardInput } from "@/app/components/StandardInput";
 import { StandardModal } from "@/app/components/StandardModal";
 import { safeFetch } from "@/utils/fetch/fetch";
 import React, { useState } from "react";
+import { FaComment } from "react-icons/fa6";
 import { toast } from "react-toastify";
 
 interface ChatModalProps {
@@ -64,7 +65,12 @@ export function ChatModal({
 
 			<StandardModal
 				title="Nuova chat"
-				titleIcon={<i className="bi bi-chat me-2" />}
+				titleIcon={
+					<FaComment
+						className="text-primary d-flex justify-content-center ms-2"
+						size={20}
+					/>
+				}
 				saveBtnText="Crea"
 				show={show}
 				handleClose={() => setShow(false)}

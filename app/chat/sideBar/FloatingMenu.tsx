@@ -3,6 +3,7 @@ import { GroupChatModal } from "@/app/chat/sideBar/GroupChatModal";
 import { useState } from "react";
 import React from "react";
 import { Button } from "react-bootstrap";
+import { FaComment, FaUserGroup } from "react-icons/fa6";
 import { IoIosAdd } from "react-icons/io";
 
 interface FloatingMenuProps {
@@ -36,7 +37,10 @@ export function FloatingMenu({ updateChatList }: FloatingMenuProps) {
 						variant="light"
 						className="dropdown-item d-flex align-items-center gap-2"
 					>
-						<i className="bi bi-chat"></i>
+						<FaComment
+							className="text-primary d-flex justify-content-center"
+							size={15}
+						/>
 						Crea nuova chat
 					</Button>
 				</ChatModal>
@@ -48,7 +52,10 @@ export function FloatingMenu({ updateChatList }: FloatingMenuProps) {
 						variant="light"
 						className="dropdown-item d-flex align-items-center gap-2"
 					>
-						<i className="bi bi-people"></i>
+						<FaUserGroup
+							className="text-primary d-flex justify-content-center"
+							size={15}
+						/>
 						Crea nuovo gruppo
 					</Button>
 				</GroupChatModal>

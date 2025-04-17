@@ -4,6 +4,7 @@ import { DEFAULT_PROFILE_URL } from "@/app/constants";
 import Image from "next/image";
 import { useState } from "react";
 import { Container } from "react-bootstrap";
+import { FaTrash } from "react-icons/fa6";
 import { IoPeopleCircleOutline, IoTrash } from "react-icons/io5";
 
 type SidebarEntry = {
@@ -107,7 +108,10 @@ export function UserItem({
 					updateChatList={updateChatList}
 				>
 					<Container className="rounded-circle p-2 delete-btn">
-						<IoTrash className="icon text-danger" size={24} />
+						<FaTrash
+							className="text-danger d-flex justify-content-center icon"
+							size={20}
+						/>
 					</Container>
 				</DeleteModal>
 			)}

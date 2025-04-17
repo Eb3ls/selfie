@@ -27,7 +27,7 @@ export function DeleteNoteModal({ children, handleDelete }: any) {
 				title="Elimina nota"
 				titleIcon={
 					<FaTrash
-						className="text-danger d-flex justify-content-center"
+						className="text-danger d-flex justify-content-center ms-2"
 						size={20}
 					/>
 				}

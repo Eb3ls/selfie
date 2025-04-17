@@ -3,6 +3,7 @@
 import { StandardModal } from "@/app/components/StandardModal";
 import { safeFetch } from "@/utils/fetch/fetch";
 import React, { useState } from "react";
+import { FaTrash } from "react-icons/fa6";
 import { toast } from "react-toastify";
 
 interface DeleteModalProps {
@@ -64,7 +65,12 @@ export function DeleteModal({
 
 			<StandardModal
 				title="Elimina chat"
-				titleIcon={<i className="bi bi-trash me-2" />}
+				titleIcon={
+					<FaTrash
+						className="text-danger d-flex justify-content-center ms-2"
+						size={20}
+					/>
+				}
 				saveBtnText="Cancella"
 				show={show}
 				handleClose={() => {
