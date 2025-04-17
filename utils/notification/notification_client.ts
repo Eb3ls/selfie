@@ -97,20 +97,28 @@ export async function setupNotifications(): Promise<boolean> {
 }
 
 export async function removeNotifications(): Promise<boolean> {
-	// 1. Verifica se il service worker è registrato
+	// 1. Verifica se il browser supporta le notifiche
+	if (!areNotificationsSupported()) {
+		console.warn("Il browser non supporta le notifiche!");
+		return false;
+	}
+
+	// 2. Verifica se il Service Worker è già registrato
 	if (!(await isServiceWorkerRegistered())) {
 		return true;
 	}
 
+	// 3. Otteniamo il Service Worker
 	const registration = await navigator.serviceWorker.ready;
 
-	// 2. Recupera la push subscription
+	// 4. Recupera la push subscription
 	const subscription = await registration.pushManager.getSubscription();
+
 	if (!subscription) {
 		return true;
 	}
 
-	// 3. Disiscrizione lato client
+	// 5. Disiscrizione lato client
 	let unsubscribed: boolean;
 	try {
 		unsubscribed = await subscription.unsubscribe();
@@ -124,7 +132,7 @@ export async function removeNotifications(): Promise<boolean> {
 		return false;
 	}
 
-	// 4. Notifica al server per rimuovere la subscription
+	// 6. Notifica al server per rimuovere la subscription
 	const response = await safeFetch(
 		fetch("/api/user/removeNotify", {
 			method: "POST",
