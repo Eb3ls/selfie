@@ -20,7 +20,7 @@ export function Header({
 		>
 			<Button
 				variant="link"
-				className="d-block d-ld-none"
+				className="d-lg-none d-flex align-items-center me-2"
 				onClick={() => {
 					setIsSidebarOpen(true);
 					setSelectedChat(null);
@@ -28,9 +28,10 @@ export function Header({
 			>
 				<FaArrowLeft fill="black" size={20}></FaArrowLeft>
 			</Button>
-			<h3 className="text-center fw-bold flex-grow-1 position-absolute top-50 start-50 translate-middle">
+			<h3 className="text-center fw-bold flex-grow-1 text-truncate m-0">
 				{chatSummary}
 			</h3>
+			<div className="d-block d-lg-none" style={{ minWidth: 34 }} />
 		</div>
 	);
 }

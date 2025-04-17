@@ -49,7 +49,7 @@ function sortCalendar(calendar: PreviewsResponse["calendar"]) {
 function WelcomeSection({ username }: { username: string | undefined }) {
 	return (
 		<div className="text-center py-4 mb-4">
-			<h1 className="display-4 mb-3 fw-bold text-primary">
+			<h1 className="display-4 mb-3 fw-bold text-primary text-truncate">
 				Benvenuto in Selfie{username ? `, ${username}` : ""}! 👋
 			</h1>
 			<p className="lead mb-4">
