@@ -40,14 +40,18 @@ function InvitationCard({
 		<Card className="border-0 rounded-3 shadow-sm hover-shadow transition-all">
 			<Card.Body className="p-4">
 				<div className="d-flex flex-column gap-2">
-					<div className="d-flex justify-content-between align-items-start">
-						<div>
-							<h5 className="fw-bold mb-1">{targetSummary}</h5>
-							<p className="text-muted mb-0">Da: {username}</p>
+					<div>
+						<div className="d-flex justify-content-between align-items-center">
+							<h5 className="fw-bold mb-0 text-truncate">
+								{targetSummary}
+							</h5>
+							<span className={`badge ${typeClass} rounded-pill`}>
+								{typeName}
+							</span>
 						</div>
-						<span className={`badge ${typeClass} rounded-pill`}>
-							{typeName}
-						</span>
+						<p className="text-muted mb-0 text-truncate">
+							Da: {username}
+						</p>
 					</div>
 					<div className="d-flex flex-wrap gap-2 mt-3 w-100">
 						<Button
