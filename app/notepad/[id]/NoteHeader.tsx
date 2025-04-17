@@ -5,6 +5,7 @@ import { EditNoteModal } from "./EditNoteModal";
 interface NoteHeaderProps {
 	ownerId: string;
 	userId?: string;
+	username: string;
 	summary: string;
 	note: any;
 	mutate: () => void;
@@ -14,6 +15,7 @@ interface NoteHeaderProps {
 export function NoteHeader({
 	ownerId,
 	userId,
+	username,
 	summary,
 	note,
 	mutate,
@@ -30,9 +32,11 @@ export function NoteHeader({
 						</button>
 					</EditNoteModal>
 				)}
-				<Button variant="primary" onClick={handleSave}>
-					Salva
-				</Button>
+				{note.userNameList.includes(username) && (
+					<Button variant="primary" onClick={handleSave}>
+						Salva
+					</Button>
+				)}
 			</div>
 		</div>
 	);

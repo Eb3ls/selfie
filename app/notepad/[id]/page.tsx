@@ -23,7 +23,7 @@ type noteData = {
 	dtStamp: string;
 	dtModified: string;
 	activityIdList: string[];
-	usernameList: string[] | undefined;
+	userNameList: string[];
 };
 
 const useWindowSize = () => {
@@ -189,6 +189,7 @@ export default function Note() {
 				<NoteHeader
 					ownerId={note.ownerId.toString()}
 					userId={user?._id?.toString()}
+					username={user?.username || ""}
 					summary={note.summary}
 					note={note}
 					mutate={mutate}
@@ -221,6 +222,11 @@ export default function Note() {
 							onChange={(e) => setNoteText(e.target.value)}
 							placeholder="Scrivi qui la tua nota..."
 							className="p-3 border rounded shadow-sm overflow-auto bg-white"
+							disabled={
+								!note.userNameList.includes(
+									user?.username || ""
+								)
+							}
 							style={{
 								flexBasis: 0,
 								flexGrow: 1,

@@ -1,17 +1,19 @@
 import { idListToNameList, validate } from "@/utils/api/api";
 import {
 	generateMessageResponse,
-	generateObjectResponse,
-	stringsToObjectId
+	generateObjectResponse
 } from "@/utils/api/common";
 import {
 	NOTE_COLLECTION,
 	Note,
+	PROJECT_ACTIVITY_COLLECTION,
+	ProjectActivity,
 	StringNote,
+	StringProjectActivity,
 	findCollectionWrapper,
 	getCollection
 } from "@/utils/db/db";
-import { Collection } from "mongodb";
+import { Collection, ObjectId } from "mongodb";
 import { NextRequest } from "next/server";
 
 export const GET = async (request: NextRequest) => {
@@ -33,7 +35,7 @@ export const GET = async (request: NextRequest) => {
 	const noteId = searchParams.get("id");
 
 	// Controlliamo che l'ID sia valido
-	if (!noteId || !stringsToObjectId([noteId])) {
+	if (!noteId || !ObjectId.isValid(noteId)) {
 		return generateMessageResponse("Invalid or missing note ID", 400);
 	}
 
@@ -75,10 +77,67 @@ export const GET = async (request: NextRequest) => {
 
 	// Verifichiamo che l'utente appartenga alla lista di userIdList
 	if (note[0].access === "INVITED" && !note[0].userIdList.includes(userId)) {
-		return generateMessageResponse(
-			"User not authorized to access note",
-			403
+		// Se la nota è di una attività di progetto, potrebbe essere che l'utente abbia accesso ad una delle attività di progetto successive
+		// Se è questo il caso, allora possiamo restituire la nota
+
+		// Ottengo la collezione delle attività di progetto
+		const projectActivityClient: Collection<ProjectActivity> =
+			await getCollection(PROJECT_ACTIVITY_COLLECTION);
+
+		// Verifichiamo se la nota è di un'attività di progetto
+		const projectActivityOut = await findCollectionWrapper(
+			{ noteId: noteId },
+			projectActivityClient
 		);
+
+		if (projectActivityOut.status !== 200) {
+			// Se non è un'attività di progetto, restituiamo l'errore
+			return generateMessageResponse(
+				"User not authorized to access note",
+				403
+			);
+		}
+
+		// Se è un'attività di progetto, verifichiamo se l'utente ha accesso ad una delle attività di progetto successive
+		const projectActivity: StringProjectActivity = (
+			await projectActivityOut.json()
+		)[0];
+
+		// Per farlo prendiamo tutte le attività di progetto
+		const allProjectActivities = await findCollectionWrapper(
+			{ projectId: projectActivity.projectId },
+			projectActivityClient
+		);
+
+		if (allProjectActivities.status !== 200) {
+			// Se non ci sono attività di progetto, restituiamo l'errore
+			return generateMessageResponse(
+				"User not authorized to access note",
+				403
+			);
+		}
+
+		// Filtriamo le attività di progetto per quelle che hanno un _id prensente nella lista di nextIdList
+		const allProjectActivitiesList: StringProjectActivity[] =
+			await allProjectActivities.json();
+
+		const nextActivities = allProjectActivitiesList.filter(
+			(activity: StringProjectActivity) =>
+				projectActivity.nextIdList.includes(activity._id!)
+		);
+
+		// Controlliamo se l'utente ha accesso ad una delle attività di progetto successive
+		const userAccess = nextActivities.some((activity) =>
+			activity.userIdList.includes(userId)
+		);
+
+		if (!userAccess) {
+			// Se non ha accesso, restituiamo l'errore
+			return generateMessageResponse(
+				"User not authorized to access note",
+				403
+			);
+		}
 	}
 
 	// Convertiamo la lista di ID in una lista di nomi
