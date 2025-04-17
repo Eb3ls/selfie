@@ -4,10 +4,11 @@ import { generalFetcher, safeFetch } from "@/utils/fetch/fetch";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "react-bootstrap";
-import { IoMusicalNotes, IoShareSocial, IoTimerOutline } from "react-icons/io5";
+import { IoMusicalNotes, IoTimerOutline } from "react-icons/io5";
 import { toast } from "react-toastify";
 import useSWR from "swr";
 import { GlobalSideBar } from "../components/GlobalSideBar";
+import { useUser } from "../components/UserContext";
 import { Coffee } from "./Animation/Coffee";
 import { Tree } from "./Animation/Tree";
 import { MusicView } from "./MusicBar/MusicView";
@@ -27,6 +28,8 @@ function PomodoroImplementation() {
 	const [isMusicView, setIsMusicView] = useState(false);
 	const [resetTrigger, setResetTrigger] = useState(0);
 	const originalSessions = useRef<number>(0);
+
+	const { fetchUser } = useUser();
 
 	const searchParams = useSearchParams();
 	let id = searchParams.get("id");
@@ -120,9 +123,11 @@ function PomodoroImplementation() {
 						"Errore persistente. Impossibile salvare le impostazioni"
 					);
 				}
+			} else {
+				fetchUser();
 			}
 		},
-		[sessions, studyTime, breakTime]
+		[sessions, studyTime, breakTime, fetchUser]
 	);
 
 	// Ogni 10 secondi se non ci sono nuove modifiche salva le impostazioni
