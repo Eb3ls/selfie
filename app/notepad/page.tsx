@@ -302,9 +302,10 @@ export default function Notepad() {
 							{note.ownerId === user?._id &&
 								note.type === "note" && (
 									<DeleteNoteModal
-										handleDelete={() =>
-											handleDelete(note._id!)
-										}
+										handleDelete={(e: any) => {
+											e.preventDefault();
+											handleDelete(note._id!);
+										}}
 									>
 										<Button
 											variant="link"

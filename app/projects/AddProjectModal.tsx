@@ -51,6 +51,8 @@ export function AddProjectModal({ children, handleAdd }: any) {
 					placeholder="Inserisci il titolo del progetto"
 					value={formData.summary}
 					onChange={handleChange}
+					min={3}
+					max={50}
 				/>
 			</StandardModal>
 		</>

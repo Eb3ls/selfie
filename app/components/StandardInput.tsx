@@ -87,6 +87,8 @@ export function StandardInput({
 					className="form-control"
 					min={min}
 					max={max}
+					minLength={typeof min === "number" ? min : undefined}
+					maxLength={typeof max === "number" ? max : undefined}
 				/>
 			</div>
 		);

@@ -2,6 +2,7 @@
 
 import { StandardModal } from "@/app/components/StandardModal";
 import React, { useState } from "react";
+import { FaTrash } from "react-icons/fa6";
 
 export function DeleteNoteModal({ children, handleDelete }: any) {
 	const [show, setShow] = useState(false);
@@ -24,7 +25,12 @@ export function DeleteNoteModal({ children, handleDelete }: any) {
 
 			<StandardModal
 				title="Elimina nota"
-				titleIcon={<i className="bi bi-trash me-2" />}
+				titleIcon={
+					<FaTrash
+						className="text-danger d-flex justify-content-center"
+						size={20}
+					/>
+				}
 				saveBtnText="Cancella"
 				show={show}
 				handleClose={() => {
