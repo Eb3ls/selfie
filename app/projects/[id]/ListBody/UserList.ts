@@ -137,6 +137,8 @@ class UsersList extends HTMLElement {
 	}
 }
 
-customElements.define("users-list", UsersList);
+if (!customElements.get("users-list")) {
+	customElements.define("users-list", UsersList);
+}
 
 export default UsersList;

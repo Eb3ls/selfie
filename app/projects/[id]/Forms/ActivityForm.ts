@@ -33,6 +33,7 @@ class ActivityForm extends HTMLElement {
 	usersList: User[];
 	selectedLinks: PartialLink[];
 	isOwner: boolean;
+	currentUser: User;
 
 	constructor() {
 		super();
@@ -43,6 +44,7 @@ class ActivityForm extends HTMLElement {
 		this.usersList = [];
 		this.selectedLinks = [];
 		this.isOwner = false;
+		this.currentUser = {} as User;
 	}
 
 	// Renderizziamo il componente senza contenuto
@@ -63,11 +65,13 @@ class ActivityForm extends HTMLElement {
 	public loadProjectData(
 		activitiesList: ProjectActivityResponse[],
 		usersAvaiable: User[],
-		isOwner: boolean
+		isOwner: boolean,
+		currentUser: User
 	) {
 		this.activitiesList = [...activitiesList];
 		this.usersAvaiable = [...usersAvaiable];
 		this.isOwner = isOwner;
+		this.currentUser = currentUser;
 	}
 
 	// Funzione per fornire i dati dell'activity specifica
@@ -91,6 +95,14 @@ class ActivityForm extends HTMLElement {
 	}
 
 	private createViewTemplate() {
+		// Controlliamo se l'utente corrente ha il permesso di vedere le note associate
+		let type: "NONE" | "VIEW" | "NONE" = "NONE";
+		if (this.activity.users.some((obj) => obj.id === this.currentUser.id)) {
+			type = "VIEW";
+		} else if (this.isOwner) {
+			type = "VIEW";
+		}
+
 		// Creiamo il blocco per le attivitá associate
 		let selectedLinksBlock = "";
 		if (this.activity.prevLinks.length > 0) {
@@ -98,7 +110,7 @@ class ActivityForm extends HTMLElement {
 				const linkBlock = createLinkEntry(
 					link.summary,
 					link.noteId,
-					false,
+					type,
 					null
 				);
 				selectedLinksBlock += linkBlock.outerHTML;
@@ -139,6 +151,14 @@ class ActivityForm extends HTMLElement {
 			</div>
 		`;
 
+		// Se l'utente corrente é uno degli utenti assegnati, mostriamo il link alla nota
+		let noteLinkBlock = "";
+		if (type === "VIEW") {
+			noteLinkBlock = `<div class="mb-4">
+					${createLinkEntry("Nota della attività", this.activity.noteId!, "VIEW", null).outerHTML}
+			</div>`;
+		}
+
 		return `
 			<div class="modal-body">
 				${titleBlock}
@@ -163,9 +183,7 @@ class ActivityForm extends HTMLElement {
 					</div>
 				</div>
 
-				<div class="mb-4">
-					${createLinkEntry("Nota della attività", this.activity.noteId!, false, null).outerHTML}
-				</div>
+				${noteLinkBlock}
 
 				<div class="mb-4">
 					<label class="form-label text-muted small">Utenti assegnati</label>
@@ -291,7 +309,9 @@ class ActivityForm extends HTMLElement {
 	}
 }
 
-customElements.define("activity-form", ActivityForm);
+if (!customElements.get("activity-form")) {
+	customElements.define("activity-form", ActivityForm);
+}
 
 export default ActivityForm;
 
@@ -397,7 +417,13 @@ class ActivityLinkForm extends HTMLElement {
 					'<div id="noLinks">Nessuna attività associata</div>';
 			}
 		};
-		const linkBlock = createLinkEntry(item.name, "", true, deleteCallback);
+
+		const linkBlock = createLinkEntry(
+			item.name,
+			"",
+			"DELETE",
+			deleteCallback
+		);
 
 		// Se non ci sono elementi nella lista, rimuoviamo il messaggio
 		if (list.querySelector("#noLinks")) {
@@ -539,8 +565,10 @@ class ActivityLinkForm extends HTMLElement {
 		this.setupEventListeners();
 	}
 }
-
-customElements.define("activity-link-form", ActivityLinkForm);
+if (!customElements.get("activity-link-form")) {
+	// Se non esiste, lo definiamo
+	customElements.define("activity-link-form", ActivityLinkForm);
+}
 
 class ActivityDeleteForm extends HTMLElement {
 	activity: ProjectActivityResponse;
@@ -622,7 +650,10 @@ class ActivityDeleteForm extends HTMLElement {
 	}
 }
 
-customElements.define("activity-delete-form", ActivityDeleteForm);
+if (!customElements.get("activity-delete-form")) {
+	// Se non esiste, lo definiamo
+	customElements.define("activity-delete-form", ActivityDeleteForm);
+}
 
 class ActivityModifyForm extends HTMLElement {
 	activity: ProjectActivityResponse;
@@ -934,7 +965,9 @@ class ActivityModifyForm extends HTMLElement {
 	}
 }
 
-customElements.define("activity-modify-form", ActivityModifyForm);
+if (!customElements.get("activity-modify-form")) {
+	customElements.define("activity-modify-form", ActivityModifyForm);
+}
 
 // Funzione per aggiungere i dati al modale dell'Activity
 export function openActivityForm(

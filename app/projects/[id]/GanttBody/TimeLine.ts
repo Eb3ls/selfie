@@ -253,6 +253,8 @@ class TimeLine extends HTMLElement {
 	}
 }
 
-customElements.define("time-line", TimeLine);
+if (!customElements.get("time-line")) {
+	customElements.define("time-line", TimeLine);
+}
 
 export default TimeLine;

@@ -351,16 +351,19 @@ export function createUserEntry(
 
 // Link
 
-// Funzione per generare una singola entry per la lista dei link, o ha il pulsante di eliminazione oppure quello per andare alla nota
+// Funzione per generare una singola entry per la lista dei link
+// DELETE: bottone con icona del cestino
+// VIEW: bottone con bottone per andare alla nota
+// NONE: nessun bottone
 export function createLinkEntry(
 	summary: string,
 	noteId: string,
-	isDeleteBtn: boolean,
+	type: "DELETE" | "VIEW" | "NONE",
 	deleteCallback: any
 ): HTMLElement {
 	const linkEntry = createEntry(summary, "bi bi-link-45deg");
 
-	if (isDeleteBtn) {
+	if (type === "DELETE") {
 		const deleteBtn = document.createElement("button");
 		deleteBtn.type = "button";
 		deleteBtn.className = "btn btn-danger btn-sm";
@@ -372,7 +375,8 @@ export function createLinkEntry(
 
 		deleteBtn.onclick = deleteCallback;
 		linkEntry.appendChild(deleteBtn);
-	} else {
+		return linkEntry;
+	} else if (type === "VIEW") {
 		const viewBtn = document.createElement("a");
 		viewBtn.href = `/notepad/${noteId}`;
 		viewBtn.className = "btn btn-primary btn-sm";

@@ -15,7 +15,6 @@ import TimeList from "./ListBody/TimeList";
 import UsersList from "./ListBody/UserList";
 import {
 	PhaseToggleMap,
-	ROW_HEIGHT,
 	ROW_HEIGHT_PX,
 	SortedActivity,
 	User,
@@ -200,7 +199,7 @@ class ViewToggler extends HTMLElement {
 	}
 
 	loadUpperHeaderData() {
-		if (!this.projectData) return;
+		if (!this.projectData || !this.currentUser) return;
 		if (this.isOwner) {
 			const addForm = this.querySelector(
 				"add-form-component"
@@ -227,7 +226,7 @@ class ViewToggler extends HTMLElement {
 			this.projectData.summary,
 			this.projectData._id,
 			this.projectData.users,
-			this.currentUser || this.projectData.users[0]
+			this.currentUser
 		);
 
 		const activityForm = document.querySelector(
@@ -238,7 +237,8 @@ class ViewToggler extends HTMLElement {
 			activityForm.loadProjectData(
 				this.sortedActivities,
 				this.projectData.users,
-				this.isOwner
+				this.isOwner,
+				this.currentUser
 			);
 		}
 	}
@@ -487,6 +487,8 @@ class ViewToggler extends HTMLElement {
 	}
 }
 
-customElements.define("view-toggler", ViewToggler);
+if (!customElements.get("view-toggler")) {
+	customElements.define("view-toggler", ViewToggler);
+}
 
 export default ViewToggler;

@@ -373,7 +373,9 @@ class PhaseForm extends HTMLElement {
 	}
 }
 
-customElements.define("phase-form", PhaseForm);
+if (!customElements.get("phase-form")) {
+	customElements.define("phase-form", PhaseForm);
+}
 
 export default PhaseForm;
 // Funzione per aggiungere i dati al modale della Phase

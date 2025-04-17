@@ -150,7 +150,9 @@ class AddForm extends HTMLElement {
 	}
 }
 
-customElements.define("add-form-component", AddForm);
+if (!customElements.get("add-form-component")) {
+	customElements.define("add-form-component", AddForm);
+}
 
 export default AddForm;
 
@@ -255,7 +257,9 @@ class AddPhaseForm extends HTMLElement {
 	}
 }
 
-customElements.define("add-phase-form", AddPhaseForm);
+if (!customElements.get("add-phase-form")) {
+	customElements.define("add-phase-form", AddPhaseForm);
+}
 
 class AddSubPhaseForm extends HTMLElement {
 	projectId: string;
@@ -458,7 +462,9 @@ class AddSubPhaseForm extends HTMLElement {
 	}
 }
 
-customElements.define("add-subphase-form", AddSubPhaseForm);
+if (!customElements.get("add-subphase-form")) {
+	customElements.define("add-subphase-form", AddSubPhaseForm);
+}
 
 class AddActivityForm extends HTMLElement {
 	phaseList: PhaseResponse[];
@@ -862,4 +868,6 @@ class AddActivityForm extends HTMLElement {
 	}
 }
 
-customElements.define("add-activity-form", AddActivityForm);
+if (!customElements.get("add-activity-form")) {
+	customElements.define("add-activity-form", AddActivityForm);
+}

@@ -241,6 +241,8 @@ class SideGanttList extends HTMLElement {
 	}
 }
 
-customElements.define("side-gantt-list", SideGanttList);
+if (!customElements.get("side-gantt-list")) {
+	customElements.define("side-gantt-list", SideGanttList);
+}
 
 export default SideGanttList;

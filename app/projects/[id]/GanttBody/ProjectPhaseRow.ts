@@ -281,6 +281,8 @@ class ProjectPhaseRow extends HTMLElement {
 	}
 }
 
-customElements.define("project-phase-row", ProjectPhaseRow);
+if (!customElements.get("project-phase-row")) {
+	customElements.define("project-phase-row", ProjectPhaseRow);
+}
 
 export default ProjectPhaseRow;

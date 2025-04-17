@@ -162,6 +162,8 @@ class TimeList extends HTMLElement {
 	}
 }
 
-customElements.define("time-list", TimeList);
+if (!customElements.get("time-list")) {
+	customElements.define("time-list", TimeList);
+}
 
 export default TimeList;

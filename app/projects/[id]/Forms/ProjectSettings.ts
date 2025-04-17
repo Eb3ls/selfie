@@ -544,6 +544,8 @@ class ProjectSettings extends HTMLElement {
 	}
 }
 
-customElements.define("project-settings", ProjectSettings);
+if (!customElements.get("project-settings")) {
+	customElements.define("project-settings", ProjectSettings);
+}
 
 export default ProjectSettings;
