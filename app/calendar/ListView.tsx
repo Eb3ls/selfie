@@ -51,7 +51,9 @@ export function ListView({ events }: { events: CalendarEvent[] }): JSX.Element {
 								<div className="text-muted mb-1">
 									{moment(event.start).format("HH:mm")}
 								</div>
-								<div>{event.title}</div>
+								<div className="text-truncate">
+									{event.title}
+								</div>
 							</div>
 						))}
 					</div>

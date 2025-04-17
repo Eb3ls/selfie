@@ -160,9 +160,9 @@ export default function ProjectPage() {
 								<span className="label d-block mb-1">
 									Collaboratori
 								</span>
-								<span className="text-truncate">
+								<p className="text-truncate m-0 p-0">
 									{project.userNameList.join(", ")}
-								</span>
+								</p>
 							</div>
 						)}
 					</div>

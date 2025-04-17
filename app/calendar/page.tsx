@@ -37,6 +37,8 @@ export default function CalendarPage() {
 	const { dateTime } = useTime();
 	const [currentDate, setCurrentDate] = useState(dateTime);
 
+	const [modalsCount, setModalsCount] = useState(0);
+
 	const { data: pulledCalendar, mutate } = useSWR<CalendarResponse>(
 		"/api/calendar/getCalendar",
 		generalFetcher
@@ -62,6 +64,7 @@ export default function CalendarPage() {
 		const selectedEvent: CalendarEvent = {
 			...event
 		};
+		setModalsCount((prev) => prev + 1);
 		setSelectedCalendarEvent(selectedEvent);
 		setShowModal(true);
 	};
@@ -109,7 +112,7 @@ export default function CalendarPage() {
 
 				{selectedCalendarEvent && (
 					<GenericModifyModal
-						key={selectedCalendarEvent.id}
+						key={modalsCount}
 						calendarEvent={selectedCalendarEvent}
 						showModal={showModal}
 						setShowModal={setShowModal}
