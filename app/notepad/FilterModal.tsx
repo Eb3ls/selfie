@@ -7,8 +7,17 @@ import { toast } from "react-toastify";
 import { StandardInput } from "../components/StandardInput";
 import { StandardModal } from "../components/StandardModal";
 
-// TODO: Sistemare ricerca categorie - cercare più categorie insieme
-export function FilterModal({ children, handleFilters }: any) {
+interface FilterModalProps {
+	children: React.ReactNode;
+	setFilters: (filters: any) => void;
+	handleFilters: (filters: any) => void;
+}
+
+export function FilterModal({
+	children,
+	setFilters,
+	handleFilters
+}: FilterModalProps) {
 	const [show, setShow] = useState(false);
 	const [formData, setFormData] = useState({
 		creationDateMin: "", // Usa null per evitare problemi di conversione
@@ -73,9 +82,15 @@ export function FilterModal({ children, handleFilters }: any) {
 			...(formData.categories && { categories: formData.categories })
 		};
 
+		// Salviamo i filtri correnti quali ultimi applicati
+		setFilters(filters);
+
 		handleFilters(filters);
 
-		// Reset del form dopo l'invio
+		setShow(false);
+	}
+
+	function handleReset() {
 		setFormData({
 			creationDateMin: "",
 			creationDateMax: "",
@@ -83,7 +98,22 @@ export function FilterModal({ children, handleFilters }: any) {
 			lengthMax: "",
 			categories: ""
 		});
+
+		setFilters({});
+		handleFilters({});
 		setShow(false);
+	}
+
+	function getResetButton() {
+		return (
+			<button
+				type="button"
+				className="btn btn-light px-4 py-2 border-0 rounded-3 hover-lift"
+				onClick={handleReset}
+			>
+				Resetta
+			</button>
+		);
 	}
 
 	return (
@@ -100,6 +130,7 @@ export function FilterModal({ children, handleFilters }: any) {
 				show={show}
 				handleClose={() => setShow(false)}
 				handleSubmit={handleSubmit}
+				extraHeaderButtons={getResetButton()}
 			>
 				<Form.Group className="mb-4" controlId="formCreationDate">
 					<Form.Label>
@@ -143,6 +174,7 @@ export function FilterModal({ children, handleFilters }: any) {
 								onChange={handleChange}
 								placeholder="Lunghezza minima"
 								className="input-field"
+								min={0}
 							/>
 						</div>
 						<div className="col-12 col-sm-6">
@@ -154,6 +186,7 @@ export function FilterModal({ children, handleFilters }: any) {
 								onChange={handleChange}
 								placeholder="Lunghezza massima"
 								className="input-field"
+								min={0}
 							/>
 						</div>
 					</div>

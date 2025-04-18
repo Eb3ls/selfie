@@ -35,15 +35,25 @@ export default function Notepad() {
 		generalFetcher
 	);
 
+	const [sortOrder, setSortOrder] = useState<{
+		field: string;
+		direction: "asc" | "desc";
+	} | null>(null);
+
+	const [filters, setFilters] = useState({});
+
+	function orderByModifiedDate(array: ExtendedStringNote[]) {
+		return array.sort((a, b) => {
+			const dateA = new Date(a.dtModified).getTime();
+			const dateB = new Date(b.dtModified).getTime();
+			return dateB - dateA;
+		});
+	}
+
 	// Aggiorna notes quando i dati vengono recuperati
 	useEffect(() => {
 		if (data) {
-			const orderedData = data.sort((a, b) => {
-				const dateA = new Date(a.dtModified).getTime();
-				const dateB = new Date(b.dtModified).getTime();
-				return dateB - dateA;
-			});
-
+			const orderedData = orderByModifiedDate(data);
 			setOldNotes(orderedData);
 			setNotes(orderedData);
 		}
@@ -94,14 +104,26 @@ export default function Notepad() {
 		setOldNotes(filteredNotes);
 	}
 
-	function handleSort(sortParams: {
-		field: string;
-		direction: "asc" | "desc";
-	}) {
+	function handleSort(
+		sortParams: {
+			field: string;
+			direction: "asc" | "desc";
+		} | null
+	) {
+		setSortOrder(sortParams);
+
+		if (!sortParams) {
+			const orderedData = orderByModifiedDate(notes);
+
+			setNotes(orderedData);
+			setOldNotes(orderedData);
+			return;
+		}
+
 		const { field, direction } = sortParams;
 
 		// Funzione di ordinamento basata sul campo e direzione
-		const sortedNotes = [...notes].sort((a: any, b: any) => {
+		const sortedNotes = [...notes].sort((a, b) => {
 			let valueA, valueB;
 
 			// Determina i valori per il confronto basati sul campo
@@ -138,13 +160,19 @@ export default function Notepad() {
 	function handleSearch(e: any) {
 		const searchTerm = e.target.value;
 
-		const filteredNotes = oldNotes.filter((note: any) => {
+		if (searchTerm === "") {
+			// Se la barra di ricerca è vuota, ripristiniamo le note originali
+			setNotes(oldNotes);
+			return;
+		}
+
+		const filteredNotes = oldNotes.filter((note) => {
 			return note.summary
 				.toLowerCase()
 				.includes(searchTerm.toLowerCase());
 		});
 
-		searchTerm !== "" ? setNotes(filteredNotes) : setNotes(oldNotes);
+		setNotes(filteredNotes);
 	}
 
 	async function handleAdd(note: { summary: string; categories: string }) {
@@ -280,6 +308,33 @@ export default function Notepad() {
 		);
 	}
 
+	function getSortInfo() {
+		if (!sortOrder) {
+			return null;
+		}
+
+		const { field, direction } = sortOrder;
+
+		let icon = direction === "asc" ? "↑" : "↓";
+
+		let fieldText = "";
+		if (field === "alphabetical") {
+			fieldText = "titolo";
+		}
+		if (field === "date") {
+			fieldText = "data di creazione";
+		}
+		if (field === "length") {
+			fieldText = "lunghezza";
+		}
+
+		return (
+			<span className="text-muted small d-flex align-items-center justify-content-center mt-3 p-3">
+				Ordinato per {fieldText} {icon}
+			</span>
+		);
+	}
+
 	function createNoteEntry(note: ExtendedStringNote) {
 		const noteEntry = (
 			<div
@@ -362,7 +417,9 @@ export default function Notepad() {
 						handleSort={handleSort}
 						handleSearch={handleSearch}
 						handleAdd={handleAdd}
+						setFilters={setFilters}
 					/>
+					{getSortInfo()}
 				</div>
 
 				{error ? (

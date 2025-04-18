@@ -1,18 +1,32 @@
 "use client";
 
-import { Button, Form } from "react-bootstrap";
+import { Form } from "react-bootstrap";
 import { FaFilter, FaPlus, FaSort } from "react-icons/fa";
 import { AddNoteModal } from "./AddNoteModal";
 import { FilterModal } from "./FilterModal";
 import { SortModal } from "./SortModal";
 import "./style.css";
 
+interface SearchBarProps {
+	handleFilters: (filters: any) => void;
+	handleSort: (
+		sortParams: {
+			field: string;
+			direction: "asc" | "desc";
+		} | null
+	) => void;
+	handleSearch: (event: React.ChangeEvent<HTMLInputElement>) => void;
+	handleAdd: (note: any) => void;
+	setFilters: (filters: any) => void;
+}
+
 export function SearchBar({
 	handleFilters,
 	handleSort,
 	handleSearch,
-	handleAdd
-}: any) {
+	handleAdd,
+	setFilters
+}: SearchBarProps) {
 	return (
 		<div>
 			<div
@@ -31,7 +45,10 @@ export function SearchBar({
 				</div>
 
 				<div className="d-flex justify-content-center align-items-center gap-3">
-					<FilterModal handleFilters={handleFilters}>
+					<FilterModal
+						handleFilters={handleFilters}
+						setFilters={setFilters}
+					>
 						<button className="action-button p-2 px-3 rounded-3 bg-white d-flex align-items-center fw-semibold hover-lift">
 							<FaFilter />
 							<span> Filtri</span>

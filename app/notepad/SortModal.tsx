@@ -21,6 +21,23 @@ export function SortModal({ children, handleSort }: any) {
 		setShow(false);
 	}
 
+	function handleReset() {
+		handleSort(null);
+		setShow(false);
+	}
+
+	function resetButton() {
+		return (
+			<Button
+				variant="light"
+				onClick={handleReset}
+				className="px-4 py-2 border-0 rounded-3 hover-lift"
+			>
+				Resetta
+			</Button>
+		);
+	}
+
 	return (
 		<>
 			{/* Bottone per aprire il modal */}
@@ -33,6 +50,7 @@ export function SortModal({ children, handleSort }: any) {
 				saveBtnText="Applica"
 				show={show}
 				handleClose={() => setShow(false)}
+				extraHeaderButtons={resetButton()}
 			>
 				<Form.Group className="mb-4" controlId="formSortAlphabetical">
 					<Form.Label>

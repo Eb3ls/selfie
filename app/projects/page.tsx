@@ -31,6 +31,11 @@ export default function ProjectPage() {
 		generalFetcher
 	);
 
+	const [sortOrder, setSortOrder] = useState<{
+		field: string;
+		direction: "asc" | "desc";
+	} | null>(null);
+
 	// Aggiorna projects quando i dati vengono recuperati
 	useEffect(() => {
 		if (data) {
@@ -39,10 +44,24 @@ export default function ProjectPage() {
 		}
 	}, [data]);
 
-	function handleSort(sortParams: {
-		field: string;
-		direction: "asc" | "desc";
-	}) {
+	function handleSort(
+		sortParams: {
+			field: string;
+			direction: "asc" | "desc";
+		} | null
+	) {
+		setSortOrder(sortParams);
+
+		if (!sortParams) {
+			// Se non ci sono parametri di ordinamento, ripristina i progetti originali
+			const filteredOldProjects = oldProjects.filter((p) =>
+				projects.some((project) => project._id === p._id)
+			);
+
+			setProjects(filteredOldProjects);
+			return;
+		}
+
 		const { field, direction } = sortParams;
 
 		const sortedProjects = [...projects].sort((a, b) => {
@@ -80,11 +99,17 @@ export default function ProjectPage() {
 	function handleSearch(e: any) {
 		const searchTerm = e.target.value;
 
+		if (searchTerm === "") {
+			// Se la barra di ricerca è vuota, ripristiniamo i progetti originali
+			setProjects(oldProjects);
+			return;
+		}
+
 		const filteredProjects = oldProjects.filter((project) =>
 			project.summary.toLowerCase().includes(searchTerm.toLowerCase())
 		);
 
-		setProjects(searchTerm !== "" ? filteredProjects : oldProjects);
+		setProjects(filteredProjects);
 	}
 
 	async function handleAdd(project: { summary: string }) {
@@ -122,6 +147,29 @@ export default function ProjectPage() {
 	function handleNoteClick(noteId: string) {
 		// Usa il router di Next.js per navigare alla pagina della nota
 		router.push(`/notepad/${noteId}`);
+	}
+
+	function getSortInfo() {
+		if (!sortOrder) {
+			return null;
+		}
+
+		const { field, direction } = sortOrder;
+
+		let icon = direction === "asc" ? "↑" : "↓";
+
+		let fieldText = "";
+		if (field === "owner") {
+			fieldText = "proprietario";
+		} else if (field === "summary") {
+			fieldText = "titolo";
+		}
+
+		return (
+			<span className="text-muted small d-flex align-items-center justify-content-center mt-3 p-3">
+				Ordinato per {fieldText} {icon}
+			</span>
+		);
 	}
 
 	function createProjectEntry(project: Project, isOwner: boolean) {
@@ -191,6 +239,8 @@ export default function ProjectPage() {
 						handleSearch={handleSearch}
 						handleAdd={handleAdd}
 					/>
+
+					{getSortInfo()}
 				</div>
 
 				{error ? (
