@@ -288,7 +288,7 @@ export default function Notepad() {
 		));
 
 		return (
-			<div className="rounded-3 p-2 d-flex gap-2 flex-nowrap overflow-auto hide-scrollbar">
+			<div className="rounded-3 p-2 d-flex gap-2 flex-nowrap overflow-auto">
 				{block}
 			</div>
 		);

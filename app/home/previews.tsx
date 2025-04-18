@@ -55,14 +55,14 @@ export const NotePreviews = ({ notes }: { notes: ReducedNote[] }) => {
 					<div className="d-flex justify-content-between align-items-center">
 						<h6 className="mb-1 text-truncate">{note.summary}</h6>
 					</div>
-					<div className="d-flex align-items-center text-truncate">
+					<div className="d-flex align-items-center text-truncate gap-1 my-1">
 						{note.categories &&
 							note.categories
 								.split(",")
 								.map((category, index) => (
 									<span
 										key={index}
-										className="badge bg-primary me-1"
+										className="category-badge rounded-pill px-2 py-1"
 									>
 										{category.trim()}
 									</span>

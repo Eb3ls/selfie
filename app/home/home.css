@@ -10,3 +10,11 @@
 		max-height: 700px !important;
 	}
 }
+
+.category-badge {
+	background: rgba(39, 174, 96, 0.08);
+	color: #27ae60;
+	border: 1px solid rgba(39, 174, 96, 0.15);
+	font-size: 0.6rem;
+	font-weight: 500;
+}
