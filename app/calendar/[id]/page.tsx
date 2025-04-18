@@ -17,7 +17,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Calendar, View, momentLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import { Container } from "react-bootstrap";
+import { Button, Container } from "react-bootstrap";
 import useSWR from "swr";
 import "../calendar.css";
 import { LittleCustomToolbar } from "./LittleCustomToolbar";
@@ -43,7 +43,11 @@ export default function CalendarIDPage() {
 	const { dateTime } = useTime();
 	const [currentDate, setCurrentDate] = useState(dateTime);
 
-	const { data: pulledCalendar, mutate } = useSWR<CalendarResponse>(
+	const {
+		data: pulledCalendar,
+		error,
+		mutate
+	} = useSWR<CalendarResponse>(
 		"/api/calendar/getCalendar/" + resourceId,
 		generalFetcher
 	);
@@ -69,10 +73,60 @@ export default function CalendarIDPage() {
 		setShowModal(true);
 	};
 
+	if (error) {
+		return (
+			<div className="dvh-100 overflow-auto bg-light">
+				<GlobalSideBar />
+				<Container>
+					<div className="d-flex flex-column align-items-center justify-content-center h-100 mt-3">
+						<h1 className="display-4 text-danger mb-3">
+							Calendario non trovato
+						</h1>
+						<p className="text-muted">
+							Il calendario che stai cercando di visualizzare non
+							è accessibile o non esiste.
+						</p>
+						<Button
+							href="/calendar"
+							variant="primary"
+							className="mt-3"
+						>
+							Torna al calendario
+						</Button>
+					</div>
+				</Container>
+			</div>
+		);
+	}
+
+	if (!pulledCalendar) {
+		return (
+			<div className="dvh-100 overflow-auto bg-light">
+				<GlobalSideBar />
+				<Container>
+					<div className="d-flex flex-column align-items-center justify-content-center h-100 mt-3">
+						<div
+							className="spinner-border text-primary mb-3"
+							role="status"
+						>
+							<span className="visually-hidden">
+								Caricamento...
+							</span>
+						</div>
+						<h2 className="h4 text-muted">Caricamento...</h2>
+					</div>
+				</Container>
+			</div>
+		);
+	}
+
 	return (
-		<div>
+		<div className="dvh-100 overflow-y-auto bg-light d-flex flex-column">
 			<GlobalSideBar />
-			<Container className="calendar-container">
+			<Container
+				className="mt-2 d-flex flex-column gap-3 flex-grow-1 mb-3 mb-lg-5"
+				style={{ minHeight: 0 }}
+			>
 				<LittleCustomToolbar
 					currentDate={currentDate}
 					calendarView={calendarView}

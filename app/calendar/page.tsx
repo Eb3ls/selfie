@@ -16,7 +16,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Calendar, View, momentLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import { Container } from "react-bootstrap";
+import { Button, Container } from "react-bootstrap";
 import useSWR from "swr";
 import { ListView } from "./ListView";
 import "./calendar.css";
@@ -39,10 +39,11 @@ export default function CalendarPage() {
 
 	const [modalsCount, setModalsCount] = useState(0);
 
-	const { data: pulledCalendar, mutate } = useSWR<CalendarResponse>(
-		"/api/calendar/getCalendar",
-		generalFetcher
-	);
+	const {
+		data: pulledCalendar,
+		error,
+		mutate
+	} = useSWR<CalendarResponse>("/api/calendar/getCalendar", generalFetcher);
 
 	useEffect(() => {
 		if (pulledCalendar) {
@@ -68,6 +69,48 @@ export default function CalendarPage() {
 		setSelectedCalendarEvent(selectedEvent);
 		setShowModal(true);
 	};
+
+	if (error) {
+		return (
+			<div className="dvh-100 overflow-auto bg-light">
+				<GlobalSideBar />
+				<Container>
+					<div className="d-flex flex-column align-items-center justify-content-center h-100 mt-3">
+						<h1 className="display-4 text-danger mb-3">
+							Errore durante il caricamento
+						</h1>
+						<p className="text-muted">
+							Controlla la tua connessione o riprova più tardi.
+						</p>
+						<Button href="/home" variant="primary" className="mt-3">
+							Torna alla home
+						</Button>
+					</div>
+				</Container>
+			</div>
+		);
+	}
+
+	if (!pulledCalendar) {
+		return (
+			<div className="dvh-100 overflow-auto bg-light">
+				<GlobalSideBar />
+				<Container>
+					<div className="d-flex flex-column align-items-center justify-content-center h-100 mt-3">
+						<div
+							className="spinner-border text-primary mb-3"
+							role="status"
+						>
+							<span className="visually-hidden">
+								Caricamento...
+							</span>
+						</div>
+						<h2 className="h4 text-muted">Caricamento...</h2>
+					</div>
+				</Container>
+			</div>
+		);
+	}
 
 	return (
 		<div className="dvh-100 overflow-y-auto bg-light d-flex flex-column">
