@@ -115,7 +115,7 @@ export default function Notepad() {
 		const { field, direction } = sortParams;
 
 		// Funzione di ordinamento basata sul campo e direzione
-		const sortedNotes = notes.sort((a, b) => {
+		const sortedNotes = [...notes].sort((a, b) => {
 			let valueA, valueB;
 
 			// Determina i valori per il confronto basati sul campo

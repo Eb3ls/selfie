@@ -22,8 +22,7 @@ export interface Project {
 export default function ProjectPage() {
 	const { user } = useUser();
 
-	const [projects, setProjects] = useState<Project[]>([]);
-	const [oldProjects, setOldProjects] = useState<Project[]>([]);
+	const [projectList, setProjectList] = useState<Project[]>([]);
 	const router = useRouter(); // Inizializza il router
 
 	const { data, error } = useSWR<Project[]>(
@@ -31,35 +30,23 @@ export default function ProjectPage() {
 		generalFetcher
 	);
 
-	const [sortOrder, setSortOrder] = useState<{
+	const [sortParams, setSortParams] = useState<{
 		field: string;
 		direction: "asc" | "desc";
 	} | null>(null);
 
+	const [searchTerm, setSearchTerm] = useState<string>("");
+
 	// Aggiorna projects quando i dati vengono recuperati
 	useEffect(() => {
 		if (data) {
-			setProjects(data);
-			setOldProjects(data);
+			setProjectList(data);
 		}
 	}, [data]);
 
-	function handleSort(
-		sortParams: {
-			field: string;
-			direction: "asc" | "desc";
-		} | null
-	) {
-		setSortOrder(sortParams);
-
+	function handleSort(projects: Project[]): Project[] {
 		if (!sortParams) {
-			// Se non ci sono parametri di ordinamento, ripristina i progetti originali
-			const filteredOldProjects = oldProjects.filter((p) =>
-				projects.some((project) => project._id === p._id)
-			);
-
-			setProjects(filteredOldProjects);
-			return;
+			return projects;
 		}
 
 		const { field, direction } = sortParams;
@@ -93,23 +80,19 @@ export default function ProjectPage() {
 						: 0;
 		});
 
-		setProjects(sortedProjects);
+		return sortedProjects;
 	}
 
-	function handleSearch(e: any) {
-		const searchTerm = e.target.value;
-
+	function handleSearch(projects: Project[]): Project[] {
 		if (searchTerm === "") {
-			// Se la barra di ricerca è vuota, ripristiniamo i progetti originali
-			setProjects(oldProjects);
-			return;
+			return projects;
 		}
 
-		const filteredProjects = oldProjects.filter((project) =>
+		const filteredProjects = projects.filter((project) =>
 			project.summary.toLowerCase().includes(searchTerm.toLowerCase())
 		);
 
-		setProjects(filteredProjects);
+		return filteredProjects;
 	}
 
 	async function handleAdd(project: { summary: string }) {
@@ -150,11 +133,11 @@ export default function ProjectPage() {
 	}
 
 	function getSortInfo() {
-		if (!sortOrder) {
+		if (!sortParams) {
 			return null;
 		}
 
-		const { field, direction } = sortOrder;
+		const { field, direction } = sortParams;
 
 		let icon = direction === "asc" ? "↑" : "↓";
 
@@ -171,6 +154,8 @@ export default function ProjectPage() {
 			</span>
 		);
 	}
+
+	const finalProjects = handleSort(handleSearch(projectList));
 
 	function createProjectEntry(project: Project, isOwner: boolean) {
 		return (
@@ -235,9 +220,9 @@ export default function ProjectPage() {
 			<div className="container py-5">
 				<div className="bg-white rounded-4 shadow-sm p-4 mb-4 mb-lg-5">
 					<SearchBar
-						handleSort={handleSort}
-						handleSearch={handleSearch}
 						handleAdd={handleAdd}
+						setSortParams={setSortParams}
+						setSearchTerm={setSearchTerm}
 					/>
 
 					{getSortInfo()}
@@ -270,12 +255,12 @@ export default function ProjectPage() {
 					</div>
 				) : (
 					<div className="projects-grid gap-3">
-						{projects.length === 0 ? (
+						{finalProjects.length === 0 ? (
 							<div className="text-center text-muted py-5">
 								<p className="mb-0">Nessun progetto trovato</p>
 							</div>
 						) : (
-							projects.map((project) =>
+							finalProjects.map((project) =>
 								createProjectEntry(
 									project,
 									isOwner(project.ownerName)
