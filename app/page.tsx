@@ -82,7 +82,7 @@ function NavbarComponent() {
 
 function HeroSection() {
 	return (
-		<div className="position-relative vh-100">
+		<div className="position-relative dvh-100">
 			<div
 				className="overlay position-absolute w-100 h-100"
 				style={{ backgroundColor: "rgba(0, 0, 0, 0.5)", zIndex: 1 }}
@@ -95,7 +95,7 @@ function HeroSection() {
 				style={{
 					objectFit: "cover",
 					width: "100%",
-					height: "100vh"
+					height: "100dvh"
 				}}
 				priority={true}
 				draggable={false}
@@ -335,7 +335,7 @@ function FooterComponent() {
 
 export default function LandingPage() {
 	return (
-		<main className="min-vh-100">
+		<main className="dvh-100 overflow-y-auto">
 			<NavbarComponent />
 			<HeroSection />
 			<CarouselComponent />
