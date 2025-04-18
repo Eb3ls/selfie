@@ -12,17 +12,22 @@ import {
 } from "react-icons/fa";
 import { StandardModal } from "../components/StandardModal";
 
-export function SortModal({ children, handleSort }: any) {
+interface SortModalProps {
+	children: React.ReactNode;
+	setSortParams: (sort: any) => void;
+}
+
+export function SortModal({ children, setSortParams }: SortModalProps) {
 	const [show, setShow] = useState(false);
 
 	function handleSortClick(field: string, direction: "asc" | "desc") {
 		// Invio dell'ordinamento selezionato
-		handleSort({ field, direction });
+		setSortParams({ field, direction });
 		setShow(false);
 	}
 
 	function handleReset() {
-		handleSort(null);
+		setSortParams(null);
 		setShow(false);
 	}
 
@@ -33,7 +38,7 @@ export function SortModal({ children, handleSort }: any) {
 				onClick={handleReset}
 				className="px-4 py-2 border-0 rounded-3 hover-lift"
 			>
-				Resetta
+				Ripristina
 			</Button>
 		);
 	}

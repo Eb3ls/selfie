@@ -10,14 +10,9 @@ import { StandardModal } from "../components/StandardModal";
 interface FilterModalProps {
 	children: React.ReactNode;
 	setFilters: (filters: any) => void;
-	handleFilters: (filters: any) => void;
 }
 
-export function FilterModal({
-	children,
-	setFilters,
-	handleFilters
-}: FilterModalProps) {
+export function FilterModal({ children, setFilters }: FilterModalProps) {
 	const [show, setShow] = useState(false);
 	const [formData, setFormData] = useState({
 		creationDateMin: "", // Usa null per evitare problemi di conversione
@@ -85,8 +80,6 @@ export function FilterModal({
 		// Salviamo i filtri correnti quali ultimi applicati
 		setFilters(filters);
 
-		handleFilters(filters);
-
 		setShow(false);
 	}
 
@@ -99,8 +92,13 @@ export function FilterModal({
 			categories: ""
 		});
 
-		setFilters({});
-		handleFilters({});
+		setFilters({
+			creationDateMin: "",
+			creationDateMax: "",
+			lengthMin: undefined,
+			lengthMax: undefined,
+			categories: ""
+		});
 		setShow(false);
 	}
 
@@ -111,7 +109,7 @@ export function FilterModal({
 				className="btn btn-light px-4 py-2 border-0 rounded-3 hover-lift"
 				onClick={handleReset}
 			>
-				Resetta
+				Ripristina
 			</button>
 		);
 	}

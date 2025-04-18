@@ -26,7 +26,7 @@ export function SortModal({ children, handleSort }: any) {
 				onClick={handleReset}
 				className="px-4 py-2 border-0 rounded-3 hover-lift"
 			>
-				Resetta
+				Ripristina
 			</Button>
 		);
 	}

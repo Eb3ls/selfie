@@ -8,24 +8,17 @@ import { SortModal } from "./SortModal";
 import "./style.css";
 
 interface SearchBarProps {
-	handleFilters: (filters: any) => void;
-	handleSort: (
-		sortParams: {
-			field: string;
-			direction: "asc" | "desc";
-		} | null
-	) => void;
-	handleSearch: (event: React.ChangeEvent<HTMLInputElement>) => void;
 	handleAdd: (note: any) => void;
 	setFilters: (filters: any) => void;
+	setSortParams: (sort: any) => void;
+	setSearchTerm: (search: string) => void;
 }
 
 export function SearchBar({
-	handleFilters,
-	handleSort,
-	handleSearch,
 	handleAdd,
-	setFilters
+	setFilters,
+	setSortParams,
+	setSearchTerm
 }: SearchBarProps) {
 	return (
 		<div>
@@ -39,23 +32,22 @@ export function SearchBar({
 						placeholder="Cerca note..."
 						aria-label="Search notes"
 						name="searchBar"
-						onChange={handleSearch}
+						onChange={(e) => {
+							setSearchTerm(e.target.value);
+						}}
 						className="note-search-input p-3 rounded-3"
 					/>
 				</div>
 
 				<div className="d-flex justify-content-center align-items-center gap-3">
-					<FilterModal
-						handleFilters={handleFilters}
-						setFilters={setFilters}
-					>
+					<FilterModal setFilters={setFilters}>
 						<button className="action-button p-2 px-3 rounded-3 bg-white d-flex align-items-center fw-semibold hover-lift">
 							<FaFilter />
 							<span> Filtri</span>
 						</button>
 					</FilterModal>
 
-					<SortModal handleSort={handleSort}>
+					<SortModal setSortParams={setSortParams}>
 						<button className="action-button p-2 rounded-3 bg-white d-flex align-items-center fw-semibold hover-lift">
 							<FaSort />
 							<span className="ms-2">Ordina</span>

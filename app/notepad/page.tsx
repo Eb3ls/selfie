@@ -5,7 +5,7 @@ import { useUser } from "@/app/components/UserContext";
 import { StringNote } from "@/utils/db/db";
 import { generalFetcher, safeFetch } from "@/utils/fetch/fetch";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
 import { FaLock, FaTrash, FaUser, FaUserShield } from "react-icons/fa";
 import { FaChartGantt, FaTimeline } from "react-icons/fa6";
@@ -27,20 +27,33 @@ export default function Notepad() {
 	const { user } = useUser();
 	const router = useRouter();
 
-	const [notes, setNotes] = useState<ExtendedStringNote[]>([]);
-	const [oldNotes, setOldNotes] = useState<ExtendedStringNote[]>([]);
+	const [noteList, setNoteList] = useState<ExtendedStringNote[]>([]);
 
 	const { data, error, mutate } = useSWR<ExtendedStringNote[]>(
 		"/api/notepad/getNotes",
 		generalFetcher
 	);
 
-	const [sortOrder, setSortOrder] = useState<{
+	const [sortParams, setSortParams] = useState<{
 		field: string;
 		direction: "asc" | "desc";
 	} | null>(null);
 
-	const [filters, setFilters] = useState({});
+	const [filters, setFilters] = useState<{
+		creationDateMin: string;
+		creationDateMax: string;
+		lengthMin: number | undefined;
+		lengthMax: number | undefined;
+		categories: string;
+	}>({
+		creationDateMin: "",
+		creationDateMax: "",
+		lengthMin: undefined,
+		lengthMax: undefined,
+		categories: ""
+	});
+
+	const [searchTerm, setSearchTerm] = useState<string>("");
 
 	function orderByModifiedDate(array: ExtendedStringNote[]) {
 		return array.sort((a, b) => {
@@ -53,15 +66,11 @@ export default function Notepad() {
 	// Aggiorna notes quando i dati vengono recuperati
 	useEffect(() => {
 		if (data) {
-			const orderedData = orderByModifiedDate(data);
-			setOldNotes(orderedData);
-			setNotes(orderedData);
+			setNoteList(data);
 		}
 	}, [data]);
 
-	function handleFilters(filters: any) {
-		setOldNotes(notes);
-
+	function handleFilters(notes: ExtendedStringNote[]): ExtendedStringNote[] {
 		const {
 			creationDateMin,
 			creationDateMax,
@@ -70,11 +79,7 @@ export default function Notepad() {
 			categories
 		} = filters;
 
-		if (!data) {
-			return;
-		}
-
-		const filteredNotes = data.filter((note: any) => {
+		const filteredNotes = notes.filter((note) => {
 			// Controllo delle date
 			const noteDate = new Date(note.dtStamp);
 			const isDateValid =
@@ -90,54 +95,41 @@ export default function Notepad() {
 			// Controllo delle categorie
 			const categoriesArray = note.categories
 				.split(",")
-				.map((cat: any) => cat.trim()); // Assicurati che le categorie siano separate da virgole
+				.map((cat) => cat.trim()); // Assicurati che le categorie siano separate da virgole
 			const isCategoryValid =
 				!categories ||
-				categoriesArray.some((cat: any) => cat.includes(categories));
+				categoriesArray.some((cat) => cat.includes(categories));
 
 			// Restituisce true solo se tutti i filtri sono validi
 			return isDateValid && isLengthValid && isCategoryValid;
 		});
 
-		// Imposta le note filtrate nello stato
-		setNotes(filteredNotes);
-		setOldNotes(filteredNotes);
+		return filteredNotes;
 	}
 
-	function handleSort(
-		sortParams: {
-			field: string;
-			direction: "asc" | "desc";
-		} | null
-	) {
-		setSortOrder(sortParams);
-
+	function handleSort(notes: ExtendedStringNote[]) {
 		if (!sortParams) {
-			const orderedData = orderByModifiedDate(notes);
-
-			setNotes(orderedData);
-			setOldNotes(orderedData);
-			return;
+			return orderByModifiedDate(notes);
 		}
 
 		const { field, direction } = sortParams;
 
 		// Funzione di ordinamento basata sul campo e direzione
-		const sortedNotes = [...notes].sort((a, b) => {
+		const sortedNotes = notes.sort((a, b) => {
 			let valueA, valueB;
 
 			// Determina i valori per il confronto basati sul campo
 			switch (field) {
 				case "alphabetical":
-					valueA = a.summary.toLowerCase(); // Assumendo che il titolo delle note sia "title"
+					valueA = a.summary.toLowerCase();
 					valueB = b.summary.toLowerCase();
 					break;
 				case "date":
-					valueA = new Date(a.dtStamp).getTime(); // Data in formato timestamp
+					valueA = new Date(a.dtStamp).getTime();
 					valueB = new Date(b.dtStamp).getTime();
 					break;
 				case "length":
-					valueA = a.length; // Assumendo che ci sia una proprietà "length" nelle note
+					valueA = a.length;
 					valueB = b.length;
 					break;
 				default:
@@ -152,27 +144,21 @@ export default function Notepad() {
 			}
 		});
 
-		// Aggiorna lo stato delle note ordinate
-		setNotes(sortedNotes);
-		setOldNotes(sortedNotes);
+		return sortedNotes;
 	}
 
-	function handleSearch(e: any) {
-		const searchTerm = e.target.value;
-
+	function handleSearch(notes: ExtendedStringNote[]): ExtendedStringNote[] {
 		if (searchTerm === "") {
-			// Se la barra di ricerca è vuota, ripristiniamo le note originali
-			setNotes(oldNotes);
-			return;
+			return notes;
 		}
 
-		const filteredNotes = oldNotes.filter((note) => {
+		const filteredNotes = notes.filter((note) => {
 			return note.summary
 				.toLowerCase()
 				.includes(searchTerm.toLowerCase());
 		});
 
-		setNotes(filteredNotes);
+		return filteredNotes;
 	}
 
 	async function handleAdd(note: { summary: string; categories: string }) {
@@ -309,11 +295,11 @@ export default function Notepad() {
 	}
 
 	function getSortInfo() {
-		if (!sortOrder) {
+		if (!sortParams) {
 			return null;
 		}
 
-		const { field, direction } = sortOrder;
+		const { field, direction } = sortParams;
 
 		let icon = direction === "asc" ? "↑" : "↓";
 
@@ -334,6 +320,8 @@ export default function Notepad() {
 			</span>
 		);
 	}
+
+	const finalNotes = handleSort(handleFilters(handleSearch(noteList)));
 
 	function createNoteEntry(note: ExtendedStringNote) {
 		const noteEntry = (
@@ -413,11 +401,10 @@ export default function Notepad() {
 			<div className="container py-5">
 				<div className="bg-white rounded-4 shadow-sm p-4 mb-4 mb-lg-5">
 					<SearchBar
-						handleFilters={handleFilters}
-						handleSort={handleSort}
-						handleSearch={handleSearch}
 						handleAdd={handleAdd}
 						setFilters={setFilters}
+						setSortParams={setSortParams}
+						setSearchTerm={setSearchTerm}
 					/>
 					{getSortInfo()}
 				</div>
@@ -449,12 +436,12 @@ export default function Notepad() {
 					</div>
 				) : (
 					<div className="note-grid gap-4">
-						{notes.length === 0 ? (
+						{finalNotes.length === 0 ? (
 							<div className="text-center text-muted py-5">
 								<p className="mb-0">Nessuna nota trovata</p>
 							</div>
 						) : (
-							notes.map((note: ExtendedStringNote) =>
+							finalNotes.map((note: ExtendedStringNote) =>
 								createNoteEntry(note)
 							)
 						)}
