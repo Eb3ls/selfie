@@ -3,7 +3,7 @@
 import { generalFetcher, safeFetch } from "@/utils/fetch/fetch";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
-import { Button } from "react-bootstrap";
+import { Button, Container } from "react-bootstrap";
 import { IoMusicalNotes, IoTimerOutline } from "react-icons/io5";
 import { toast } from "react-toastify";
 import useSWR from "swr";
@@ -426,8 +426,29 @@ function PomodoroImplementation() {
 }
 
 export default function Pomodoro() {
+	function fallback() {
+		return (
+			<div className="dvh-100 overflow-auto bg-light">
+				<GlobalSideBar />
+				<Container>
+					<div className="d-flex flex-column align-items-center justify-content-center h-100 mt-3">
+						<div
+							className="spinner-border text-primary mb-3"
+							role="status"
+						>
+							<span className="visually-hidden">
+								Caricamento...
+							</span>
+						</div>
+						<h2 className="h4 text-muted">Caricamento...</h2>
+					</div>
+				</Container>
+			</div>
+		);
+	}
+
 	return (
-		<Suspense fallback={<div>Loading search params...</div>}>
+		<Suspense fallback={fallback()}>
 			<PomodoroImplementation />
 		</Suspense>
 	);
