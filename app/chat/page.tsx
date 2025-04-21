@@ -155,10 +155,13 @@ export default function ChatMain() {
 				const lastMessage = chat.lastMessage;
 				const lastMessageObj = lastMessage
 					? {
-							name: fromIdToUsername(
-								lastMessage.ownerId,
-								chatResponse!.userList
-							)!,
+							name:
+								lastMessage.ownerId === chatResponse?.whoAmI._id
+									? "Tu"
+									: fromIdToUsername(
+											lastMessage.ownerId,
+											chatResponse!.userList
+										)!,
 							content: lastMessage.content
 						}
 					: null;
