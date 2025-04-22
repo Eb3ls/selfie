@@ -96,11 +96,20 @@ export const PATCH = async (request: NextRequest) => {
 		alarmPreferences: newBody.alarmPreferences
 	};
 
-	if (
-		newBody.password !== "" &&
-		newBody.oldPassword !== "" &&
-		newBody.oldPassword === userString.password
-	) {
+	if (newBody.password === "" || newBody.oldPassword === "") {
+		// Saltiamo la modifica della password
+	} else {
+		// Controlliamo che la vecchia password sia corretta
+		const hash = crypto
+			.createHash("sha256")
+			.update(newBody.oldPassword)
+			.digest("hex");
+
+		if (userString.password !== hash) {
+			return generateMessageResponse("Old password is incorrect", 400);
+		}
+
+		// Modifichiamo la password
 		newFields.password = crypto
 			.createHash("sha256")
 			.update(newBody.password)
