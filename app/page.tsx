@@ -123,12 +123,14 @@ function HeroSection() {
 							Inizia Gratuitamente
 						</Button>
 					</Link>
-					<Button
-						variant="outline-light"
-						className="rounded-pill px-md-5 py-md-3 fw-bold"
-					>
-						Scopri di più
-					</Button>
+					<Link href={"/info"}>
+						<Button
+							variant="outline-light"
+							className="rounded-pill px-md-5 py-md-3 fw-bold h-100 w-100"
+						>
+							Scopri di più
+						</Button>
+					</Link>
 				</div>
 			</Container>
 		</div>
@@ -143,16 +145,20 @@ function CarouselComponent() {
 					className="text-center text-white py-5"
 					style={{ height: "400px" }}
 				>
-					<h2 className="display-4 mb-4">Organizza la Tua Vita</h2>
+					<h2 className="display-4 mb-4 fw-semibold">
+						Organizza la Tua Vita
+					</h2>
 					<p className="mb-4">
 						Gestisci i tuoi impegni in modo semplice ed efficace con
 						il nostro calendario smart. Sincronizza tutti i tuoi
 						dispositivi e non perdere mai un appuntamento
 						importante.
 					</p>
-					<Button variant="outline-light" size="lg">
-						Scopri di più
-					</Button>
+					<Link href="/register">
+						<Button variant="outline-light" size="lg">
+							Registrati ora
+						</Button>
+					</Link>
 				</Container>
 			</Carousel.Item>
 			<Carousel.Item>
@@ -160,16 +166,18 @@ function CarouselComponent() {
 					className="text-center text-white py-5"
 					style={{ height: "400px" }}
 				>
-					<h2 className="display-4 mb-4">
+					<h2 className="display-4 mb-4 fw-semibold">
 						Condividi con il Tuo Team
 					</h2>
 					<p className="lead mb-4">
 						Collabora facilmente con colleghi e amici. Pianifica
 						riunioni, eventi e scadenze in modo collaborativo.
 					</p>
-					<Button variant="outline-light" size="lg">
-						Prova Gratis
-					</Button>
+					<Link href="/register">
+						<Button variant="outline-light" size="lg">
+							Prova Gratis
+						</Button>
+					</Link>
 				</Container>
 			</Carousel.Item>
 			<Carousel.Item>
@@ -177,14 +185,18 @@ function CarouselComponent() {
 					className="text-center text-white py-5"
 					style={{ height: "400px" }}
 				>
-					<h2 className="display-4 mb-4">Sempre con Te</h2>
+					<h2 className="display-4 mb-4 fw-semibold">
+						Sempre con Te
+					</h2>
 					<p className="lead mb-4">
 						Accedi al tuo calendario ovunque tu sia. App mobile,
 						desktop e web sempre sincronizzate.
 					</p>
-					<Button variant="outline-light" size="lg">
-						Inizia Ora
-					</Button>
+					<Link href="/register">
+						<Button variant="outline-light" size="lg">
+							Inizia Ora
+						</Button>
+					</Link>
 				</Container>
 			</Carousel.Item>
 		</Carousel>
@@ -270,7 +282,7 @@ function FooterComponent() {
 	return (
 		<footer className="bg-dark text-white py-4 mt-5">
 			<Container>
-				<Row className="align-items-center">
+				<Row>
 					<Col md={6} className="text-center text-md-start">
 						<div className="d-flex align-items-center mb-3">
 							<Image
@@ -295,34 +307,14 @@ function FooterComponent() {
 						md={6}
 						className="text-center text-md-end mt-3 mt-md-0"
 					>
-						<div className="mb-2">
-							<Link
-								href="#"
-								className="text-decoration-none text-white mx-2"
-							>
-								Privacy
-							</Link>
-							<Link
-								href="#"
-								className="text-decoration-none text-white mx-2"
-							>
-								Termini
-							</Link>
-							<Link
-								href="#"
-								className="text-decoration-none text-white mx-2"
-							>
-								Contatti
-							</Link>
-						</div>
 						<div>
-							<Link href="#" className="text-white mx-2">
+							<Link href="/info" className="text-white mx-2">
 								<i className="bi bi-instagram fs-5"></i>
 							</Link>
-							<Link href="#" className="text-white mx-2">
+							<Link href="/info" className="text-white mx-2">
 								<i className="bi bi-facebook fs-5"></i>
 							</Link>
-							<Link href="#" className="text-white mx-2">
+							<Link href="/info" className="text-white mx-2">
 								<i className="bi bi-twitter fs-5"></i>
 							</Link>
 						</div>
