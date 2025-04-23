@@ -130,7 +130,10 @@ export default function CalendarPage() {
 				/>
 
 				{currentView === "list" ? (
-					<ListView events={events} />
+					<ListView
+						events={events}
+						handleSelectEvent={handleSelectEvent}
+					/>
 				) : (
 					<Calendar
 						localizer={localizer}

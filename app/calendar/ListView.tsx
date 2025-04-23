@@ -4,7 +4,15 @@ import { CalendarEvent } from "./calendarUtils/calendarTypes";
 
 moment.locale("it");
 
-export function ListView({ events }: { events: CalendarEvent[] }): JSX.Element {
+interface ListViewProps {
+	events: CalendarEvent[];
+	handleSelectEvent: (event: CalendarEvent) => void;
+}
+
+export function ListView({
+	events,
+	handleSelectEvent
+}: ListViewProps): JSX.Element {
 	const listRef = useRef<HTMLDivElement>(null);
 	let sortedEvents = events
 		.filter(
@@ -47,6 +55,7 @@ export function ListView({ events }: { events: CalendarEvent[] }): JSX.Element {
 								style={{
 									borderLeft: "5px solid"
 								}}
+								onClick={() => handleSelectEvent(event)}
 							>
 								<div className="text-muted mb-1">
 									{moment(event.start).format("HH:mm")}
