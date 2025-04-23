@@ -225,7 +225,7 @@ export default function Note() {
 							disabled={
 								!note.userNameList.includes(
 									user?.username || ""
-								)
+								) && note.access !== "PUBLIC"
 							}
 							style={{
 								flexBasis: 0,

@@ -32,7 +32,8 @@ export function NoteHeader({
 						</button>
 					</EditNoteModal>
 				)}
-				{note.userNameList.includes(username) && (
+				{(note.userNameList.includes(username) ||
+					note.access === "PUBLIC") && (
 					<Button variant="primary" onClick={handleSave}>
 						Salva
 					</Button>
