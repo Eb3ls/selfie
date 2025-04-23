@@ -573,6 +573,10 @@ export async function isResourceAvailable(
 		client
 	);
 
+	if (out.status === 404) {
+		return generateMessageResponse("Resource is available", 200);
+	}
+
 	if (out.status !== 200) {
 		return out;
 	}
