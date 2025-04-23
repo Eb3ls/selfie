@@ -99,6 +99,7 @@ export default function SettingsForm({
 							})
 						}
 						max={new Date(dateTime).toISOString().split("T")[0]}
+						isRequired={false}
 					/>
 
 					<PasswordSection
