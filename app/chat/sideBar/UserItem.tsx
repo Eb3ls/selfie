@@ -12,7 +12,7 @@ type SidebarEntry = {
 	isGroup: boolean;
 	imageId: string | undefined;
 	summary: string;
-	lastMessage: { name: string; content: string } | null;
+	lastMessage: { name: string; content: string; sentAt: string } | null;
 	canIDelete: boolean;
 	loader: () => void;
 };

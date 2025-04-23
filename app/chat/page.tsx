@@ -108,21 +108,14 @@ export default function ChatMain() {
 			})
 		);
 
-		if (response.ok) {
-			// Aggiorno i messaggi
-			const newMessageObj: StringMessage = {
-				ownerId: chatResponse?.whoAmI._id!,
-				content: newMessage,
-				sentAt: dateTime.toISOString()
-			};
-			setCurrentMessages([...currentMessages, newMessageObj]);
-		} else {
+		if (!response.ok) {
 			toast.error("Errore durante l'invio del messaggio");
 		}
 
 		setNewMessage("");
 		scrollToBottom();
 		mutate();
+		mutateContacts();
 	}
 
 	// Funzione per caricare la chat con un utente
@@ -162,7 +155,8 @@ export default function ChatMain() {
 											lastMessage.ownerId,
 											chatResponse!.userList
 										)!,
-							content: lastMessage.content
+							content: lastMessage.content,
+							sentAt: lastMessage.sentAt
 						}
 					: null;
 
@@ -192,6 +186,12 @@ export default function ChatMain() {
 					loader: () => loadChat(chat._id)
 				});
 			}
+
+			filteredChats.sort((a, b) => {
+				const dateA = new Date(a.lastMessage?.sentAt || 0);
+				const dateB = new Date(b.lastMessage?.sentAt || 0);
+				return dateB.getTime() - dateA.getTime();
+			});
 		}
 
 		return (
