@@ -162,6 +162,7 @@ export const POST = async (request: NextRequest) => {
 		{
 			summary: newBody.summary,
 			ownerId: userId,
+			access: "INVITED",
 			userIdList: userIdList,
 			categories: "Attività di progetto"
 		},
