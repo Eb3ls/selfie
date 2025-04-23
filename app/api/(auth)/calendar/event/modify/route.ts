@@ -119,6 +119,13 @@ export const PATCH = async (request: NextRequest) => {
 
 	convertedBody.userIdList.push(...resourceIdList);
 
+	// Prendiamo la lista delle categorie separate da virgola non vuote
+	const categories = convertedBody.categories
+		.split(",")
+		.map((category: string) => category.trim())
+		.filter((category: string) => category !== "");
+	convertedBody.categories = categories.join(",");
+
 	// Modifichiamo l'evento
 	const updateOut = await updateCollectionWrapper<Event>(
 		{ _id: eventId },

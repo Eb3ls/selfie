@@ -89,6 +89,13 @@ export const POST = async (request: NextRequest) => {
 	newActivity.ownerId = owner._id!;
 	newActivity.userIdList = [...resourceIdList, owner._id!];
 
+	// Prendiamo la lista delle categorie separate da virgola non vuote
+	const categories = newActivity.categories
+		.split(",")
+		.map((category: string) => category.trim())
+		.filter((category: string) => category !== "");
+	newActivity.categories = categories.join(",");
+
 	// Ottieniamo la collezione delle attività
 	const client: Collection<Activity> =
 		await getCollection<Activity>(ACTIVITY_COLLECTION);

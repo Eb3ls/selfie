@@ -315,6 +315,8 @@ class ProjectSettings extends HTMLElement {
 			return;
 		}
 
+		this.usersToInvite = [];
+
 		const viewToggler = document.querySelector(
 			"view-toggler"
 		) as ViewToggler | null;

@@ -123,6 +123,13 @@ export const PATCH = async (request: NextRequest) => {
 	// Aggiungiamo le risorse alla lista degli utenti
 	convertedBody.userIdList.push(...resourceIdList);
 
+	// Prendiamo la lista delle categorie separate da virgola non vuote
+	const categories = convertedBody.categories
+		.split(",")
+		.map((category: string) => category.trim())
+		.filter((category: string) => category !== "");
+	convertedBody.categories = categories.join(",");
+
 	// Modifichiamo l'attività
 	const updateOut = await updateCollectionWrapper<Activity>(
 		{ _id: activityId },

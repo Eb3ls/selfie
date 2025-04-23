@@ -126,6 +126,13 @@ export const POST = async (request: NextRequest) => {
 	newEvent.ownerId = owner._id!;
 	newEvent.userIdList = [...resourceIdList, owner._id!];
 
+	// Prendiamo la lista delle categorie separate da virgola non vuote
+	const categories = newEvent.categories
+		.split(",")
+		.map((category: string) => category.trim())
+		.filter((category: string) => category !== "");
+	newEvent.categories = categories.join(",");
+
 	// Ottieniamo la collezione degli eventi
 	const client: Collection<Event> =
 		await getCollection<Event>(EVENT_COLLECTION);
