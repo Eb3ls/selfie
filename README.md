@@ -14,15 +14,11 @@ Abbiamo svolto il progetto Selfie con estensione 18-33 dell'a.a. 2023/2024.
 
 ## Distribuzione del lavoro
 
-Ciascun componente del gruppo ha lavorato a vari sottocomponenti di molte delle funzionalità. Ci siamo interscambiati nelle parti principali, in modo che ognuno avesse una maggior padronanza dell'intero progetto. Ciononostante ogni componente ha più familiarità con alcune parti. Nello specifico:
+Ciascun componente del gruppo ha lavorato in maniera generale a molte delle funzionalità del sito. Ci siamo interscambiati nelle parti principali, in modo che ognuno avesse una maggior padronanza dell'intero progetto. Ciononostante ogni componente ha più familiarità con alcune parti. Nello specifico:
 
 - Daniele Vito Ardito: Sviluppo backend di note, progetti, calendario, preview, impostazioni. Sviluppo frontend di note, hub note, hub progetti, impostazioni
-- Leonardo Berselli: Sviluppo backend di progetti. Sviluppo frontend di progetti, pomodoro, chat, impostazioni, landing page, login/signup, modali, miglioramento ui/ux
+- Leonardo Berselli: Sviluppo backend di progetti. Sviluppo frontend di progetti, pomodoro, chat, impostazioni, landing page, login/signup, modali, miglioramento UI/UX
 - Francesco Tomba: Sviluppo backend di calendario, notifiche, chat, time machine, pomodoro, autenticazione, inviti, impostazioni. Sviluppo frontend di home, calendario, inbox, toast
-
-## Uso di AI generativa
-
-La abbiamo usata principalmente per completamento (attraverso GitHub Copilot e Codeium) e per generare piccoli componenti React poi corretti manualmente.
 
 ## Tecnologie e librerie usate
 
@@ -39,6 +35,10 @@ La abbiamo usata principalmente per completamento (attraverso GitHub Copilot e C
 - **GitHub**: Piattaforma per il versioning del codice
 - **Postman**: Software per testare API
 - **MongoDB Atlas**: Piattaforma per la gestione di un DB remoto condiviso
+
+## Uso di AI generativa
+
+Abbiamo usato AI generativa principalmente per completamento di codice (attraverso GitHub Copilot e Codeium) e per generare piccoli componenti React poi corretti manualmente.
 
 ## Funzionalità
 
