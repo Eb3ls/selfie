@@ -1,111 +1,48 @@
-# Introduzione
+# Selfie Calendar
 
-Abbiamo svolto il progetto Selfie con estensione 18-33 dell'a.a. 2023/2024.
+A full-stack productivity web app built with Next.js 14, TypeScript, and MongoDB. Developed as a university group project at the University of Bologna (A.Y. 2023/2024).
 
-# Membri del gruppo
+## Features
 
-| Matricola  | Nome         | Cognome  | Email                              |
-| ---------- | ------------ | -------- | ---------------------------------- |
-| 0001079345 | Daniele Vito | Ardito   | danielevito.ardito@studio.unibo.it |
-| 0001100617 | Leonardo     | Berselli | leonardo.berselli@studio.unibo.it  |
-| 0001079778 | Francesco    | Tomba    | francesco.tomba2@studio.unibo.it   |
+- **Calendar** — daily, weekly, and monthly views with events, tasks, and Pomodoro sessions
+- **Projects** — Gantt chart, phases, linked tasks, and deadline tracking
+- **Notes** — rich text notepad with granular sharing and permissions
+- **Real-time chat** — private and group messaging
+- **Pomodoro timer** — session tracking with optional background music
+- **Notifications** — push notifications (web-push/VAPID) and email alerts (Nodemailer)
+- **iCal export** — subscribe to your calendar from any calendar app
+- **Authentication** — custom JWT-based auth with user invitations
 
-# Dettagli del progetto
+## Tech stack
 
-## Distribuzione del lavoro
+Next.js 14 · TypeScript · MongoDB · React-Bootstrap · JOSE · Nodemailer · web-push · SWR · DOMPurify
 
-Ciascun componente del gruppo ha lavorato in maniera generale a molte delle funzionalità del sito. Ci siamo interscambiati nelle parti principali, in modo che ognuno avesse una maggior padronanza dell'intero progetto. Ciononostante ogni componente ha più familiarità con alcune parti. Nello specifico:
+## Getting started
 
-- Daniele Vito Ardito: Sviluppo backend di note, progetti, calendario, preview, impostazioni. Sviluppo frontend di note, hub note, hub progetti, impostazioni
-- Leonardo Berselli: Sviluppo backend di progetti. Sviluppo frontend di progetti, pomodoro, chat, impostazioni, landing page, login/signup, modali, miglioramento UI/UX
-- Francesco Tomba: Sviluppo backend di calendario, notifiche, chat, time machine, pomodoro, autenticazione, inviti, impostazioni. Sviluppo frontend di home, calendario, inbox, toast
+**Prerequisites:** Node.js 18+, a MongoDB instance (e.g. MongoDB Atlas), a Gmail account with App Password enabled.
 
-## Tecnologie e librerie usate
+```bash
+npm install
+cp .env.example .env.local
+# fill in .env.local with your credentials
+npm run dev
+```
 
-### Nel progetto
+To generate VAPID keys for push notifications:
 
-- **Next.js**: Scelto per le sue funzioni e perchè basato su React
-- **Typescript**: Scelto per il tipaggio esplicito
-- **MongoDB**: Database gerarchico
-- **Bootstrap**: Scelto per la realizzazione di interfacce responsive
+```bash
+node generate_vapid_keys.js
+```
 
-### Per lo sviluppo
+## Known limitations
 
-- **VSCode**: Editor di testo utilizzato da tutti i membri
-- **GitHub**: Piattaforma per il versioning del codice
-- **Postman**: Software per testare API
-- **MongoDB Atlas**: Piattaforma per la gestione di un DB remoto condiviso
+This was an academic project — a few things would be done differently in production:
 
-## Uso di AI generativa
+- Passwords are hashed with SHA-256; **bcrypt or argon2** would be the correct choice
+- The JWT session payload includes the password hash unnecessarily
+- No automated test suite
+- The `/api/timeMachine` endpoint (used for demo/testing) is unauthenticated
 
-Abbiamo usato AI generativa principalmente per completamento di codice (attraverso GitHub Copilot e Codeium) e per generare piccoli componenti React poi corretti manualmente.
+## Authors
 
-## Funzionalità
-
-### Home
-
-Visualizzazione delle anteprime di:
-
-- Calendario
-- Chat
-- Note
-- Progetti
-- Pomodoro
-
-### Calendario
-
-- Visualizzazione Giornaliero/Settimanale/Mensile di:
-    - Eventi
-    - Attività
-    - Sessioni Pomodoro
-    - Attività di Progetto
-- Visualizzazione a lista delle attività
-- Aggiunta/modifica/eliminazione di:
-    - Eventi
-    - Attività
-    - Sessioni Pomodoro
-- Visualizzazione risorse disponibili con relativo calendario
-- Esportazione del calendario in formato iCal
-
-### Note
-
-- Visualizzazione delle note con relative icone esplicative
-- Gestione della singola nota
-    - Visualizzazione e modifica del testo
-    - Gestione inviti e permessi
-
-### Chat
-
-- Invio messaggi in chat private e gruppi
-
-### Progetti
-
-- Visualizzazione progetti con relative icone e link alle note associate
-- Gestione del singolo progetto
-    - Visualizzazione a lista
-    - Visualizzazione Gannt
-    - Creazione/modifica/eliminazione di attività, fasi e sottofasi
-    - Gestione stato di attività
-    - Gestione link tra attività
-    - Gestione ritardi
-
-### Pomodoro
-
-- Gestione di una sessione personalizzata
-- Gestione di una sessione ripetuta da calendario
-
-### Impostazioni
-
-- Gestione informazioni utente
-- Gestione preverenze per le preview
-- Gestione preferenze per le notifiche
-    - Invio di email
-    - Invio notifiche push
-- Modifica dell'immagine di profilo
-
-### Inbox
-
-- Visualizzazione inviti ricevuti da altri utenti per
-    - Progetti
-    - Note
-    - Calendario
+Leonardo Berselli, Daniele Ardito, Francesco Tomba — Bachelor's in Computer Science, University of Bologna (2024)
