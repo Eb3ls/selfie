@@ -1,3 +1,5 @@
+import type { JSX } from "react";
+
 interface StandardViewFieldProps {
 	title: string;
 	value: string | number | JSX.Element;

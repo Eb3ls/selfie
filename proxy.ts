@@ -16,7 +16,7 @@ async function api_route_handler(request: NextRequest): Promise<boolean> {
 	return jwt_status;
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
 	const path: string = request.nextUrl.pathname;
 
 	let outcome: boolean = true;

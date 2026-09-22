@@ -75,7 +75,7 @@ export interface ProjectActivityResponse {
 
 export const GET = async (
 	request: NextRequest,
-	params: { params: { id: string } }
+	{ params }: { params: Promise<{ id: string }> }
 ) => {
 	// Validazione della richiesta
 	const validation = await validate<{}>(request, {}, false);
@@ -84,6 +84,7 @@ export const GET = async (
 	if (validation === null) {
 		return generateMessageResponse("Invalid request", 400);
 	}
+	const { id } = await params;
 
 	// Estraiamo l'utente e il corpo della richiesta
 	const { user } = validation;
@@ -91,7 +92,7 @@ export const GET = async (
 	// Estraiamo l'ID dell'utente
 	const userId: string = user._id!;
 
-	const projectId = params.params.id;
+	const projectId = id;
 
 	if (!projectId) {
 		return generateMessageResponse("Invalid request", 400);

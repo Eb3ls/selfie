@@ -21,11 +21,11 @@ It combines a personal calendar with projects, shared notes, Pomodoro sessions, 
 
 ## Architecture
 
-The application uses the Next.js App Router for both pages and API routes. React client pages render the calendar, project, note, chat, Pomodoro, and settings interfaces; SWR fetches and refreshes client-side data where needed. Route handlers under `app/api` implement the application’s server-side operations, while shared data models and database helpers live in `utils`. Middleware manages route-level session checks.
+The application uses the Next.js App Router for both pages and API routes. React client pages render the calendar, project, note, chat, Pomodoro, and settings interfaces; SWR fetches and refreshes client-side data where needed. Route handlers under `app/api` implement the application’s server-side operations, while shared data models and database helpers live in `utils`. The `proxy.ts` entry point manages route-level session checks.
 
 ## Stack
 
-Next.js 14 · TypeScript · React 18 · MongoDB · React-Bootstrap · JOSE · SWR · Nodemailer · web-push · DOMPurify
+Next.js 16 · TypeScript · React 19 · MongoDB · React-Bootstrap · JOSE · SWR · Nodemailer · web-push · DOMPurify
 
 ## Run locally
 
@@ -84,13 +84,13 @@ npm test
 npm run lint
 npm run typecheck
 npm run build
+npm audit
 ```
 
 The regression tests run the actual handlers, validation, and database wrappers with an in-memory database fixture, and check notification worker URLs. They require no database connection or credentials. The production build requires the environment configured above and network access to download the configured Google font.
 
 ## Known limitations
 
-- The dependency tree has outstanding security advisories. Run `npm audit` and address dependency upgrades before deployment.
 - Passwords use SHA-256; a production system should use a password-hashing scheme designed for credentials, such as Argon2id or bcrypt.
 - The JWT session payload includes the password hash, which is unnecessary and should be removed in a production design.
 - The demo/testing `/api/timeMachine` endpoint is unauthenticated and can change the shared simulated time.

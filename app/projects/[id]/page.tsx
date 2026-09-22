@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import ViewToggler from "./ViewToggler";
 import "./styles.css";
 
-declare global {
+declare module "react" {
 	namespace JSX {
 		interface IntrinsicElements {
 			"view-toggler": {};

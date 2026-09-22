@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const { harness, ids, id, request } = require('./helpers.cjs');
 const calendarPath = 'app/api/(auth)/calendar/getCalendar/[id]/route.ts';
 const linkPath = 'app/api/(auth)/project/activity/link/route.ts';
-const calendar = (h, target) => h.load(calendarPath).GET(request('/api/calendar/getCalendar/' + target), { params: { id: String(target) } });
+const calendar = (h, target) => h.load(calendarPath).GET(request('/api/calendar/getCalendar/' + target), { params: Promise.resolve({ id: String(target) }) });
 const link = (h, prevIds = [], nextId = String(ids.after)) => h.load(linkPath).PATCH(request('/api/project/activity/link', { prevIds, nextId }));
 const strings = values => Array.from(values, String);
 

@@ -1,7 +1,7 @@
 import { StandardInput } from "@/app/components/StandardInput";
 import { StandardViewField } from "@/app/components/StandardViewFIeld";
 import { StringAlarm, Trigger } from "@/utils/db/models/Alarm";
-import React from "react";
+import React, { type JSX } from "react";
 import { Col, Row } from "react-bootstrap";
 import Card from "react-bootstrap/esm/Card";
 

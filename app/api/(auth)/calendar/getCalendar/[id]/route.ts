@@ -27,7 +27,7 @@ interface CalendarResponse {
 
 export const GET = async (
 	request: NextRequest,
-	{ params }: { params: { id: string } }
+	{ params }: { params: Promise<{ id: string }> }
 ) => {
 	// Validazione della richiesta
 	const validation = await validate<{}>(request, {}, false);
@@ -36,12 +36,13 @@ export const GET = async (
 	if (validation === null) {
 		return generateMessageResponse("Invalid request", 400);
 	}
+	const { id } = await params;
 
 	// Otteniamo l'ID della risorsa dall'URL
-	if (!ObjectId.isValid(params.id)) {
+	if (!ObjectId.isValid(id)) {
 		return generateMessageResponse("Invalid resource ID", 400);
 	}
-	const resourceId: string = params.id;
+	const resourceId: string = id;
 
 	// Only resource calendars listed by getResources are shared with all users.
 	const resourceOut = await findCollectionWrapper<User>(

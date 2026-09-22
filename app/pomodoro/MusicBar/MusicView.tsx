@@ -1,5 +1,5 @@
 import Script from "next/script";
-import { useEffect, useRef, useState } from "react";
+import { type JSX, useEffect, useRef, useState } from "react";
 import { Button } from "react-bootstrap";
 import { FaTimes } from "react-icons/fa";
 import {

@@ -135,8 +135,6 @@ export function MusicInput({
 					onReady={onReady}
 					opts={opts}
 					className="d-none"
-					frameBorder="0"
-					Allow="autoplay; encrypted-media; picture-in-picture;"
 				></YouTube>
 			)}
 		</>
