@@ -90,6 +90,7 @@ The regression tests run the actual handlers, validation, and database wrappers 
 
 ## Known limitations
 
+- The dependency tree has outstanding security advisories. Run `npm audit` and address dependency upgrades before deployment.
 - Passwords use SHA-256; a production system should use a password-hashing scheme designed for credentials, such as Argon2id or bcrypt.
 - The JWT session payload includes the password hash, which is unnecessary and should be removed in a production design.
 - The demo/testing `/api/timeMachine` endpoint is unauthenticated and can change the shared simulated time.
