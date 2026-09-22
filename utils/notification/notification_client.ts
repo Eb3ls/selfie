@@ -1,6 +1,6 @@
 import { safeFetch } from "@/utils/fetch/fetch";
 
-const SERVICE_WORKER_FILE_PATH = "./service_worker.js";
+const SERVICE_WORKER_FILE_PATH = "/service_worker.js";
 
 export function areNotificationsSupported() {
 	if (

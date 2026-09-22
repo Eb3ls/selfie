@@ -8,6 +8,9 @@ import {
 	EVENT_COLLECTION,
 	Event,
 	StringEvent,
+	StringUser,
+	USER_COLLECTION,
+	User,
 	findCollectionWrapper,
 	getCollection
 } from "@/utils/db/db";
@@ -39,6 +42,19 @@ export const GET = async (
 		return generateMessageResponse("Invalid resource ID", 400);
 	}
 	const resourceId: string = params.id;
+
+	// Only resource calendars listed by getResources are shared with all users.
+	const resourceOut = await findCollectionWrapper<User>(
+		{ _id: resourceId },
+		await getCollection<User>(USER_COLLECTION)
+	);
+	if (resourceOut.status !== 200) {
+		return resourceOut;
+	}
+	const resource: StringUser = (await resourceOut.json())[0];
+	if (!resource.username.startsWith("[RES]-")) {
+		return generateMessageResponse("Not a resource calendar", 403);
+	}
 
 	// Otteniamo la collezione degli eventi
 	const eventClient: Collection<Event> =

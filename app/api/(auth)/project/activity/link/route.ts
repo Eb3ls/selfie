@@ -11,7 +11,7 @@ import {
 	getCollection,
 	updateCollectionWrapper
 } from "@/utils/db/db";
-import { Collection } from "mongodb";
+import { Collection, ObjectId } from "mongodb";
 import { NextRequest } from "next/server";
 
 const requestTemplate = {
@@ -41,8 +41,20 @@ export const PATCH = async (request: NextRequest) => {
 	const userId: string = user._id!;
 
 	// Estraiamo il prevId e il nextId dal body
-	const prevIds: string[] = newBody.prevIds;
-	const nextId: string = newBody.nextId;
+	const requestedPrevIds: string[] = newBody.prevIds;
+	const requestedNextId: string = newBody.nextId;
+
+	if (
+		!Array.isArray(requestedPrevIds) ||
+		!ObjectId.isValid(requestedNextId) ||
+		requestedPrevIds.some((id) => typeof id !== "string" || !ObjectId.isValid(id))
+	) {
+		return generateMessageResponse("Invalid request", 400);
+	}
+
+	// MongoDB accepts either hex case; compare the canonical form everywhere.
+	const prevIds = requestedPrevIds.map((id) => new ObjectId(id).toHexString());
+	const nextId = new ObjectId(requestedNextId).toHexString();
 
 	if (prevIds.includes(nextId)) {
 		return generateMessageResponse(
@@ -55,8 +67,26 @@ export const PATCH = async (request: NextRequest) => {
 	const projectActivityClient: Collection<ProjectActivity> =
 		await getCollection<ProjectActivity>(PROJECT_ACTIVITY_COLLECTION);
 
+	const nextActivityOut = await findCollectionWrapper<ProjectActivity>(
+		{ _id: nextId },
+		projectActivityClient
+	);
+
+	if (nextActivityOut.status !== 200) {
+		return nextActivityOut;
+	}
+
+	const nextActivity: StringProjectActivity = (
+		await nextActivityOut.json()
+	)[0];
+
+	// Controlliamo che l'owner dell'attività da modificare sia l'utente corrispondente
+	if (nextActivity.ownerId !== userId) {
+		return generateMessageResponse("Unauthorized", 400);
+	}
+
 	const allActivitiesOut = await findCollectionWrapper<ProjectActivity>(
-		{},
+		{ projectId: nextActivity.projectId },
 		projectActivityClient
 	);
 
@@ -72,18 +102,14 @@ export const PATCH = async (request: NextRequest) => {
 		prevIds.includes(activity._id!)
 	);
 
-	const nextActivityOut = await findCollectionWrapper<ProjectActivity>(
-		{ _id: nextId },
-		projectActivityClient
-	);
-
-	if (nextActivityOut.status !== 200) {
-		return nextActivityOut;
+	// Controlliamo che tutte le attività precedenti richieste esistano
+	if (
+		prevIds.some(
+			(id) => !prevActivities.some((activity) => activity._id === id)
+		)
+	) {
+		return generateMessageResponse("No data found", 404);
 	}
-
-	const nextActivity: StringProjectActivity = (
-		await nextActivityOut.json()
-	)[0];
 
 	// Controlliamo che l'owner sia l'utente corrispondente
 	if (prevActivities.some((activity) => activity.ownerId !== userId)) {
@@ -103,17 +129,18 @@ export const PATCH = async (request: NextRequest) => {
 	}
 
 	// Controlliamo se le prevActivities sono prima della nextActivity
-	prevActivities.forEach((activity) => {
-		if (
+	if (
+		prevActivities.some(
+			(activity) =>
 			activity.dtStart > nextActivity.dtStart ||
 			activity.due > nextActivity.due
-		) {
-			return generateMessageResponse(
-				"Activities can't be in the same period of time",
-				400
-			);
-		}
-	});
+		)
+	) {
+		return generateMessageResponse(
+			"Activities can't be in the same period of time",
+			400
+		);
+	}
 
 	// Controlliamo che tra le attività precedenti non ci siano attività DROPPED
 	if (prevActivities.some((activity) => activity.status === "DROPPED")) {
@@ -134,6 +161,11 @@ export const PATCH = async (request: NextRequest) => {
 	const oldPrevIdList = allActivities.filter((activity) =>
 		activity.nextIdList.includes(nextId)
 	);
+
+	if (oldPrevIdList.some((activity) => activity.ownerId !== userId)) {
+		return generateMessageResponse("Unauthorized", 400);
+	}
+
 	oldPrevIdList.forEach((activity) => {
 		activity.nextIdList = activity.nextIdList.filter((id) => id !== nextId);
 	});
