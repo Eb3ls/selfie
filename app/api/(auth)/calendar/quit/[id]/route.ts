@@ -18,7 +18,7 @@ type RequestType = typeof requestTemplate;
 
 export const POST = async (
 	request: NextRequest,
-	{ params }: { params: { id: string } }
+	{ params }: { params: Promise<{ id: string }> }
 ) => {
 	// Validazione della richiesta
 	const validation = await validate<RequestType>(
@@ -31,6 +31,7 @@ export const POST = async (
 	if (validation === null) {
 		return generateMessageResponse("Invalid request", 400);
 	}
+	const { id } = await params;
 
 	// Estraiamo l'utente e il corpo della richiesta
 	const { user: user, body: newBody } = validation;
@@ -41,10 +42,10 @@ export const POST = async (
 	}
 
 	// Otteniamo l'ID della risorsa dall'URL
-	if (!ObjectId.isValid(params.id)) {
+	if (!ObjectId.isValid(id)) {
 		return generateMessageResponse("Invalid resource ID", 400);
 	}
-	const resourceId: string = params.id;
+	const resourceId: string = id;
 
 	// Estraiamo l'id dell'evento
 	const eventId: string = newBody._id;

@@ -2,11 +2,16 @@
 	"name": "selfie",
 	"version": "0.1.0",
 	"private": true,
+	"engines": {
+		"node": ">=22"
+	},
 	"scripts": {
-		"dev": "next dev",
-		"build": "next build",
+		"dev": "next dev --webpack",
+		"build": "next build --webpack",
 		"start": "next start",
-		"lint": "next lint"
+		"lint": "eslint app utils proxy.ts",
+		"typecheck": "tsc --noEmit",
+		"test": "node --test tests/*.test.cjs"
 	},
 	"dependencies": {
 		"dompurify": "^3.1.7",
@@ -14,18 +19,18 @@
 		"jose": "^5.6.3",
 		"marked": "^14.1.2",
 		"mongodb": "^6.8.0",
-		"next": "^14.2.13",
-		"nodemailer": "^6.9.15",
-		"react": "^18",
+		"next": "^16.3.5",
+		"nodemailer": "^10.0.10",
+		"react": "^19.3.0",
 		"react-big-calendar": "^1.15.0",
 		"react-bootstrap": "^2.10.4",
-		"react-dom": "^18",
+		"react-dom": "^19.3.0",
 		"react-icons": "^5.3.0",
 		"react-router-dom": "^7.1.5",
 		"react-toastify": "^11.0.5",
 		"react-youtube": "^10.1.0",
 		"rrule": "^2.8.1",
-		"sharp": "^0.34.1",
+		"sharp": "^0.35.4",
 		"swr": "^2.2.5",
 		"web-push": "^3.6.7"
 	},
@@ -33,13 +38,13 @@
 		"@trivago/prettier-plugin-sort-imports": "^4.3.0",
 		"@types/dompurify": "^3.0.5",
 		"@types/node": "^20",
-		"@types/nodemailer": "^6.4.16",
-		"@types/react": "^18",
+		"@types/nodemailer": "^8.0.2",
+		"@types/react": "^19.3.0",
 		"@types/react-big-calendar": "^1.8.12",
-		"@types/react-dom": "^18",
+		"@types/react-dom": "^19.3.0",
 		"@types/web-push": "^3.6.3",
-		"eslint": "^8",
-		"eslint-config-next": "^14.2.13",
+		"eslint": "^9.39.5",
+		"eslint-config-next": "^16.3.5",
 		"typescript": "^5"
 	}
 }

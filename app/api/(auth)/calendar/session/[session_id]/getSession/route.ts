@@ -25,7 +25,7 @@ interface SessionResponse {
 
 export const GET = async (
 	request: NextRequest,
-	{ params }: { params: { session_id: string } }
+	{ params }: { params: Promise<{ session_id: string }> }
 ) => {
 	// Validazione della richiesta
 	const validation = await validate<{}>(request, {}, false);
@@ -34,15 +34,16 @@ export const GET = async (
 	if (validation === null) {
 		return generateMessageResponse("Invalid request", 400);
 	}
+	const { session_id } = await params;
 
 	// Estraiamo l'utente e il corpo della richiesta
 	const { user: user, body: newBody } = validation;
 
 	// Otteniamo l'ID della chat dall'URL
-	if (!ObjectId.isValid(params.session_id)) {
+	if (!ObjectId.isValid(session_id)) {
 		return generateMessageResponse("Invalid chat ID", 400);
 	}
-	const sessionId: string = params.session_id;
+	const sessionId: string = session_id;
 
 	// Estraggo l'id dell'utente
 	const userId: string = user._id!;

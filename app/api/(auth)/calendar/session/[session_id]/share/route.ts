@@ -21,7 +21,7 @@ type RequestType = typeof requestTemplate;
 
 export const POST = async (
 	request: NextRequest,
-	{ params }: { params: { session_id: string } }
+	{ params }: { params: Promise<{ session_id: string }> }
 ) => {
 	// Validazione della richiesta
 	const validation = await validate<RequestType>(
@@ -34,15 +34,16 @@ export const POST = async (
 	if (validation === null) {
 		return generateMessageResponse("Invalid request", 400);
 	}
+	const { session_id } = await params;
 
 	// Estraiamo l'utente e il corpo della richiesta
 	const { user: owner, body: newBody } = validation;
 
 	// Otteniamo l'ID della sessione dall'URL
-	if (!ObjectId.isValid(params.session_id)) {
+	if (!ObjectId.isValid(session_id)) {
 		return generateMessageResponse("Invalid session ID", 400);
 	}
-	const sessionId: string = params.session_id;
+	const sessionId: string = session_id;
 
 	// Estraiamo l'id dell'utente
 	const userId: string = owner._id!;

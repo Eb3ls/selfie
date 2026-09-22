@@ -1,5 +1,5 @@
 import moment from "moment-timezone";
-import { useRef } from "react";
+import { type JSX, useRef } from "react";
 import { CalendarEvent } from "./calendarUtils/calendarTypes";
 
 moment.locale("it");

@@ -27,7 +27,7 @@ type RequestType = typeof requestTemplate;
 
 export const POST = async (
 	request: NextRequest,
-	{ params }: { params: { chat_id: string } }
+	{ params }: { params: Promise<{ chat_id: string }> }
 ) => {
 	// Validazione della richiesta
 	const validation = await validate<RequestType>(
@@ -40,6 +40,7 @@ export const POST = async (
 	if (validation === null) {
 		return generateMessageResponse("Invalid request", 400);
 	}
+	const { chat_id } = await params;
 
 	// Estraiamo l'utente e il corpo della richiesta
 	const { user: user, body: newBody } = validation;
@@ -48,10 +49,10 @@ export const POST = async (
 	const userId: string = user._id!;
 
 	// Otteniamo l'ID della chat dall'URL
-	if (!ObjectId.isValid(params.chat_id)) {
+	if (!ObjectId.isValid(chat_id)) {
 		return generateMessageResponse("Invalid chat ID", 400);
 	}
-	const chatId: string = params.chat_id;
+	const chatId: string = chat_id;
 
 	// Otteniamo le collezioni delle chat
 	const chatClient: Collection<Chat> =

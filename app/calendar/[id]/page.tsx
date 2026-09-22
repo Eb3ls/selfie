@@ -31,7 +31,7 @@ type NewCalendarEvent = Omit<CalendarEvent, "originalElement"> & {
 };
 
 export default function CalendarIDPage() {
-	const params = useParams();
+	const params = useParams<{ id: string }>();
 	const resourceId = params.id;
 
 	const [events, setEvents] = useState<NewCalendarEvent[]>([]);
